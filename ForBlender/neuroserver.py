@@ -319,14 +319,14 @@ class NeuroServer:
         except:
             pass
 
+        for mat in ob.data.materials:
+            bpy.data.materials.remove(mat)
+
         if obType == "Curve":
             bpy.data.curves.remove(ob.data)
 
         elif obType == "Mesh":
             bpy.data.meshes.remove(ob.data)
-
-        for mat in ob.data.materials:
-            bpy.data.materials.remove(mat)
 
         bpy.data.objects.remove(ob, True)
 
