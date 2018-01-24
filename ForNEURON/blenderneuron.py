@@ -129,6 +129,11 @@ class BlenderNEURON(object):
         if len(root_paths) > 0:
             self.client.make_paths(root_paths)
 
+    def send_root(self, root):
+        root_paths = []
+        self.gather_section_paths(root, root_paths)
+        self.client.make_paths(root_paths)
+
     def gather_section_paths(self, rootSection, paths, current_path = None):
         # Determine how many 3d points the section has
         coordCount = int(self.h.n3d(sec=rootSection))
