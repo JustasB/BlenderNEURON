@@ -1,9 +1,12 @@
-import xmlrpclib
+import xmlrpclib, threading, time
+from math import sqrt
 
 class BlenderNEURON(object):
     def __init__(self, h, ip = '192.168.0.34', port = '8000', collect_activity = True, roots_to_collect = []):
         self.h = h
         self.client = xmlrpclib.ServerProxy('http://'+ip+':'+port)
+        self.progress_client = xmlrpclib.ServerProxy('http://' + ip + ':' + port)
+        self.activity_simplification_tolerance = 0.32 # mV
 
         if collect_activity or len(roots_to_collect) > 0:
             self.collector_stim = self.h.NetStim(0.5)
@@ -15,29 +18,93 @@ class BlenderNEURON(object):
             self.collector_con = self.h.NetCon(self.collector_stim, None)
             self.collector_con.record(self.collect)
 
-            # Collect from all segments
+            # Collect from all segments by default
             if len(roots_to_collect) == 0:
                 self.roots_to_collect = self.h.SectionList()
                 self.roots_to_collect.allroots()
             else:
                 self.roots_to_collect = roots_to_collect
 
+        self.clear_activity()
 
-        self.is_collecting = collect_activity
+        # Clear previously recorded activity on h.run()
+        self.fih = self.h.FInitializeHandler(self.clear_activity)
+
+        self.progressNEURON = self.h.ref('0.0')
+        self.progressBlender = self.h.ref('0.0')
+        self.progressPercent = self.h.ref('0.0')
+        self.include_cells = True
+        self.include_connections = True
+        self.include_activity = True
+        self.show_panel()
+
+    def show_panel(self):
+        self.h.xpanel('BlenderNEURON')
+
+        self.h.xcheckbox('Include Cells', (self, 'include_cells'))
+        self.h.xcheckbox('Include Connections', (self, 'include_connections'))
+        self.h.xcheckbox('Include Activity', (self, 'include_activity'))
+        self.h.xbutton('Send To Blender', self.send_model_threaded)
+
+        self.h.xlabel('Progress:')
+        self.h.xvarlabel(self.progressNEURON)
+        self.h.xvarlabel(self.progressBlender)
+        self.h.xvarlabel(self.progressPercent)
+
+        self.h.xpanel(500, 10)
+
+    def clear_activity(self):
         self.segment_activity = {}
         self.collection_times = []
 
-    def send_model(self, include_cells = True, include_cons = True, include_activity = True):
+    def send_model_threaded(self):
+        self.send_thread = threading.Thread(target=self.send_model)
+        self.send_thread.daemon = True
+
+        self.blender_progress_thread = threading.Thread(target=self.get_blender_progress)
+        self.blender_progress_thread.daemon = True
+
+        self.progress_client.progress_start()
+        self.send_thread.start()
+        self.blender_progress_thread.start()
+
+        # self.send_thread.join()
+        # self.blender_progress_thread.join()
+
+    def get_blender_progress(self):
+        def update():
+            sent = self.progress_client.progress_get_total()
+            done = self.progress_client.progress_get_done()
+
+            self.progressNEURON[0] = 'Sent: ' + str(sent)
+            self.progressBlender[0] = 'Completed: ' + str(done)
+
+            if sent > 0:
+                self.progressPercent[0] = ("%.2f" % ((done*1.0)/sent*100))+'%'
+
+            return (sent, done)
+
+        sent, done = update()
+
+        while sent == 0 or sent != done:
+            time.sleep(0.5)
+            sent, done = update()
+
+        sent, done = update()
+
+        return 0
+
+    def send_model(self):
         # Remove any previous model objects
         self.client.clear()
 
-        if include_cells:
+        if self.include_cells:
             self.send_cells()
 
-        if include_cons:
+        if self.include_connections:
             self.send_cons()
 
-        if include_activity:
+        if self.include_activity:
             self.send_activity()
 
     def send_cons(self):
@@ -64,13 +131,13 @@ class BlenderNEURON(object):
                 # If source is a segment
                 if pre_loc != -1.0:
                     pre_seg = self.h.cas()(pre_loc) # TEST THIS
-                    self.pop_section()
+                    self.h.pop_section()
 
                 # Skip if it's neither a PP nor a segment
                 else:
                     continue
 
-            # Check if post is a Section
+            # Check if post is a PointProcess on a Section
             if post is None or hasattr(post, "get_segment") == False:
                 continue
 
@@ -115,9 +182,13 @@ class BlenderNEURON(object):
         along = start + along_start_coord * length
         return along
 
-    def send_cells(self):
-        self.roots = self.h.SectionList()
-        self.roots.allroots()
+    def send_cells(self, roots_to_send = None):
+        if roots_to_send is None:
+            self.roots = self.h.SectionList()
+            self.roots.allroots()
+        else:
+            self.roots = roots_to_send
+
         root_paths = []
         for root in self.roots:
             self.gather_section_paths(root, root_paths)
@@ -140,8 +211,8 @@ class BlenderNEURON(object):
 
         # Let NEURON create them if missing
         if coordCount == 0:
-            h.define_shape(sec=rootSection)
-            coordCount = int(h.n3d(sec=rootSection))
+            self.h.define_shape(sec=rootSection)
+            coordCount = int(self.h.n3d(sec=rootSection))
 
         # Collect the coordinates
         section_coords = []
@@ -224,16 +295,58 @@ class BlenderNEURON(object):
             self.collect_recursive(child, variable)
 
     def send_activity(self):
-        activities = []
+        if self.segment_activity is None:
+            return
+
+        segments = []
 
         for seg in self.segment_activity:
-            activities.append({'name':seg, 'activity':self.segment_activity[seg]})
+            reduced_times, reduced_values = self.simplify_activity(self.segment_activity[seg])
+
+            segments.append({'name':seg, 'times':reduced_times, 'activity':reduced_values})
 
             # Buffered send
-            if len(activities) > 100:
-                self.client.set_segment_activities(self.collection_times, activities)
-                activities = []
+            if len(segments) > 100:
+                self.client.set_segment_activities(segments)
+                segments = []
 
-        self.client.set_segment_activities(self.collection_times, activities)
+        self.client.set_segment_activities(segments)
 
+    def simplify_activity(self, activity):
+        reduced = BlenderNEURON.rdp(zip(self.collection_times, activity), self.activity_simplification_tolerance)
+        return zip(*reduced)
 
+    @staticmethod
+    def distance(a, b):
+        return sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
+    @staticmethod
+    def point_line_distance(point, start, end):
+        if (start == end):
+            return BlenderNEURON.distance(point, start)
+        else:
+            n = abs(
+                (end[0] - start[0]) * (start[1] - point[1]) - (start[0] - point[0]) * (end[1] - start[1])
+            )
+            d = sqrt(
+                (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2
+            )
+            return n / d
+
+    # Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series
+    # Ramer-Douglas-Peucker algorithm
+    # Adapted from: https://github.com/sebleier/RDP
+    @staticmethod
+    def rdp(points, epsilon):
+        dmax = 0.0
+        index = 0
+        for i in range(1, len(points) - 1):
+            d = BlenderNEURON.point_line_distance(points[i], points[0], points[-1])
+            if d > dmax:
+                index = i
+                dmax = d
+        if dmax >= epsilon:
+            results = BlenderNEURON.rdp(points[:index + 1], epsilon)[:-1] + BlenderNEURON.rdp(points[index:], epsilon)
+        else:
+            results = [points[0], points[-1]]
+        return results

@@ -73,9 +73,9 @@ class NEURONServerStartOperator(bpy.types.Operator):
 
             if self.neuron_server.queue.empty() == False:
                 #DEBUG PROFILE
-                # cProfile.runctx('self.service_queue()',globals(),locals())
+                cProfile.runctx('self.service_queue()',globals(),locals())
 
-                self.service_queue()
+                # self.service_queue()
 
             self.isServicing = False
 

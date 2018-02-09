@@ -64,6 +64,27 @@ class NeuroServer:
         self.link_lock = threading.Lock()
 
         self.queue = queue.Queue()
+        self.progress_start()
+
+    def progress_start(self):
+        self.tasks_total = 0
+        self.tasks_done = 0
+        return 0
+
+    def progress_add(self, task, count = 1):
+        self.tasks_total += count
+        self.queue.put(task)
+        return 0
+
+    def progress_complete(self):
+        self.tasks_done += 1
+        return 0
+
+    def progress_get_done(self):
+        return self.tasks_done
+
+    def progress_get_total(self):
+        return self.tasks_total
 
     # Executed on first export from simulator
     def on_first_link(self):
@@ -74,9 +95,9 @@ class NeuroServer:
         bpy.context.scene.unit_settings.system = 'METRIC'
         bpy.context.scene.unit_settings.scale_length = 0.001
 
-    def set_segment_activities(self, times, segments):
+    def set_segment_activities(self, segments):
         for seg in segments:
-            self.set_segment_activity(seg["name"], times, seg["activity"])
+            self.set_segment_activity(seg["name"], seg["times"], seg["activity"])
 
     def set_segment_activity(self, name, times, activity):
         seg_mat = self.bpy.data.materials[name]
@@ -86,6 +107,8 @@ class NeuroServer:
         for t in range(len(times)):
             seg_mat.diffuse_color = colors[t]
             seg_mat.keyframe_insert(data_path="diffuse_color", frame=int(times[t]))
+
+        self.progress_complete()
 
     def activity_to_color(self, activity):
         scale = (activity + 80.0) / 120.0
@@ -99,29 +122,32 @@ class NeuroServer:
 
     def create_cons(self, cons):
         for con in cons:
-            start = np.array(con["from"])
-            end = np.array(con["to"])
-            lengths = end - start
-            arrow_head = end - lengths * 0.05  # Position the arrow head a few percent from end
-            arrow_base = arrow_head - lengths * 0.01
+            self.create_con(con)
 
-            start = start.tolist()
-            arrow_base = arrow_base.tolist()
-            arrow_head = arrow_head.tolist()
-            end = end.tolist()
+    def create_con(self, con):
+        start = np.array(con["from"])
+        end = np.array(con["to"])
+        lengths = end - start
+        arrow_head = end - lengths * 0.05  # Position the arrow head a few percent from end
+        arrow_base = arrow_head - lengths * 0.01
 
-            # Set diameters of the arrow
-            start.append(1)
-            arrow_base.append(1)
-            arrow_head.append(3)
-            end.append(0)
+        start = start.tolist()
+        arrow_base = arrow_base.tolist()
+        arrow_head = arrow_head.tolist()
+        end = end.tolist()
 
-            con_path = [{
-                "name": con["name"],
-                "coords": [start, arrow_base,arrow_head, end]
-            }]
+        # Set diameters of the arrow
+        start.append(1)
+        arrow_base.append(1)
+        arrow_head.append(3)
+        end.append(0)
 
-            self.create_path(con_path, res_bev = 1, res_u = 1, addCaps = False)
+        con_path = [{
+            "name": con["name"],
+            "coords": [start, arrow_base,arrow_head, end]
+        }]
+
+        self.create_path(con_path, res_bev = 1, res_u = 1, addCaps = False)
 
     def make_paths(self, paths):
         for path in paths:
@@ -149,6 +175,8 @@ class NeuroServer:
 
             # Add materials to each coord segment
             self.add_coord_segment_materials(coords, sec_mesh_obj, res_u, res_bev)
+
+        self.progress_complete()
 
     def add_coord_segment_materials(self, coords, sec_mesh_obj, res_u, res_bev):
         seg_count = len(coords) - 1 - 2 # Extra caps don't count
@@ -320,6 +348,12 @@ class NeuroServer:
             pass
 
         for mat in ob.data.materials:
+            action_name = mat.name+'Action'
+
+            if action_name in bpy.data.actions:
+                bpy.data.actions.remove(bpy.data.actions[action_name])
+
+            mat.animation_data_clear()
             bpy.data.materials.remove(mat)
 
         if obType == "Curve":
@@ -332,6 +366,7 @@ class NeuroServer:
 
         if removeFromSelf:
             self.objects.remove(ob)
+
 
     def stop(self):
         self.server.shutdown()
@@ -363,44 +398,44 @@ class NeuroServer:
 
         def create_path(sections):
             print("Adding path... queue size: " + str(self.queue.qsize()))
-            self.queue.put(lambda: self.create_path(sections))
+            self.progress_add(lambda: self.create_path(sections))
             print("Added. queue size: " + str(self.queue.qsize()))
             return 0
 
         self.server.register_function(create_path, 'create_path')
 
         def make_paths(paths):
-            self.queue.put(lambda: self.make_paths(paths))
+            self.progress_add(lambda: self.make_paths(paths), count=len(paths))
             return 0
 
         self.server.register_function(make_paths, 'make_paths')
 
         def create_cons(cons):
-            self.queue.put(lambda: self.create_cons(cons))
+            self.progress_add(lambda: self.create_cons(cons), count=len(cons))
             return 0
 
         self.server.register_function(create_cons, 'create_cons')
 
         def link_objects():
-            self.queue.put(lambda: self.link_objects())
+            self.progress_add(lambda: self.link_objects())
             return 0
 
         self.server.register_function(link_objects, 'link_objects')
 
         def show_full_scene():
-            self.queue.put(lambda: self.show_full_scene())
+            self.progress_add(lambda: self.show_full_scene())
             return 0
 
         self.server.register_function(show_full_scene, 'show_full_scene')
 
-        def set_segment_activities(times, segments):
-            self.queue.put(lambda: self.set_segment_activities(times, segments))
+        def set_segment_activities(segments):
+            self.progress_add(lambda: self.set_segment_activities(segments),count=len(segments))
             return 0
 
         self.server.register_function(set_segment_activities, 'set_segment_activities')
 
         def set_segment_activity(name, times, activity):
-            self.queue.put(lambda: self.set_segment_activity(name, times, activity))
+            self.progress_add(lambda: self.set_segment_activity(name, times, activity))
             return 0
 
         self.server.register_function(set_segment_activity, 'set_segment_activity')
@@ -408,10 +443,15 @@ class NeuroServer:
         def clear():
             print("Clearing... queue size: " + str(self.queue.qsize()))
             self.queue.put(lambda: self.clear())
+            self.queue.put(lambda: self.progress_start())
 
             print("Cleared. queue size: " + str(self.queue.qsize()))
             return 0
 
         self.server.register_function(clear, 'clear')
+
+        self.server.register_function(self.progress_start, 'progress_start')
+        self.server.register_function(self.progress_get_done, 'progress_get_done')
+        self.server.register_function(self.progress_get_total, 'progress_get_total')
 
         self.server.serve_forever()
