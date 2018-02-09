@@ -1,4 +1,4 @@
-#BlenderNEURON
+# BlenderNEURON
 
 A Python package and an addon that takes a NEURON simulator model and exports its 3D structure and membrane activity to Blender. The export can be peformed via NEURON GUI or via Python commands.
 
