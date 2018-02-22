@@ -6,6 +6,14 @@ import bpy, threading
 from bpy.app.handlers import persistent
 import cProfile
 
+# import sys
+# sys.path.append('C:\\Users\\Justas\\Miniconda3\\envs\\pb35\\lib\\site-packages')
+# import line_profiler
+# import os
+# os.chdir('E:\Code\BlenderNEURON\ForBlender')
+# bpy.types.Object.profiler = line_profiler.LineProfiler(bpy.types.Object.neuron_server.create_path)
+# bpy.types.Object.profiler.print_stats()
+
 bl_info = {
     "name": "NEURON Blender Interface",
     "category": "Import-Export",
@@ -73,9 +81,8 @@ class NEURONServerStartOperator(bpy.types.Operator):
 
             if self.neuron_server.queue.empty() == False:
                 #DEBUG PROFILE
-                cProfile.runctx('self.service_queue()',globals(),locals())
-
-                # self.service_queue()
+                #cProfile.runctx('self.service_queue()',globals(),locals())
+                self.service_queue()
 
             self.isServicing = False
 
