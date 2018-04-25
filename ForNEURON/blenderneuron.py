@@ -245,8 +245,8 @@ class BlenderNEURON(object):
 
     def send_group(self, group):
         data = group['3d_data']
-        data = cPickle.dumps(data)
-        data = zlib.compress(data)
+        # data = cPickle.dumps(data)
+        # data = zlib.compress(data)
 
         self.client.visualize_group(data)
 

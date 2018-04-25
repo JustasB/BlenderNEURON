@@ -480,6 +480,14 @@ class NeuroServer:
         if "Camera" in bpy.data.cameras:
             bpy.data.cameras["Camera"].clip_end = distance
 
+    def get_view3d_override(self):
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        override = {'area': area, 'region': region } #, 'edit_object': bpy.context.edit_object}
+                        return override
+
     def show_full_scene(self):
         # Unselect everything
         for ob in bpy.data.objects:
@@ -489,15 +497,22 @@ class NeuroServer:
         for ob in self.objects.values():
             ob["object"].select = True
 
-        # Show all model objects
+        # Change to camera view
+        bpy.ops.view3d.viewnumpad(self.get_view3d_override(), type='CAMERA')
+
+        #Lock camera to view
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        override = {'area': area, 'region': region, 'edit_object': bpy.context.edit_object}
-                        bpy.ops.view3d.view_selected(override, use_all_regions=False)
-                        bpy.ops.view3d.camera_to_view(override)
-                        break
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        space.lock_camera = True
+
+        #Fill screen with camera view
+        bpy.ops.view3d.view_center_camera(self.get_view3d_override())
+
+        # Show all model objects
+        bpy.ops.view3d.view_selected(self.get_view3d_override(), use_all_regions=False)
+        bpy.ops.view3d.camera_to_view(self.get_view3d_override())
 
         bpy.ops.object.select_all(action='TOGGLE')
 
@@ -570,8 +585,8 @@ class NeuroServer:
         self.server.register_function(ping, 'ping')
 
         def visualize_group(group):
-            group = zlib.decompress(group)
-            group = marshal.loads(group)
+            # group = zlib.decompress(group)
+            # group = marshal.loads(group)
             self.progress_add(lambda: self.visualize_group(group), count=len(group["cells"]))
             return 0
 

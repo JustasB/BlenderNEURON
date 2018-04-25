@@ -55,7 +55,6 @@ class NEURONServerStartOperator(bpy.types.Operator):
 
     def create_server(self):
 
-        self.isServicing = False
         self.neuron_server = NeuroServer()
         bpy.types.Object.neuron_server = self.neuron_server
 
@@ -64,27 +63,41 @@ class NEURONServerStartOperator(bpy.types.Operator):
         self.externalEventThread.daemon = True
         self.externalEventThread.start()
 
-    def service_queue(self):
+
+
+    def work_on_queue_tasks(self):
         q = self.neuron_server.queue
 
         while not q.empty():
             task = q.get()
             task()
+            q.task_done()
+
+        print("Quitting worker thread...")
+
+    def service_queue(self):
+        print("Checking queue...")
+
+        q = self.neuron_server.queue
+
+        if not q.empty():
+            print("TASKS FOUND")
+
+            self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
+            self.queue_servicer.daemon = True
+
+            print("Starting service thread...")
+            self.queue_servicer.start()
+
+            print("Waiting for tasks to finish...")
+            q.join()
+            print("Task queue DONE")
 
     def modal(self, context, event):
 
-        if event.type == 'TIMER' and not self.isServicing:
-            self.isServicing = True
+        if event.type == 'TIMER':
 
-            # DEBUG
-            #print("Checking queue - found " + str(self.neuron_server.queue.qsize()) + " tasks...")
-
-            if self.neuron_server.queue.empty() == False:
-                #DEBUG PROFILE
-                #cProfile.runctx('self.service_queue()',globals(),locals())
-                self.service_queue()
-
-            self.isServicing = False
+            self.service_queue()
 
         if bpy.types.Object.neuron_server is None:
             self.cancel(context)
