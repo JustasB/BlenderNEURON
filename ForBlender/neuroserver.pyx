@@ -1,13 +1,17 @@
 # distutils: define_macros=CYTHON_TRACE=1
 # cython: profile=True
 
-import bpy as blenderpy
 import numpy as np
-import bmesh, operator, bpy, threading, queue, marshal, zlib
+import bmesh, operator, bpy, threading, queue, marshal, zlib, traceback
+from math import sqrt, radians
 
 class NeuroServer:
 
-    def __init__(self):
+    def __init__(self, global_name = "BN"):
+
+        if global_name:
+            globals()[global_name] = self
+
         self.IP = "192.168.0.34"
         self.Port = 8000
 
@@ -21,7 +25,8 @@ class NeuroServer:
         self.ui_background_zenith_color = (0,0.22,0.294)           # Shaded greenish blue
         self.ui_background_horizon_color = (0,0.086, 0.098)        # Darker zenith
 
-        self.bpy = blenderpy
+        self.ttc_name = "CameraTrackToConstraint"
+        self.fpc_name = "CameraFollowPathConstraint"
 
         # Level to rank map
         self.level_rank = {
@@ -41,6 +46,8 @@ class NeuroServer:
             bpy.data.objects.remove(bpy.data.objects["Lamp"])
         except:
             pass
+
+        self.camera = bpy.data.objects["Camera"]
 
         # Default curve to use
         self.blank_curve = bpy.data.curves.new("bezier", type='CURVE')
@@ -77,6 +84,42 @@ class NeuroServer:
 
         self.queue = queue.Queue()
         self.progress_start()
+            
+    def work_on_queue_tasks(self):
+        q = self.queue
+
+        while not q.empty():
+            task = q.get()
+
+            try:
+                if not self.queue_error:
+                    task()
+
+            except:
+                self.queue_error = True
+                tb = traceback.format_exc()
+                print(tb)
+
+            q.task_done()
+
+        print("Quitting worker thread...")
+
+    def service_queue(self):
+        q = self.queue
+
+        if not q.empty():
+            print_safe("TASKS FOUND")
+
+            self.queue_error = False
+            self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
+            self.queue_servicer.daemon = True
+
+            print_safe("Starting service thread...")
+            self.queue_servicer.start()
+
+            print_safe("Waiting for tasks to finish...")
+            q.join()
+            print_safe("Task queue DONE")
 
     def progress_start(self):
         self.tasks_total = 0
@@ -112,7 +155,7 @@ class NeuroServer:
             self.set_segment_activity(seg["name"], seg["times"], seg["activity"])
 
     def set_segment_activity(self, name, times, activity):
-        seg_mat = self.bpy.data.materials[name]
+        seg_mat = bpy.data.materials[name]
 
         colors = list(map(self.activity_to_color, activity))
 
@@ -253,8 +296,6 @@ class NeuroServer:
 
     def assign_mats_to_polys(self, parent_curve_obj, object_poly_mat_idxs):
         mesh_obj = self.curve_to_mesh(parent_curve_obj)
-        print(mesh_obj.data.polygons)
-        print(object_poly_mat_idxs)
         mesh_obj.data.polygons.foreach_set("material_index", object_poly_mat_idxs)
         self.objects[mesh_obj.name] = {'object': mesh_obj, 'linked': False}
 
@@ -296,8 +337,6 @@ class NeuroServer:
     def add_coord_segment_materials(self, coords, sec_mesh_obj, res_u, res_bev):
         seg_count = get_num_materials(coords) # Extra caps don't count
         seg_cursor = 0
-
-        # print(sec_mesh_obj.name + "coord seg count: " + str(seg_count))
 
         mesh_name = sec_mesh_obj.name
         color = self.solidColor
@@ -450,7 +489,6 @@ class NeuroServer:
                         self.on_first_link()
                         self.has_linked = True
 
-                    # print('linking: ' + obj['object'].name)
                     bpy.context.scene.objects.link(obj['object'])
                     obj["linked"] = True
 
@@ -466,11 +504,13 @@ class NeuroServer:
                 # Reset their origins to center
                 bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
 
-                self.show_full_scene()
+        # Clear selection
+        self.all_select(select=False)
+
 
     def set_clip_distance(self, distance = 100000):
         # For viewport
-        for a in bpy.context.screen.areas:
+        for a in bpy.data.screens["Default"].areas:
             if a.type == 'VIEW_3D':
                 for s in a.spaces:
                     if s.type == 'VIEW_3D':
@@ -480,51 +520,201 @@ class NeuroServer:
         if "Camera" in bpy.data.cameras:
             bpy.data.cameras["Camera"].clip_end = distance
 
-    def get_view3d_override(self):
-        for area in bpy.context.screen.areas:
+    def get_operator_context_override(self, selected_object = None):
+        # override = bpy.context.copy()
+        override = {}
+
+        try:
+            for area in bpy.data.screens["Default"].areas:
+                if area.type == 'VIEW_3D':
+                    for region in area.regions:
+                        if region.type == 'WINDOW':
+                            override['area'] = area
+                            override['region'] = region
+                            raise StopIteration()
+
+        except StopIteration:
+            pass
+
+        override["window"]        = bpy.context.window_manager.windows[0]
+        override["scene"]         = bpy.data.scenes['Scene']
+        override["screen"]        = bpy.data.screens["Default"]
+
+        if selected_object:
+            override["object"]        = selected_object
+            override["active_object"] = selected_object
+            override["edit_object"]   = selected_object
+
+        return override
+
+    def set_camera_lock(self, lock):
+        for area in bpy.data.screens["Default"].areas:
             if area.type == 'VIEW_3D':
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        override = {'area': area, 'region': region } #, 'edit_object': bpy.context.edit_object}
-                        return override
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        space.lock_camera = lock
+                        print("Camera lock:" + str(lock))
+
+    def all_select(self, select):
+        for ob in bpy.data.objects:
+            ob.select = select
+
+    def get_current_view_perspective(self):
+        for area in bpy.data.screens["Default"].areas:
+            if area.type == 'VIEW_3D':
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        return space.region_3d.view_perspective
 
     def show_full_scene(self):
-        # Unselect everything
-        for ob in bpy.data.objects:
-            ob.select = False
+        # Clear selection
+        self.all_select(select=False)
 
         # Select only the model objects
         for ob in self.objects.values():
             ob["object"].select = True
 
-        # Change to camera view
-        bpy.ops.view3d.viewnumpad(self.get_view3d_override(), type='CAMERA')
+        # Change to camera view (if not already)
+        if self.get_current_view_perspective() == 'PERSP':
+            bpy.ops.view3d.viewnumpad(self.get_operator_context_override(), type='CAMERA')
 
         #Lock camera to view
-        for area in bpy.context.screen.areas:
-            if area.type == 'VIEW_3D':
-                for space in area.spaces:
-                    if space.type == 'VIEW_3D':
-                        space.lock_camera = True
+        self.set_camera_lock(lock=True)
+
+        # Start with a camera that faces the front of the object
+        self.camera.location = (0,-1000,0)
+        self.camera.rotation_euler = (radians(90),0,0)
 
         #Fill screen with camera view
-        bpy.ops.view3d.view_center_camera(self.get_view3d_override())
+        bpy.ops.view3d.view_center_camera(self.get_operator_context_override())
 
         # Show all model objects
-        bpy.ops.view3d.view_selected(self.get_view3d_override(), use_all_regions=False)
-        bpy.ops.view3d.camera_to_view(self.get_view3d_override())
+        bpy.ops.view3d.view_selected(self.get_operator_context_override(), use_all_regions=False)
 
-        bpy.ops.object.select_all(action='TOGGLE')
+        # Unlock camera
+        self.set_camera_lock(lock=False)
+
+        # Change back to perspective view
+        if self.get_current_view_perspective() == 'CAMERA':
+            bpy.ops.view3d.viewnumpad(self.get_operator_context_override(), type='CAMERA')
+
+        # Clear selection
+        self.all_select(select=False)
+
+    def set_render_params(self, frame_range = (0, 100), width = 500, height = 500, file_format = 'JPEG', format_param = 93):
+        scene = bpy.data.scenes["Scene"]
+
+        scene.frame_start = frame_range[0]
+        scene.frame_end = frame_range[1]
+
+        scene.render.resolution_x = width
+        scene.render.resolution_y = height
+        scene.render.resolution_percentage = 100
+
+        scene.render.image_settings.file_format = file_format
+
+        if file_format.startswith('JPEG'):
+            scene.render.image_settings.quality = format_param
+
+        if file_format.startswith('PNG'):
+            scene.render.image_settings.compression = format_param
+
+    def render_animation(self, destination_path):
+        scene = bpy.data.scenes["Scene"]
+
+        # Set render params
+        scene.render.filepath = destination_path
+
+        # Run render
+        bpy.ops.render.render(self.get_operator_context_override(), animation=True)
+
+
+    def orbit_camera_around_model(self, orbit_incline_angle = 15.0):
+        # Run with: bpy.types.Object.neuron_server.orbit_camera_around_model()
+
+        # Create a circular camera trajectory  - if haven't already
+        if not hasattr(self, "camera_trajectory") or not self.camera_trajectory:
+            bpy.ops.curve.primitive_nurbs_circle_add(location=(0.0, 0.0, 0.0))
+            self.camera_trajectory  = bpy.data.objects['NurbsCircle']
+            self.camera_trajectory.name = "CameraTrajectory"
+            bpy.context.scene.objects.active = self.camera_trajectory
+
+            # Hack to fix trajectory being in edit mode after path constraint is added
+            #bpy.ops.object.mode_set(self.get_operator_context_override(self.camera_trajectory), mode = 'OBJECT')
+            bpy.ops.object.mode_set(self.get_operator_context_override(self.camera_trajectory), mode = 'EDIT')
+            # End hack
+
+        # Get the distance of the camera to the center
+        radius = sqrt((np.array(self.camera.location)**2).sum())
+
+        # Make it large enough to fit whole scene and angle it a bit
+        self.camera_trajectory.scale = (radius, radius, 1)
+        self.camera_trajectory.rotation_euler = (0.0, radians(orbit_incline_angle), 0.0)
+
+        # Create a camera target at the origin
+        if not hasattr(self, "camera_target") or not self.camera_target:
+            bpy.ops.object.empty_add(type='SPHERE',
+                                 radius=0.001,
+                                 location=(0.0, 0.0, 0.0))
+
+            self.camera_target  = bpy.data.objects["Empty"]
+            bpy.context.scene.objects.active = self.camera_target
+            self.camera_target.name = "CameraTarget"
+
+
+        # Assign camera to move along the trajectory (must be before track_to)
+        bpy.context.scene.objects.active = self.camera
+        self.camera.location = (0,0,0)
+        self.camera.rotation_euler = (radians(90),0,0)
+
+
+
+        if self.fpc_name not in self.camera.constraints:
+            fpc = self.camera.constraints.new(type="FOLLOW_PATH")
+            fpc.target = self.camera_trajectory
+            fpc.use_curve_follow = True
+            fpc.forward_axis = 'FORWARD_Y'
+            fpc.up_axis = 'UP_Z'
+            fpc.name = self.fpc_name
+
+            # Animate the camera path
+            bpy.ops.constraint.followpath_path_animate({"constraint":fpc, "object":self.camera},constraint=fpc.name)
+
+        # Assign camera to point at the model  (must be after follow_path)
+
+        if self.ttc_name not in self.camera.constraints:
+            ttc = self.camera.constraints.new(type="TRACK_TO")
+            ttc.target = self.camera_target
+            ttc.track_axis = 'TRACK_NEGATIVE_Z'
+            ttc.up_axis = 'UP_Y'
+            ttc.name = self.ttc_name
 
     def clear(self):
 
         for object in self.objects.values():
-            self.clear_model_object(object, removeFromSelf=False)
+            self.clear_model_object(object, removeFromSelf=False) # Will remove below
 
         self.objects = {}
 
+        # Clear any camera orbits
+        if hasattr(self, "camera_target") and self.camera_target:
+            self.clear_model_object(self.camera_target, removeFromSelf = False)
+
+        if hasattr(self, "camera_trajectory") and self.camera_trajectory:
+            self.clear_model_object(self.camera_trajectory, removeFromSelf = False)
+
+        if self.ttc_name in self.camera.constraints:
+            self.camera.constraints.remove(self.camera.constraints[self.ttc_name])
+
+        if self.fpc_name in self.camera.constraints:
+            self.camera.constraints.remove(self.camera.constraints[self.fpc_name])
+
     def clear_model_object(self, object, removeFromSelf = True):
-        ob = object["object"]
+        if object.__class__.__name__ == 'dict':
+            ob = object["object"]
+        else:
+            ob = object
+
         obType = ob.type
 
         try:
@@ -532,17 +722,18 @@ class NeuroServer:
         except:
             pass
 
-        for mat in ob.data.materials:
-            if mat is None:
-                continue
+        if hasattr(ob.data, "materials"):
+            for mat in ob.data.materials:
+                if mat is None:
+                    continue
 
-            action_name = mat.name+'Action'
+                action_name = mat.name+'Action'
 
-            if action_name in bpy.data.actions:
-                bpy.data.actions.remove(bpy.data.actions[action_name])
+                if action_name in bpy.data.actions:
+                    bpy.data.actions.remove(bpy.data.actions[action_name])
 
-            mat.animation_data_clear()
-            bpy.data.materials.remove(mat)
+                mat.animation_data_clear()
+                bpy.data.materials.remove(mat)
 
         if obType == "CURVE":
             bpy.data.curves.remove(ob.data)
@@ -555,6 +746,8 @@ class NeuroServer:
         if removeFromSelf:
             self.objects.pop(ob.name)
 
+    def run_command(self, command_str):
+        exec(command_str)
 
     def stop(self):
         self.server.shutdown()
@@ -576,7 +769,7 @@ class NeuroServer:
         def stop():
             self.stop()
             return 0
-
+        
         self.server.register_function(stop, 'stop')
 
         def ping():
@@ -597,6 +790,12 @@ class NeuroServer:
             return 0
 
         self.server.register_function(create_cons, 'create_cons')
+
+        def orbit_camera_around_model():
+            self.progress_add(lambda: self.orbit_camera_around_model())
+            return 0
+
+        self.server.register_function(orbit_camera_around_model, 'orbit_camera_around_model')
 
         def link_objects():
             self.progress_add(lambda: self.link_objects())
@@ -628,6 +827,12 @@ class NeuroServer:
 
         self.server.register_function(clear, 'clear')
 
+        def run_command(command_str):
+            self.queue.put(lambda: self.run_command(command_str))
+            return 0
+
+        self.server.register_function(run_command, 'run_command')
+
         self.server.register_function(self.progress_start, 'progress_start')
         self.server.register_function(self.progress_get_done, 'progress_get_done')
         self.server.register_function(self.progress_get_total, 'progress_get_total')
@@ -636,6 +841,13 @@ class NeuroServer:
 
 
 cimport cython
+
+cdef inline print_safe(value):
+    try:
+        print(value)
+    except:
+        tb = traceback.format_exc()
+        print(tb)
 
 cdef inline int get_num_materials(coords):
     # Div by 3: Each coord has x,y,z locations
@@ -660,7 +872,7 @@ cdef inline diam0version(start, end):
 
 @cython.profile(False)
 cdef inline create_default_material(color, name = "SolidColor"):
-    result = blenderpy.data.materials.new(name)
+    result = bpy.data.materials.new(name)
     result.diffuse_color = color
     result.use_transparency = True
     result.alpha = 0.8
@@ -680,3 +892,4 @@ cdef inline int get_poly_count(int iseg, int res_u=2, int res_bev=1, bint isFirs
         end_index_excl = end_index_excl + face_count
 
     return int(end_index_excl-start_index)
+
