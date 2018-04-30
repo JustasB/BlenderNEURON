@@ -7,7 +7,7 @@ class BlenderNEURON(object):
 
         self.IP = ip
         self.Port = port
-        self.client = xmlrpclib.ServerProxy('http://'+ip+':'+port)
+        self.client = xmlrpclib.ServerProxy('http://'+ip+':'+port, allow_none=True)
         self.progress_client = xmlrpclib.ServerProxy('http://' + ip + ':' + port)
 
         self.activity_simplification_tolerance = 0.32 # mV
@@ -96,15 +96,18 @@ class BlenderNEURON(object):
 
         if len(self.connections) == 0:
             self.setup_default_connections()
+
     def setup_default_connections(self):
         # Include all connections by default
         self.connections = self.h.NetCon
+
     def setup_default_group(self):
         # By default, include all cells ('root sections') in the model
         all_cells = self.h.SectionList()
         all_cells.allroots()
 
         self.create_cell_group("all", [cell for cell in all_cells])
+
     def create_cell_group(self, name, cells):
 
         # Adjust level of detail based on cell count
@@ -117,15 +120,14 @@ class BlenderNEURON(object):
             'collection_period_ms': 1,
             '3d_data': {
                 'name': name,
-                'color': [0.5, 0.5, 0.5],
+                'color': [1, 1, 1],
                 'interaction_level': level,
                 'color_level': level,
                 'as_lines': False,
-                'segment_subdivisions': 1,
-                'circular_subdivisions': 6,
-                'smooth_sections': False,
-                'cells': {},
-                'activity': []
+                'segment_subdivisions': 3,
+                'circular_subdivisions': 12,
+                'smooth_sections': True,
+                'cells': {}
             }
         }
 
@@ -138,6 +140,7 @@ class BlenderNEURON(object):
         self.groups[name] = group
 
         return group
+
     def get_detail_level(self, cell_count):
         if cell_count <= 5:
             level = 'Segment'
@@ -165,19 +168,37 @@ class BlenderNEURON(object):
             group["collected_activity"] = {}
 
 
+    def prepare_for_collection(self):
+        self.setup_defaults_if_needed()
+
+    def run_method(self, name, *args, **kwargs):
+        self.client.run_method(name, args, kwargs)
+
+    def enqueue_method(self, name, *args, **kwargs):
+        self.client.enqueue_method(name, args, kwargs)
+
+    def run_command(self, command_string):
+        self.client.run_command(command_string)
+
+    def enqueue_command(self, command_string):
+        self.client.enqueue_command(command_string)
+
     def send_model(self):
         self.is_blender_ready()
 
         self.setup_defaults_if_needed()
 
         # Remove any previous model objects
-        self.client.clear()
+        self.enqueue_method("clear")
 
         if self.include_morphology:
             self.send_morphology()
 
         if self.include_connections:
             self.send_cons()
+
+        if self.include_activity:
+            self.send_activity()
 
     def is_blender_ready(self):
         try:
@@ -248,8 +269,7 @@ class BlenderNEURON(object):
         # data = cPickle.dumps(data)
         # data = zlib.compress(data)
 
-        self.client.visualize_group(data)
-
+        self.enqueue_method("visualize_group", data)
 
 
     def collect_group(self, group_name):
@@ -257,7 +277,7 @@ class BlenderNEURON(object):
         group["collection_times"].append(self.h.t)
         level = group['3d_data']["color_level"]
 
-        level = "Cell"
+        #level = "Cell"
 
         # Recursively record from every segment of each section of each cell
         if level == 'Segment':
@@ -291,6 +311,7 @@ class BlenderNEURON(object):
                 activity[name] = []
 
             activity[name].append(value)
+
     def collect_segments_recursive(self, section, group):
         coordCount = int(self.h.n3d(sec=section))
         activity = group["collected_activity"]
@@ -312,6 +333,7 @@ class BlenderNEURON(object):
 
         for child in section.children():
             self.collect_segments_recursive(child, group)
+
     def collect_section(self, section, group, recursive = True):
         activity = group["collected_activity"]
         variable = group["collect_variable"]
@@ -333,25 +355,31 @@ class BlenderNEURON(object):
                 self.collect_section(child, group, recursive)
 
     def send_activity(self):
-        if self.activity is None:
-            return
+        for group in self.groups.values():
+            if "collected_activity" not in group:
+                return
 
-        segments = []
+            part_activities = group["collected_activity"]
+            parts = part_activities.keys()
+            times = group["collection_times"]
 
-        for seg in self.activity:
-            reduced_times, reduced_values = self.simplify_activity(self.activity[seg])
+            payload = []
 
-            segments.append({'name':seg, 'times':reduced_times, 'activity':reduced_values})
+            for part in parts:
+                reduced_times, reduced_values = self.simplify_activity(times, part_activities[part])
 
-            # Buffered send
-            if len(segments) > 100:
-                self.client.set_segment_activities(segments)
-                segments = []
+                payload.append({'name':part, 'times':reduced_times, 'activity':reduced_values})
 
-        self.client.set_segment_activities(segments)
+                # Buffered send
+                if len(payload) > 100:
+                    self.enqueue_method("set_segment_activities", payload)
+                    payload = []
 
-    def simplify_activity(self, activity):
-        reduced = BlenderNEURON.rdp(zip(self.collection_times, activity), self.activity_simplification_tolerance)
+            self.enqueue_method("set_segment_activities", payload)
+
+    # TODO: this could benefit from cython
+    def simplify_activity(self, times, activity):
+        reduced = BlenderNEURON.rdp(zip(times, activity), self.activity_simplification_tolerance)
         return zip(*reduced)
 
     def clear_activity(self):
@@ -404,7 +432,8 @@ class BlenderNEURON(object):
                 "to": post_pos
             })
 
-        self.client.create_cons(cons)
+        self.enqueue_method("create_cons", cons)
+
     def get_coords_along_sec(self, section, along):
         coord_count = self.h.n3d(sec=section)
         along_coords = (coord_count-1) * along
