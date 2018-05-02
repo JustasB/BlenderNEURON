@@ -2,8 +2,9 @@
 # cython: profile=True
 
 import numpy as np
-import bmesh, operator, bpy, threading, queue, marshal, zlib, traceback
-from math import sqrt, radians
+import bmesh, operator, bpy, threading, queue, marshal, zlib, traceback, time, re, inspect, colors
+from math import sqrt, radians, atan, tan, degrees
+from statistics import mean
 
 class NeuroServer:
 
@@ -82,9 +83,94 @@ class NeuroServer:
         self.has_linked = False
         self.link_lock = threading.Lock()
 
+        self.task_lock = threading.Lock()
+        self.tasks = {}
+        self.task_next_id = 0
+
         self.queue = queue.Queue()
         self.progress_start()
-            
+
+    def run_command(self, command_string):
+        exec_lambda = self.get_command_lambda()
+        return self.run_lambda(exec_lambda)
+
+    def enqueue_command(self, command_string):
+        exec_lambda = self.get_command_lambda()
+        return self.enqueue_lambda(exec_lambda)
+
+    def run_method(self, method, args, kwargs):
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+
+        return self.run_lambda(task_lambda)
+
+    def enqueue_method(self, method, args, kwargs):
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+
+        return self.enqueue_lambda(task_lambda)
+
+    def get_command_lambda(self, command_string):
+        def exec_lambda():
+            return_value = None
+            exec("return_value = " + command_string)
+            return return_value
+
+        return exec_lambda
+
+    def get_method_lambda(self, method, *args, **kwargs):
+
+        # Retrieve the default values from method definition and pass them along if they're not set
+        method_arg_spec = inspect.getargspec(getattr(self, method))
+        default_args = dict(zip(method_arg_spec.args[-len(method_arg_spec.defaults):], method_arg_spec.defaults))
+        for arg in default_args:
+            if arg not in kwargs:
+                kwargs[arg] = default_args[arg]
+
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+        return task_lambda
+
+    def run_lambda(self, task_lambda):
+        id = self.enqueue_lambda(task_lambda)
+
+        while self.get_task_status(id) == 'QUEUED':
+            time.sleep(0.1)
+
+        status = self.get_task_status(id)
+
+        if status == "SUCCESS":
+            return self.tasks[id]["result"]
+
+        else:
+            raise Exception(self.tasks[id]["error"])
+
+    def enqueue_lambda(self, task_lambda):
+        task_id = self.get_new_task_id()
+
+        task = {"id": task_id, "status": "QUEUED", "lambda": task_lambda, "result": None, "error": None}
+
+        self.tasks[task_id] = task
+        self.queue.put(task)
+
+        return task_id
+
+    def get_new_task_id(self):
+        with self.task_lock:
+            task_id = self.task_next_id
+            self.task_next_id += 1
+
+        return task_id
+
+    def get_task_status(self, task_id):
+        if task_id in self.tasks:
+            return self.tasks[task_id]["status"]
+
+        return "DOES_NOT_EXIST"
+
+    def get_task_error(self, task_id):
+        return self.tasks[task_id]["error"]
+
+    def get_task_result(self, task_id):
+        return self.tasks[task_id]["result"]
+
     def work_on_queue_tasks(self):
         q = self.queue
 
@@ -93,16 +179,22 @@ class NeuroServer:
 
             try:
                 if not self.queue_error:
-                    task()
+                    result = task["lambda"]()
+                    task["result"] = result
+                    task["status"] = "SUCCESS"
+                else:
+                    task["status"] = "ERROR"
 
             except:
                 self.queue_error = True
                 tb = traceback.format_exc()
+
+                task["status"] = "ERROR"
+                task["error"] = tb
+
                 print(tb)
 
             q.task_done()
-
-        print("Quitting worker thread...")
 
     def service_queue(self):
         q = self.queue
@@ -114,10 +206,8 @@ class NeuroServer:
             self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
             self.queue_servicer.daemon = True
 
-            print_safe("Starting service thread...")
             self.queue_servicer.start()
 
-            print_safe("Waiting for tasks to finish...")
             q.join()
             print_safe("Task queue DONE")
 
@@ -157,15 +247,15 @@ class NeuroServer:
     def set_segment_activity(self, name, times, activity):
         seg_mat = bpy.data.materials[name]
 
-        colors = list(map(self.activity_to_color, activity))
+        intensity = list(map(self.activity_to_intensity, activity))
 
         for t in range(len(times)):
-            seg_mat.diffuse_color = colors[t]
-            seg_mat.keyframe_insert(data_path="diffuse_color", frame=int(times[t]))
+            seg_mat.emit = intensity[t]
+            seg_mat.keyframe_insert(data_path="emit", frame=int(times[t]))
 
         self.progress_complete()
 
-    def activity_to_color(self, activity):
+    def activity_to_intensity(self, activity):
         scale = (activity + 80.0) / 120.0
 
         if activity < 0:
@@ -173,7 +263,7 @@ class NeuroServer:
         elif activity > 1:
             scale = 1.0
 
-        return (self.resting_color + self.color_dist * scale).tolist()
+        return scale
 
     def create_cons(self, cons):
         for con in cons:
@@ -553,7 +643,6 @@ class NeuroServer:
                 for space in area.spaces:
                     if space.type == 'VIEW_3D':
                         space.lock_camera = lock
-                        print("Camera lock:" + str(lock))
 
     def all_select(self, select):
         for ob in bpy.data.objects:
@@ -578,12 +667,12 @@ class NeuroServer:
         if self.get_current_view_perspective() == 'PERSP':
             bpy.ops.view3d.viewnumpad(self.get_operator_context_override(), type='CAMERA')
 
+        # Start with a camera that faces the front of the object
+        self.camera.location = (7,7,7)
+        self.camera.rotation_euler = (radians(53),0,radians(134))
+
         #Lock camera to view
         self.set_camera_lock(lock=True)
-
-        # Start with a camera that faces the front of the object
-        self.camera.location = (0,-1000,0)
-        self.camera.rotation_euler = (radians(90),0,0)
 
         #Fill screen with camera view
         bpy.ops.view3d.view_center_camera(self.get_operator_context_override())
@@ -591,12 +680,12 @@ class NeuroServer:
         # Show all model objects
         bpy.ops.view3d.view_selected(self.get_operator_context_override(), use_all_regions=False)
 
-        # Unlock camera
-        self.set_camera_lock(lock=False)
-
         # Change back to perspective view
         if self.get_current_view_perspective() == 'CAMERA':
             bpy.ops.view3d.viewnumpad(self.get_operator_context_override(), type='CAMERA')
+
+        # Unlock camera
+        self.set_camera_lock(lock=False)
 
         # Clear selection
         self.all_select(select=False)
@@ -639,23 +728,28 @@ class NeuroServer:
             self.camera_trajectory.name = "CameraTrajectory"
             bpy.context.scene.objects.active = self.camera_trajectory
 
-            # Hack to fix trajectory being in edit mode after path constraint is added
-            #bpy.ops.object.mode_set(self.get_operator_context_override(self.camera_trajectory), mode = 'OBJECT')
+            # For some reason the curve is in edit mode after creation and needs to be flipped
             bpy.ops.object.mode_set(self.get_operator_context_override(self.camera_trajectory), mode = 'EDIT')
-            # End hack
 
-        # Get the distance of the camera to the center
-        radius = sqrt((np.array(self.camera.location)**2).sum())
+        radius = self.get_whole_view_camera_distance()
 
         # Make it large enough to fit whole scene and angle it a bit
         self.camera_trajectory.scale = (radius, radius, 1)
         self.camera_trajectory.rotation_euler = (0.0, radians(orbit_incline_angle), 0.0)
 
-        # Create a camera target at the origin
+        # Create a camera target at the object center
         if not hasattr(self, "camera_target") or not self.camera_target:
+            bounds = self.get_model_bounds()
+
+            center = (
+                mean([bounds["mins"][0], bounds["maxes"][0]]),
+                mean([bounds["mins"][1], bounds["maxes"][1]]),
+                mean([bounds["mins"][2], bounds["maxes"][2]]),
+            )
+
             bpy.ops.object.empty_add(type='SPHERE',
                                  radius=0.001,
-                                 location=(0.0, 0.0, 0.0))
+                                 location=center)
 
             self.camera_target  = bpy.data.objects["Empty"]
             bpy.context.scene.objects.active = self.camera_target
@@ -689,6 +783,73 @@ class NeuroServer:
             ttc.up_axis = 'UP_Y'
             ttc.name = self.ttc_name
 
+    def get_model_bounds(self):
+        from mathutils import Vector
+        corners = []
+
+        for bn_object in self.objects.values():
+            b_object = bn_object["object"]
+
+            # Convert bound_box object-space coords to world-space coords
+            for corner in b_object.bound_box:
+                corners.append(b_object.matrix_world * Vector(corner))
+
+        mins = []
+        maxes = []
+        ranges = []
+
+        for d in range(3):
+            maxes.append(max(c[d] for c in corners))
+            mins.append(min(c[d] for c in corners))
+            ranges.append(maxes[-1] - mins[-1])
+
+        return { "mins": mins, "maxes": maxes, "ranges": ranges }
+
+    def get_camera_hv_angles(self):
+        camera_angle_rad = bpy.data.cameras[self.camera.name].angle
+
+        cam_width = bpy.data.scenes["Scene"].render.resolution_x
+        cam_height = bpy.data.scenes["Scene"].render.resolution_y
+
+        max_dim = max(cam_height, cam_width)
+        min_dim = min(cam_height, cam_width)
+
+        aspect_ratio = min_dim / max_dim
+
+        smaller_angle = 2*atan(aspect_ratio*tan(camera_angle_rad/2.0))
+
+        if cam_width == max_dim:
+            return { "h": camera_angle_rad, "v": smaller_angle }
+
+        else:
+            return { "h": smaller_angle, "v": camera_angle_rad }
+
+    def get_whole_view_camera_distance(self):
+
+        # Use camera angle, resolution w/h, and model bounding box dims
+        # To find such cam dist that whole model would be visible
+        model_bounds = self.get_model_bounds()
+        camera_angles = self.get_camera_hv_angles()
+
+        # x and y must fit within width
+        h_range = max(model_bounds["ranges"][0], model_bounds["ranges"][1])
+
+        # z must fit within cam height
+        v_range = model_bounds["ranges"][2]
+
+        # depth range is the narrower of x and y ranges
+        depth_range = min(model_bounds["ranges"][0], model_bounds["ranges"][1])
+
+        from math import tan
+        dist_to_fit_h_range = (h_range / 2.0) / tan(camera_angles["h"] / 2.0) + (depth_range / 2.0)
+        dist_to_fit_v_range = (v_range / 2.0) / tan(camera_angles["v"] / 2.0) + (depth_range / 2.0)
+
+        # max of width dist and height dist is the cam dist
+        cam_dist = max(dist_to_fit_h_range, dist_to_fit_v_range)
+
+        return cam_dist
+
+
     def clear(self):
 
         for object in self.objects.values():
@@ -696,18 +857,39 @@ class NeuroServer:
 
         self.objects = {}
 
-        # Clear any camera orbits
-        if hasattr(self, "camera_target") and self.camera_target:
-            self.clear_model_object(self.camera_target, removeFromSelf = False)
-
-        if hasattr(self, "camera_trajectory") and self.camera_trajectory:
-            self.clear_model_object(self.camera_trajectory, removeFromSelf = False)
-
         if self.ttc_name in self.camera.constraints:
             self.camera.constraints.remove(self.camera.constraints[self.ttc_name])
 
         if self.fpc_name in self.camera.constraints:
             self.camera.constraints.remove(self.camera.constraints[self.fpc_name])
+
+        # Clear any camera orbits
+        if hasattr(self, "camera_target") and self.camera_target:
+            self.clear_model_object(self.camera_target, removeFromSelf = False)
+            self.camera_target = None
+
+        if hasattr(self, "camera_trajectory") and self.camera_trajectory:
+            self.clear_model_object(self.camera_trajectory, removeFromSelf = False)
+            self.camera_trajectory = None
+
+    def color_by_unique_materials(self):
+        mat_names = set()
+        regex = re.compile(r"(\d|_|]|\[|\.)")
+
+        for mat in bpy.data.materials:
+            clean_name = regex.sub("", mat.name)
+            mat_names.add(clean_name)
+
+        color_palette = colors.get_distinct(len(mat_names))
+
+        # Assign each clean name to a color
+        mat_colors = dict(zip(mat_names,color_palette))
+
+        # Assign sections to a color
+        for mat in bpy.data.materials:
+            clean_name = regex.sub("", mat.name)
+            if clean_name in mat_colors:
+                mat.diffuse_color = mat_colors[clean_name]
 
     def clear_model_object(self, object, removeFromSelf = True):
         if object.__class__.__name__ == 'dict':
@@ -746,12 +928,13 @@ class NeuroServer:
         if removeFromSelf:
             self.objects.pop(ob.name)
 
-    def run_command(self, command_str):
-        exec(command_str)
-
     def stop(self):
         self.server.shutdown()
         self.server.server_close()
+        return 0
+
+    def ping(self):
+        return "I'm alive"
 
     def listenForExternal(self):
         from xmlrpc.server import SimpleXMLRPCServer
@@ -761,86 +944,44 @@ class NeuroServer:
         class BlenderServer(ThreadingMixIn, SimpleXMLRPCServer):
             def __init__(self, param):
                 self.daemon_threads = True
-                super(BlenderServer, self).__init__(param)
+                super(BlenderServer, self).__init__(param, allow_none=True)
 
         self.server = BlenderServer((self.IP, self.Port))
         self.server.register_introspection_functions()
 
-        def stop():
-            self.stop()
-            return 0
-        
-        self.server.register_function(stop, 'stop')
+        # Basic server functions
+        self.server.register_function(self.stop, 'stop')
+        self.server.register_function(self.ping, 'ping')
 
-        def ping():
-            return "I'm alive"
+        # Synchronous execution
+        self.server.register_function(self.run_command, 'run_command')
+        self.server.register_function(self.run_method,  'run_method')
 
-        self.server.register_function(ping, 'ping')
-
-        def visualize_group(group):
-            # group = zlib.decompress(group)
-            # group = marshal.loads(group)
-            self.progress_add(lambda: self.visualize_group(group), count=len(group["cells"]))
-            return 0
-
-        self.server.register_function(visualize_group, 'visualize_group')
-
-        def create_cons(cons):
-            self.progress_add(lambda: self.create_cons(cons), count=len(cons))
-            return 0
-
-        self.server.register_function(create_cons, 'create_cons')
-
-        def orbit_camera_around_model():
-            self.progress_add(lambda: self.orbit_camera_around_model())
-            return 0
-
-        self.server.register_function(orbit_camera_around_model, 'orbit_camera_around_model')
-
-        def link_objects():
-            self.progress_add(lambda: self.link_objects())
-            return 0
-
-        self.server.register_function(link_objects, 'link_objects')
-
-        def show_full_scene():
-            self.progress_add(lambda: self.show_full_scene())
-            return 0
-
-        self.server.register_function(show_full_scene, 'show_full_scene')
-
-        def set_segment_activities(segments):
-            self.progress_add(lambda: self.set_segment_activities(segments),count=len(segments))
-            return 0
-
-        self.server.register_function(set_segment_activities, 'set_segment_activities')
-
-        def set_segment_activity(name, times, activity):
-            self.progress_add(lambda: self.set_segment_activity(name, times, activity))
-            return 0
-
-        self.server.register_function(set_segment_activity, 'set_segment_activity')
-
-        def clear():
-            self.queue.put(lambda: self.clear())
-            return 0
-
-        self.server.register_function(clear, 'clear')
-
-        def run_command(command_str):
-            self.queue.put(lambda: self.run_command(command_str))
-            return 0
-
-        self.server.register_function(run_command, 'run_command')
-
-        self.server.register_function(self.progress_start, 'progress_start')
-        self.server.register_function(self.progress_get_done, 'progress_get_done')
-        self.server.register_function(self.progress_get_total, 'progress_get_total')
+        # Asynchronous task execution queueing
+        self.server.register_function(self.enqueue_method,  'enqueue_method')
+        self.server.register_function(self.enqueue_command, 'enqueue_command')
+        self.server.register_function(self.get_task_status, 'get_task_status')
+        self.server.register_function(self.get_task_error,  'get_task_error')
+        self.server.register_function(self.get_task_result, 'get_task_result')
 
         self.server.serve_forever()
 
 
 cimport cython
+
+cdef inline hex_to_rgb(value):
+    gamma = 2.2
+    value = value.lstrip('#')
+    lv = len(value)
+    fin = list(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+    r = pow(fin[0] / 255, gamma)
+    g = pow(fin[1] / 255, gamma)
+    b = pow(fin[2] / 255, gamma)
+    fin.clear()
+    fin.append(r)
+    fin.append(g)
+    fin.append(b)
+    return tuple(fin)
 
 cdef inline print_safe(value):
     try:
@@ -874,9 +1015,16 @@ cdef inline diam0version(start, end):
 cdef inline create_default_material(color, name = "SolidColor"):
     result = bpy.data.materials.new(name)
     result.diffuse_color = color
-    result.use_transparency = True
-    result.alpha = 0.8
-    result.emit = 1.0
+
+    # Ambient and back lighting
+    result.ambient = 0.85
+    result.translucency = 0.85
+
+    # Raytraced reflections
+    result.raytrace_mirror.use = True
+    result.raytrace_mirror.reflect_factor = 0.1
+    result.raytrace_mirror.fresnel = 2.0
+
     return result
 
 @cython.profile(False)
