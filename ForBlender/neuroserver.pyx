@@ -2,6 +2,7 @@
 # cython: profile=True
 
 import numpy as np
+
 import bmesh, operator, bpy, threading, queue, marshal, zlib, traceback, time, re, inspect, colors
 from math import sqrt, radians, atan, tan, degrees
 from statistics import mean
@@ -13,7 +14,7 @@ class NeuroServer:
         if global_name:
             globals()[global_name] = self
 
-        self.IP = "192.168.0.34"
+        self.IP = "127.0.0.1" #"192.168.0.34"
         self.Port = 8000
 
         self.resting_color = np.array((30/255.0, 138/255.0, 112/255.0))   # Tinted bluish green
@@ -712,6 +713,9 @@ class NeuroServer:
         scene = bpy.data.scenes["Scene"]
 
         # Set render params
+        if not destination_path.endswith("/"):
+            destination_path += "/"
+
         scene.render.filepath = destination_path
 
         # Run render

@@ -2,7 +2,7 @@ import xmlrpclib, threading, time, cPickle, zlib
 from math import sqrt
 
 class BlenderNEURON(object):
-    def __init__(self, h, ip = '192.168.0.34', port = '8000'):
+    def __init__(self, h, ip='127.0.0.1', port='8000'):
         self.h = h
 
         self.IP = ip

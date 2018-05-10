@@ -1,5 +1,6 @@
 import sys, threading;
 sys.path.append('E:\Code\BlenderNEURON\ForBlender');
+sys.path.append('/home/justas/Repositories/BlenderNEURON/ForBlender')
 from neuroserver import NeuroServer
 
 import bpy, threading
@@ -64,26 +65,11 @@ class NEURONServerStartOperator(bpy.types.Operator):
         self.externalEventThread.daemon = True
         self.externalEventThread.start()
 
-    def service_queue(self):
-        q = self.neuron_server.queue
-
-        while not q.empty():
-            task = q.get()
-            task()
-
     def modal(self, context, event):
 
         if event.type == 'TIMER' and not self.isServicing:
             self.isServicing = True
-
-            # DEBUG
-            #print("Checking queue - found " + str(self.neuron_server.queue.qsize()) + " tasks...")
-
-            if self.neuron_server.queue.empty() == False:
-                #DEBUG PROFILE
-                #cProfile.runctx('self.service_queue()',globals(),locals())
-                self.service_queue()
-
+            self.neuron_server.service_queue()
             self.isServicing = False
 
         if bpy.types.Object.neuron_server is None:
@@ -98,7 +84,7 @@ class NEURONServerStartOperator(bpy.types.Operator):
         self.create_server()
 
         wm = context.window_manager
-        self._timer = wm.event_timer_add(5.0, context.window)  # This will periodically call the modal() method above
+        self._timer = wm.event_timer_add(1.0, context.window)  # This will periodically (every x seconds) call the modal() method above
         wm.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
