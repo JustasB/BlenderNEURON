@@ -118,6 +118,7 @@ class BlenderNEURON(object):
             'collect_activity': True,
             'collect_variable': 'v',
             'collection_period_ms': 1,
+            'spherize_soma_if_DeqL': True,
             '3d_data': {
                 'name': name,
                 'color': [1, 1, 1],
@@ -214,10 +215,11 @@ class BlenderNEURON(object):
 
     def gather_group_coords(self, group):
         cell_data = group['3d_data']['cells'] = {}
+        spherize = group["spherize_soma_if_DeqL"]
 
         for root in group["cells"]:
             cell_name = root.cell().hname()
-            cell_coords = self.get_cell_coords(root)
+            cell_coords = self.get_cell_coords(root, spherize_if_DeqL=spherize)
 
             # Account for a cell having multiple roots
             if cell_name in cell_data:
@@ -225,19 +227,27 @@ class BlenderNEURON(object):
             else:
                 cell_data[cell_name] = cell_coords
 
-    def get_cell_coords(self, section, result = None):
-        # Determine how many 3d points the section has
-        coordCount = int(self.h.n3d(sec=section))
+
+    def get_coord_count(self, section):
+        coord_count = int(self.h.n3d(sec=section))
 
         # Let NEURON create them if missing
-        if coordCount == 0:
+        if coord_count == 0:
             self.h.define_shape(sec=section)
-            coordCount = int(self.h.n3d(sec=section))
+            coord_count = int(self.h.n3d(sec=section))
+
+        return coord_count
+
+
+    def get_cell_coords(self, section, result=None, spherize_if_DeqL=True):
+        # Determine how many 3d points the section has
+        coord_count = self.get_coord_count(section)
 
         # Collect the coordinates
-        coords = [None]*coordCount*3
-        radii = [None]*coordCount
-        for c in range(coordCount):
+        coords = [None]*coord_count*3
+        radii =  [None]*coord_count
+
+        for c in range(coord_count):
             ci = c*3
             coords[ci] = self.h.x3d(c, sec=section)
             coords[ci+1] = self.h.y3d(c, sec=section)
@@ -249,20 +259,66 @@ class BlenderNEURON(object):
         if result is None:
             result = []
 
-        result.append({
+        sec_coords = {
             "name": section.name(),
             "coords": coords,
             "radii": radii,
-        })
+        }
+
+        # Create spherical intermediate points if spherizing
+        if spherize_if_DeqL:
+            if coord_count == 2 and \
+               abs(section.diam - section.L) < 1e-5 and \
+               "soma" in section.name().lower():
+                    self.spherize_coords(sec_coords, length=section.L)
+
+        result.append(sec_coords)
 
         children = section.children()
 
         for child in children:
-            self.get_cell_coords(child, result)
+            self.get_cell_coords(child, result, spherize_if_DeqL)
 
         return result
 
+    def spherize_coords(self, sec_coords, length, steps=7):
+        sec_coords["spherical"] = True
 
+        x1 = sec_coords["coords"][0]
+        y1 = sec_coords["coords"][1]
+        z1 = sec_coords["coords"][2]
+
+        x2 = sec_coords["coords"][3]
+        y2 = sec_coords["coords"][4]
+        z2 = sec_coords["coords"][5]
+
+        range_x = x2 - x1
+        range_y = y2 - y1
+        range_z = z2 - z1
+
+        radius = sec_coords["radii"][0]
+
+        # Length and diameter are same, so spherize the cylinder
+        # by adding intermediate, spherical diameter points
+        step_size = length / (steps + 1.0)
+
+        for step in range(steps):
+            dist_from_start = step_size + step*step_size
+            dist_to_center = abs(radius-dist_from_start)
+            step_radius = sqrt(radius**2-dist_to_center**2)
+
+            fraction_along = dist_from_start / length
+            step_x = x1 + range_x * fraction_along
+            step_y = y1 + range_y * fraction_along
+            step_z = z1 + range_z * fraction_along
+
+            pt_idx = step+1
+            sec_coords["coords"][pt_idx*3:pt_idx*3] = [step_x, step_y, step_z]
+            sec_coords["radii"].insert(pt_idx, step_radius)
+
+        # Set the first and last points to 0 diam
+        sec_coords["radii"][0] = 0
+        sec_coords["radii"][-1] = 0
 
     def send_group(self, group):
         data = group['3d_data']
@@ -313,7 +369,8 @@ class BlenderNEURON(object):
             activity[name].append(value)
 
     def collect_segments_recursive(self, section, group):
-        coordCount = int(self.h.n3d(sec=section))
+        coordCount = self.get_coord_count(section)
+
         activity = group["collected_activity"]
         variable = group["collect_variable"]
 

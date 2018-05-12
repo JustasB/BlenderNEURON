@@ -334,6 +334,7 @@ class NeuroServer:
                 section_name = section["name"]
                 coords = section["coords"]
                 radii = section["radii"]
+                spherical = section["spherical"] if "spherical" in section else False
 
                 if color_level == 'Section':
                     material = self.create_material(section_name, group)
@@ -349,10 +350,19 @@ class NeuroServer:
                 if color_level == 'Segment':
                     mat_count = get_num_materials(coords)
 
+                    if spherical:
+                        seg_count = mat_count
+                        mat_count = 1
+
                     for m in range(mat_count):
                         material = self.create_material(section_name+"["+str(m)+"]", group)
                         mat_idx = self.assign_material(parent_curve_obj, material)
-                        poly_count = get_poly_count(m, res_u, res_bev, m == 0, m == (mat_count - 1))
+
+                        if spherical:
+                            poly_count = get_spherical_poly_count(seg_count, res_u, res_bev)
+                        else:
+                            poly_count = get_poly_count(m, res_u, res_bev, m == 0, m == (mat_count - 1))
+
                         object_part_mat_idxs.extend([mat_idx]*poly_count)
 
                     if interaction_level == 'Section':
@@ -1011,7 +1021,15 @@ cdef inline diam0version(start, end):
         start = np.array(start)
         end = np.array(end)
         lengths = end - start
-        extended = start + lengths * 1.001  # Extend by a small amount
+
+        # Simple extension
+        # extended = start + lengths * 1.001  # Extend by a small amount
+
+        # Versor extension
+        length = sqrt(np.power(lengths,2).sum())
+        versor = lengths / length
+        extended = end + versor * 0.01 # Extend in the same direction by a small amount
+
         result = extended.tolist()
         return result
 
@@ -1044,4 +1062,15 @@ cdef inline int get_poly_count(int iseg, int res_u=2, int res_bev=1, bint isFirs
         end_index_excl = end_index_excl + face_count
 
     return int(end_index_excl-start_index)
+
+cdef inline int get_spherical_poly_count(int seg_count, int res_u, int res_bev):
+    # Get spherical bevelled bezier polygons by:
+    iseg = seg_count-1 # Get the polygons of the last sphere segment
+    isLast = True # Include the final end-cap
+    isFirst = True # Include the start end-cap (and everything up to the last segment)
+
+    result = get_poly_count(iseg, res_u, res_bev, isFirst=isFirst, isLast=isLast)
+
+    return result
+
 
