@@ -701,7 +701,7 @@ class NeuroServer:
         # Clear selection
         self.all_select(select=False)
 
-    def set_render_params(self, frame_range = (0, 100), width = 500, height = 500, file_format = 'JPEG', format_param = 93):
+    def set_render_params(self, frame_range = (0, 200), width = 500, height = 500, file_format = 'JPEG', format_param = 93):
         scene = bpy.data.scenes["Scene"]
 
         scene.frame_start = frame_range[0]
@@ -732,14 +732,14 @@ class NeuroServer:
         bpy.ops.render.render(self.get_operator_context_override(), animation=True)
 
 
-    def orbit_camera_around_model(self, orbit_incline_angle = 15.0):
+    def orbit_camera_around_model(self, orbit_incline_angle = 15.0, animation_length = 200):
         # Run with: bpy.types.Object.neuron_server.orbit_camera_around_model()
 
         # Create a circular camera trajectory  - if haven't already
         if not hasattr(self, "camera_trajectory") or not self.camera_trajectory:
             bpy.ops.curve.primitive_nurbs_circle_add(location=(0.0, 0.0, 0.0))
             self.camera_trajectory  = bpy.data.objects['NurbsCircle']
-            self.camera_trajectory.name = "CameraTrajectory"
+            self.camera_trajectory.name = "CameraTrajectory"            
             bpy.context.scene.objects.active = self.camera_trajectory
 
             # For some reason the curve is in edit mode after creation and needs to be flipped
@@ -750,6 +750,9 @@ class NeuroServer:
         # Make it large enough to fit whole scene and angle it a bit
         self.camera_trajectory.scale = (radius, radius, 1)
         self.camera_trajectory.rotation_euler = (0.0, radians(orbit_incline_angle), 0.0)
+
+        # Set the number of frames to use for the animation     
+        self.camera_trajectory.data.path_duration = animation_length
 
         # Create a camera target at the object center
         if not hasattr(self, "camera_target") or not self.camera_target:
