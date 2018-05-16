@@ -263,8 +263,8 @@ class NeuroServer:
 
     def activity_to_intensity(self, activity, min_range = -50.0, max_range =   0.0):
 
-        # Normalize to 0-1
-        return max(min((activity - min_range) / (max_range - min_range), 1.0), 0.0)
+        # Normalize and clamp min-max range to 0-2
+        return max(min((activity - min_range) / (max_range - min_range), 1.0), 0.0)*2.0
 
     def create_cons(self, cons):
         for con in cons:
