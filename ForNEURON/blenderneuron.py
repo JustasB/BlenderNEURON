@@ -118,6 +118,7 @@ class BlenderNEURON(object):
             'collect_activity': True,
             'collect_variable': 'v',
             'collection_period_ms': 1,
+            'frames_per_ms': 2.0,
             'spherize_soma_if_DeqL': True,
             '3d_data': {
                 'name': name,
@@ -416,6 +417,7 @@ class BlenderNEURON(object):
             if "collected_activity" not in group:
                 return
 
+            frames_per_ms = group["frames_per_ms"]
             part_activities = group["collected_activity"]
             parts = part_activities.keys()
             times = group["collection_times"]
@@ -423,12 +425,16 @@ class BlenderNEURON(object):
             payload = []
 
             for part in parts:
+                # Remove extra co-linear points
                 reduced_times, reduced_values = self.simplify_activity(times, part_activities[part])
+
+                # Scale the times
+                reduced_times = [t*frames_per_ms for t in reduced_times]
 
                 payload.append({'name':part, 'times':reduced_times, 'activity':reduced_values})
 
                 # Buffered send
-                if len(payload) > 100:
+                if len(payload) > 1000:
                     self.enqueue_method("set_segment_activities", payload)
                     payload = []
 
