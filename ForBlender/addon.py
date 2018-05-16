@@ -84,7 +84,7 @@ class NEURONServerStartOperator(bpy.types.Operator):
         self.create_server()
 
         wm = context.window_manager
-        self._timer = wm.event_timer_add(1.0, context.window)  # This will periodically (every x seconds) call the modal() method above
+        self._timer = wm.event_timer_add(0.1, context.window)  # This will periodically (every x seconds) call the modal() method above
         wm.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 

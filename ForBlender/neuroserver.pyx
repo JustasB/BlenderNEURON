@@ -174,16 +174,19 @@ class NeuroServer:
 
     def work_on_queue_tasks(self):
         q = self.queue
-
+        
         while not q.empty():
+            print_safe("Tasks in queue. Getting next task...")
             task = q.get()
 
             try:
                 if not self.queue_error:
+                    print_safe("Running task...")
                     result = task["lambda"]()
                     task["result"] = result
                     task["status"] = "SUCCESS"
                 else:
+                    print_safe("Previous task had an error. SKIPPING.")
                     task["status"] = "ERROR"
 
             except:
@@ -193,9 +196,11 @@ class NeuroServer:
                 task["status"] = "ERROR"
                 task["error"] = tb
 
-                print(tb)
+                print_safe(tb)
 
+            print_safe("Marking task as done")
             q.task_done()
+            print_safe("MARKED DONE")
 
     def service_queue(self):
         q = self.queue
@@ -256,15 +261,10 @@ class NeuroServer:
 
         self.progress_complete()
 
-    def activity_to_intensity(self, activity):
-        scale = (activity + 80.0) / 120.0
+    def activity_to_intensity(self, activity, min_range = -50.0, max_range =   0.0):
 
-        if activity < 0:
-            scale = 0.0
-        elif activity > 1:
-            scale = 1.0
-
-        return scale
+        # Normalize to 0-1
+        return max(min((activity - min_range) / (max_range - min_range), 1.0), 0.0)
 
     def create_cons(self, cons):
         for con in cons:
@@ -701,7 +701,7 @@ class NeuroServer:
         # Clear selection
         self.all_select(select=False)
 
-    def set_render_params(self, frame_range = (0, 100), width = 500, height = 500, file_format = 'JPEG', format_param = 93):
+    def set_render_params(self, frame_range = (0, 200), width = 500, height = 500, file_format = 'JPEG', format_param = 93):
         scene = bpy.data.scenes["Scene"]
 
         scene.frame_start = frame_range[0]
@@ -732,7 +732,7 @@ class NeuroServer:
         bpy.ops.render.render(self.get_operator_context_override(), animation=True)
 
 
-    def orbit_camera_around_model(self, orbit_incline_angle = 15.0):
+    def orbit_camera_around_model(self, orbit_incline_angle = 15.0, animation_length = 200):
         # Run with: bpy.types.Object.neuron_server.orbit_camera_around_model()
 
         # Create a circular camera trajectory  - if haven't already
@@ -787,6 +787,8 @@ class NeuroServer:
 
             # Animate the camera path
             bpy.ops.constraint.followpath_path_animate({"constraint":fpc, "object":self.camera},constraint=fpc.name)
+
+            self.camera_trajectory.data.path_duration = animation_length
 
         # Assign camera to point at the model  (must be after follow_path)
 
@@ -1072,5 +1074,6 @@ cdef inline int get_spherical_poly_count(int seg_count, int res_u, int res_bev):
     result = get_poly_count(iseg, res_u, res_bev, isFirst=isFirst, isLast=isLast)
 
     return result
+
 
 
