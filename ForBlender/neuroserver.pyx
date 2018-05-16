@@ -209,12 +209,11 @@ class NeuroServer:
             print_safe("TASKS FOUND")
 
             self.queue_error = False
-            # self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
-            # self.queue_servicer.daemon = True
-            #
-            # self.queue_servicer.start()
-            # q.join()
-            self.work_on_queue_tasks()
+            self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
+            self.queue_servicer.daemon = True
+            
+            self.queue_servicer.start()
+            self.queue_servicer.join()
             print_safe("Task queue DONE")
 
     def progress_start(self):
