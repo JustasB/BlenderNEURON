@@ -893,9 +893,17 @@ class NeuroServer:
             self.clear_model_object(self.camera_trajectory, removeFromSelf = False)
             self.camera_trajectory = None
 
+        if "NurbsCircleAction" in bpy.data.actions:
+            bpy.data.actions.remove(bpy.data.actions["NurbsCircleAction"])
+
+        # Clear sun
+        if "Sun" in bpy.data.objects:
+            bpy.data.objects.remove(bpy.data.objects["Sun"])
+            bpy.data.lamps.remove(bpy.data.lamps["Sun"])
+
     def color_by_unique_materials(self):
         mat_names = set()
-        regex = re.compile(r"(\d|_|]|\[|\.)")
+        regex = re.compile(r"(\d|_|]|\[|\.|#.*)")
 
         for mat in bpy.data.materials:
             clean_name = regex.sub("", mat.name)
