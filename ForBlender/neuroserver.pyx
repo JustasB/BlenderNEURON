@@ -399,7 +399,14 @@ class NeuroServer:
 
     def assign_mats_to_polys(self, parent_curve_obj, object_poly_mat_idxs):
         mesh_obj = self.curve_to_mesh(parent_curve_obj)
-        mesh_obj.data.polygons.foreach_set("material_index", object_poly_mat_idxs)
+
+        try:
+            mesh_obj.data.polygons.foreach_set("material_index", object_poly_mat_idxs)
+        except:
+            print("Error assigning materials to section: " + mesh_obj.name)
+            print("Make sure the Section does not have duplicate/very close x,y,z coordinates")
+            raise
+
         self.objects[mesh_obj.name] = {'object': mesh_obj, 'linked': False}
 
     def level_is_greater_or_same(self, color_level, interaction_level):
