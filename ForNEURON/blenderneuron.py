@@ -1,4 +1,4 @@
-import xmlrpclib, threading, time, cPickle, zlib
+import xmlrpclib, threading, time, cPickle, zlib, hashlib
 from math import sqrt
 
 class BlenderNEURON(object):
@@ -219,7 +219,7 @@ class BlenderNEURON(object):
         spherize = group["spherize_soma_if_DeqL"]
 
         for root in group["cells"]:
-            cell_name = root.cell().hname()
+            cell_name = root.cell().hname() if root.cell() is not None else root.name()
             cell_coords = self.get_cell_coords(root, spherize_if_DeqL=spherize)
 
             # Account for a cell having multiple roots
@@ -239,6 +239,17 @@ class BlenderNEURON(object):
 
         return coord_count
 
+    def shorten_name_if_needed(self, name, max_length=56):
+        result = name
+
+        # Blender names must be <64 characters long
+        # If section name is too long, will truncate the string and replace it with a MD5 hash
+        # There must also be enough room for segment materials (here we allow for up to 99,999 segments/materials per section)
+        # 63 max, with two for []s and 5 for segment id = 56
+        if len(result) > max_length:
+            return result[:max_length-17] + "#" + hashlib.md5(result.encode('utf-8')).hexdigest()[:16]
+
+        return result
 
     def get_cell_coords(self, section, result=None, spherize_if_DeqL=True):
         # Determine how many 3d points the section has
@@ -261,16 +272,15 @@ class BlenderNEURON(object):
             result = []
 
         sec_coords = {
-            "name": section.name(),
+            "name": self.shorten_name_if_needed(section.name()),
             "coords": coords,
             "radii": radii,
         }
 
         # Create spherical intermediate points if spherizing
-        if spherize_if_DeqL:
-            if coord_count == 2 and \
-               abs(section.diam - section.L) < 1e-5 and \
-               "soma" in section.name().lower():
+        if spherize_if_DeqL and \
+            "soma" in section.name().lower() and \
+                 abs(section.diam - section.L) < 0.1:
                     self.spherize_coords(sec_coords, length=section.L)
 
         result.append(sec_coords)
@@ -376,7 +386,7 @@ class BlenderNEURON(object):
         variable = group["collect_variable"]
 
         for i in range(1, coordCount):
-            name = section.name() + "[" + str(i - 1) + "]"
+            name = self.shorten_name_if_needed(section.name()) + "[" + str(i - 1) + "]"
 
             startL = self.h.arc3d(i - 1, sec=section)
             endL = self.h.arc3d(i, sec=section)
@@ -397,7 +407,7 @@ class BlenderNEURON(object):
         variable = group["collect_variable"]
 
         if recursive:
-            name = section.name()
+            name = self.shorten_name_if_needed(section.name())
         else:
             name = section.cell().name()
 
