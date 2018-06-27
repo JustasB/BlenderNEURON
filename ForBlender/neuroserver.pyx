@@ -250,6 +250,9 @@ class NeuroServer:
             self.set_segment_activity(seg["name"], seg["times"], seg["activity"])
 
     def set_segment_activity(self, name, times, activity):
+        if name not in bpy.data.materials:
+            return
+
         seg_mat = bpy.data.materials[name]
 
         intensity = list(map(self.activity_to_intensity, activity))

@@ -293,15 +293,18 @@ class BlenderNEURON(object):
         return result
 
     def spherize_coords(self, sec_coords, length, steps=7):
-        sec_coords["spherical"] = True
+        # Remove intermediate, co-linear points
+        if len(sec_coords["radii"]) > 2:
+            sec_coords["radii"] = [sec_coords["radii"][0], sec_coords["radii"][-1]]
+            sec_coords["coords"] = sec_coords["coords"][0:3] + sec_coords["coords"][-3:]
 
         x1 = sec_coords["coords"][0]
         y1 = sec_coords["coords"][1]
         z1 = sec_coords["coords"][2]
 
-        x2 = sec_coords["coords"][3]
-        y2 = sec_coords["coords"][4]
-        z2 = sec_coords["coords"][5]
+        x2 = sec_coords["coords"][-3]
+        y2 = sec_coords["coords"][-2]
+        z2 = sec_coords["coords"][-1]
 
         range_x = x2 - x1
         range_y = y2 - y1
@@ -330,6 +333,8 @@ class BlenderNEURON(object):
         # Set the first and last points to 0 diam
         sec_coords["radii"][0] = 0
         sec_coords["radii"][-1] = 0
+
+        sec_coords["spherical"] = True
 
     def send_group(self, group):
         data = group['3d_data']
