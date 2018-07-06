@@ -740,6 +740,9 @@ class NeuroServer:
         # Run render
         bpy.ops.render.render(self.get_operator_context_override(), animation=True)
 
+    def save_scene(self, destination_file_path):
+        bpy.ops.wm.save_as_mainfile(filepath=destination_file_path)
+
 
     def orbit_camera_around_model(self, orbit_incline_angle = 15.0, animation_length = 200):
         # Run with: bpy.types.Object.neuron_server.orbit_camera_around_model()
