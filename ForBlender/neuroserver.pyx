@@ -92,11 +92,11 @@ class NeuroServer:
         self.progress_start()
 
     def run_command(self, command_string):
-        exec_lambda = self.get_command_lambda()
+        exec_lambda = self.get_command_lambda(command_string)
         return self.run_lambda(exec_lambda)
 
     def enqueue_command(self, command_string):
-        exec_lambda = self.get_command_lambda()
+        exec_lambda = self.get_command_lambda(command_string)
         return self.enqueue_lambda(exec_lambda)
 
     def run_method(self, method, args, kwargs):
@@ -110,10 +110,17 @@ class NeuroServer:
         return self.enqueue_lambda(task_lambda)
 
     def get_command_lambda(self, command_string):
+        """
+        Execute arbitrary python command within Blender's python process
+        :param command_string: A python expression. Set variable 'return_value' to receive a response.
+           e.g. command_string = "print('test')" -> will print 'test' in Blender console
+           e.g. command_string = "return_value = 1+3" -> will compute in Blender and return 4
+           e.g. command_string = "import bpy; return_value = [i for i in bpy.data.objects]" -> will list all Blender objects
+        :return:
+        """
         def exec_lambda():
-            return_value = None
-            exec("return_value = " + command_string)
-            return return_value
+            exec("import bpy, mathutils; " + command_string, globals())
+            return globals()['return_value'] if 'return_value' in globals() else None
 
         return exec_lambda
 
@@ -138,10 +145,10 @@ class NeuroServer:
         status = self.get_task_status(id)
 
         if status == "SUCCESS":
-            return self.tasks[id]["result"]
+            return self.get_task_result(id)
 
         else:
-            raise Exception(self.tasks[id]["error"])
+            raise Exception(self.get_task_error(id))
 
     def enqueue_lambda(self, task_lambda):
         task_id = self.get_new_task_id()
@@ -198,16 +205,13 @@ class NeuroServer:
 
                 print_safe(tb)
 
-            print_safe("Marking task as done")
             q.task_done()
-            print_safe("MARKED DONE")
+            print_safe("DONE")
 
     def service_queue(self):
         q = self.queue
 
         if not q.empty():
-            print_safe("TASKS FOUND")
-
             self.queue_error = False
             self.queue_servicer = threading.Thread(target=self.work_on_queue_tasks)
             self.queue_servicer.daemon = True
@@ -268,38 +272,25 @@ class NeuroServer:
         # Normalize and clamp min-max range to 0-2
         return max(min((activity - min_range) / (max_range - min_range), 1.0), 0.0)*2.0
 
-    def create_cons(self, cons):
-        for con in cons:
-            self.create_con(con)
+    def create_cons(self, con_group):
 
-    def create_con(self, con):
-        start = np.array(con["from"])
-        end = np.array(con["to"])
-        lengths = end - start
-        arrow_head = end - lengths * 0.05  # Position the arrow head a few percent from end
-        arrow_base = arrow_head - lengths * 0.01
+        # Make this shape from each connection:
+        #
+        #              /|
+        #  pre  ======= | post
+        #              \|
+        #
+        for con_name in con_group["cells"].keys():
+            con = con_group["cells"][con_name][0]
+            start = np.array(con["coords"][0:3])
+            end = np.array(con["coords"][3:6])
+            lengths = end - start
+            syn_cap = start + lengths * 1.01
 
-        start = start.tolist()
-        arrow_base = arrow_base.tolist()
-        arrow_head = arrow_head.tolist()
-        end = end.tolist()
+            con["coords"].extend(syn_cap.tolist())
+            con["radii"].append(2)
 
-        # Set diameters of the arrow
-        start.append(1)
-        arrow_base.append(1)
-        arrow_head.append(3)
-        end.append(0)
-
-        con_path = [{
-            "name": con["name"],
-            "coords": [start, arrow_base,arrow_head, end]
-        }]
-
-        self.create_path(con_path, res_bev = 1, res_u = 1, addCaps = False)
-
-    def make_paths(self, paths, selectable_sections = False):
-        for path in paths:
-            self.create_path(path, selectable_sections)
+        self.visualize_group(con_group)
 
     def visualize_group(self, group):
         group_name = group["name"] + "Group"

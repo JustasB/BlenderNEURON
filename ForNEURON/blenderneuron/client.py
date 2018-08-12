@@ -1,12 +1,19 @@
 import xmlrpclib, threading, time, cPickle, zlib, hashlib
 from math import sqrt
+import collections
 
 class BlenderNEURON(object):
-    def __init__(self, h, ip='127.0.0.1', port='8000'):
-        self.h = h
+    def __init__(self, h=None, ip='127.0.0.1', port='8000'):
+
+        if h is not None:
+            self.h = h
+
+        else:
+            from neuron import h, gui
+            self.h = h
 
         self.IP = ip
-        self.Port = port
+        self.Port = str(port)
         self.client = xmlrpclib.ServerProxy('http://'+ip+':'+port, allow_none=True)
         self.progress_client = xmlrpclib.ServerProxy('http://' + ip + ':' + port)
 
@@ -24,15 +31,16 @@ class BlenderNEURON(object):
         # Example connections:
         # blender.conenctions = [h.NetCon[0], h.NetCon[1]]
         self.connections = []
+        self.connection_data = {}
 
         self.clear_activity()
 
         # Clear previously recorded activity on h.run()
         self.fih = self.h.FInitializeHandler(self.clear_activity)
 
-        self.progressNEURON = self.h.ref('0.0')
-        self.progressBlender = self.h.ref('0.0')
-        self.progressPercent = self.h.ref('0.0')
+        # self.progressNEURON = self.h.ref('0.0')
+        # self.progressBlender = self.h.ref('0.0')
+        # self.progressPercent = self.h.ref('0.0')
 
         self.include_morphology = True
         self.include_connections = True
@@ -40,55 +48,60 @@ class BlenderNEURON(object):
 
         self.show_panel()
 
+        print("")
+        print("-== NEURON python module of BlenderNEURON is ready ==-")
+        print("  It will send commands to Blender at the following address:" + self.IP + ":" + self.Port)
+        print("  If you haven't already, start Blender with BlenderNEURON addon installed")
+        print("  The address on the addon's tab in Blender should match the above IP and Port.")
+        print("")
+        print("  Type: bn.is_blender_ready() to check if connection to Blender can be established.")
+        print("")
+        print("  To visualize a model in Blender: ")
+        print("  1) Load it in NEURON. Graph > Shape plot should show active cell morphology.")
+        print("  2) Click 'Send to Blender' in the GUI panel or type 'bn.to_blender()' in python console.")
+        print("  3) Switch to Blender window to see the model.")
+        print("")
+        print(" Blender basics:")
+        print("   HOME key to zoom out and view the full scene")
+        print("   Mouse wheel - zoom in/out")
+        print("   Hold down and drag mouse middle button - rotate")
+        print("   SHIFT + hold down and drag mouse middle button - pan view")
+        print("   Right click on an object - select the object and see its name")
+        print("   Numpad '.' key - to zoom in on a selected object")
+
+    def to_blender(self):
+        self.enqueue_method("clear")
+        self.send_model()
+        self.enqueue_method('link_objects')
+        self.enqueue_method('show_full_scene')
+        self.enqueue_method('color_by_unique_materials')
+        self.run_method('set_render_params', (0, self.get_num_frames()))
+
+    def refresh(self):
+        self.setup_default_group()
+
+    def get_num_frames(self):
+        max_num_frames_per_ms = max(self.groups[g]["frames_per_ms"] for g in self.groups.keys())
+
+        return max_num_frames_per_ms * self.h.tstop
+
     def show_panel(self):
         self.h.xpanel('BlenderNEURON')
 
         self.h.xcheckbox('Include Cells', (self, 'include_morphology'))
         self.h.xcheckbox('Include Connections', (self, 'include_connections'))
         self.h.xcheckbox('Include Activity', (self, 'include_activity'))
-        self.h.xbutton('Send To Blender', self.send_model_threaded)
 
-        self.h.xlabel('Progress:')
-        self.h.xvarlabel(self.progressNEURON)
-        self.h.xvarlabel(self.progressBlender)
-        self.h.xvarlabel(self.progressPercent)
+        self.h.xbutton('Prepare For Simulation', self.prepare_for_collection)
+        self.h.xbutton('Send To Blender', self.to_blender)
+        self.h.xbutton('Re-Gather Sections', self.refresh)
+
+        # self.h.xlabel('Progress:')
+        # self.h.xvarlabel(self.progressNEURON)
+        # self.h.xvarlabel(self.progressBlender)
+        # self.h.xvarlabel(self.progressPercent)
 
         self.h.xpanel(500, 10)
-    def send_model_threaded(self):
-        self.send_thread = threading.Thread(target=self.send_model)
-        self.send_thread.daemon = True
-
-        self.blender_progress_thread = threading.Thread(target=self.get_blender_progress)
-        self.blender_progress_thread.daemon = True
-
-        # self.progress_client.progress_start()
-        self.send_thread.start()
-        self.blender_progress_thread.start()
-
-        # self.send_thread.join()
-        # self.blender_progress_thread.join()
-    def get_blender_progress(self):
-        def update():
-            sent = self.progress_client.progress_get_total()
-            done = self.progress_client.progress_get_done()
-
-            self.progressNEURON[0] = 'Sent: ' + str(sent)
-            self.progressBlender[0] = 'Completed: ' + str(done)
-
-            if sent > 0:
-                self.progressPercent[0] = ("%.2f" % ((done*1.0)/sent*100))+'%'
-
-            return (sent, done)
-
-        sent, done = update()
-
-        while sent == 0 or sent != done:
-            time.sleep(0.5)
-            sent, done = update()
-
-        sent, done = update()
-
-        return 0
 
     def setup_defaults_if_needed(self):
         if len(self.groups.values()) == 0:
@@ -98,21 +111,49 @@ class BlenderNEURON(object):
             self.setup_default_connections()
 
     def setup_default_connections(self):
-        # Include all connections by default
+        # Include all NetCon connections by default
         self.connections = self.h.NetCon
+
+        # Connections will be rendered as segments connecting cells
+        group =  {
+            'name': "Synapses",
+            'color': [1, 1, 0],
+            'interaction_level': "Group",
+            'color_level': "Group",
+            'as_lines': False,
+            'circular_subdivisions': 4,
+            'segment_subdivisions': 1,
+            'smooth_sections': False,
+            'cells': {}
+        }
+
+        self.connection_data["Synapses"] = group
+
 
     def setup_default_group(self):
         # By default, include all cells ('root sections') in the model
         all_cells = self.h.SectionList()
         all_cells.allroots()
+        root_sections = [cell for cell in all_cells]
 
-        self.create_cell_group("all", [cell for cell in all_cells])
+        if "all" in self.groups:
+            group = self.groups["all"]
 
-    def create_cell_group(self, name, cells):
+            # If group already exists, clear out previous section data
+            group["cells"] = root_sections
+            group["3d_data"]["cells"] = {}
+            group['collection_times'] = []
+            group['collected_activity'] = {}
+
+        else:
+            self.create_cell_group("all", root_sections)
+
+    def create_cell_group(self, name, cells, options=None):
 
         # Adjust level of detail based on cell count
         level = self.get_detail_level(len(cells))
 
+        # Create group based on default settings
         group = {
             'cells': cells,
             'collect_activity': True,
@@ -130,18 +171,25 @@ class BlenderNEURON(object):
                 'circular_subdivisions': 12,
                 'smooth_sections': True,
                 'cells': {}
-            }
+            },
+            'collection_times': [],
+            'collected_activity': {},
         }
 
+        # Set any custom options for the group
+        BlenderNEURON.update_group(group, options)
+
         # TODO: Segment level interaction is not supported
-        if level == 'Segment':
+        if group['3d_data']['interaction_level'] == 'Segment':
             group['3d_data']['interaction_level'] = 'Section'
 
+        # Create collectors, if collecting activity for the group
         self.create_collector(group)
 
         self.groups[name] = group
 
         return group
+
 
     def get_detail_level(self, cell_count):
         if cell_count <= 5:
@@ -166,27 +214,29 @@ class BlenderNEURON(object):
 
             group["collector_stim"] = collector_stim
             group["collector_con"] = collector_con
-            group["collection_times"] = []
-            group["collected_activity"] = {}
 
 
     def prepare_for_collection(self):
         self.setup_defaults_if_needed()
 
     def run_method(self, name, *args, **kwargs):
-        self.client.run_method(name, args, kwargs)
+        return self.client.run_method(name, args, kwargs)
 
     def enqueue_method(self, name, *args, **kwargs):
         self.client.enqueue_method(name, args, kwargs)
 
     def run_command(self, command_string):
-        self.client.run_command(command_string)
+        return self.client.run_command(command_string)
 
     def enqueue_command(self, command_string):
         self.client.enqueue_command(command_string)
 
     def send_model(self):
-        self.is_blender_ready()
+        if not self.is_blender_ready():
+            raise Exception(
+                "Is Blender running and BlenderNEURON addon active? "
+                "Could not communicate with Blender on " + self.IP + ":" + self.Port
+            )
 
         self.setup_defaults_if_needed()
 
@@ -205,9 +255,9 @@ class BlenderNEURON(object):
     def is_blender_ready(self):
         try:
             self.client.ping()
+            return True
         except:
-            raise Exception(
-                "Is Blender running and BlenderNEURON addon active? Could not communicate with Blender on " + self.IP + ":" + self.Port)
+            return False
 
     def send_morphology(self):
         for group in self.groups.values():
@@ -377,7 +427,7 @@ class BlenderNEURON(object):
             value = value / len(group["cells"])
 
             activity = group["collected_activity"]
-            name = group["name"] + "Group"
+            name = group_name + "Group"
 
             if name not in activity:
                 activity[name] = []
@@ -414,7 +464,7 @@ class BlenderNEURON(object):
         if recursive:
             name = self.shorten_name_if_needed(section.name())
         else:
-            name = section.cell().name()
+            name = str(section.cell())
 
         value = getattr(section(0.5), variable)
 
@@ -467,7 +517,7 @@ class BlenderNEURON(object):
 
     def send_cons(self):
 
-        cons = []
+        cons = {}
 
         for i, con in enumerate(self.connections):
             pre = con.pre()
@@ -504,13 +554,15 @@ class BlenderNEURON(object):
             post_seg = post.get_segment()
             post_pos = self.get_coords_along_sec(post_seg.sec, post_seg.x)
 
-            cons.append({
-                "name":"NetCon["+str(i)+"]",
-                "from":pre_pos,
-                "to": post_pos
-            })
+            cons["NetCon["+str(i)+"]"] = [{
+                "name": "NetCon["+str(i)+"]",
+                "coords": pre_pos + post_pos,
+                "radii": [1,1]
+            }]
 
-        self.enqueue_method("create_cons", cons)
+        self.connection_data["Synapses"]["cells"] = cons
+
+        self.enqueue_method("create_cons", self.connection_data["Synapses"])
 
     def get_coords_along_sec(self, section, along):
         coord_count = self.h.n3d(sec=section)
@@ -571,3 +623,20 @@ class BlenderNEURON(object):
         else:
             results = [points[0], points[-1]]
         return results
+
+    @staticmethod
+    def update_group(group, options):
+        if options is None:
+            return group
+
+        d = group
+        u = options
+
+        for k, v in u.iteritems():
+            if isinstance(v, collections.Mapping):
+                d[k] = update(d.get(k, {}), v)
+
+            else:
+                d[k] = v
+
+        return d
