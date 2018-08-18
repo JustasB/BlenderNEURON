@@ -1,5 +1,5 @@
-import sys, threading;
-from neuroserver import NeuroServer
+import os, sys, threading;
+from blender_neuron.blender_neuron.server import NeuroServer
 
 import bpy, threading
 from bpy.app.handlers import persistent
@@ -132,6 +132,8 @@ def register():
 
 
 def unregister():
+    bpy.ops.wm.neuron_server_stop_operator()
+
     bpy.utils.unregister_class(NEURONServerStartOperator)
     bpy.utils.unregister_class(NEURONBlenderPanel)
     bpy.utils.unregister_class(NEURONLinkObjectsOperator)
