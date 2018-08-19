@@ -1,1 +1,3 @@
-include:             ["docs/_static"]
+include:
+  - _sources
+  - _static
