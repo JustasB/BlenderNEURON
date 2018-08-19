@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = BlenderNEURON
-SOURCEDIR     = .
-BUILDDIR      = _build
+SOURCEDIR     = source
+BUILDDIR      = ..
 
 # Put it first so that "make" without argument is like "make help".
 help:
