@@ -1,18 +1,14 @@
+# Run all tests with 'python client.py'
+# Run single test with: 'python client.py TestMorphologyExport.test_ping'
+
 import unittest
-
-# Example assertions:
-# self.assertEqual('foo'.upper(), 'FOO')
-# self.assertTrue('FOO'.isupper())
-# self.assertFalse('Foo'.isupper())
-
-# with self.assertRaises(TypeError):
-#     s.split(2)
 
 import os, sys
 from multiprocessing import Process
 from time import sleep
 from unittest import TestCase
 
+# Start from the parent dir
 sys.path.append("..")
 
 class Blender:
@@ -162,9 +158,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender():
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
-
                 from neuron import h
                 h.load_file('TestCell.hoc')
                 tc1 = h.TestCell()
@@ -199,8 +192,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender():
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -239,8 +230,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -279,8 +268,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -320,8 +307,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -358,8 +343,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -400,8 +383,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -442,8 +423,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -485,8 +464,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -524,8 +501,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -566,8 +541,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -608,8 +581,6 @@ class TestMorphologyExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')
@@ -652,8 +623,6 @@ class TestConnectionExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
 
@@ -680,8 +649,6 @@ class TestActivityExport(BlenderTestCase):
             from blenderneuron.quick import bn
 
             with Blender(keep=False):
-                import pydevd
-                pydevd.settrace('192.168.0.34', port=4200, suspend=False)
 
                 from neuron import h
                 h.load_file('TestCell.hoc')

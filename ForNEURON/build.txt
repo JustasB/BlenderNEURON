@@ -1,0 +1,11 @@
+To Build BlenderNEURON client:
+
+-Cd into ForNEURON
+-Change version in setup.py
+-Run: 'python setup.py test' and check that all tests pass
+-Run: 'python setup.py sdist bdist_wheel' this will compile the wheels/tarballs
+-Run: 'twine upload dist/*' and use pypi.org creds to upload
+-View project on: https://pypi.org/project/blenderneuron
+-Install an updated version with: 'pip install blenderneuron --no-cache-dir'
+-
+

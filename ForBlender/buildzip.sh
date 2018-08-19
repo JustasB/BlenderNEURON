@@ -1,0 +1,1 @@
+zip -R blender_neuron_v$1.zip '__init__.py' '*.pyd' '*.so'

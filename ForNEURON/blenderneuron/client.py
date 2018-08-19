@@ -41,6 +41,7 @@ class BlenderNEURON(object):
         # self.progressNEURON = self.h.ref('0.0')
         # self.progressBlender = self.h.ref('0.0')
         # self.progressPercent = self.h.ref('0.0')
+        self.connectionStatus = self.h.ref('---')
 
         self.include_morphology = True
         self.include_connections = True
@@ -54,12 +55,21 @@ class BlenderNEURON(object):
         print("  If you haven't already, start Blender with BlenderNEURON addon installed")
         print("  The address on the addon's tab in Blender should match the above IP and Port.")
         print("")
-        print("  Type: bn.is_blender_ready() to check if connection to Blender can be established.")
+        print("  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.")
         print("")
         print("  To visualize a model in Blender: ")
         print("  1) Load it in NEURON. Graph > Shape plot should show active cell morphology.")
         print("  2) Click 'Send to Blender' in the GUI panel or type 'bn.to_blender()' in python console.")
         print("  3) Switch to Blender window to see the model.")
+        print("")
+        print("  To visualize activity: ")
+        print("  1) Load model in NEURON")
+        print("  2) Click 'Prepare for Simulation'. During simulation, this will save compartment activity to be sent to Blender.")
+        print("  3) Run simulation (e.g. 'h.run()')")
+        print("  4) Click 'Send to Blender' ")
+        print("  5) Switch to Blender window to see the model.")
+        print("")
+        print("  If you add cells or make changes to morphology, click 'Re-Gather Sections before 'Send'ing or 'Prepare'ing.")
         print("")
         print(" Blender basics:")
         print("   HOME key to zoom out and view the full scene")
@@ -68,6 +78,9 @@ class BlenderNEURON(object):
         print("   SHIFT + hold down and drag mouse middle button - pan view")
         print("   Right click on an object - select the object and see its name")
         print("   Numpad '.' key - to zoom in on a selected object")
+        print("")
+        print("   There are many great Blender tutorials online. ")
+        print("   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98")
 
     def to_blender(self):
         self.enqueue_method("clear")
@@ -91,10 +104,15 @@ class BlenderNEURON(object):
         self.h.xcheckbox('Include Cells', (self, 'include_morphology'))
         self.h.xcheckbox('Include Connections', (self, 'include_connections'))
         self.h.xcheckbox('Include Activity', (self, 'include_activity'))
-
+        self.h.xlabel(" ")
         self.h.xbutton('Prepare For Simulation', self.prepare_for_collection)
         self.h.xbutton('Send To Blender', self.to_blender)
+        self.h.xlabel(" ")
         self.h.xbutton('Re-Gather Sections', self.refresh)
+        self.h.xlabel(" ")
+        self.h.xlabel("Connection status:")
+        self.h.xvarlabel(self.connectionStatus)
+        self.h.xbutton('Test Connection', self.is_blender_ready)
 
         # self.h.xlabel('Progress:')
         # self.h.xvarlabel(self.progressNEURON)
@@ -255,8 +273,10 @@ class BlenderNEURON(object):
     def is_blender_ready(self):
         try:
             self.client.ping()
+            self.connectionStatus[0] = 'Ready'
             return True
         except:
+            self.connectionStatus[0] = 'Not Connected'
             return False
 
     def send_morphology(self):
@@ -293,7 +313,7 @@ class BlenderNEURON(object):
         result = name
 
         # Blender names must be <64 characters long
-        # If section name is too long, will truncate the string and replace it with a MD5 hash
+        # If section name is too long, will truncate the string and replace it with an MD5 hash
         # There must also be enough room for segment materials (here we allow for up to 99,999 segments/materials per section)
         # 63 max, with two for []s and 5 for segment id = 56
         if len(result) > max_length:
@@ -511,9 +531,9 @@ class BlenderNEURON(object):
         return zip(*reduced)
 
     def clear_activity(self):
-        self.activity = {}
-        self.collection_times = []
-
+        for group in self.groups.values():
+            group['collection_times'] = []
+            group['collected_activity'] = {}
 
     def send_cons(self):
 

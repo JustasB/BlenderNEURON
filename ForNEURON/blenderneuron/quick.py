@@ -1,3 +1,3 @@
-from client import BlenderNEURON
+from blenderneuron.client import BlenderNEURON
 
 bn = BlenderNEURON()
