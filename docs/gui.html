@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Visualizing Using the GUI &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Visualizing Using Python Commands" href="python.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualizing Using the GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#visualizing-morphology">Visualizing Morphology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualizing-activity">Visualizing Activity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Visualizing Using the GUI</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/gui.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="visualizing-using-the-gui">
+<h1>Visualizing Using the GUI<a class="headerlink" href="#visualizing-using-the-gui" title="Permalink to this headline">¶</a></h1>
+<p>For all of these tasks, make sure you have done the following:</p>
+<ol class="arabic simple">
+<li>Load your model in NEURON</li>
+<li>Load BlenderNEURON in NEURON (by either opening the BlenderNEURON.hoc file or running <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">blenderneuron.quick</span> <span class="pre">import</span> <span class="pre">bn</span></code>)</li>
+<li>Load Blender with the BlenderNEURON add-on (NEURON tab should be visible in Blender left panel)</li>
+<li>Test the connectivity between NEURON and Blender (Should say “Ready”)</li>
+</ol>
+<p>See <a class="reference external" href="installation.html">Installation</a> for how to perform steps 2-4.</p>
+<div class="section" id="visualizing-morphology">
+<h2>Visualizing Morphology<a class="headerlink" href="#visualizing-morphology" title="Permalink to this headline">¶</a></h2>
+<p>Follow these steps to visualize the cell morphology of a NEURON model:</p>
+<ol class="arabic simple">
+<li>Once your model is loaded, click “Send to Blender” button</li>
+<li>A moment later, your model should appear in Blender</li>
+<li>Navigate around the Blender scene to inspect the model. If you’re not familiar with Blender, <a class="reference external" href="https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98">these tutorials</a> will give an overview of basic scene navigation.</li>
+</ol>
+<p>By default, BlenderNEURON will export the morphology of all cells (sections) in the model. It will use NEURON’s x/y/z3d() and diam3d() values to build the 3D meshes in Blender.</p>
+<p>If you add or make changes to your model’s sections/cells, click the “Re-Gather Sections” before clicking “Send to Blender” to ensure that they are included in the export.</p>
+</div>
+<div class="section" id="visualizing-activity">
+<h2>Visualizing Activity<a class="headerlink" href="#visualizing-activity" title="Permalink to this headline">¶</a></h2>
+<p>Follow these steps to visualize the morphology and simulated activity of a NEURON model:</p>
+<ol class="arabic simple">
+<li>Once your model is loaded, click “Prepare For Simulation” button. This will add a handler to gather section voltage values during the simulation.</li>
+<li>Run your simulation</li>
+<li>Once the simulation is finished, click the “Send to Blender” button</li>
+<li>A moment later, your model should appear in Blender</li>
+<li>Use the buttons under the bottom timeline in Blender to re-play the simulation. If your cells emit action potentials (Vm &gt; -20mV), you should be able to see them as glowing compartments. By default, 1 frame in Blender corresponds to 0.5ms in NEURON and 1 distance unit in Blender corresponds to 1 micron in NEURON.</li>
+<li>You can scrub the timeline to re-play any part of the simulation and use the left/right arrow keys to step through the frames.</li>
+</ol>
+<img alt="_images/timeline.JPG" src="_images/timeline.JPG" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="python.html" class="btn btn-neutral float-right" title="Visualizing Using Python Commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

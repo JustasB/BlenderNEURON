@@ -1,20 +1,16 @@
-.. BlenderNEURON documentation master file, created by
-   sphinx-quickstart on Sun Aug 19 09:57:11 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to BlenderNEURON's documentation!
+BlenderNEURON Documentation
 =========================================
+
+.. image:: files_static/logo.png
+
+Welcome to BlenderNEURON documentation. To get started, please follow the sections below.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
+   introduction
+   requirements
+   installation
+   gui
+   python
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

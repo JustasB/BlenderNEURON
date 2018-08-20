@@ -1,4 +1,9 @@
-import xmlrpclib, threading, time, cPickle, zlib, hashlib
+try:
+    import xmlrpclib
+except:
+    import xmlrpc.client as xmlrpclib
+
+import threading, time, hashlib
 from math import sqrt
 import collections
 

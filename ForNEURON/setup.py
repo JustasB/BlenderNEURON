@@ -4,7 +4,7 @@ with open('README.txt') as file:
     long_description = file.read()
 
 setup(name='blenderneuron',
-      version='0.1.4',
+      version='0.1.5',
       description='Interface for Blender <-> NEURON',
       long_description=long_description,
       author='Justas Birgiolas',
