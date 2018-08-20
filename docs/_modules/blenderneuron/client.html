@@ -1,0 +1,873 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blenderneuron.client &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gui.html">Visualizing Using the GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python.html">Visualizing Using Python Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">Client Library API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>blenderneuron.client</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blenderneuron.client</h1><div class="highlight"><pre>
+<span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpclib</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpc.client</span> <span class="k">as</span> <span class="nn">xmlrpclib</span>
+
+<span class="kn">import</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<div class="viewcode-block" id="BlenderNEURON"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON">[docs]</a><span class="k">class</span> <span class="nc">BlenderNEURON</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;8000&#39;</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">h</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">neuron</span> <span class="k">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">gui</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">h</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">=</span> <span class="n">ip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">ServerProxy</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span><span class="o">+</span><span class="n">ip</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">port</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_client</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">ServerProxy</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span> <span class="o">+</span> <span class="n">ip</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">port</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity_simplification_tolerance</span> <span class="o">=</span> <span class="mf">0.32</span> <span class="c1"># mV</span>
+
+        <span class="c1"># Example groups:</span>
+        <span class="c1"># blender.groups = {</span>
+        <span class="c1"># 	&quot;earth&quot;: {     cells: [h.Cell[0].soma],    color_level = &#39;Segment&#39;, interaction_level = &#39;Segment&#39;, collection_period_ms = 0.1, res_u, res_v, as_lines, color, smooth_sections},</span>
+        <span class="c1"># 	&quot;pluto&quot;: {     cells: [root2,3,4],         color_level = &#39;Section&#39;, interaction_level = &#39;Section&#39;, collection_period_ms = 1},</span>
+        <span class="c1"># 	&quot;alphaC&quot;: {    cells: [root5,6,7,8,9,10],  color_level = &#39;Cell&#39;,    interaction_level = &#39;Cell&#39;,    collection_period_ms = 3},</span>
+        <span class="c1"># 	&quot;andromeda&quot;: { cells: [root11-1000],       color_level = &#39;Group&#39;,   interaction_level = &#39;Group&#39;,   collection_period_ms = 5}</span>
+        <span class="c1"># }</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Example connections:</span>
+        <span class="c1"># blender.conenctions = [h.NetCon[0], h.NetCon[1]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_activity</span><span class="p">()</span>
+
+        <span class="c1"># Clear previously recorded activity on h.run()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fih</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">FInitializeHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clear_activity</span><span class="p">)</span>
+
+        <span class="c1"># self.progressNEURON = self.h.ref(&#39;0.0&#39;)</span>
+        <span class="c1"># self.progressBlender = self.h.ref(&#39;0.0&#39;)</span>
+        <span class="c1"># self.progressPercent = self.h.ref(&#39;0.0&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="s1">&#39;---&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_morphology</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_connections</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_activity</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_panel</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-== NEURON python module of BlenderNEURON is ready ==-&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  It will send commands to Blender at the following address:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Port</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you haven&#39;t already, start Blender with BlenderNEURON addon installed&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  The address on the addon&#39;s tab in Blender should match the above IP and Port.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize a model in Blender: &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load it in NEURON. Graph &gt; Shape plot should show active cell morphology.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Send to Blender&#39; in the GUI panel or type &#39;bn.to_blender()&#39; in python console.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize activity: &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load model in NEURON&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Prepare for Simulation&#39;. During simulation, this will save compartment activity to be sent to Blender.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Run simulation (e.g. &#39;h.run()&#39;)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  4) Click &#39;Send to Blender&#39; &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  5) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you add cells or make changes to morphology, click &#39;Re-Gather Sections before &#39;Send&#39;ing or &#39;Prepare&#39;ing.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Blender basics:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   HOME key to zoom out and view the full scene&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Mouse wheel - zoom in/out&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Hold down and drag mouse middle button - rotate&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   SHIFT + hold down and drag mouse middle button - pan view&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Right click on an object - select the object and see its name&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Numpad &#39;.&#39; key - to zoom in on a selected object&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   There are many great Blender tutorials online. &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BlenderNEURON.to_blender"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.to_blender">[docs]</a>    <span class="k">def</span> <span class="nf">to_blender</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;clear&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;link_objects&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;show_full_scene&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;color_by_unique_materials&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_method</span><span class="p">(</span><span class="s1">&#39;set_render_params&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_num_frames</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.refresh"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.get_num_frames"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_num_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">max_num_frames_per_ms</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">g</span><span class="p">][</span><span class="s2">&quot;frames_per_ms&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">max_num_frames_per_ms</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">tstop</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.show_panel"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.show_panel">[docs]</a>    <span class="k">def</span> <span class="nf">show_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xpanel</span><span class="p">(</span><span class="s1">&#39;BlenderNEURON&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xcheckbox</span><span class="p">(</span><span class="s1">&#39;Include Cells&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;include_morphology&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xcheckbox</span><span class="p">(</span><span class="s1">&#39;Include Connections&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;include_connections&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xcheckbox</span><span class="p">(</span><span class="s1">&#39;Include Activity&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;include_activity&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xbutton</span><span class="p">(</span><span class="s1">&#39;Prepare For Simulation&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_for_collection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xbutton</span><span class="p">(</span><span class="s1">&#39;Send To Blender&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_blender</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xbutton</span><span class="p">(</span><span class="s1">&#39;Re-Gather Sections&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Connection status:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xvarlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xbutton</span><span class="p">(</span><span class="s1">&#39;Test Connection&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_blender_ready</span><span class="p">)</span>
+
+        <span class="c1"># self.h.xlabel(&#39;Progress:&#39;)</span>
+        <span class="c1"># self.h.xvarlabel(self.progressNEURON)</span>
+        <span class="c1"># self.h.xvarlabel(self.progressBlender)</span>
+        <span class="c1"># self.h.xvarlabel(self.progressPercent)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xpanel</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.setup_defaults_if_needed"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_defaults_if_needed">[docs]</a>    <span class="k">def</span> <span class="nf">setup_defaults_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_connections</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.setup_default_connections"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_default_connections">[docs]</a>    <span class="k">def</span> <span class="nf">setup_default_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Include all NetCon connections by default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">NetCon</span>
+
+        <span class="c1"># Connections will be rendered as segments connecting cells</span>
+        <span class="n">group</span> <span class="o">=</span>  <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Synapses&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;interaction_level&#39;</span><span class="p">:</span> <span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;color_level&#39;</span><span class="p">:</span> <span class="s2">&quot;Group&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;as_lines&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;circular_subdivisions&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;segment_subdivisions&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;smooth_sections&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;cells&#39;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_data</span><span class="p">[</span><span class="s2">&quot;Synapses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span></div>
+
+
+<div class="viewcode-block" id="BlenderNEURON.setup_default_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_default_group">[docs]</a>    <span class="k">def</span> <span class="nf">setup_default_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># By default, include all cells (&#39;root sections&#39;) in the model</span>
+        <span class="n">all_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">()</span>
+        <span class="n">all_cells</span><span class="o">.</span><span class="n">allroots</span><span class="p">()</span>
+        <span class="n">root_sections</span> <span class="o">=</span> <span class="p">[</span><span class="n">cell</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">all_cells</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;all&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">]</span>
+
+            <span class="c1"># If group already exists, clear out previous section data</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_sections</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;3d_data&quot;</span><span class="p">][</span><span class="s2">&quot;cells&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collection_times&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collected_activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_cell_group</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">root_sections</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.create_cell_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.create_cell_group">[docs]</a>    <span class="k">def</span> <span class="nf">create_cell_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Adjust level of detail based on cell count</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_detail_level</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>
+
+        <span class="c1"># Create group based on default settings</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;cells&#39;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span>
+            <span class="s1">&#39;collect_activity&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;collect_variable&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;collection_period_ms&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;frames_per_ms&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+            <span class="s1">&#39;spherize_soma_if_DeqL&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;3d_data&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="s1">&#39;interaction_level&#39;</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+                <span class="s1">&#39;color_level&#39;</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+                <span class="s1">&#39;as_lines&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;segment_subdivisions&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s1">&#39;circular_subdivisions&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="s1">&#39;smooth_sections&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;cells&#39;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;collection_times&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;collected_activity&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Set any custom options for the group</span>
+        <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">update_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Segment level interaction is not supported</span>
+        <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;interaction_level&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Segment&#39;</span><span class="p">:</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;interaction_level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Section&#39;</span>
+
+        <span class="c1"># Create collectors, if collecting activity for the group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_collector</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+
+        <span class="k">return</span> <span class="n">group</span></div>
+
+
+<div class="viewcode-block" id="BlenderNEURON.get_detail_level"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_detail_level">[docs]</a>    <span class="k">def</span> <span class="nf">get_detail_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cell_count</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Segment&#39;</span>
+        <span class="k">elif</span> <span class="n">cell_count</span> <span class="o">&lt;=</span> <span class="mi">25</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Section&#39;</span>
+        <span class="k">elif</span> <span class="n">cell_count</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Cell&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Group&#39;</span>
+        <span class="k">return</span> <span class="n">level</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.create_collector"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.create_collector">[docs]</a>    <span class="k">def</span> <span class="nf">create_collector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collect_activity&#39;</span><span class="p">]:</span>
+            <span class="n">collector_stim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">NetStim</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collection_period_ms&#39;</span><span class="p">]</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mf">1e9</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">collector_con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span><span class="n">collector_stim</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">collector_con</span><span class="o">.</span><span class="n">record</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">collect_group</span><span class="p">,</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span>
+
+            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collector_stim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collector_stim</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collector_con&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collector_con</span></div>
+
+
+<div class="viewcode-block" id="BlenderNEURON.prepare_for_collection"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.prepare_for_collection">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_for_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_defaults_if_needed</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.run_method"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.run_method">[docs]</a>    <span class="k">def</span> <span class="nf">run_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_method</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.enqueue_method"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.enqueue_method">[docs]</a>    <span class="k">def</span> <span class="nf">enqueue_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.run_command"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.run_command">[docs]</a>    <span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.enqueue_command"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.enqueue_command">[docs]</a>    <span class="k">def</span> <span class="nf">enqueue_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">enqueue_command</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.send_model"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_model">[docs]</a>    <span class="k">def</span> <span class="nf">send_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_blender_ready</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Is Blender running and BlenderNEURON addon active? &quot;</span>
+                <span class="s2">&quot;Could not communicate with Blender on &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Port</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_defaults_if_needed</span><span class="p">()</span>
+
+        <span class="c1"># Remove any previous model objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;clear&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_morphology</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_morphology</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_connections</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_cons</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_activity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_activity</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.is_blender_ready"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.is_blender_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_blender_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Ready&#39;</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Not Connected&#39;</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.send_morphology"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_morphology">[docs]</a>    <span class="k">def</span> <span class="nf">send_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gather_group_coords</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_group</span><span class="p">(</span><span class="n">group</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.gather_group_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.gather_group_coords">[docs]</a>    <span class="k">def</span> <span class="nf">gather_group_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">cell_data</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;cells&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">spherize</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;spherize_soma_if_DeqL&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+            <span class="n">cell_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">cell</span><span class="p">()</span><span class="o">.</span><span class="n">hname</span><span class="p">()</span> <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">cell</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+            <span class="n">cell_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_coords</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">spherize_if_DeqL</span><span class="o">=</span><span class="n">spherize</span><span class="p">)</span>
+
+            <span class="c1"># Account for a cell having multiple roots</span>
+            <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">in</span> <span class="n">cell_data</span><span class="p">:</span>
+                <span class="n">cell_data</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cell_coords</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cell_data</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_coords</span></div>
+
+
+<div class="viewcode-block" id="BlenderNEURON.get_coord_count"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_coord_count">[docs]</a>    <span class="k">def</span> <span class="nf">get_coord_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">):</span>
+        <span class="n">coord_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">))</span>
+
+        <span class="c1"># Let NEURON create them if missing</span>
+        <span class="k">if</span> <span class="n">coord_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">define_shape</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">coord_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">coord_count</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.shorten_name_if_needed"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.shorten_name_if_needed">[docs]</a>    <span class="k">def</span> <span class="nf">shorten_name_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">56</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="c1"># Blender names must be &lt;64 characters long</span>
+        <span class="c1"># If section name is too long, will truncate the string and replace it with an MD5 hash</span>
+        <span class="c1"># There must also be enough room for segment materials (here we allow for up to 99,999 segments/materials per section)</span>
+        <span class="c1"># 63 max, with two for []s and 5 for segment id = 56</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">[:</span><span class="n">max_length</span><span class="o">-</span><span class="mi">17</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">16</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.get_cell_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_cell_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_cell_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spherize_if_DeqL</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># Determine how many 3d points the section has</span>
+        <span class="n">coord_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coord_count</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+
+        <span class="c1"># Collect the coordinates</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">coord_count</span><span class="o">*</span><span class="mi">3</span>
+        <span class="n">radii</span> <span class="o">=</span>  <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">coord_count</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">coord_count</span><span class="p">):</span>
+            <span class="n">ci</span> <span class="o">=</span> <span class="n">c</span><span class="o">*</span><span class="mi">3</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">ci</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">ci</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+
+            <span class="n">radii</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">diam3d</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">sec_coords</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorten_name_if_needed</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">()),</span>
+            <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">coords</span><span class="p">,</span>
+            <span class="s2">&quot;radii&quot;</span><span class="p">:</span> <span class="n">radii</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Create spherical intermediate points if spherizing</span>
+        <span class="k">if</span> <span class="n">spherize_if_DeqL</span> <span class="ow">and</span> \
+            <span class="s2">&quot;soma&quot;</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> \
+                 <span class="nb">abs</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">diam</span> <span class="o">-</span> <span class="n">section</span><span class="o">.</span><span class="n">L</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spherize_coords</span><span class="p">(</span><span class="n">sec_coords</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sec_coords</span><span class="p">)</span>
+
+        <span class="n">children</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">children</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_coords</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">spherize_if_DeqL</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.spherize_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.spherize_coords">[docs]</a>    <span class="k">def</span> <span class="nf">spherize_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sec_coords</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+        <span class="c1"># Remove intermediate, co-linear points</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">range_x</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span>
+        <span class="n">range_y</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span>
+        <span class="n">range_z</span> <span class="o">=</span> <span class="n">z2</span> <span class="o">-</span> <span class="n">z1</span>
+
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Length and diameter are same, so spherize the cylinder</span>
+        <span class="c1"># by adding intermediate, spherical diameter points</span>
+        <span class="n">step_size</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="p">(</span><span class="n">steps</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+            <span class="n">dist_from_start</span> <span class="o">=</span> <span class="n">step_size</span> <span class="o">+</span> <span class="n">step</span><span class="o">*</span><span class="n">step_size</span>
+            <span class="n">dist_to_center</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">radius</span><span class="o">-</span><span class="n">dist_from_start</span><span class="p">)</span>
+            <span class="n">step_radius</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">radius</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">dist_to_center</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">fraction_along</span> <span class="o">=</span> <span class="n">dist_from_start</span> <span class="o">/</span> <span class="n">length</span>
+            <span class="n">step_x</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">range_x</span> <span class="o">*</span> <span class="n">fraction_along</span>
+            <span class="n">step_y</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">+</span> <span class="n">range_y</span> <span class="o">*</span> <span class="n">fraction_along</span>
+            <span class="n">step_z</span> <span class="o">=</span> <span class="n">z1</span> <span class="o">+</span> <span class="n">range_z</span> <span class="o">*</span> <span class="n">fraction_along</span>
+
+            <span class="n">pt_idx</span> <span class="o">=</span> <span class="n">step</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="n">pt_idx</span><span class="o">*</span><span class="mi">3</span><span class="p">:</span><span class="n">pt_idx</span><span class="o">*</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">step_x</span><span class="p">,</span> <span class="n">step_y</span><span class="p">,</span> <span class="n">step_z</span><span class="p">]</span>
+            <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pt_idx</span><span class="p">,</span> <span class="n">step_radius</span><span class="p">)</span>
+
+        <span class="c1"># Set the first and last points to 0 diam</span>
+        <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;spherical&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.send_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_group">[docs]</a>    <span class="k">def</span> <span class="nf">send_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">]</span>
+        <span class="c1"># data = cPickle.dumps(data)</span>
+        <span class="c1"># data = zlib.compress(data)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;visualize_group&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BlenderNEURON.collect_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_group">[docs]</a>    <span class="k">def</span> <span class="nf">collect_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">):</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span>
+        <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collection_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s2">&quot;color_level&quot;</span><span class="p">]</span>
+
+        <span class="c1">#level = &quot;Cell&quot;</span>
+
+        <span class="c1"># Recursively record from every segment of each section of each cell</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;Segment&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">collect_segments_recursive</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+
+        <span class="c1"># Recursively record from the middle of each section of each cell</span>
+        <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;Section&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">collect_section</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Record from the middle of somas of each cell</span>
+        <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;Cell&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">collect_section</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Record from the somas of each cell and compute their mean</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collect_variable&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Compute the mean of group cell somas</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">soma</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">soma</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">variable</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">])</span>
+
+            <span class="n">activity</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">group_name</span> <span class="o">+</span> <span class="s2">&quot;Group&quot;</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">activity</span><span class="p">:</span>
+                <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.collect_segments_recursive"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_segments_recursive">[docs]</a>    <span class="k">def</span> <span class="nf">collect_segments_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">coordCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coord_count</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
+        <span class="n">variable</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collect_variable&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">coordCount</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorten_name_if_needed</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+
+            <span class="n">startL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">arc3d</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">endL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">arc3d</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">vectorPos</span> <span class="o">=</span> <span class="p">(</span><span class="n">endL</span> <span class="o">+</span> <span class="n">startL</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">section</span><span class="o">.</span><span class="n">L</span>
+
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">section</span><span class="p">(</span><span class="n">vectorPos</span><span class="p">),</span> <span class="n">variable</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">activity</span><span class="p">:</span>
+                <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collect_segments_recursive</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.collect_section"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_section">[docs]</a>    <span class="k">def</span> <span class="nf">collect_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">activity</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
+        <span class="n">variable</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collect_variable&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorten_name_if_needed</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">cell</span><span class="p">())</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">section</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">variable</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">activity</span><span class="p">:</span>
+            <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">collect_section</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.send_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_activity">[docs]</a>    <span class="k">def</span> <span class="nf">send_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;collected_activity&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">frames_per_ms</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;frames_per_ms&quot;</span><span class="p">]</span>
+            <span class="n">part_activities</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">part_activities</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collection_times&quot;</span><span class="p">]</span>
+
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+                <span class="c1"># Remove extra co-linear points</span>
+                <span class="n">reduced_times</span><span class="p">,</span> <span class="n">reduced_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simplify_activity</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">part_activities</span><span class="p">[</span><span class="n">part</span><span class="p">])</span>
+
+                <span class="c1"># Scale the times</span>
+                <span class="n">reduced_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">*</span><span class="n">frames_per_ms</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">reduced_times</span><span class="p">]</span>
+
+                <span class="n">payload</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">part</span><span class="p">,</span> <span class="s1">&#39;times&#39;</span><span class="p">:</span><span class="n">reduced_times</span><span class="p">,</span> <span class="s1">&#39;activity&#39;</span><span class="p">:</span><span class="n">reduced_values</span><span class="p">})</span>
+
+                <span class="c1"># Buffered send</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;set_segment_activities&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+                    <span class="n">payload</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;set_segment_activities&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span></div>
+
+    <span class="c1"># TODO: this could benefit from cython</span>
+<div class="viewcode-block" id="BlenderNEURON.simplify_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.simplify_activity">[docs]</a>    <span class="k">def</span> <span class="nf">simplify_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">):</span>
+        <span class="n">reduced</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity_simplification_tolerance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">reduced</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.clear_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.clear_activity">[docs]</a>    <span class="k">def</span> <span class="nf">clear_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collection_times&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collected_activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.send_cons"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_cons">[docs]</a>    <span class="k">def</span> <span class="nf">send_cons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">cons</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">con</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">):</span>
+            <span class="n">pre</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">pre</span><span class="p">()</span>
+            <span class="n">post</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">syn</span><span class="p">()</span>
+
+            <span class="c1"># If source is PointProcess</span>
+            <span class="k">if</span> <span class="n">pre</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># A PointProcess with a segment</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="s2">&quot;get_segment&quot;</span><span class="p">):</span>
+                    <span class="n">pre_seg</span> <span class="o">=</span> <span class="n">pre</span><span class="o">.</span><span class="n">get_segment</span><span class="p">()</span>
+
+                <span class="c1"># Skip if the PP doesn&#39;t have a segment</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pre_loc</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">preloc</span><span class="p">()</span>
+
+                <span class="c1"># If source is a segment</span>
+                <span class="k">if</span> <span class="n">pre_loc</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
+                    <span class="n">pre_seg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">cas</span><span class="p">()(</span><span class="n">pre_loc</span><span class="p">)</span> <span class="c1"># TEST THIS</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">pop_section</span><span class="p">()</span>
+
+                <span class="c1"># Skip if it&#39;s neither a PP nor a segment</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Check if post is a PointProcess on a Section</span>
+            <span class="k">if</span> <span class="n">post</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">&quot;get_segment&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">pre_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_along_sec</span><span class="p">(</span><span class="n">pre_seg</span><span class="o">.</span><span class="n">sec</span><span class="p">,</span> <span class="n">pre_seg</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="n">post_seg</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">get_segment</span><span class="p">()</span>
+            <span class="n">post_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_along_sec</span><span class="p">(</span><span class="n">post_seg</span><span class="o">.</span><span class="n">sec</span><span class="p">,</span> <span class="n">post_seg</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="n">cons</span><span class="p">[</span><span class="s2">&quot;NetCon[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NetCon[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;coords&quot;</span><span class="p">:</span> <span class="n">pre_pos</span> <span class="o">+</span> <span class="n">post_pos</span><span class="p">,</span>
+                <span class="s2">&quot;radii&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">}]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_data</span><span class="p">[</span><span class="s2">&quot;Synapses&quot;</span><span class="p">][</span><span class="s2">&quot;cells&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cons</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;create_cons&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_data</span><span class="p">[</span><span class="s2">&quot;Synapses&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.get_coords_along_sec"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_coords_along_sec">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_along_sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">along</span><span class="p">):</span>
+        <span class="n">coord_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">along_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord_count</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">along</span>
+        <span class="n">start_coord_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">along_coords</span><span class="p">)</span>
+        <span class="n">along_start_coord</span> <span class="o">=</span> <span class="n">along_coords</span> <span class="o">-</span> <span class="n">start_coord_i</span>
+
+        <span class="k">if</span> <span class="n">along_start_coord</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">along_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_along_coord_dim</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">start_coord_i</span><span class="p">,</span> <span class="n">along_start_coord</span><span class="p">)</span>
+            <span class="n">along_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_along_coord_dim</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">start_coord_i</span><span class="p">,</span> <span class="n">along_start_coord</span><span class="p">)</span>
+            <span class="n">along_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_along_coord_dim</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">start_coord_i</span><span class="p">,</span> <span class="n">along_start_coord</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">along_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">start_coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">along_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">start_coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">along_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">start_coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">along_x</span><span class="p">,</span><span class="n">along_y</span><span class="p">,</span><span class="n">along_z</span><span class="p">)</span></div>
+<div class="viewcode-block" id="BlenderNEURON.get_along_coord_dim"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_along_coord_dim">[docs]</a>    <span class="k">def</span> <span class="nf">get_along_coord_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">coord_i</span><span class="p">,</span> <span class="n">along_start_coord</span><span class="p">):</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span><span class="n">dim</span><span class="o">+</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">dim</span><span class="p">(</span><span class="n">coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">dim</span><span class="p">(</span><span class="n">coord_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="n">along</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">along_start_coord</span> <span class="o">*</span> <span class="n">length</span>
+        <span class="k">return</span> <span class="n">along</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.distance"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.distance">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.point_line_distance"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.point_line_distance">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">point_line_distance</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start</span> <span class="o">==</span> <span class="n">end</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span></div>
+
+    <span class="c1"># Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series</span>
+    <span class="c1"># Ramer-Douglas-Peucker algorithm</span>
+    <span class="c1"># Adapted from: https://github.com/sebleier/RDP</span>
+<div class="viewcode-block" id="BlenderNEURON.rdp"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.rdp">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">rdp</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="n">dmax</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">point_line_distance</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">dmax</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">dmax</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="k">if</span> <span class="n">dmax</span> <span class="o">&gt;=</span> <span class="n">epsilon</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="n">points</span><span class="p">[:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">epsilon</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">index</span><span class="p">:],</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="BlenderNEURON.update_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.update_group">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">update_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">group</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">options</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="n">d</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

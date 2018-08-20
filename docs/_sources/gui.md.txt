@@ -22,6 +22,8 @@ Follow these steps to visualize the cell morphology of a NEURON model:
 
 By default, BlenderNEURON will export the morphology of all cells (sections) in the model. It will use NEURON's x/y/z3d() and diam3d() values to build the 3D meshes in Blender.
 
+In BlenderNEURON, 1 cm corresponds to 1 micron in NEURON.
+
 If you add or make changes to your model's sections/cells, click the "Re-Gather Sections" before clicking "Send to Blender" to ensure that they are included in the export. 
 
 ***************************
@@ -34,7 +36,7 @@ Follow these steps to visualize the morphology and simulated activity of a NEURO
 2. Run your simulation
 3. Once the simulation is finished, click the "Send to Blender" button
 4. A moment later, your model should appear in Blender
-5. Use the buttons under the bottom timeline in Blender to re-play the simulation. If your cells emit action potentials (Vm > -20mV), you should be able to see them as glowing compartments. By default, 1 frame in Blender corresponds to 0.5ms in NEURON and 1 distance unit in Blender corresponds to 1 micron in NEURON.
+5. Use the buttons under the bottom timeline in Blender to re-play the simulation. If your cells emit action potentials (Vm > -20mV), you should be able to see them as glowing compartments. By default, 1 frame in Blender corresponds to 0.5ms in NEURON.
 6. You can scrub the timeline to re-play any part of the simulation and use the left/right arrow keys to step through the frames.
 
 .. image:: files_static/timeline.JPG

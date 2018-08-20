@@ -38,4 +38,4 @@ Follow these steps to display a NEURON model and its voltage potential propagati
  2. Install the `BlenderNEURON HOC GUI <installation.html#hoc-install>`_ or `Python library <installation.html#python-install>`_
  3. Install the `Blender Addon <installation.html#blender-addon-installation>`_
  4. Load your model in NEURON
- 5. Load the `BlenderNEURON GUI <gui.html>`_ or `Python module <python.html>`_, and use them to export the model to Blender
+ 5. Load the `BlenderNEURON GUI <gui.html>`_ or `Python module <python.html>`_, and use them to export the model to Blender.

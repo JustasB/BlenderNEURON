@@ -14,3 +14,11 @@ Welcome to BlenderNEURON documentation. To get started, please follow the sectio
    gui
    python
 
+   client
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

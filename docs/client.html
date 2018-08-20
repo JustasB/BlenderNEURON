@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Client Library API &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Visualizing Using Python Commands" href="python.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Client Library API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Client Library API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/client.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-blenderneuron.client">
+<span id="client-library-api"></span><h1>Client Library API<a class="headerlink" href="#module-blenderneuron.client" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="blenderneuron.client.BlenderNEURON">
+<em class="property">class </em><code class="descclassname">blenderneuron.client.</code><code class="descname">BlenderNEURON</code><span class="sig-paren">(</span><em>h=None</em>, <em>ip='127.0.0.1'</em>, <em>port='8000'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.clear_activity">
+<code class="descname">clear_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.clear_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.clear_activity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.collect_group">
+<code class="descname">collect_group</code><span class="sig-paren">(</span><em>group_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.collect_section">
+<code class="descname">collect_section</code><span class="sig-paren">(</span><em>section</em>, <em>group</em>, <em>recursive=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.collect_segments_recursive">
+<code class="descname">collect_segments_recursive</code><span class="sig-paren">(</span><em>section</em>, <em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_segments_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_segments_recursive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.create_cell_group">
+<code class="descname">create_cell_group</code><span class="sig-paren">(</span><em>name</em>, <em>cells</em>, <em>options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.create_cell_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.create_cell_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.create_collector">
+<code class="descname">create_collector</code><span class="sig-paren">(</span><em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.create_collector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.create_collector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="blenderneuron.client.BlenderNEURON.distance">
+<em class="property">static </em><code class="descname">distance</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.enqueue_command">
+<code class="descname">enqueue_command</code><span class="sig-paren">(</span><em>command_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.enqueue_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.enqueue_command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.enqueue_method">
+<code class="descname">enqueue_method</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.enqueue_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.enqueue_method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.gather_group_coords">
+<code class="descname">gather_group_coords</code><span class="sig-paren">(</span><em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.gather_group_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.gather_group_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_along_coord_dim">
+<code class="descname">get_along_coord_dim</code><span class="sig-paren">(</span><em>dim</em>, <em>section</em>, <em>coord_i</em>, <em>along_start_coord</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_along_coord_dim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_along_coord_dim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_cell_coords">
+<code class="descname">get_cell_coords</code><span class="sig-paren">(</span><em>section</em>, <em>result=None</em>, <em>spherize_if_DeqL=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_cell_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_cell_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_coord_count">
+<code class="descname">get_coord_count</code><span class="sig-paren">(</span><em>section</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_coord_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_coord_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_coords_along_sec">
+<code class="descname">get_coords_along_sec</code><span class="sig-paren">(</span><em>section</em>, <em>along</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_coords_along_sec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_coords_along_sec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_detail_level">
+<code class="descname">get_detail_level</code><span class="sig-paren">(</span><em>cell_count</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_detail_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_detail_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.get_num_frames">
+<code class="descname">get_num_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_num_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_num_frames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.is_blender_ready">
+<code class="descname">is_blender_ready</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.is_blender_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.is_blender_ready" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="blenderneuron.client.BlenderNEURON.point_line_distance">
+<em class="property">static </em><code class="descname">point_line_distance</code><span class="sig-paren">(</span><em>point</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.point_line_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.point_line_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.prepare_for_collection">
+<code class="descname">prepare_for_collection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.prepare_for_collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.prepare_for_collection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="blenderneuron.client.BlenderNEURON.rdp">
+<em class="property">static </em><code class="descname">rdp</code><span class="sig-paren">(</span><em>points</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.rdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.rdp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.refresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.run_command">
+<code class="descname">run_command</code><span class="sig-paren">(</span><em>command_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.run_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.run_command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.run_method">
+<code class="descname">run_method</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.run_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.run_method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.send_activity">
+<code class="descname">send_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_activity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.send_cons">
+<code class="descname">send_cons</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_cons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_cons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.send_group">
+<code class="descname">send_group</code><span class="sig-paren">(</span><em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.send_model">
+<code class="descname">send_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.send_morphology">
+<code class="descname">send_morphology</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_morphology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_morphology" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.setup_default_connections">
+<code class="descname">setup_default_connections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.setup_default_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.setup_default_connections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.setup_default_group">
+<code class="descname">setup_default_group</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.setup_default_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.setup_default_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.setup_defaults_if_needed">
+<code class="descname">setup_defaults_if_needed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.setup_defaults_if_needed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.setup_defaults_if_needed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.shorten_name_if_needed">
+<code class="descname">shorten_name_if_needed</code><span class="sig-paren">(</span><em>name</em>, <em>max_length=56</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.shorten_name_if_needed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.shorten_name_if_needed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.show_panel">
+<code class="descname">show_panel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.show_panel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.show_panel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.simplify_activity">
+<code class="descname">simplify_activity</code><span class="sig-paren">(</span><em>times</em>, <em>activity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.simplify_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.simplify_activity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.spherize_coords">
+<code class="descname">spherize_coords</code><span class="sig-paren">(</span><em>sec_coords</em>, <em>length</em>, <em>steps=7</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.spherize_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.spherize_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.to_blender">
+<code class="descname">to_blender</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.to_blender"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.to_blender" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="blenderneuron.client.BlenderNEURON.update_group">
+<em class="property">static </em><code class="descname">update_group</code><span class="sig-paren">(</span><em>group</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.update_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.update_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="python.html" class="btn btn-neutral" title="Visualizing Using Python Commands" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

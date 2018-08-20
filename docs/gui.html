@@ -157,7 +157,7 @@
 <p>For all of these tasks, make sure you have done the following:</p>
 <ol class="arabic simple">
 <li>Load your model in NEURON</li>
-<li>Load BlenderNEURON in NEURON (by either opening the BlenderNEURON.hoc file or running <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">blenderneuron.quick</span> <span class="pre">import</span> <span class="pre">bn</span></code>)</li>
+<li>Load BlenderNEURON in NEURON (by either opening the BlenderNEURON.hoc file or running <code class="docutils literal"><span class="pre">from</span> <span class="pre">blenderneuron.quick</span> <span class="pre">import</span> <span class="pre">bn</span></code>)</li>
 <li>Load Blender with the BlenderNEURON add-on (NEURON tab should be visible in Blender left panel)</li>
 <li>Test the connectivity between NEURON and Blender (Should say “Ready”)</li>
 </ol>
@@ -171,6 +171,7 @@
 <li>Navigate around the Blender scene to inspect the model. If you’re not familiar with Blender, <a class="reference external" href="https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98">these tutorials</a> will give an overview of basic scene navigation.</li>
 </ol>
 <p>By default, BlenderNEURON will export the morphology of all cells (sections) in the model. It will use NEURON’s x/y/z3d() and diam3d() values to build the 3D meshes in Blender.</p>
+<p>In BlenderNEURON, 1 cm corresponds to 1 micron in NEURON.</p>
 <p>If you add or make changes to your model’s sections/cells, click the “Re-Gather Sections” before clicking “Send to Blender” to ensure that they are included in the export.</p>
 </div>
 <div class="section" id="visualizing-activity">
@@ -181,7 +182,7 @@
 <li>Run your simulation</li>
 <li>Once the simulation is finished, click the “Send to Blender” button</li>
 <li>A moment later, your model should appear in Blender</li>
-<li>Use the buttons under the bottom timeline in Blender to re-play the simulation. If your cells emit action potentials (Vm &gt; -20mV), you should be able to see them as glowing compartments. By default, 1 frame in Blender corresponds to 0.5ms in NEURON and 1 distance unit in Blender corresponds to 1 micron in NEURON.</li>
+<li>Use the buttons under the bottom timeline in Blender to re-play the simulation. If your cells emit action potentials (Vm &gt; -20mV), you should be able to see them as glowing compartments. By default, 1 frame in Blender corresponds to 0.5ms in NEURON.</li>
 <li>You can scrub the timeline to re-play any part of the simulation and use the left/right arrow keys to step through the frames.</li>
 </ol>
 <img alt="_images/timeline.JPG" src="_images/timeline.JPG" />

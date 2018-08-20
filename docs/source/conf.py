@@ -15,7 +15,9 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import sys, os
+sys.path.insert(0, os.path.abspath('../../ForNEURON'))
+sys.path.insert(0, os.path.abspath('../../ForBlender'))
 
 # -- Project information -----------------------------------------------------
 
