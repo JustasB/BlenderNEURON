@@ -2,3 +2,4 @@ include:
   - _sources
   - _static
   - _images
+  - _modules
