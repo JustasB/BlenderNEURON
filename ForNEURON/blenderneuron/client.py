@@ -7,8 +7,23 @@ import threading, time, hashlib
 from math import sqrt
 import collections
 
+"""NEURON-based client library for BlenderNEURON"""
+
 class BlenderNEURON(object):
-    def __init__(self, h=None, ip='127.0.0.1', port='8000'):
+    """The BlenderNEURON client class, which sends commands to the server created by the BlenderNEURON Blender add-on"""
+
+    def __init__(self, h=None, ip='127.0.0.1', port='8000', show_panel=True, show_tutorial=True):
+        """
+        Creates an XMLRCP client which will communicate with the server, shows the GUI panel, and the tutorial
+
+        :math:`a^2+b^2=c^2`
+
+        :param h: an optional NEURON "h" variable. If not passed in, the method will load NEURON automatically
+        :param ip: the IP address of the machine where the Addon will listen to client commands. Localhost by default. If another machine is specified, make sure any firewalls allow communication.
+        :param port: the port of the machine where the Addon will listen to
+        :param show_panel: Shows the GUI window
+        :param show_tutorial: Shows a short tutorial for how to use the client
+        """
 
         if h is not None:
             self.h = h
@@ -52,53 +67,84 @@ class BlenderNEURON(object):
         self.include_connections = True
         self.include_activity = True
 
-        self.show_panel()
+        if show_panel:
+            self.show_panel()
 
-        print("")
-        print("-== NEURON python module of BlenderNEURON is ready ==-")
-        print("  It will send commands to Blender at the following address:" + self.IP + ":" + self.Port)
-        print("  If you haven't already, start Blender with BlenderNEURON addon installed")
-        print("  The address on the addon's tab in Blender should match the above IP and Port.")
-        print("")
-        print("  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.")
-        print("")
-        print("  To visualize a model in Blender: ")
-        print("  1) Load it in NEURON. Graph > Shape plot should show active cell morphology.")
-        print("  2) Click 'Send to Blender' in the GUI panel or type 'bn.to_blender()' in python console.")
-        print("  3) Switch to Blender window to see the model.")
-        print("")
-        print("  To visualize activity: ")
-        print("  1) Load model in NEURON")
-        print("  2) Click 'Prepare for Simulation'. During simulation, this will save compartment activity to be sent to Blender.")
-        print("  3) Run simulation (e.g. 'h.run()')")
-        print("  4) Click 'Send to Blender' ")
-        print("  5) Switch to Blender window to see the model.")
-        print("")
-        print("  If you add cells or make changes to morphology, click 'Re-Gather Sections before 'Send'ing or 'Prepare'ing.")
-        print("")
-        print(" Blender basics:")
-        print("   HOME key to zoom out and view the full scene")
-        print("   Mouse wheel - zoom in/out")
-        print("   Hold down and drag mouse middle button - rotate")
-        print("   SHIFT + hold down and drag mouse middle button - pan view")
-        print("   Right click on an object - select the object and see its name")
-        print("   Numpad '.' key - to zoom in on a selected object")
-        print("")
-        print("   There are many great Blender tutorials online. ")
-        print("   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98")
+        if show_tutorial:
+            print("")
+            print("-== NEURON python module of BlenderNEURON is ready ==-")
+            print("  It will send commands to Blender at the following address:" + self.IP + ":" + self.Port)
+            print("  If you haven't already, start Blender with BlenderNEURON addon installed")
+            print("  The address on the addon's tab in Blender should match the above IP and Port.")
+            print("")
+            print("  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.")
+            print("")
+            print("  To visualize a model in Blender: ")
+            print("  1) Load it in NEURON. Graph > Shape plot should show active cell morphology.")
+            print("  2) Click 'Send to Blender' in the GUI panel or type 'bn.to_blender()' in python console.")
+            print("  3) Switch to Blender window to see the model.")
+            print("")
+            print("  To visualize activity: ")
+            print("  1) Load model in NEURON")
+            print("  2) Click 'Prepare for Simulation'. During simulation, this will save compartment activity to be sent to Blender.")
+            print("  3) Run simulation (e.g. 'h.run()')")
+            print("  4) Click 'Send to Blender' ")
+            print("  5) Switch to Blender window to see the model.")
+            print("")
+            print("  If you add cells or make changes to morphology, click 'Re-Gather Sections before 'Send'ing or 'Prepare'ing.")
+            print("")
+            print(" Blender basics:")
+            print("   HOME key to zoom out and view the full scene")
+            print("   Mouse wheel - zoom in/out")
+            print("   Hold down and drag mouse middle button - rotate")
+            print("   SHIFT + hold down and drag mouse middle button - pan view")
+            print("   Right click on an object - select the object and see its name")
+            print("   Numpad '.' key - to zoom in on a selected object")
+            print("")
+            print("   There are many great Blender tutorials online. ")
+            print("   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98")
 
-    def to_blender(self):
+    def to_blender(self, color_unique_names=True):
+        """
+        A convenience method to send all groups of cells defined by self.groups property to Blender.
+        The method first clears the Blender scene, sends the morphology, any activity, and NetConns, links them to the scene (shows),
+        Zooms out the camera to include all cells/sections, colors the sections based on their names, and sets the animation length based on h.tstop
+
+        If called without creating any groups, it will create a default "all" group which contains all sections instantiated in NEURON
+
+        :param color_unique_names: Whether to color the cell sections based on their names, gray otherwise
+        :return: None
+        """
         self.enqueue_method("clear")
         self.send_model()
         self.enqueue_method('link_objects')
         self.enqueue_method('show_full_scene')
-        self.enqueue_method('color_by_unique_materials')
+
+        if color_unique_names:
+            self.enqueue_method('color_by_unique_materials')
+
         self.run_method('set_render_params', (0, self.get_num_frames()))
 
     def refresh(self):
+        """
+        A convenience menthod that will recreate the default "all" group. It should be called after NEURON model
+        has changed (added/modified sections).
+
+        :return: None
+        """
         self.setup_default_group()
 
     def get_num_frames(self):
+        r"""
+        Computes the number of frames to be shown in Blender to represent the simulation.
+
+        It's equal to the maximum number of frames per ms of simulation x NEURON h.tstop
+
+
+
+        :return:
+        """
+
         max_num_frames_per_ms = max(self.groups[g]["frames_per_ms"] for g in self.groups.keys())
 
         return max_num_frames_per_ms * self.h.tstop

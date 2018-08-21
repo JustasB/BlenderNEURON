@@ -155,8 +155,23 @@
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 
+<span class="sd">&quot;&quot;&quot;NEURON-based client library for BlenderNEURON&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="BlenderNEURON"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON">[docs]</a><span class="k">class</span> <span class="nc">BlenderNEURON</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;8000&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The BlenderNEURON client class, which sends commands to the server created by the BlenderNEURON Blender add-on&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BlenderNEURON.__init__"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s1">&#39;8000&#39;</span><span class="p">,</span> <span class="n">show_panel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_tutorial</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an XMLRCP client which will communicate with the server, shows the GUI panel, and the tutorial</span>
+
+<span class="sd">        :math:`a^2+b^2=c^2`</span>
+
+<span class="sd">        :param h: an optional NEURON &quot;h&quot; variable. If not passed in, the method will load NEURON automatically</span>
+<span class="sd">        :param ip: the IP address of the machine where the Addon will listen to client commands. Localhost by default. If another machine is specified, make sure any firewalls allow communication.</span>
+<span class="sd">        :param port: the port of the machine where the Addon will listen to</span>
+<span class="sd">        :param show_panel: Shows the GUI window</span>
+<span class="sd">        :param show_tutorial: Shows a short tutorial for how to use the client</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">h</span>
@@ -200,53 +215,84 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">include_connections</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">include_activity</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">show_panel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">show_panel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_panel</span><span class="p">()</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-== NEURON python module of BlenderNEURON is ready ==-&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  It will send commands to Blender at the following address:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Port</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you haven&#39;t already, start Blender with BlenderNEURON addon installed&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  The address on the addon&#39;s tab in Blender should match the above IP and Port.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize a model in Blender: &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load it in NEURON. Graph &gt; Shape plot should show active cell morphology.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Send to Blender&#39; in the GUI panel or type &#39;bn.to_blender()&#39; in python console.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize activity: &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load model in NEURON&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Prepare for Simulation&#39;. During simulation, this will save compartment activity to be sent to Blender.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Run simulation (e.g. &#39;h.run()&#39;)&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  4) Click &#39;Send to Blender&#39; &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  5) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you add cells or make changes to morphology, click &#39;Re-Gather Sections before &#39;Send&#39;ing or &#39;Prepare&#39;ing.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Blender basics:&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   HOME key to zoom out and view the full scene&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Mouse wheel - zoom in/out&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Hold down and drag mouse middle button - rotate&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   SHIFT + hold down and drag mouse middle button - pan view&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Right click on an object - select the object and see its name&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Numpad &#39;.&#39; key - to zoom in on a selected object&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   There are many great Blender tutorials online. &quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_tutorial</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-== NEURON python module of BlenderNEURON is ready ==-&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  It will send commands to Blender at the following address:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Port</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you haven&#39;t already, start Blender with BlenderNEURON addon installed&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  The address on the addon&#39;s tab in Blender should match the above IP and Port.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  In python console, type: bn.is_blender_ready() to check if connection to Blender can be established.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize a model in Blender: &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load it in NEURON. Graph &gt; Shape plot should show active cell morphology.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Send to Blender&#39; in the GUI panel or type &#39;bn.to_blender()&#39; in python console.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  To visualize activity: &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  1) Load model in NEURON&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  2) Click &#39;Prepare for Simulation&#39;. During simulation, this will save compartment activity to be sent to Blender.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  3) Run simulation (e.g. &#39;h.run()&#39;)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  4) Click &#39;Send to Blender&#39; &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  5) Switch to Blender window to see the model.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  If you add cells or make changes to morphology, click &#39;Re-Gather Sections before &#39;Send&#39;ing or &#39;Prepare&#39;ing.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Blender basics:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   HOME key to zoom out and view the full scene&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Mouse wheel - zoom in/out&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Hold down and drag mouse middle button - rotate&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   SHIFT + hold down and drag mouse middle button - pan view&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Right click on an object - select the object and see its name&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Numpad &#39;.&#39; key - to zoom in on a selected object&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   There are many great Blender tutorials online. &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   These are a good start: https://cloud.blender.org/p/blender-inside-out/560414b7044a2a00c4a6da98&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BlenderNEURON.to_blender"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.to_blender">[docs]</a>    <span class="k">def</span> <span class="nf">to_blender</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BlenderNEURON.to_blender"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.to_blender">[docs]</a>    <span class="k">def</span> <span class="nf">to_blender</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color_unique_names</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenience method to send all groups of cells defined by self.groups property to Blender.</span>
+<span class="sd">        The method first clears the Blender scene, sends the morphology, any activity, and NetConns, links them to the scene (shows),</span>
+<span class="sd">        Zooms out the camera to include all cells/sections, colors the sections based on their names, and sets the animation length based on h.tstop</span>
+
+<span class="sd">        If called without creating any groups, it will create a default &quot;all&quot; group which contains all sections instantiated in NEURON</span>
+
+<span class="sd">        :param color_unique_names: Whether to color the cell sections based on their names, gray otherwise</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;clear&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_model</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;link_objects&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;show_full_scene&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;color_by_unique_materials&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">color_unique_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;color_by_unique_materials&#39;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">run_method</span><span class="p">(</span><span class="s1">&#39;set_render_params&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_num_frames</span><span class="p">()))</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.refresh"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenience menthod that will recreate the default &quot;all&quot; group. It should be called after NEURON model</span>
+<span class="sd">        has changed (added/modified sections).</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.get_num_frames"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_num_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the number of frames to be shown in Blender to represent the simulation.</span>
+
+<span class="sd">        It&#39;s equal to the maximum number of frames per ms of simulation x NEURON h.tstop</span>
+
+
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">max_num_frames_per_ms</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">g</span><span class="p">][</span><span class="s2">&quot;frames_per_ms&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">max_num_frames_per_ms</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">tstop</span></div>
@@ -858,6 +904,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js"></script>
 
   
 

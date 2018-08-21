@@ -152,8 +152,31 @@
 <span id="client-library-api"></span><h1>Client Library API<a class="headerlink" href="#module-blenderneuron.client" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="blenderneuron.client.BlenderNEURON">
-<em class="property">class </em><code class="descclassname">blenderneuron.client.</code><code class="descname">BlenderNEURON</code><span class="sig-paren">(</span><em>h=None</em>, <em>ip='127.0.0.1'</em>, <em>port='8000'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">blenderneuron.client.</code><code class="descname">BlenderNEURON</code><span class="sig-paren">(</span><em>h=None</em>, <em>ip='127.0.0.1'</em>, <em>port='8000'</em>, <em>show_panel=True</em>, <em>show_tutorial=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The BlenderNEURON client class, which sends commands to the server created by the BlenderNEURON Blender add-on</p>
+<dl class="method">
+<dt id="blenderneuron.client.BlenderNEURON.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>h=None</em>, <em>ip='127.0.0.1'</em>, <em>port='8000'</em>, <em>show_panel=True</em>, <em>show_tutorial=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an XMLRCP client which will communicate with the server, shows the GUI panel, and the tutorial</p>
+<p><span class="math">\(a^2+b^2=c^2\)</span></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h</strong> – an optional NEURON “h” variable. If not passed in, the method will load NEURON automatically</li>
+<li><strong>ip</strong> – the IP address of the machine where the Addon will listen to client commands. Localhost by default. If another machine is specified, make sure any firewalls allow communication.</li>
+<li><strong>port</strong> – the port of the machine where the Addon will listen to</li>
+<li><strong>show_panel</strong> – Shows the GUI window</li>
+<li><strong>show_tutorial</strong> – Shows a short tutorial for how to use the client</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.clear_activity">
 <code class="descname">clear_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.clear_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.clear_activity" title="Permalink to this definition">¶</a></dt>
@@ -232,7 +255,17 @@
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.get_num_frames">
 <code class="descname">get_num_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_num_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_num_frames" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Computes the number of frames to be shown in Blender to represent the simulation.</p>
+<p>It’s equal to the maximum number of frames per ms of simulation x NEURON h.tstop</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.is_blender_ready">
@@ -257,7 +290,17 @@
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.refresh">
 <code class="descname">refresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.refresh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>A convenience menthod that will recreate the default “all” group. It should be called after NEURON model
+has changed (added/modified sections).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.run_command">
@@ -331,8 +374,22 @@
 
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.to_blender">
-<code class="descname">to_blender</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.to_blender"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.to_blender" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">to_blender</code><span class="sig-paren">(</span><em>color_unique_names=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.to_blender"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.to_blender" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience method to send all groups of cells defined by self.groups property to Blender.
+The method first clears the Blender scene, sends the morphology, any activity, and NetConns, links them to the scene (shows),
+Zooms out the camera to include all cells/sections, colors the sections based on their names, and sets the animation length based on h.tstop</p>
+<p>If called without creating any groups, it will create a default “all” group which contains all sections instantiated in NEURON</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>color_unique_names</strong> – Whether to color the cell sections based on their names, gray otherwise</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="blenderneuron.client.BlenderNEURON.update_group">
@@ -394,6 +451,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js"></script>
 
   
 
