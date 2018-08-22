@@ -182,10 +182,8 @@ potential security issue as the port could be used to execute arbitrary commands
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.clear_activity">
 <code class="descname">clear_activity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.clear_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.clear_activity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Removes collected activity values from all groups. Called at the start of simulation, using NEURON’s FInitialize()</dt>
-<dd>method.</dd>
-</dl>
+<dd><p>Removes collected activity values from all groups. Called at the start of simulation, using NEURON’s FInitialize()
+method.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -199,10 +197,8 @@ potential security issue as the port could be used to execute arbitrary commands
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.collect_group">
 <code class="descname">collect_group</code><span class="sig-paren">(</span><em>group_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_group" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Based on the group’s color level, gathers the values of the group’s collect_variable. This method is called</dt>
-<dd>at regular times during the simulation. See <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.create_cell_group" title="blenderneuron.client.BlenderNEURON.create_cell_group"><code class="xref any py py-meth docutils literal"><span class="pre">create_cell_group()</span></code></a> for details.</dd>
-</dl>
+<dd><p>Based on the group’s color level, gathers the values of the group’s collect_variable. This method is called
+at regular times during the simulation. See <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.create_cell_group" title="blenderneuron.client.BlenderNEURON.create_cell_group"><code class="xref any py py-meth docutils literal"><span class="pre">create_cell_group()</span></code></a> for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -240,11 +236,9 @@ potential security issue as the port could be used to execute arbitrary commands
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.collect_segments_recursive">
 <code class="descname">collect_segments_recursive</code><span class="sig-paren">(</span><em>section</em>, <em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_segments_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_segments_recursive" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Recursively collects the values of segments of a group cell (root section). Segments are given sequential 0-based</dt>
-<dd>names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th
-dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON’s xyz3d() function.</dd>
-</dl>
+<dd><p>Recursively collects the values of segments of a group cell (root section). Segments are given sequential 0-based
+names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th
+dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON’s xyz3d() function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -345,10 +339,7 @@ segments. This method does nothing if group[‘collect_activity’] is False</p>
 <dl class="staticmethod">
 <dt id="blenderneuron.client.BlenderNEURON.distance">
 <em class="property">static </em><code class="descname">distance</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the distance between two points defined as 2-lists/tuples
-:param a:
-:param b:
-:return:</p>
+<dd><p>Returns the distance between two points defined as 2-lists/tuples</p>
 </dd></dl>
 
 <dl class="method">
@@ -467,7 +458,7 @@ method to automatically create them (will be equal to nseg).</p>
 <code class="descname">get_num_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_num_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_num_frames" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the number of frames to be shown in Blender to represent the simulation.</p>
 <p>It is equal to the maximum number of frames per ms of simulation x NEURON h.tstop</p>
-<p><span class="math">\(t_{stop}*\max_{1 \leq g \leq n}(fps_{g})\)</span></p>
+<p><span class="math">\(t_{stop}*\max_{0 \leq g \leq n}(fps_{g})\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -506,9 +497,8 @@ method to automatically create them (will be equal to nseg).</p>
 <dl class="staticmethod">
 <dt id="blenderneuron.client.BlenderNEURON.rdp">
 <em class="property">static </em><code class="descname">rdp</code><span class="sig-paren">(</span><em>points</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.rdp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.rdp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series
-Ramer-Douglas-Peucker algorithm
-Adapted from: <a class="reference external" href="https://github.com/sebleier/RDP">https://github.com/sebleier/RDP</a></p>
+<dd><p>Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series.</p>
+<p>Ramer-Douglas-Peucker algorithm adapted from: <a class="reference external" href="https://github.com/sebleier/RDP">https://github.com/sebleier/RDP</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -697,10 +687,8 @@ Also allows for up to 100,000 segments/materials per section</p>
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.simplify_activity">
 <code class="descname">simplify_activity</code><span class="sig-paren">(</span><em>times</em>, <em>activity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.simplify_activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.simplify_activity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Removes co-linear points from a time series of collected activity. Used to compress activity before</dt>
-<dd>sending to Blender.</dd>
-</dl>
+<dd><p>Removes co-linear points from a time series of collected activity. Used to compress activity before
+sending to Blender.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

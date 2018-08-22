@@ -292,7 +292,7 @@
 
 <span class="sd">        It is equal to the maximum number of frames per ms of simulation x NEURON h.tstop</span>
 <span class="sd">        </span>
-<span class="sd">        :math:`t_{stop}*\max_{1 \leq g \leq n}(fps_{g})`</span>
+<span class="sd">        :math:`t_{stop}*\max_{0 \leq g \leq n}(fps_{g})`</span>
 
 <span class="sd">        :return: Number of animation frames</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -815,7 +815,7 @@
 <div class="viewcode-block" id="BlenderNEURON.collect_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_group">[docs]</a>    <span class="k">def</span> <span class="nf">collect_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Based on the group&#39;s color level, gathers the values of the group&#39;s collect_variable. This method is called</span>
-<span class="sd">         at regular times during the simulation. See :any:`create_cell_group()` for details.</span>
+<span class="sd">        at regular times during the simulation. See :any:`create_cell_group()` for details.</span>
 
 <span class="sd">        :param group_name: The name of the group whose section values to measure and store</span>
 
@@ -864,8 +864,8 @@
 <div class="viewcode-block" id="BlenderNEURON.collect_segments_recursive"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_segments_recursive">[docs]</a>    <span class="k">def</span> <span class="nf">collect_segments_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively collects the values of segments of a group cell (root section). Segments are given sequential 0-based</span>
-<span class="sd">         names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th</span>
-<span class="sd">         dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON&#39;s xyz3d() function.</span>
+<span class="sd">        names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th</span>
+<span class="sd">        dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON&#39;s xyz3d() function.</span>
 
 <span class="sd">        :param section: A reference to a group root section</span>
 <span class="sd">        :param group: reference to a group dictionary</span>
@@ -962,7 +962,7 @@
 <div class="viewcode-block" id="BlenderNEURON.simplify_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.simplify_activity">[docs]</a>    <span class="k">def</span> <span class="nf">simplify_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes co-linear points from a time series of collected activity. Used to compress activity before</span>
-<span class="sd">         sending to Blender.</span>
+<span class="sd">        sending to Blender.</span>
 
 <span class="sd">        :param times: an array of times</span>
 <span class="sd">        :param activity: an array of corresponding activity values</span>
@@ -974,7 +974,7 @@
 <div class="viewcode-block" id="BlenderNEURON.clear_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.clear_activity">[docs]</a>    <span class="k">def</span> <span class="nf">clear_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removes collected activity values from all groups. Called at the start of simulation, using NEURON&#39;s FInitialize()</span>
-<span class="sd">         method.</span>
+<span class="sd">        method.</span>
 
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1074,9 +1074,6 @@
     <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the distance between two points defined as 2-lists/tuples</span>
-<span class="sd">        :param a:</span>
-<span class="sd">        :param b:</span>
-<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
 
@@ -1092,9 +1089,9 @@
 <div class="viewcode-block" id="BlenderNEURON.rdp"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.rdp">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">rdp</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series</span>
-<span class="sd">        Ramer-Douglas-Peucker algorithm</span>
-<span class="sd">        Adapted from: https://github.com/sebleier/RDP</span>
+<span class="sd">        Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series.</span>
+
+<span class="sd">        Ramer-Douglas-Peucker algorithm adapted from: https://github.com/sebleier/RDP</span>
 
 <span class="sd">        :param points: An array of (x,y) tuples to simplify</span>
 <span class="sd">        :param epsilon: The maximum distance that points can deviate from a line and be removed</span>

@@ -144,7 +144,7 @@ class BlenderNEURON(object):
 
         It is equal to the maximum number of frames per ms of simulation x NEURON h.tstop
         
-        :math:`t_{stop}*\max_{1 \leq g \leq n}(fps_{g})`
+        :math:`t_{stop}*\max_{0 \leq g \leq n}(fps_{g})`
 
         :return: Number of animation frames
         """
@@ -667,7 +667,7 @@ class BlenderNEURON(object):
     def collect_group(self, group_name):
         """
         Based on the group's color level, gathers the values of the group's collect_variable. This method is called
-         at regular times during the simulation. See :any:`create_cell_group()` for details.
+        at regular times during the simulation. See :any:`create_cell_group()` for details.
 
         :param group_name: The name of the group whose section values to measure and store
 
@@ -716,8 +716,8 @@ class BlenderNEURON(object):
     def collect_segments_recursive(self, section, group):
         """
         Recursively collects the values of segments of a group cell (root section). Segments are given sequential 0-based
-         names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th
-         dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON's xyz3d() function.
+        names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th
+        dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON's xyz3d() function.
 
         :param section: A reference to a group root section
         :param group: reference to a group dictionary
@@ -814,7 +814,7 @@ class BlenderNEURON(object):
     def simplify_activity(self, times, activity):
         """
         Removes co-linear points from a time series of collected activity. Used to compress activity before
-         sending to Blender.
+        sending to Blender.
 
         :param times: an array of times
         :param activity: an array of corresponding activity values
@@ -826,7 +826,7 @@ class BlenderNEURON(object):
     def clear_activity(self):
         """
         Removes collected activity values from all groups. Called at the start of simulation, using NEURON's FInitialize()
-         method.
+        method.
 
         :return: None
         """
@@ -926,9 +926,6 @@ class BlenderNEURON(object):
     def distance(a, b):
         """
         Returns the distance between two points defined as 2-lists/tuples
-        :param a:
-        :param b:
-        :return:
         """
         return sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
@@ -944,9 +941,9 @@ class BlenderNEURON(object):
     @staticmethod
     def rdp(points, epsilon):
         """
-        Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series
-        Ramer-Douglas-Peucker algorithm
-        Adapted from: https://github.com/sebleier/RDP
+        Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series.
+
+        Ramer-Douglas-Peucker algorithm adapted from: https://github.com/sebleier/RDP
 
         :param points: An array of (x,y) tuples to simplify
         :param epsilon: The maximum distance that points can deviate from a line and be removed
