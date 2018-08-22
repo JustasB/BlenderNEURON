@@ -146,7 +146,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for blenderneuron.client</h1><div class="highlight"><pre>
-<span></span><span class="k">try</span><span class="p">:</span>
+<span></span><span class="kn">import</span> <span class="nn">blenderneuron</span>
+
+<span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">xmlrpclib</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">xmlrpc.client</span> <span class="k">as</span> <span class="nn">xmlrpclib</span>
@@ -164,10 +166,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an XMLRCP client which will communicate with the server, shows the GUI panel, and the tutorial</span>
 
-<span class="sd">        :math:`a^2+b^2=c^2`</span>
-
 <span class="sd">        :param h: an optional NEURON &quot;h&quot; variable. If not passed in, the method will load NEURON automatically</span>
-<span class="sd">        :param ip: the IP address of the machine where the Addon will listen to client commands. Localhost by default. If another machine is specified, make sure any firewalls allow communication.</span>
+<span class="sd">        :param ip: the IP address of the machine where the Addon will listen to client commands. Localhost by default.</span>
+<span class="sd">         If another machine is specified, make sure any firewalls allow communication. However, this may create a</span>
+<span class="sd">         potential security issue as the port could be used to execute arbitrary commands while Blender is running. See:</span>
+<span class="sd">         :any:`run_command()`</span>
 <span class="sd">        :param port: the port of the machine where the Addon will listen to</span>
 <span class="sd">        :param show_panel: Shows the GUI window</span>
 <span class="sd">        :param show_tutorial: Shows a short tutorial for how to use the client</span>
@@ -256,7 +259,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A convenience method to send all groups of cells defined by self.groups property to Blender.</span>
 <span class="sd">        The method first clears the Blender scene, sends the morphology, any activity, and NetConns, links them to the scene (shows),</span>
-<span class="sd">        Zooms out the camera to include all cells/sections, colors the sections based on their names, and sets the animation length based on h.tstop</span>
+<span class="sd">        zooms out the camera to include all cells/sections, colors the sections based on their names, and sets the animation length based on h.tstop</span>
 
 <span class="sd">        If called without creating any groups, it will create a default &quot;all&quot; group which contains all sections instantiated in NEURON</span>
 
@@ -275,22 +278,23 @@
 
 <div class="viewcode-block" id="BlenderNEURON.refresh"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A convenience menthod that will recreate the default &quot;all&quot; group. It should be called after NEURON model</span>
-<span class="sd">        has changed (added/modified sections).</span>
+<span class="sd">        A convenience menthod that will recreate the default &quot;all&quot; group and recreate all connections. It should be</span>
+<span class="sd">        called after NEURON model has changed (added/modified sections).</span>
 
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_connections</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.get_num_frames"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_num_frames">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the number of frames to be shown in Blender to represent the simulation.</span>
 
-<span class="sd">        It&#39;s equal to the maximum number of frames per ms of simulation x NEURON h.tstop</span>
+<span class="sd">        It is equal to the maximum number of frames per ms of simulation x NEURON h.tstop</span>
+<span class="sd">        </span>
+<span class="sd">        :math:`t_{stop}*\max_{1 \leq g \leq n}(fps_{g})`</span>
 
-
-
-<span class="sd">        :return:</span>
+<span class="sd">        :return: Number of animation frames</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">max_num_frames_per_ms</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">g</span><span class="p">][</span><span class="s2">&quot;frames_per_ms&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -298,6 +302,10 @@
         <span class="k">return</span> <span class="n">max_num_frames_per_ms</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">tstop</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.show_panel"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.show_panel">[docs]</a>    <span class="k">def</span> <span class="nf">show_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a NEURON window that shows the GUI widgets to perform basic model export operations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xpanel</span><span class="p">(</span><span class="s1">&#39;BlenderNEURON&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xcheckbox</span><span class="p">(</span><span class="s1">&#39;Include Cells&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;include_morphology&#39;</span><span class="p">))</span>
@@ -321,13 +329,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">xpanel</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.setup_defaults_if_needed"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_defaults_if_needed">[docs]</a>    <span class="k">def</span> <span class="nf">setup_defaults_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if there are any cell groups or connections setup for export to Blender, creates defaults if not.</span>
+
+<span class="sd">        See also:</span>
+<span class="sd">            :any:`setup_default_group`</span>
+<span class="sd">            :any:`setup_default_connections`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_morphology</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">include_connections</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_default_connections</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.setup_default_connections"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_default_connections">[docs]</a>    <span class="k">def</span> <span class="nf">setup_default_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets up all NEURON NetCon&#39;s to be exported as synapses to Blender</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Include all NetCon connections by default</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">NetCon</span>
 
@@ -348,6 +368,10 @@
 
 
 <div class="viewcode-block" id="BlenderNEURON.setup_default_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.setup_default_group">[docs]</a>    <span class="k">def</span> <span class="nf">setup_default_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets up all NEURON sections and their 3d coordinates to be exported to Blender</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># By default, include all cells (&#39;root sections&#39;) in the model</span>
         <span class="n">all_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">()</span>
         <span class="n">all_cells</span><span class="o">.</span><span class="n">allroots</span><span class="p">()</span>
@@ -366,6 +390,70 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">create_cell_group</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">root_sections</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.create_cell_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.create_cell_group">[docs]</a>    <span class="k">def</span> <span class="nf">create_cell_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a cell group from a list of root sections. Each cell group can have different color and selection</span>
+<span class="sd">        options.</span>
+
+<span class="sd">        :param name: The name of the group of cells</span>
+<span class="sd">        :param cells: a list of top level, &quot;root&quot; sections. The children of these sections will be exported</span>
+<span class="sd">        :param options: The group can have the following options:</span>
+
+<span class="sd">        **group[&#39;collect_activity&#39;]**: True/False, whether to collect the group section activity during simulation.</span>
+
+<span class="sd">        **group[&#39;collect_variable&#39;]**: string e.g. &#39;v&#39;, the name of the section variable to collect.</span>
+
+<span class="sd">        **group[&#39;collection_period_ms&#39;]**: int, e.g. 1, how often per simulator ms to collect activity 1=one datapoint per ms.</span>
+
+<span class="sd">        **group[&#39;frames_per_ms&#39;]**: float, e.g. 2.0, how many Blender frames to use for each simulator ms.</span>
+
+<span class="sd">        **group[&#39;spherize_soma_if_DeqL&#39;]**: True/False, whether to render sections that include &quot;soma&quot; in their names as spheres if</span>
+<span class="sd">        their lengths and diameters are approximately equal.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;color&#39;]**: 3-array, e.g. [1,1,1] for white, to specify the RGB values for the default color of</span>
+<span class="sd">        all sections of the group.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;interaction_level&#39;]**: one of &quot;Group&quot;, &quot;Cell&quot;, &quot;Section&quot; to specify the level at which</span>
+<span class="sd">        sections of this group can be *interacted* with in Blender. &quot;Group&quot; creates one Blender object for the whole</span>
+<span class="sd">        group, &quot;Section&quot; creates objects for each section. Use &quot;Group&quot; to maximize Blender performance, and</span>
+<span class="sd">        &quot;Section&quot; to maximize debugging/interaction detail.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;color_level&#39;]**: one of &quot;Group&quot;, &quot;Cell&quot;, &quot;Section&quot;, or &quot;Segment&quot; to specify the level at which</span>
+<span class="sd">        sections of this group should be *colored* in Blender. The difference is visible only when cell activity is</span>
+<span class="sd">        included. The chosen value will have the following effects:</span>
+
+<span class="sd">        *Group*: All sections will be colored based on the average value of collect_variable at the root sections of</span>
+<span class="sd">        the group. Coarsest, fastest color method. Appropriate to visually approximate population level activity.</span>
+
+<span class="sd">        *Cell*: Sections of each cell will be colored based on the value at the soma(0.5) (root) section.</span>
+
+<span class="sd">        *Section*: Each section will be colored based on the value at the middle of each section.</span>
+
+<span class="sd">        *Segment*: Each section segment (h.n3d()) will be colored based on the value at that segment. The most</span>
+<span class="sd">        detailed, most computationaly demanding color method. Note: if NEURON xyz3d() points are defined, a &quot;segment&quot;</span>
+<span class="sd">        in BlenderNEURON refers to n3d()-1 points. However, if no xyz3d() points are defined, number of BlenderNEURON</span>
+<span class="sd">        &quot;segments&quot; = nseg in NEURON.</span>
+
+<span class="sd">        BlenderNEURON will favor 3D point info over nseg when creating the Blender objects,</span>
+<span class="sd">        however it will not alter the simulation. For example, if there are 10 3D points on a section, but nseg = 1,</span>
+<span class="sd">        BlenderNEURON will show a 3D shape with 10 subdivisions, however all subdivisions will have the same color value</span>
+<span class="sd">        because their values will come from the one compartment.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;as_lines&#39;]**: True/False, whether to display sections as 0-diameter lines in Blender.</span>
+<span class="sd">        Very fast, but will not render using Blender&#39;s &quot;Render&quot; tab.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;segment_subdivisions&#39;]**: int &gt; 1. e.g. 3, the number of subdivisions to use when rendering</span>
+<span class="sd">        the segment cylinder. If &quot;smooth_sections&quot; (see below) is False, use value of 1 to reduce the number of Blender</span>
+<span class="sd">        polygons. If True, larger values result in smoother branching angles.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;circular_subdivisions&#39;]**: int &gt; 4, e.g. 8, the number of circular &quot;sides&quot; to use when</span>
+<span class="sd">        rendering the segment cylinder. Larger values provide rounder cylinder shape, but result in more polygons.</span>
+
+<span class="sd">        **group[&#39;3d_data&#39;][&#39;smooth_sections&#39;]**: True/False: whether to render sections as smooth bezier curves, instead</span>
+<span class="sd">        of straight lines. True results in more visually appealing morphology, but requires more polygons depending on</span>
+<span class="sd">        the &#39;segment_subdivisions&#39; value (above).</span>
+
+<span class="sd">        :return: The created group dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Adjust level of detail based on cell count</span>
         <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_detail_level</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>
@@ -396,7 +484,7 @@
         <span class="c1"># Set any custom options for the group</span>
         <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">update_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 
-        <span class="c1"># TODO: Segment level interaction is not supported</span>
+        <span class="c1"># Segment level interaction is not supported</span>
         <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;interaction_level&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Segment&#39;</span><span class="p">:</span>
             <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;interaction_level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Section&#39;</span>
 
@@ -409,6 +497,13 @@
 
 
 <div class="viewcode-block" id="BlenderNEURON.get_detail_level"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_detail_level">[docs]</a>    <span class="k">def</span> <span class="nf">get_detail_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_count</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses a heuristic to select an appropriate level of detail based on the number of cells in simulation</span>
+
+<span class="sd">        :param cell_count: The number of &quot;root&quot; sections instantiated in NEURON</span>
+<span class="sd">        :return: One of &quot;Group&quot;, &quot;Cell&quot;, &quot;Section&quot;, or &quot;Segment&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">cell_count</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Segment&#39;</span>
         <span class="k">elif</span> <span class="n">cell_count</span> <span class="o">&lt;=</span> <span class="mi">25</span><span class="p">:</span>
@@ -417,9 +512,17 @@
             <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Cell&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;Group&#39;</span>
+
         <span class="k">return</span> <span class="n">level</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.create_collector"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.create_collector">[docs]</a>    <span class="k">def</span> <span class="nf">create_collector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Greates a pair of NetStim and NetCon which trigger an event to recursively collect the activity of the group</span>
+<span class="sd">        segments. This method does nothing if group[&#39;collect_activity&#39;] is False</span>
+
+<span class="sd">        :param group: The group dictionary for which to create the collector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collect_activity&#39;</span><span class="p">]:</span>
             <span class="n">collector_stim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">NetStim</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="n">collector_stim</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
@@ -434,21 +537,58 @@
 
 
 <div class="viewcode-block" id="BlenderNEURON.prepare_for_collection"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.prepare_for_collection">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_for_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks and creates a default group and its activity collectors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_defaults_if_needed</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.run_method"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.run_method">[docs]</a>    <span class="k">def</span> <span class="nf">run_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Synchronously requests and blocks while a BlenderNEURON addon method is executed in Blender</span>
+
+<span class="sd">        :param name: The name of the BlenderNEURON addon method to call</span>
+<span class="sd">        :param args: method parameters</span>
+<span class="sd">        :param kwargs: This should be blank, as named parameters are not supported over XMLRPC</span>
+<span class="sd">        :return: The value returned by the BlenderNEURON addon method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_method</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.enqueue_method"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.enqueue_method">[docs]</a>    <span class="k">def</span> <span class="nf">enqueue_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asynchronous version of run_method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.run_command"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.run_command">[docs]</a>    <span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Synchronously runs a Python command within Blender&#39;s Python instance. This allows controlling/using Blender from</span>
+<span class="sd">        NEURON/python.</span>
+
+<span class="sd">        :param command_string: A python command. To include a return value, set a special variable &#39;return_value&#39;.</span>
+<span class="sd">        :return: None, but if return_value is set within the command, will return its value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">run_command</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="BlenderNEURON.enqueue_command"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.enqueue_command">[docs]</a>    <span class="k">def</span> <span class="nf">enqueue_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asynchronous version of :any:`run_command`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">enqueue_command</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.send_model"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_model">[docs]</a>    <span class="k">def</span> <span class="nf">send_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A convenience method to send the model morphology, connections, and activity data to Blender. After this method</span>
+<span class="sd">        executes, BlenderNEURON addon method &#39;link_objects&#39; needs to be called for the cells to become visible in</span>
+<span class="sd">        Blender. See: :any:`to_blender` for details.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">             Exception if communication with BlenderNEURON addon cannot be established</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_blender_ready</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
                 <span class="s2">&quot;Is Blender running and BlenderNEURON addon active? &quot;</span>
@@ -470,6 +610,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">send_activity</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.is_blender_ready"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.is_blender_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_blender_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if communication with BlenderNEURON addon can be established at self.IP:self.Port</span>
+
+<span class="sd">        :return: True if connection can be made, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Ready&#39;</span>
@@ -479,11 +624,22 @@
             <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.send_morphology"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_morphology">[docs]</a>    <span class="k">def</span> <span class="nf">send_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sends the cell morphology data of all defined self.groups to Blender</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gather_group_coords</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">send_group</span><span class="p">(</span><span class="n">group</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.gather_group_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.gather_group_coords">[docs]</a>    <span class="k">def</span> <span class="nf">gather_group_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively obtains the coordinates of all 3D points of the group sections</span>
+
+<span class="sd">        :param group: the dictionary of the group</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">cell_data</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;cells&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">spherize</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;spherize_soma_if_DeqL&quot;</span><span class="p">]</span>
 
@@ -499,6 +655,14 @@
 
 
 <div class="viewcode-block" id="BlenderNEURON.get_coord_count"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_coord_count">[docs]</a>    <span class="k">def</span> <span class="nf">get_coord_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obtains the number of 3D points defined for a section. If no points have been added, uses NEURON&#39;s define_shape</span>
+<span class="sd">        method to automatically create them (will be equal to nseg).</span>
+
+<span class="sd">        :param section: a reference to a NEURON section e.g. soma = h.Section()</span>
+<span class="sd">        :return: The number of 3D points the section has</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">coord_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">))</span>
 
         <span class="c1"># Let NEURON create them if missing</span>
@@ -509,11 +673,20 @@
         <span class="k">return</span> <span class="n">coord_count</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.shorten_name_if_needed"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.shorten_name_if_needed">[docs]</a>    <span class="k">def</span> <span class="nf">shorten_name_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">56</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a shortened name string suitable for use as a name for an object in Blender.</span>
+
+<span class="sd">        Blender names must be &lt;64 characters long</span>
+<span class="sd">        If section name is too long, this method will truncate the string and replace it with an MD5 hash</span>
+<span class="sd">        Also allows for up to 100,000 segments/materials per section</span>
+
+<span class="sd">        :param name: The name of a NEURON object e.g. cell, group, section, segment</span>
+<span class="sd">        :param max_length: The number of characters that will be kept before start of MD5 hash</span>
+<span class="sd">        :return: Same or, if necessary, shortened name string, suitable for use as Blender object name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">result</span> <span class="o">=</span> <span class="n">name</span>
 
-        <span class="c1"># Blender names must be &lt;64 characters long</span>
-        <span class="c1"># If section name is too long, will truncate the string and replace it with an MD5 hash</span>
-        <span class="c1"># There must also be enough room for segment materials (here we allow for up to 99,999 segments/materials per section)</span>
         <span class="c1"># 63 max, with two for []s and 5 for segment id = 56</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span><span class="p">[:</span><span class="n">max_length</span><span class="o">-</span><span class="mi">17</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">16</span><span class="p">]</span>
@@ -521,6 +694,17 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.get_cell_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_cell_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_cell_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spherize_if_DeqL</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively gathers the list of coordinates of a cell (root section)</span>
+
+<span class="sd">        :param section: A reference to NEURON root section</span>
+<span class="sd">        :param result: None, used internally</span>
+<span class="sd">        :param spherize_if_DeqL: Whether to create a sphere instead of a cylinder for sections with &quot;soma&quot; in their names</span>
+<span class="sd">         and which have equal lengths and diameters (within 0.1 um)</span>
+<span class="sd">        :return: A list of dictionaries with section names, coordinates, and coordinate radii. Coords has the form</span>
+<span class="sd">         of [x1,y1,z1,x2,y2,z2...], and radii [r1,r2,...]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Determine how many 3d points the section has</span>
         <span class="n">coord_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coord_count</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
 
@@ -562,6 +746,18 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.spherize_coords"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.spherize_coords">[docs]</a>    <span class="k">def</span> <span class="nf">spherize_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sec_coords</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Turns a cylindrical section 3D points into a 3D points of a sphere spanning the section length. This method assumes the</span>
+<span class="sd">        section length and diameter are equal.</span>
+
+<span class="sd">        :param sec_coords: A dictionary of section 3d coordinates. Same format as elements of array returned by</span>
+<span class="sd">         :any:`get_cell_coords()`</span>
+<span class="sd">        :param length: The length of the section</span>
+<span class="sd">        :param steps: The number of intermediate subdivisions to use to approximate the sphere. More steps uses more</span>
+<span class="sd">         polygons but results in more smooth sphere.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Remove intermediate, co-linear points</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;radii&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
@@ -606,14 +802,26 @@
         <span class="n">sec_coords</span><span class="p">[</span><span class="s2">&quot;spherical&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.send_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_group">[docs]</a>    <span class="k">def</span> <span class="nf">send_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sends the 3d morphology data of a group to Blender</span>
+
+<span class="sd">        :param group: Reference to the group&#39;s dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">]</span>
-        <span class="c1"># data = cPickle.dumps(data)</span>
-        <span class="c1"># data = zlib.compress(data)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;visualize_group&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BlenderNEURON.collect_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_group">[docs]</a>    <span class="k">def</span> <span class="nf">collect_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Based on the group&#39;s color level, gathers the values of the group&#39;s collect_variable. This method is called</span>
+<span class="sd">         at regular times during the simulation. See :any:`create_cell_group()` for details.</span>
+
+<span class="sd">        :param group_name: The name of the group whose section values to measure and store</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">group_name</span><span class="p">]</span>
         <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collection_times&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
         <span class="n">level</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s2">&quot;color_level&quot;</span><span class="p">]</span>
@@ -654,6 +862,16 @@
             <span class="n">activity</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.collect_segments_recursive"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_segments_recursive">[docs]</a>    <span class="k">def</span> <span class="nf">collect_segments_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively collects the values of segments of a group cell (root section). Segments are given sequential 0-based</span>
+<span class="sd">         names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th</span>
+<span class="sd">         dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON&#39;s xyz3d() function.</span>
+
+<span class="sd">        :param section: A reference to a group root section</span>
+<span class="sd">        :param group: reference to a group dictionary</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">coordCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coord_count</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
 
         <span class="n">activity</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
@@ -677,6 +895,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">collect_segments_recursive</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.collect_section"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.collect_section">[docs]</a>    <span class="k">def</span> <span class="nf">collect_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively collects the section midpoint values of a group&#39;s collect_variable (e.g. &#39;v&#39;)</span>
+
+<span class="sd">        :param section: A root section of a group</span>
+<span class="sd">        :param group: The group&#39;s dictionary</span>
+<span class="sd">        :param recursive: Whether to collect child section values (otherwise stop at root/soma)</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">activity</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collected_activity&quot;</span><span class="p">]</span>
         <span class="n">variable</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;collect_variable&quot;</span><span class="p">]</span>
 
@@ -697,6 +924,13 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">collect_section</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">recursive</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.send_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_activity">[docs]</a>    <span class="k">def</span> <span class="nf">send_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sends the collected group section/segment activity to Blender. The recorded activity values are compressed</span>
+<span class="sd">        to remove co-linear points and are sent in batches to maximize performance.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="s2">&quot;collected_activity&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
                 <span class="k">return</span>
@@ -726,15 +960,34 @@
 
     <span class="c1"># TODO: this could benefit from cython</span>
 <div class="viewcode-block" id="BlenderNEURON.simplify_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.simplify_activity">[docs]</a>    <span class="k">def</span> <span class="nf">simplify_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes co-linear points from a time series of collected activity. Used to compress activity before</span>
+<span class="sd">         sending to Blender.</span>
+
+<span class="sd">        :param times: an array of times</span>
+<span class="sd">        :param activity: an array of corresponding activity values</span>
+<span class="sd">        :return: times and activity arrays with the co-linear points removed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reduced</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity_simplification_tolerance</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">reduced</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.clear_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.clear_activity">[docs]</a>    <span class="k">def</span> <span class="nf">clear_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes collected activity values from all groups. Called at the start of simulation, using NEURON&#39;s FInitialize()</span>
+<span class="sd">         method.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collection_times&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">group</span><span class="p">[</span><span class="s1">&#39;collected_activity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.send_cons"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_cons">[docs]</a>    <span class="k">def</span> <span class="nf">send_cons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gathers the start and end coordinates (if available) of all NetConn objects and sends them to Blender.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">cons</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -757,7 +1010,7 @@
 
                 <span class="c1"># If source is a segment</span>
                 <span class="k">if</span> <span class="n">pre_loc</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
-                    <span class="n">pre_seg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">cas</span><span class="p">()(</span><span class="n">pre_loc</span><span class="p">)</span> <span class="c1"># TEST THIS</span>
+                    <span class="n">pre_seg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">cas</span><span class="p">()(</span><span class="n">pre_loc</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">pop_section</span><span class="p">()</span>
 
                 <span class="c1"># Skip if it&#39;s neither a PP nor a segment</span>
@@ -784,6 +1037,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;create_cons&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_data</span><span class="p">[</span><span class="s2">&quot;Synapses&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.get_coords_along_sec"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_coords_along_sec">[docs]</a>    <span class="k">def</span> <span class="nf">get_coords_along_sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">along</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the section 3d coordinate that is 0-1 fraction along from the begining of the section.</span>
+
+<span class="sd">        :param section: reference to a NEURON section</span>
+<span class="sd">        :param along: float, 0-1, refering to the fraction along the section</span>
+<span class="sd">        :return: a tuple of (x,y,z) coordinate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">coord_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
         <span class="n">along_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord_count</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">along</span>
         <span class="n">start_coord_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">along_coords</span><span class="p">)</span>
@@ -800,6 +1061,7 @@
             <span class="n">along_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">start_coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">along_x</span><span class="p">,</span><span class="n">along_y</span><span class="p">,</span><span class="n">along_z</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="BlenderNEURON.get_along_coord_dim"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.get_along_coord_dim">[docs]</a>    <span class="k">def</span> <span class="nf">get_along_coord_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">coord_i</span><span class="p">,</span> <span class="n">along_start_coord</span><span class="p">):</span>
         <span class="n">dim</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span><span class="n">dim</span><span class="o">+</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">dim</span><span class="p">(</span><span class="n">coord_i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
@@ -810,6 +1072,12 @@
 
 <div class="viewcode-block" id="BlenderNEURON.distance"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.distance">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the distance between two points defined as 2-lists/tuples</span>
+<span class="sd">        :param a:</span>
+<span class="sd">        :param b:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.point_line_distance"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.point_line_distance">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -817,19 +1085,22 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">start</span> <span class="o">==</span> <span class="n">end</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="p">)</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">n</span> <span class="o">/</span> <span class="n">d</span></div>
 
-    <span class="c1"># Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series</span>
-    <span class="c1"># Ramer-Douglas-Peucker algorithm</span>
-    <span class="c1"># Adapted from: https://github.com/sebleier/RDP</span>
 <div class="viewcode-block" id="BlenderNEURON.rdp"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.rdp">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">rdp</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces a series of points to a simplified version that loses detail, but maintains the general shape of the series</span>
+<span class="sd">        Ramer-Douglas-Peucker algorithm</span>
+<span class="sd">        Adapted from: https://github.com/sebleier/RDP</span>
+
+<span class="sd">        :param points: An array of (x,y) tuples to simplify</span>
+<span class="sd">        :param epsilon: The maximum distance that points can deviate from a line and be removed</span>
+<span class="sd">        :return: A simplified array of (x,y) tuples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">dmax</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
@@ -845,6 +1116,14 @@
 
 <div class="viewcode-block" id="BlenderNEURON.update_group"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.update_group">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">update_group</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates a dictionary with another dictionary, replacing values of matching keys</span>
+
+<span class="sd">        :param group: dictionary to update</span>
+<span class="sd">        :param options: dictionary with which to update the first dictionary</span>
+<span class="sd">        :return: an updated first dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">group</span>
 
@@ -904,7 +1183,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.rawgit.com/mathjax/MathJax/2.7.1/MathJax.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
 
   
 
