@@ -7,13 +7,24 @@ Overview
 
 .. image:: files_static/logo.png
 
-BlenderNEURON is a software tool that takes a NEURON simulator model and exports its 3D structure and membrane activity to Blender. It is easy to install and requires no model translation or modification.
+BlenderNEURON is a software tool that takes a NEURON simulator model and exports its 3D structure and membrane activity
+to Blender, an open-source high-performance 3D modeling tool. BlenderNEURON is easy to install and requires no model
+translation or modification.
 
-Once in Blender, users can inspect/debug cell morphology and network connectivity, re-play/step through/scrub compartment membrane voltage, add render the model as beutiful images or videos/animated GIFs.
+Once a model is in Blender, users can inspect or debug cell morphology and network connectivity, re-play, step through,
+or scrub through compartment membrane voltage over time, and render the model as beautiful images, videos, or animated
+GIFs.
 
-The tool is useful for debugging biophysically realistic neural models, easily creating visually impressive figures, and as a virtual laboratory for teaching neuroscience concepts.
+The tool is useful for debugging biophysically realistic neural models, easily creating visually impressive figures,
+and as a virtual laboratory for teaching neuroscience concepts. Most importantly, the tool works with a large body of
+existing NEURON models. The export can be performed via NEURON GUI or automated via Python commands.
 
-The export can be peformed via NEURON GUI or automated via Python commands.
+`NeuroML <https://neuroml.org>`_ models can be visualized by converting them to NEURON with `j/pyNeuroML <https://github.com/NeuroML/jNeuroML>`_. Support for other simulators can be added
+by passing section morphology and activity data to `the client library <client.html>`_.
+
+The tool has been developed by `researchers at Arizona State University <https://iconlab.asu.edu/>`_ and has been used
+as part of the `NeuroML-DB.org project <https://neuroml-db.org/>`_.
+
 
 ***************
 Architecture

@@ -153,7 +153,7 @@
 <dl class="class">
 <dt id="blenderneuron.client.BlenderNEURON">
 <em class="property">class </em><code class="descclassname">blenderneuron.client.</code><code class="descname">BlenderNEURON</code><span class="sig-paren">(</span><em>h=None</em>, <em>ip='127.0.0.1'</em>, <em>port='8000'</em>, <em>show_panel=True</em>, <em>show_tutorial=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The BlenderNEURON client class, which sends commands to the server created by the BlenderNEURON Blender add-on</p>
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.__init__">
@@ -168,7 +168,7 @@
 <li><strong>ip</strong> – the IP address of the machine where the Addon will listen to client commands. Localhost by default.
 If another machine is specified, make sure any firewalls allow communication. However, this may create a
 potential security issue as the port could be used to execute arbitrary commands while Blender is running. See:
-<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.run_command" title="blenderneuron.client.BlenderNEURON.run_command"><code class="xref any py py-meth docutils literal"><span class="pre">run_command()</span></code></a></li>
+<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.run_command" title="blenderneuron.client.BlenderNEURON.run_command"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">run_command()</span></code></a></li>
 <li><strong>port</strong> – the port of the machine where the Addon will listen to</li>
 <li><strong>show_panel</strong> – Shows the GUI window</li>
 <li><strong>show_tutorial</strong> – Shows a short tutorial for how to use the client</li>
@@ -198,7 +198,7 @@ method.</p>
 <dt id="blenderneuron.client.BlenderNEURON.collect_group">
 <code class="descname">collect_group</code><span class="sig-paren">(</span><em>group_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.collect_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.collect_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Based on the group’s color level, gathers the values of the group’s collect_variable. This method is called
-at regular times during the simulation. See <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.create_cell_group" title="blenderneuron.client.BlenderNEURON.create_cell_group"><code class="xref any py py-meth docutils literal"><span class="pre">create_cell_group()</span></code></a> for details.</p>
+at regular times during the simulation. See <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.create_cell_group" title="blenderneuron.client.BlenderNEURON.create_cell_group"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">create_cell_group()</span></code></a> for details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -345,7 +345,7 @@ segments. This method does nothing if group[‘collect_activity’] is False</p>
 <dl class="method">
 <dt id="blenderneuron.client.BlenderNEURON.enqueue_command">
 <code class="descname">enqueue_command</code><span class="sig-paren">(</span><em>command_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.enqueue_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.enqueue_command" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous version of <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.run_command" title="blenderneuron.client.BlenderNEURON.run_command"><code class="xref any py py-meth docutils literal"><span class="pre">run_command</span></code></a></p>
+<dd><p>Asynchronous version of <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.run_command" title="blenderneuron.client.BlenderNEURON.run_command"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">run_command</span></code></a></p>
 </dd></dl>
 
 <dl class="method">
@@ -458,7 +458,7 @@ method to automatically create them (will be equal to nseg).</p>
 <code class="descname">get_num_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.get_num_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.get_num_frames" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the number of frames to be shown in Blender to represent the simulation.</p>
 <p>It is equal to the maximum number of frames per ms of simulation x NEURON h.tstop</p>
-<p><span class="math">\(t_{stop}*\max_{0 \leq g \leq n}(fps_{g})\)</span></p>
+<p><span class="math notranslate nohighlight">\(t_{stop}*\max_{0 \leq g \leq n}(fps_{g})\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -618,7 +618,7 @@ to remove co-linear points and are sent in batches to maximize performance.</p>
 <code class="descname">send_model</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/client.html#BlenderNEURON.send_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.client.BlenderNEURON.send_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience method to send the model morphology, connections, and activity data to Blender. After this method
 executes, BlenderNEURON addon method ‘link_objects’ needs to be called for the cells to become visible in
-Blender. See: <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.to_blender" title="blenderneuron.client.BlenderNEURON.to_blender"><code class="xref any py py-meth docutils literal"><span class="pre">to_blender</span></code></a> for details.</p>
+Blender. See: <a class="reference internal" href="#blenderneuron.client.BlenderNEURON.to_blender" title="blenderneuron.client.BlenderNEURON.to_blender"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">to_blender</span></code></a> for details.</p>
 <dl class="docutils">
 <dt>Raises:</dt>
 <dd>Exception if communication with BlenderNEURON addon cannot be established</dd>
@@ -649,8 +649,8 @@ Blender. See: <a class="reference internal" href="#blenderneuron.client.BlenderN
 <dd><p>Checks if there are any cell groups or connections setup for export to Blender, creates defaults if not.</p>
 <dl class="docutils">
 <dt>See also:</dt>
-<dd><a class="reference internal" href="#blenderneuron.client.BlenderNEURON.setup_default_group" title="blenderneuron.client.BlenderNEURON.setup_default_group"><code class="xref any py py-meth docutils literal"><span class="pre">setup_default_group</span></code></a>
-<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.setup_default_connections" title="blenderneuron.client.BlenderNEURON.setup_default_connections"><code class="xref any py py-meth docutils literal"><span class="pre">setup_default_connections</span></code></a></dd>
+<dd><a class="reference internal" href="#blenderneuron.client.BlenderNEURON.setup_default_group" title="blenderneuron.client.BlenderNEURON.setup_default_group"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">setup_default_group</span></code></a>
+<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.setup_default_connections" title="blenderneuron.client.BlenderNEURON.setup_default_connections"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">setup_default_connections</span></code></a></dd>
 </dl>
 </dd></dl>
 
@@ -717,7 +717,7 @@ section length and diameter are equal.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>sec_coords</strong> – A dictionary of section 3d coordinates. Same format as elements of array returned by
-<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.get_cell_coords" title="blenderneuron.client.BlenderNEURON.get_cell_coords"><code class="xref any py py-meth docutils literal"><span class="pre">get_cell_coords()</span></code></a></li>
+<a class="reference internal" href="#blenderneuron.client.BlenderNEURON.get_cell_coords" title="blenderneuron.client.BlenderNEURON.get_cell_coords"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">get_cell_coords()</span></code></a></li>
 <li><strong>length</strong> – The length of the section</li>
 <li><strong>steps</strong> – The number of intermediate subdivisions to use to approximate the sphere. More steps uses more
 polygons but results in more smooth sphere.</li>

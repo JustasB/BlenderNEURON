@@ -159,10 +159,19 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/logo.png" src="_images/logo.png" />
-<p>BlenderNEURON is a software tool that takes a NEURON simulator model and exports its 3D structure and membrane activity to Blender. It is easy to install and requires no model translation or modification.</p>
-<p>Once in Blender, users can inspect/debug cell morphology and network connectivity, re-play/step through/scrub compartment membrane voltage, add render the model as beutiful images or videos/animated GIFs.</p>
-<p>The tool is useful for debugging biophysically realistic neural models, easily creating visually impressive figures, and as a virtual laboratory for teaching neuroscience concepts.</p>
-<p>The export can be peformed via NEURON GUI or automated via Python commands.</p>
+<p>BlenderNEURON is a software tool that takes a NEURON simulator model and exports its 3D structure and membrane activity
+to Blender, an open-source high-performance 3D modeling tool. BlenderNEURON is easy to install and requires no model
+translation or modification.</p>
+<p>Once a model is in Blender, users can inspect or debug cell morphology and network connectivity, re-play, step through,
+or scrub through compartment membrane voltage over time, and render the model as beautiful images, videos, or animated
+GIFs.</p>
+<p>The tool is useful for debugging biophysically realistic neural models, easily creating visually impressive figures,
+and as a virtual laboratory for teaching neuroscience concepts. Most importantly, the tool works with a large body of
+existing NEURON models. The export can be performed via NEURON GUI or automated via Python commands.</p>
+<p><a class="reference external" href="https://neuroml.org">NeuroML</a> models can be visualized by converting them to NEURON with <a class="reference external" href="https://github.com/NeuroML/jNeuroML">j/pyNeuroML</a>. Support for other simulators can be added
+by passing section morphology and activity data to <a class="reference external" href="client.html">the client library</a>.</p>
+<p>The tool has been developed by <a class="reference external" href="https://iconlab.asu.edu/">researchers at Arizona State University</a> and has been used
+as part of the <a class="reference external" href="https://neuroml-db.org/">NeuroML-DB.org project</a>.</p>
 </div>
 <div class="section" id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>

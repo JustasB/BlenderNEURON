@@ -45,7 +45,10 @@ Blender Addon Installation
 
 **Part 2: Blender Addon Server**
  1. If you haven't already, install and open `Blender <https://www.blender.org/download/>`_
- 2. Download the `BlenderNEURON addon <https://github.com/JustasB/BlenderNEURON/releases>`_  (e.g. blender_neuron_addon_xxx.zip)
+ 2. Download the `BlenderNEURON addon <https://github.com/JustasB/BlenderNEURON/releases>`_  (e.g.
+    blender_neuron_addon_xxx.zip). Note: On MacOS, Safari browser may `automatically extract the zip file
+    <https://www.addictivetips.com/mac-os/stop-automatically-unzipping-files-in-safari/>`_, make sure you use the unextracted
+    .zip file in the next step.
  3. In Blender, click File > User Preferences > Add-ons (tab) > Install Add-on From File > Point to the addon .zip file
  4. Tick the checkbox next to 'Import-Export: NEURON Blender Interface' to load the addon. Then click "Save User Settings".
  5. If you see a NEURON tab on the left side of the screen, the addon has been loaded successfully.
