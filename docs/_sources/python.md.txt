@@ -84,5 +84,52 @@ A complete example of exporting a model with activity to Blender::
     bn.to_blender()                    # send section morphology and activity data to Blender
 
 
+************************************
+Customizing Visualization Parameters
+************************************
+
+The default visualization parameters used by `bn.to_blender()` method can be customized. Each visualization group, 
+composed of cell root sections, can have its own visualization parameters. By default one group, `all`, is created and contains the root sections of all cells in the model. 
+
+Groups are stored in the `bn.groups` dictionary. To customize the default group's parameters, use the example script below.
+
+In this example, the render detail of each cell will be reduced to improve performance (fewer polygons) in Blender::
+
+    # Build and prepare your model
+    prepare_model()
+
+    # import BlenderNEURON
+    from blenderneuron.quick import bn 
+
+    # Create the default "all" group. Accessible with `bn.groups['all']`
+    bn.setup_default_group()           
+
+    # The whole group of cells is treated as one selectable Blender object (use 'Cell' to make cells individually selectable)
+    bn.groups['all']['3d_data']['interaction_level'] = 'Group'     
+
+    # Each cell will get its own color (each cell will have it's own Blender material)
+    bn.groups['all']['3d_data']['color_level'] = 'Cell'  
+          
+    # Section compartments will be connected with straight-line cylinders (instead of curvy beziers)
+    bn.groups['all']['3d_data']['smooth_sections'] = False  
+
+    # Extra subdivisions are not necessary for straight-line cylinders
+    bn.groups['all']['3d_data']['segment_subdivisions'] = 1
+
+    # The cylinders will have pentagonal cross sections
+    bn.groups['all']['3d_data']['circular_subdivisions'] = 5
+
+    # Send all groups with the updated parameters to Blender
+    bn.to_blender()                    
+
+
+
+
+
+
+See documentation of the `create_cell_group </docs/client.html#blenderneuron.client.BlenderNEURON.create_cell_group>`_ 
+method for values of other parameters.
+
+
 
 

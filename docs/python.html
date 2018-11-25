@@ -87,6 +87,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#before-starting">Before starting:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#visualizing-morphology">Visualizing Morphology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#visualizing-activity">Visualizing Activity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#customizing-visualization-parameters">Customizing Visualization Parameters</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
@@ -223,6 +224,43 @@ through the frames.</li>
 <span class="n">bn</span><span class="o">.</span><span class="n">to_blender</span><span class="p">()</span>                    <span class="c1"># send section morphology and activity data to Blender</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="customizing-visualization-parameters">
+<h2>Customizing Visualization Parameters<a class="headerlink" href="#customizing-visualization-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The default visualization parameters used by <cite>bn.to_blender()</cite> method can be customized. Each visualization group,
+composed of cell root sections, can have its own visualization parameters. By default one group, <cite>all</cite>, is created and contains the root sections of all cells in the model.</p>
+<p>Groups are stored in the <cite>bn.groups</cite> dictionary. To customize the default group’s parameters, use the example script below.</p>
+<p>In this example, the render detail of each cell will be reduced to improve performance (fewer polygons) in Blender:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build and prepare your model</span>
+<span class="n">prepare_model</span><span class="p">()</span>
+
+<span class="c1"># import BlenderNEURON</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.quick</span> <span class="k">import</span> <span class="n">bn</span>
+
+<span class="c1"># Create the default &quot;all&quot; group. Accessible with `bn.groups[&#39;all&#39;]`</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">setup_default_group</span><span class="p">()</span>
+
+<span class="c1"># The whole group of cells is treated as one selectable Blender object (use &#39;Cell&#39; to make cells individually selectable)</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">][</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;interaction_level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Group&#39;</span>
+
+<span class="c1"># Each cell will get its own color (each cell will have it&#39;s own Blender material)</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">][</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;color_level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Cell&#39;</span>
+
+<span class="c1"># Section compartments will be connected with straight-line cylinders (instead of curvy beziers)</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">][</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;smooth_sections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># Extra subdivisions are not necessary for straight-line cylinders</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">][</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;segment_subdivisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># The cylinders will have pentagonal cross sections</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">][</span><span class="s1">&#39;3d_data&#39;</span><span class="p">][</span><span class="s1">&#39;circular_subdivisions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="c1"># Send all groups with the updated parameters to Blender</span>
+<span class="n">bn</span><span class="o">.</span><span class="n">to_blender</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>See documentation of the <a class="reference external" href="/docs/client.html#blenderneuron.client.BlenderNEURON.create_cell_group">create_cell_group</a>
+method for values of other parameters.</p>
 </div>
 </div>
 
