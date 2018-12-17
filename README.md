@@ -15,6 +15,14 @@ The tool is integrated with NEURON to provide a simple user interface and a set 
 | Cerebellum Purkinje Cell         | Neocortex Layer 5 Basket Cell    |
 
 ## Example Networks
+Example visualization of Traub et. al. (2005) cortical column model, also showing a model of a nano-fabricated electrode:
+
+![Traub 2005](images/TraubMediumSingleElectrode.jpg)
+
+Virtual slices can be created by manipulating Blender's camera clipping distances. An example of a virtual slice of an olfcatory bulb model (colors represend different cell types):
+
+![Olfactory bulb slice layers](images/ob-wiki-match.jpg)
+
 Example visualizations of an olfactory bulb model (Migliore et. al. 2014).
 
 ![60MCs](images/60MCs.gif)
@@ -25,7 +33,6 @@ A network of about 60 mitral cells
 
 ![1MCs](images/1MCwGCs.gif)
 Activity of 1 mitral cell with several hundred companion granule cells
-
 
 ## Blender GUI:
 ![Blender GUI](images/Blender.jpg)
