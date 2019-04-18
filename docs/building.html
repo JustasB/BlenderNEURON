@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>BlenderNEURON Documentation &mdash; BlenderNEURON  documentation</title>
+  <title>Building BlenderNEURON &mdash; BlenderNEURON  documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="introduction.html" /> 
+    <link rel="prev" title="Client Library API" href="client.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -47,7 +47,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> BlenderNEURON
+            <a href="index.html" class="icon icon-home"> BlenderNEURON
           
 
           
@@ -77,14 +77,17 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building.html">Building BlenderNEURON</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building BlenderNEURON</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#blender-addon-building">Blender Addon Building</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -99,7 +102,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">BlenderNEURON</a>
+          <a href="index.html">BlenderNEURON</a>
         
       </nav>
 
@@ -128,15 +131,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>BlenderNEURON Documentation</li>
+      <li>Building BlenderNEURON</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/building.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -149,53 +152,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="blenderneuron-documentation">
-<h1>BlenderNEURON Documentation<a class="headerlink" href="#blenderneuron-documentation" title="Permalink to this headline">¶</a></h1>
-<img alt="_images/logo.png" src="_images/logo.png" />
-<p>Welcome to BlenderNEURON documentation. To get started, please follow the sections below.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#getting-started">Getting Started</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#hoc-gui-installation">HOC GUI Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#python-library-installation-optional">Python Library Installation (Optional)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#blender-addon-installation">Blender Addon Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#test-neuron-blender-connectivity">Test NEURON-Blender Connectivity</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="gui.html#visualizing-morphology">Visualizing Morphology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gui.html#visualizing-activity">Visualizing Activity</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="python.html#before-starting">Before starting:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="python.html#visualizing-morphology">Visualizing Morphology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="python.html#visualizing-activity">Visualizing Activity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="python.html#customizing-visualization-parameters">Customizing Visualization Parameters</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building.html">Building BlenderNEURON</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="building.html#blender-addon-building">Blender Addon Building</a></li>
-</ul>
-</li>
-</ul>
+  <div class="section" id="building-blenderneuron">
+<h1>Building BlenderNEURON<a class="headerlink" href="#building-blenderneuron" title="Permalink to this headline">¶</a></h1>
+<p>The Blender addon (the server) uses Cython to improve performance and has to be built for every platform on which it is used. By default,
+the addon includes cythonized binaries for Win, Mac, and Ubuntu Linux versions of Python that come bundled with Blender. On the other hand,
+the HOC/Python library for NEURON (the client) is written in pure Python and does not need to be cythonized.</p>
+<p>If you use a different minor version of Python than the one that comes bundled with Blender (e.g. 3.6 vs bundled 3.5) you will need to manually
+cythonize the addon using your version of Python. Without this step, you will receive the following error in Blender: <code class="docutils literal notranslate"><span class="pre">ModuleNotFound:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'blender_neuron.blender_neuron.server'</span></code></p>
+<div class="section" id="blender-addon-building">
+<span id="addon-build"></span><h2>Blender Addon Building<a class="headerlink" href="#blender-addon-building" title="Permalink to this headline">¶</a></h2>
+<p>Perform the following steps using the Python version that you are using with Blender.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Clone the BlenderNEURON repository: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/JustasB/BlenderNEURON</span></code></li>
+<li>Change into addon folder: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">BlenderNEURON/ForBlender/blender_neuron</span></code></li>
+<li>Ensure you have Cython package installed: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cython</span></code></li>
+<li>Cythonize the addon code: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">build_ext</span> <span class="pre">--inplace</span></code></li>
+<li>Change to parent ForBlender folder: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">..</span></code></li>
+<li>Create a .zip file (recursively, including directory structure) using only <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>, <code class="docutils literal notranslate"><span class="pre">.so</span></code>, and <code class="docutils literal notranslate"><span class="pre">.pyd</span></code> files. On Linux, use command <code class="docutils literal notranslate"><span class="pre">./buildzip.sh</span></code>, which will create the <code class="docutils literal notranslate"><span class="pre">blender_neuron_v.zip</span></code> file.</li>
+<li>The .zip file now contains the compiled version of the Blender addon. Follow <a class="reference external" href="installation.html#blender-addon-installation">the installation steps to install the addon</a>.</li>
+</ol>
+</div></blockquote>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
-</ul>
 </div>
 
 
@@ -206,8 +184,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+        <a href="client.html" class="btn btn-neutral" title="Client Library API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

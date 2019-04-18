@@ -15,6 +15,7 @@ Welcome to BlenderNEURON documentation. To get started, please follow the sectio
    python
 
    client
+   building
 
 Indices and tables
 ==================

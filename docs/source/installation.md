@@ -43,6 +43,8 @@ Install this part if you generally use NEURON+Python interface. The library will
 Blender Addon Installation
 ***************************
 
+.. note:: The steps below assume that the Blender-bundled instance of Python is being used in Blender. If you've modified Blender to use a different version of Python, you will need to `manually Cythonize the addon <building.html>`_.
+
 **Part 2: Blender Addon Server**
  1. If you haven't already, install and open `Blender <https://www.blender.org/download/>`_
  2. Download the `BlenderNEURON addon <https://github.com/JustasB/BlenderNEURON/releases>`_  (e.g.
