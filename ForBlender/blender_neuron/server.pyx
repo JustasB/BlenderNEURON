@@ -14,9 +14,9 @@ class NeuroServer:
         if global_name:
             globals()[global_name] = self
 
-        # Run on localhost:8000, by default
+        # Run on localhost:8753, by default
         self.IP = "127.0.0.1"
-        self.Port = 8000
+        self.Port = 8753
 
         self.resting_color = np.array((30/255.0, 138/255.0, 112/255.0))   # Tinted bluish green
         self.active_color = np.array((0.992, 0.455, 0))                   # Tinted redish yellow

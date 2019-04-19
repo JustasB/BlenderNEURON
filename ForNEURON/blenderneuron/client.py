@@ -15,7 +15,7 @@ from time import sleep
 class BlenderNEURON(object):
     """The BlenderNEURON client class, which sends commands to the server created by the BlenderNEURON Blender add-on"""
 
-    def __init__(self, h=None, ip='127.0.0.1', port='8000', show_panel=True, show_tutorial=True):
+    def __init__(self, h=None, ip='127.0.0.1', port='8753', show_panel=True, show_tutorial=True):
         """
         Creates an XMLRCP client which will communicate with the server, shows the GUI panel, and the tutorial
 
