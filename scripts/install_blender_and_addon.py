@@ -3,7 +3,7 @@ import os, re
 skip_download = os.path.exists('./blender')
 
 if not skip_download:
-    from blender_latest_url import get_latest
+    from latest_blender_url import get_latest
     latest_url = get_latest()
 
     print('Downloading Blender', latest_url)
