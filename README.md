@@ -2,11 +2,19 @@
 
 A Python package and an addon that takes a NEURON simulator model and exports its 3D structure and membrane activity to Blender. The export can be peformed via NEURON GUI or via Python commands.
 
+[![Build Status](https://travis-ci.org/JustasB/BlenderNEURON.svg?branch=master)](https://travis-ci.org/JustasB/BlenderNEURON) [![codecov](https://codecov.io/gh/JustasB/BlenderNEURON/branch/master/graph/badge.svg)](https://codecov.io/gh/JustasB/BlenderNEURON) [![PyPI version](https://badge.fury.io/py/blenderneuron.svg)](https://badge.fury.io/py/blenderneuron)
+
 ## NEURON GUI
 
 ![NEURON GUI](images/NEURON.JPG)
 
 The tool is integrated with NEURON to provide a simple user interface and a set of Python commands that can be used to visualize and inspect single cell or network morphology and activity.
+
+## Blender GUI:
+![Blender GUI](images/Blender.jpg)
+
+## Install Steps and Documentation
+Instructions for how to install and use BlenderNEURON can be found here: [BlenderNEURON Documentation](http://blenderneuron.org/docs)
 
 ## Example Cells and Activity
 
@@ -48,11 +56,3 @@ Exported models can be saved as .blend files and uploaded to 3D model sharing we
     on <a href="https://sketchfab.com?utm_medium=embed&utm_source=website&utm_campaign=share-popup" target="_blank" style="font-weight: bold; color: #1CAAD9;">Sketchfab</a>
 </p>
 </div>
-
-## Blender GUI:
-![Blender GUI](images/Blender.jpg)
-
-## Documentation
-Instructions for how to install and use BlenderNEURON can be found here: [BlenderNEURON Documentation](http://blenderneuron.org/docs)
-
-
