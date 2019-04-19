@@ -2,7 +2,7 @@
 
 import sys
 if sys.version_info[0] < 3:
-    raise Exception("Must be using Python 3+ to compile for Blender")
+    print("WARNING: Must be using Python 3+ to compile for Blender. Ignore this if you're using non-Blender-bundled version of Python.")
 
 from distutils.core import setup, Extension
 from Cython.Build import cythonize

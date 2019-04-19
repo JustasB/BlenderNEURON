@@ -157,6 +157,7 @@
 <span class="kn">import</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">hashlib</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
 <span class="sd">&quot;&quot;&quot;NEURON-based client library for BlenderNEURON&quot;&quot;&quot;</span>
 
@@ -267,6 +268,7 @@
 <span class="sd">        :param color_unique_names: Whether to color the cell sections based on their names, gray otherwise</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_till_blender_is_ready</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s2">&quot;clear&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_model</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enqueue_method</span><span class="p">(</span><span class="s1">&#39;link_objects&#39;</span><span class="p">)</span>
@@ -624,6 +626,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">connectionStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Not Connected&#39;</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
+<div class="viewcode-block" id="BlenderNEURON.wait_till_blender_is_ready"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.wait_till_blender_is_ready">[docs]</a>    <span class="k">def</span> <span class="nf">wait_till_blender_is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Blocks the thread while waiting for communication with BlenderNEURON addon for up to timeout seconds.</span>
+
+<span class="sd">        :raise: Exception if Blender server was not ready before the end of the timeout</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seconds_passed</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_blender_ready</span><span class="p">()</span> <span class="ow">and</span> <span class="n">seconds_passed</span> <span class="o">&lt;=</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">seconds_passed</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_blender_ready</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;BlenderNEURON addon was not ready before the timeout expired&quot;</span><span class="p">)</span>        </div>
+        
+
 <div class="viewcode-block" id="BlenderNEURON.send_morphology"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.send_morphology">[docs]</a>    <span class="k">def</span> <span class="nf">send_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sends the cell morphology data of all defined self.groups to Blender</span>
@@ -969,7 +990,7 @@
 <span class="sd">        :param activity: an array of corresponding activity values</span>
 <span class="sd">        :return: times and activity arrays with the co-linear points removed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">reduced</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity_simplification_tolerance</span><span class="p">)</span>
+        <span class="n">reduced</span> <span class="o">=</span> <span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">rdp</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">activity</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity_simplification_tolerance</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">reduced</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlenderNEURON.clear_activity"><a class="viewcode-back" href="../../client.html#blenderneuron.client.BlenderNEURON.clear_activity">[docs]</a>    <span class="k">def</span> <span class="nf">clear_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

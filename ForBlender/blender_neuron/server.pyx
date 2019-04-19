@@ -963,8 +963,9 @@ class NeuroServer:
             self.objects.pop(ob.name)
 
     def stop(self):
-        self.server.shutdown()
-        self.server.server_close()
+        if hasattr(self, "server") and self.server is not None:
+            self.server.shutdown()
+            self.server.server_close()
         return 0
 
     def ping(self):

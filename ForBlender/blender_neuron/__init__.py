@@ -35,8 +35,9 @@ class NEURONServerStopOperator(bpy.types.Operator):
     bl_label = "Stop Server"
     
     def execute(self, context):
-        bpy.types.Object.neuron_server.stop()
-        bpy.types.Object.neuron_server = None
+        if bpy.types.Object.neuron_server is not None:
+            bpy.types.Object.neuron_server.stop()
+            bpy.types.Object.neuron_server = None
         return {'FINISHED'}
 
 class NEURONServerStartOperator(bpy.types.Operator):

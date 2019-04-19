@@ -8,6 +8,7 @@ except:
 import threading, time, hashlib
 from math import sqrt
 import collections
+from time import sleep
 
 """NEURON-based client library for BlenderNEURON"""
 
@@ -118,6 +119,7 @@ class BlenderNEURON(object):
         :param color_unique_names: Whether to color the cell sections based on their names, gray otherwise
         :return: None
         """
+        self.wait_till_blender_is_ready()
         self.enqueue_method("clear")
         self.send_model()
         self.enqueue_method('link_objects')
@@ -475,6 +477,25 @@ class BlenderNEURON(object):
             self.connectionStatus[0] = 'Not Connected'
             return False
 
+    def wait_till_blender_is_ready(self, timeout=10):
+        """
+        Blocks the thread while waiting for communication with BlenderNEURON addon for up to timeout seconds.
+
+        :raise: Exception if Blender server was not ready before the end of the timeout
+        """
+        seconds_passed = 0
+
+        while not self.is_blender_ready() and seconds_passed <= timeout:
+            sleep(1)
+            seconds_passed += 1
+
+        if self.is_blender_ready():
+            return
+
+        else:
+            raise Exception("BlenderNEURON addon was not ready before the timeout expired")        
+        
+
     def send_morphology(self):
         """
         Sends the cell morphology data of all defined self.groups to Blender
@@ -820,7 +841,7 @@ class BlenderNEURON(object):
         :param activity: an array of corresponding activity values
         :return: times and activity arrays with the co-linear points removed
         """
-        reduced = BlenderNEURON.rdp(zip(times, activity), self.activity_simplification_tolerance)
+        reduced = BlenderNEURON.rdp(list(zip(times, activity)), self.activity_simplification_tolerance)
         return zip(*reduced)
 
     def clear_activity(self):
