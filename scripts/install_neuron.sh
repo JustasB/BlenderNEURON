@@ -56,4 +56,8 @@ export N=$HOME/neuron/nrn
 
 export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 
-cd ~/neuron/nrn/srcs
+export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
+cd ~/neuron/nrn/src/nrnpython/
+python setup.py install
+cd $start_dir
+

@@ -9,7 +9,7 @@ if not skip_download:
     print('Downloading Blender', latest_url)
     import os
     os.system('curl -L -o blender.tar.bz2 ' + latest_url)
-    os.system('tar xvjf blender.tar.bz2')
+    os.system('tar xjf blender.tar.bz2')
 
     # rename dir to just blender
     d = '.'
