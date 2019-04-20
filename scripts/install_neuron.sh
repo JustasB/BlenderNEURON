@@ -2,6 +2,8 @@ neuron_v=7.5
 iv_v=19
 export CPU=x86_64
 
+start_DISPLAY=$DISPLAY
+DISPLAY=:0
 start_dir=$(pwd)
 
 sudo apt-get update
@@ -60,4 +62,5 @@ export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 cd ~/neuron/nrn/src/nrnpython/
 python setup.py install
 cd $start_dir
+DISPLAY=$start_DISPLAY
 
