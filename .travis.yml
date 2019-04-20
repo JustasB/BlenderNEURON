@@ -10,7 +10,7 @@ script:
   - python scripts/install_blender_and_addon.py
   - ./blender/blender --python scripts/install_enable_addon.py --background
   - scripts/install_neuron.sh
-  - python ForNEURON/blenderneuron/tests/test_client.py TestMorphologyExport.test_ping
+  - python tests/test_client.py TestMorphologyExport.test_ping
   - py.test --cov=ForNEURON/blenderneuron tests/test_client.py
 after_success:
   - codecov
