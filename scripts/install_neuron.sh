@@ -5,8 +5,6 @@ export IV=$HOME/neuron/iv
 export N=$HOME/neuron/nrn
 export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 
-start_DISPLAY=$DISPLAY
-DISPLAY=:0
 start_dir=$(pwd)
 
 sudo apt-get update
@@ -21,7 +19,7 @@ pip install --upgrade pip
 
 pip install scipy numpy matplotlib cython mpi4py neuronpy
 
-if [[ -d "~/neuron" ]] ; then
+if [[ -d $HOME/neuron ]] ; then
     exit
 fi
 
@@ -60,7 +58,8 @@ make
 make install
 
 cd ~/neuron/nrn/src/nrnpython/
+
 python setup.py install
+
 cd $start_dir
-DISPLAY=$start_DISPLAY
 
