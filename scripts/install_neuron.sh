@@ -1,10 +1,9 @@
-if [[ -d "~/neuron" ]] ; then
-    exit
-fi
-
 neuron_v=7.5
 iv_v=19
 export CPU=x86_64
+export IV=$HOME/neuron/iv
+export N=$HOME/neuron/nrn
+export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 
 start_DISPLAY=$DISPLAY
 DISPLAY=:0
@@ -21,6 +20,10 @@ sudo apt-get install libncurses-dev xfonts-100dpi
 pip install --upgrade pip
 
 pip install scipy numpy matplotlib cython mpi4py neuronpy
+
+if [[ -d "~/neuron" ]] ; then
+    exit
+fi
 
 curl -o nrn.tar.gz https://neuron.yale.edu/ftp/neuron/versions/v$neuron_v/nrn-$neuron_v.tar.gz
 
@@ -56,13 +59,6 @@ make
 
 make install
 
-export IV=$HOME/neuron/iv
-
-export N=$HOME/neuron/nrn
-
-export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
-
-export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 cd ~/neuron/nrn/src/nrnpython/
 python setup.py install
 cd $start_dir
