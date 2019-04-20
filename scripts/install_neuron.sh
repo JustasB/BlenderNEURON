@@ -8,18 +8,14 @@ export PATH="$IV/$CPU/bin:$N/$CPU/bin:$PATH"
 start_dir=$(pwd)
 
 sudo apt-get update
-
-sudo apt-get install libx11-dev libxt-dev gnome-devel
-
-sudo apt-get install mpich
-
-sudo apt-get install libncurses-dev xfonts-100dpi
-
+sudo apt-get install libx11-dev libxt-dev gnome-devel mpich libncurses-dev xfonts-100dpi
 pip install --upgrade pip
-
 pip install scipy numpy matplotlib cython mpi4py neuronpy
 
 if [[ -d $HOME/neuron ]] ; then
+    cd ~/neuron/nrn/src/nrnpython/
+    python setup.py install
+    cd $start_dir
     exit
 fi
 
