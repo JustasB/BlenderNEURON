@@ -1,9 +1,6 @@
 language: python
 python:
   - "3.5"
-dist: xenial
-services:
-  - xvfb
 install:
   - pip install pytest-cov codecov latest_blender_url 
 script:
@@ -11,10 +8,9 @@ script:
   - python setup.py develop
   - cd ..
   - python scripts/install_blender_and_addon.py
-  - ./blender/blender --python scripts/install_enable_addon.py --background
+  - xvfb-run ./blender/blender --python scripts/install_enable_addon.py --background
   - scripts/install_neuron.sh
-  - export DISPLAY=:99.0
-  - python tests/test_client.py TestMorphologyExport.test_ping
-  - py.test --cov=ForNEURON/blenderneuron tests/test_client.py
+  - xvfb-run python tests/test_client.py TestMorphologyExport.test_ping
+  - xvfb-run py.test --cov=ForNEURON/blenderneuron tests/test_client.py
 after_success:
   - codecov
