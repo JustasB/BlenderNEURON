@@ -1,3 +1,7 @@
+if [[ -d "~/neuron" ]] ; then
+    exit
+fi
+
 neuron_v=7.5
 iv_v=19
 export CPU=x86_64
