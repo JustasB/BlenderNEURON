@@ -11,9 +11,9 @@ script:
   - python setup.py develop
   - cd ..
   - python scripts/install_blender_and_addon.py
-  - xvfb-run --server-args "-screen 0 1920x1080x24" ./blender/blender --python scripts/install_enable_addon.py --background
+  - xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./blender/blender --python scripts/install_enable_addon.py --background
   - scripts/install_neuron.sh
-  - xvfb-run --server-args "-screen 0 1920x1080x24" python tests/test_client.py TestMorphologyExport.test_ping
-  - xvfb-run --server-args "-screen 0 1920x1080x24" py.test --cov=ForNEURON/blenderneuron tests/test_client.py
+  - xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" python tests/test_client.py TestMorphologyExport.test_ping
+  - xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" py.test --cov=ForNEURON/blenderneuron tests/test_client.py
 after_success:
   - codecov
