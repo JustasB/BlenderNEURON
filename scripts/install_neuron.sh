@@ -12,7 +12,7 @@ sudo apt-get install libx11-dev libxt-dev gnome-devel mpich libncurses-dev xfont
 pip install --upgrade pip
 pip install scipy numpy matplotlib cython mpi4py neuronpy
 
-if [[ -d $HOME/neuron ]] ; then
+if [[ -d ~/neuron/nrn/src/nrnpython ]] ; then
     cd ~/neuron/nrn/src/nrnpython/
     python setup.py install
     cd $start_dir
