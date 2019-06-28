@@ -1,0 +1,356 @@
+import blenderneuron
+import threading, time, hashlib
+from math import sqrt
+import collections
+from time import sleep
+import mmap, os, math, json, traceback, socket, queue, tempfile
+from contextlib import closing
+from blenderneuron import config
+
+try:
+    import xmlrpclib
+except:
+    import xmlrpc.client as xmlrpclib
+
+try:
+    from xmlrpc.server import SimpleXMLRPCServer
+    from xmlrpc.server import SimpleXMLRPCRequestHandler
+except:
+    from SimpleXMLRPCServer import SimpleXMLRPCServer
+    from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+
+from socketserver import ThreadingMixIn
+
+debug = True
+
+class CommNode(object):
+    def __init__(self, end):
+        if end in config.end_types:
+            self.server_end = end
+            self.client_end = (set(config.end_types)-set([end])).pop()
+        else:
+            raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(config.end_types))
+
+        self.try_setup_client()
+
+        self.setup_server()
+
+        # If successfully connected, then instruct the other node to connect back
+        # thus completing the circle
+        if self.client is not None:
+            self.client.try_setup_client()
+
+            if self.client is not None and self.server is not None:
+                self.print_safe("Two-way communication between Blender and NEURON established")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_server()
+
+    def init_task_queue(self):
+        self.queue = queue.Queue()
+        self.task_lock = threading.Lock()
+        self.tasks = {}
+        self.task_next_id = 0
+
+    def setup_server(self):
+
+        class CommNodeServer(ThreadingMixIn, SimpleXMLRPCServer, object):
+            """
+            A helper class to create an XML-RCP server
+            """
+
+            def __init__(self, param):
+                self.daemon_threads = True
+                super(CommNodeServer, self).__init__(param, allow_none=True, logRequests=False)
+
+        self.init_task_queue()
+
+        self.server_ip = config.default_ip[self.server_end]
+        self.server_port = self.find_free_port()
+        self.server_address = 'http://' + self.server_ip + ':' + self.server_port
+
+        self.server = CommNodeServer((self.server_ip, int(self.server_port)))
+        self.server.register_introspection_functions()
+
+        # Basic server functions
+        self.server.register_function(self.sm_stop, 'stop')
+        self.server.register_function(self.sm_ping, 'ping')
+        self.server.register_function(self.try_setup_client, 'try_setup_client')
+
+        # Synchronous execution
+        self.server.register_function(self.sm_run_command, 'run_command')
+        self.server.register_function(self.sm_run_method, 'run_method')
+
+        # Asynchronous task execution queueing
+        self.server.register_function(self.sm_enqueue_method, 'enqueue_method')
+        self.server.register_function(self.sm_enqueue_command, 'enqueue_command')
+        self.server.register_function(self.sm_get_task_status, 'get_task_status')
+        self.server.register_function(self.sm_get_task_error, 'get_task_error')
+        self.server.register_function(self.sm_get_task_result, 'get_task_result')
+
+        # Start the server in a separate thread - it will place tasks onto queue
+        self.server_thread = threading.Thread(target=self.server.serve_forever)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+
+        # Perform the servicing of queued tasks in a separate thread
+        self.service_thread = threading.Thread(target=self.service_queue_loop)
+        self.service_thread.daemon = True
+        self.service_thread_continue = True # When false, queue servicing thread will stop
+        self.service_thread.start()
+
+        # Communicate the address of the server to the client
+        self.save_server_address_file()
+
+        self.print_safe("Started " + self.server_end + " server at: " + self.server_address)
+
+    def stop_server(self):
+        if hasattr(self, "service_thread") and self.service_thread is not None and self.service_thread.isAlive():
+            self.service_thread_continue = False
+            self.service_thread.join()
+            self.service_thread = None
+            self.init_task_queue()
+
+        if hasattr(self, "server_thread") and self.server_thread is not None and self.server_thread.isAlive():
+            try:
+                own_server_client = xmlrpclib.ServerProxy(self.server_address, allow_none=True)
+                own_server_client.stop()
+                self.server_thread.join()
+                self.server_thread = None
+            except:
+                pass
+
+        if hasattr(self, "server"):
+            self.server = None
+            self.server_ip = None
+            self.server_port = None
+            self.server_address = None
+
+            self.save_server_address_file()
+
+    def find_free_port(self):
+        """
+        :return: A random available port
+        """
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.bind(('localhost', 0))
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            return str(s.getsockname()[1])
+
+    def try_setup_client(self):
+        try:
+            # Try reading the client address file
+            client_address = self.read_client_address_file()
+
+            # Create XML-RCP client and attempt to connect to it
+            self.client = xmlrpclib.ServerProxy(client_address, allow_none=True)
+            assert self.client.ping() == 1
+
+            # If connection succeeded, save the address
+            self.client_address = client_address
+
+        except (IOError, ValueError, AssertionError):
+            self.print_safe("Could not connect to " + self.client_end + " server. Ensure "+("Blender+BlenderNEURON addon" if self.server_end == "NEURON" else "NEURON+BlenderNEURON package")+" is running.")
+            self.client = None
+            self.client_address = None
+
+    def read_client_address_file(self):
+        """
+        Read from a file in tmp folder that contains the address of the other node's XML-RCP server
+        :return: The address of the other end's XML-RCP server
+        """
+        tmp_dir = os.path.abspath(tempfile.gettempdir())
+        file_name = self.get_end_address_file(self.client_end)
+
+        if not os.path.exists(file_name):
+            raise IOError("Client address file not found:" + file_name)
+
+        with open(file_name, "r") as f:
+            client_address = f.read()
+
+        if "http" not in client_address:
+            raise ValueError("Address in the client address file does not appear to be valid:" + client_address)
+
+        return client_address
+
+    def save_server_address_file(self):
+        """
+        Create a file in tmp folder that contains the address of this node's XML-RCP server
+        :return: Nothing
+        """
+        file_name = self.get_end_address_file(self.server_end)
+
+        # If the server address is blank (i.e. on cleanup), remove the file if it exists
+        if self.server_address is None:
+            if os.path.exists(file_name):
+                os.remove(file_name)
+
+        else:
+            with open(file_name, "w") as f:
+                f.write(self.server_address)
+
+    def get_end_address_file(self, end):
+        tmp_dir = os.path.abspath(tempfile.gettempdir())
+        file_name = os.path.join(tmp_dir, "BlenderNEURON-" + end + ".address")
+        return file_name
+
+    def print_safe(self, value):
+        if debug == False:
+            return
+
+        try:
+            print(value)
+        except:
+            tb = traceback.format_exc()
+            print(tb)
+
+    def sm_stop(self):
+        """
+        A method that, when called by a client of the node server, will stop the server
+        :return:
+        """
+        if hasattr(self, "server") and self.server is not None:
+            self.server.shutdown()
+            self.server.server_close()
+
+        return 0
+
+    def sm_ping(self):
+        self.print_safe(self.server_end + " server at " + self.server_address + " ALIVE")
+        return 1
+
+    def sm_run_command(self, command_string):
+        exec_lambda = self._get_command_lambda(command_string)
+        return self._run_lambda(exec_lambda)
+
+    def sm_enqueue_command(self, command_string):
+        exec_lambda = self._get_command_lambda(command_string)
+        return self._enqueue_lambda(exec_lambda)
+
+    def sm_run_method(self, method, args, kwargs):
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+
+        return self._run_lambda(task_lambda)
+
+    def sm_enqueue_method(self, method, args, kwargs):
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+
+        return self._enqueue_lambda(task_lambda)
+
+    def _get_command_lambda(self, command_string):
+        """
+        Execute arbitrary python command within Blender's python process
+        :param command_string: A python expression. Set variable 'return_value' to receive a response.
+           e.g. command_string = "print('test')" -> will print 'test' in Blender console
+           e.g. command_string = "return_value = 1+3" -> will compute in Blender and return 4
+           e.g. command_string = "import bpy; return_value = [i for i in bpy.data.objects]" -> will list all Blender objects
+        :return:
+        """
+        def exec_lambda():
+            end_imports = config.imports[self.server_end]
+            exec(end_imports + "; " + command_string, globals())
+            return globals().pop('return_value', None)
+
+        return exec_lambda
+
+    def _get_method_lambda(self, method, *args, **kwargs):
+
+        # Retrieve the default values from method definition and pass them along if they're not set
+        method_arg_spec = inspect.getargspec(getattr(self, method))
+        default_args = dict(zip(method_arg_spec.args[-len(method_arg_spec.defaults):], method_arg_spec.defaults))
+        for arg in default_args:
+            if arg not in kwargs:
+                kwargs[arg] = default_args[arg]
+
+        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
+        return task_lambda
+
+    def _run_lambda(self, task_lambda):
+        id = self._enqueue_lambda(task_lambda)
+
+        while self.sm_get_task_status(id) == 'QUEUED':
+            time.sleep(0.1)
+
+        status = self.sm_get_task_status(id)
+
+        if status == "SUCCESS":
+            return self.sm_get_task_result(id)
+
+        else:
+            raise Exception(self.sm_get_task_error(id))
+
+    def _enqueue_lambda(self, task_lambda):
+        task_id = self._get_new_task_id()
+
+        task = {
+            "id": task_id,
+            "status": "QUEUED",
+            "lambda": task_lambda,
+            "result": None,
+            "error": None
+        }
+
+        self.tasks[task_id] = task
+        self.queue.put(task)
+
+        return task_id
+
+    def _get_new_task_id(self):
+        with self.task_lock:
+            task_id = self.task_next_id
+            self.task_next_id += 1
+
+        return task_id
+
+    def sm_get_task_status(self, task_id):
+        if task_id in self.tasks:
+            return self.tasks[task_id]["status"]
+
+        return "DOES_NOT_EXIST"
+
+    def sm_get_task_error(self, task_id):
+        return self.tasks[task_id]["error"]
+
+    def sm_get_task_result(self, task_id):
+        return self.tasks[task_id]["result"]
+
+    def work_on_queue_tasks(self):
+        q = self.queue
+        self.queue_error = False
+
+        while not q.empty():
+            self.print_safe("Tasks in queue. Getting next task...")
+            task = q.get()
+
+            try:
+                if not self.queue_error:
+                    self.print_safe("Running task...")
+                    result = task["lambda"]()
+                    task["result"] = result
+                    task["status"] = "SUCCESS"
+                else:
+                    self.print_safe("Previous task had an error. SKIPPING.")
+                    task["status"] = "ERROR"
+
+            except:
+                self.queue_error = True
+                tb = traceback.format_exc()
+
+                task["status"] = "ERROR"
+                task["error"] = tb
+
+                self.print_safe(tb)
+
+            q.task_done()
+            self.print_safe("DONE")
+
+    def service_queue_loop(self):
+        while self.service_thread_continue:
+            if not self.queue.empty():
+                self.work_on_queue_tasks()
+            else:
+                time.sleep(0.1)
+
