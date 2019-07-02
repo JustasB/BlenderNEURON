@@ -1,45 +1,34 @@
 try:
-    import os, sys
-    from blenderneuron.commnode import CommNode
-    import bpy, threading
+    import bpy
     from bpy.app.handlers import persistent
+
+    import blenderneuron
+    from blenderneuron.commnode import CommNode
+
+    from blenderneuron.addon.operators import *
+    from blenderneuron.addon.panels import *
+    from blenderneuron.addon.properties import *
+
+    from blenderneuron.addon.utils import register_module_classes
 
     inside_blender = True
 except:
     inside_blender = False
 
 if inside_blender:
+
     bl_info = {
-        "name": "NEURON Blender Interface",
+        "name": "BlenderNEURON",
+        "description": "A Blender GUI for NEURON simulator",
+        "author": "Justas Birgiolas",
+        "version": (2, 0),
+        "blender": (2, 79, 0),
+        "location": "View3D > Tools > BlenderNEURON side tab",
+        "wiki_url": "BlenderNEURON.org",
+        "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
+        "support": "COMMUNITY",
         "category": "Import-Export",
     }
-
-    class NEURONServerStopOperator(bpy.types.Operator):
-        bl_idname = "wm.blenderneuron_node_stop"
-        bl_label = "Stop BlenderNEURON Blender node"
-
-        def execute(self, context):
-            if hasattr(bpy.types.Object, "BlenderNEURON_node") and \
-               bpy.types.Object.BlenderNEURON_node is not None:
-                    bpy.types.Object.BlenderNEURON_node.stop_server()
-                    bpy.types.Object.BlenderNEURON_node = None
-
-            return {'FINISHED'}
-
-
-    class NEURONServerStartOperator(bpy.types.Operator):
-        bl_idname = "wm.blenderneuron_node_start"
-        bl_label = "Start BlenderNEURON Blender node"
-
-        def execute(self, context):
-            # Create the communications node for Blender end
-            node = CommNode("Blender")
-
-            # Save it so it's accessible globally from Blender
-            bpy.types.Object.BlenderNEURON_node = node
-
-            return {'FINISHED'}
-
 
     @persistent
     def auto_start(scene):
@@ -50,8 +39,18 @@ if inside_blender:
 
 
     def register():
-        bpy.utils.register_class(NEURONServerStartOperator)
-        bpy.utils.register_class(NEURONServerStopOperator)
+        try:
+            bpy.utils.register_module(__name__)
+        except:
+            pass
+
+        register_module_classes(blenderneuron.addon.operators)
+        register_module_classes(blenderneuron.addon.panels)
+        register_module_classes(blenderneuron.addon.properties)
+
+        # Load config properties
+        bpy.types.Scene.BlenderNEURON_properties = \
+            bpy.props.PointerProperty(type=blenderneuron_properties)
 
         # This ensures the server starts on Blender load (self-removing)
         bpy.app.handlers.scene_update_post.append(auto_start)
@@ -59,8 +58,16 @@ if inside_blender:
     def unregister():
         bpy.ops.wm.blenderneuron_node_stop()
 
-        bpy.utils.unregister_class(NEURONServerStartOperator)
-        bpy.utils.unregister_class(NEURONServerStopOperator)
+        try:
+            bpy.utils.unregister_module(__name__)
+        except:
+            pass
+
+        register_module_classes(blenderneuron.addon.operators, unreg=True)
+        register_module_classes(blenderneuron.addon.panels, unreg=True)
+        register_module_classes(blenderneuron.addon.properties, unreg=True)
+
+        del bpy.types.Scene.BlenderNEURON_properties
 
 # Only for testing from Blender Text Editor
 if __name__ == "__main__" and inside_blender:

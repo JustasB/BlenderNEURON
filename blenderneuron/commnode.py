@@ -1,11 +1,11 @@
-import blenderneuron
-import threading, time, hashlib
-from math import sqrt
-import collections
-from time import sleep
-import mmap, os, math, json, traceback, socket, queue, tempfile
+try:
+    import Queue as queue
+except:
+    import queue
+
+import threading, time, sys
+import os, json, traceback, socket, tempfile, atexit
 from contextlib import closing
-from blenderneuron import config
 
 try:
     import xmlrpclib
@@ -24,20 +24,28 @@ from socketserver import ThreadingMixIn
 debug = True
 
 class CommNode(object):
-    def __init__(self, end):
-        if end in config.end_types:
-            self.server_end = end
-            self.client_end = (set(config.end_types)-set([end])).pop()
-        else:
-            raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(config.end_types))
+    def __init__(self, end, connect_back=True):
+        self.load_config()
 
+        if end in self.config["end_types"]:
+            self.server_end = end
+            self.client_end = (set(self.config["end_types"])-set([end])).pop()
+        else:
+            raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(self.config["end_types"]))
+
+        # Try connecting to the other node (if it's running)
         self.try_setup_client()
 
+        self.connect_back = connect_back
+
+        # Create a server
         self.setup_server()
 
         # If successfully connected, then instruct the other node to connect back
-        # thus completing the circle
-        if self.client is not None:
+        # and complete the 2nd half of the connection
+        # Note: when `connect_back` is False, this keeps the node 1-directional (a node with a connected client, but
+        # no connections to the server)
+        if self.client is not None and self.connect_back:
             self.client.try_setup_client()
 
             if self.client is not None and self.server is not None:
@@ -48,6 +56,12 @@ class CommNode(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop_server()
+
+    def load_config(self):
+        package_dir = os.path.dirname(os.path.abspath(__file__))
+        config_file = os.path.join(package_dir, 'config.json')
+        with open(config_file, "r") as f:
+            self.config = json.load(f)[0]
 
     def init_task_queue(self):
         self.queue = queue.Queue()
@@ -68,8 +82,10 @@ class CommNode(object):
 
         self.init_task_queue()
 
-        self.server_ip = config.default_ip[self.server_end]
-        self.server_port = self.find_free_port()
+        port = self.config["default_port"][self.server_end]
+
+        self.server_ip = self.config["default_ip"][self.server_end]
+        self.server_port = self.find_free_port() if port == "" else port
         self.server_address = 'http://' + self.server_ip + ':' + self.server_port
 
         self.server = CommNodeServer((self.server_ip, int(self.server_port)))
@@ -103,7 +119,8 @@ class CommNode(object):
         self.service_thread.start()
 
         # Communicate the address of the server to the client
-        self.save_server_address_file()
+        if self.connect_back:
+            self.save_server_address_file()
 
         self.print_safe("Started " + self.server_end + " server at: " + self.server_address)
 
@@ -140,10 +157,16 @@ class CommNode(object):
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return str(s.getsockname()[1])
 
-    def try_setup_client(self):
+    def try_setup_client(self, warn=True):
         try:
-            # Try reading the client address file
-            client_address = self.read_client_address_file()
+            config_ip = self.config["default_ip"][self.client_end]
+            config_port = self.config["default_port"][self.client_end]
+
+            if config_ip != "127.0.0.1" and config_port != "":
+                client_address = 'http://' + config_ip + ':' + config_port
+            else:
+                # Try reading the client address file
+                client_address = self.read_client_address_file()
 
             # Create XML-RCP client and attempt to connect to it
             self.client = xmlrpclib.ServerProxy(client_address, allow_none=True)
@@ -153,7 +176,11 @@ class CommNode(object):
             self.client_address = client_address
 
         except (IOError, ValueError, AssertionError):
-            self.print_safe("Could not connect to " + self.client_end + " server. Ensure "+("Blender+BlenderNEURON addon" if self.server_end == "NEURON" else "NEURON+BlenderNEURON package")+" is running.")
+            if warn:
+                self.print_safe("Could not connect to " + self.client_end + " server. Ensure "+
+                    ("Blender+BlenderNEURON addon" if self.server_end == "NEURON" else "NEURON+BlenderNEURON package")+
+                    " is running.")
+
             self.client = None
             self.client_address = None
 
@@ -250,7 +277,7 @@ class CommNode(object):
         :return:
         """
         def exec_lambda():
-            end_imports = config.imports[self.server_end]
+            end_imports = self.config["imports"][self.server_end]
             exec(end_imports + "; " + command_string, globals())
             return globals().pop('return_value', None)
 
@@ -339,10 +366,23 @@ class CommNode(object):
                 self.queue_error = True
                 tb = traceback.format_exc()
 
-                task["status"] = "ERROR"
-                task["error"] = tb
+                if "SystemExit" not in tb:
+                    task["status"] = "ERROR"
+                    task["error"] = tb
+                    self.print_safe(tb)
 
-                self.print_safe(tb)
+                else:
+                    task["status"] = "SUCCESS"
+                    task["result"] = None
+
+                    # We want to allow the RCP server to send back a response before killing the process
+                    def self_destruct():
+                        self.print_safe("Exiting NEURON in 1s ... ")
+                        time.sleep(0.5)
+                        quit()
+
+                    thread = threading.Thread(target=self_destruct)
+                    thread.start()
 
             q.task_done()
             self.print_safe("DONE")

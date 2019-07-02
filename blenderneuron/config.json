@@ -1,0 +1,22 @@
+[
+    {
+        "NEURON_last_command": "h.run()",
+        "NEURON_launch_command": "nrngui -python -c 'from blenderneuron import neuronstart'",
+        "default_ip": {
+            "Blender": "127.0.0.1",
+            "NEURON": "127.0.0.1"
+        },
+        "default_port": {
+            "Blender": "",
+            "NEURON": ""
+        },
+        "end_types": [
+            "NEURON",
+            "Blender"
+        ],
+        "imports": {
+            "Blender": "import bpy, mathutils",
+            "NEURON": "from neuron import h"
+        }
+    }
+]
