@@ -1,21 +1,7 @@
 import bpy
+
+from blenderneuron.addon.panels import BlenderNEURONPanel
 from blenderneuron.addon.utils import blender_launched_neuron_running
-
-class BlenderNEURONPanel(object):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_context = "objectmode"
-    bl_category = "BlenderNEURON"
-    bl_label = ""
-
-    def draw(self, context):
-        pass
-
-    def set_node(self):
-        try:
-            self.node = bpy.types.Object.BlenderNEURON_node
-        except:
-            self.node = None
 
 
 class blenderneuron_nodes_panel(BlenderNEURONPanel, bpy.types.Panel):
@@ -76,24 +62,3 @@ class blenderneuron_nodes_panel(BlenderNEURONPanel, bpy.types.Panel):
             # ----------- #
 
             self.layout.operator("wm.blenderneuron_node_stop", text="Stop Blender Node", icon="CANCEL")
-
-
-class blenderneuron_NEURON_panel(BlenderNEURONPanel, bpy.types.Panel):
-    bl_label = "NEURON"
-
-    def draw(self, context):
-
-        self.set_node()
-
-        self.layout.label(text="NEURON Client Status")
-
-        col = self.layout.box().column(align=True)
-
-        if self.node is None or self.node.client is None:
-            col.label(text="Status: Not Connected", icon="ERROR")
-
-        else:
-            col.label(text="Status: Connected")
-
-        if blender_launched_neuron_running():
-            col.label("Blender launched NEURON is running")

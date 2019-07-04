@@ -1,21 +1,24 @@
 try:
     import bpy
-    from bpy.app.handlers import persistent
-
-    import blenderneuron
-    from blenderneuron.commnode import CommNode
-
-    from blenderneuron.addon.operators import *
-    from blenderneuron.addon.panels import *
-    from blenderneuron.addon.properties import *
-
-    from blenderneuron.addon.utils import register_module_classes
-
     inside_blender = True
 except:
     inside_blender = False
 
 if inside_blender:
+    from bpy.app.handlers import persistent
+
+    import blenderneuron
+    from blenderneuron.commnode import CommNode
+
+    from blenderneuron.addon.operators.connection import *
+    from blenderneuron.addon.panels.connection import *
+    from blenderneuron.addon.properties.connection import *
+
+    from blenderneuron.addon.operators.cellgroups import *
+    from blenderneuron.addon.panels.cellgroups import *
+    from blenderneuron.addon.properties.cellgroups import *
+
+    from blenderneuron.addon.utils import register_module_classes
 
     bl_info = {
         "name": "BlenderNEURON",
@@ -44,13 +47,17 @@ if inside_blender:
         except:
             pass
 
-        register_module_classes(blenderneuron.addon.operators)
-        register_module_classes(blenderneuron.addon.panels)
-        register_module_classes(blenderneuron.addon.properties)
+        register_module_classes(blenderneuron.addon.operators.connection)
+        register_module_classes(blenderneuron.addon.panels.connection)
+        register_module_classes(blenderneuron.addon.properties.connection)
 
-        # Load config properties
-        bpy.types.Scene.BlenderNEURON_properties = \
-            bpy.props.PointerProperty(type=blenderneuron_properties)
+        blenderneuron.addon.properties.connection.register()
+
+        register_module_classes(blenderneuron.addon.operators.cellgroups)
+        register_module_classes(blenderneuron.addon.panels.cellgroups)
+        register_module_classes(blenderneuron.addon.properties.cellgroups)
+
+        blenderneuron.addon.properties.cellgroups.register()
 
         # This ensures the server starts on Blender load (self-removing)
         bpy.app.handlers.scene_update_post.append(auto_start)
@@ -63,11 +70,19 @@ if inside_blender:
         except:
             pass
 
-        register_module_classes(blenderneuron.addon.operators, unreg=True)
-        register_module_classes(blenderneuron.addon.panels, unreg=True)
-        register_module_classes(blenderneuron.addon.properties, unreg=True)
+        register_module_classes(blenderneuron.addon.operators.connection, unreg=True)
+        register_module_classes(blenderneuron.addon.panels.connection, unreg=True)
+        register_module_classes(blenderneuron.addon.properties.connection, unreg=True)
 
-        del bpy.types.Scene.BlenderNEURON_properties
+        blenderneuron.addon.connection.properties.unregister()
+
+        register_module_classes(blenderneuron.addon.operators.cellgroups, unreg=True)
+        register_module_classes(blenderneuron.addon.panels.cellgroups, unreg=True)
+        register_module_classes(blenderneuron.addon.properties.cellgroups, unreg=True)
+
+        blenderneuron.addon.properties.cellgroups.unregister()
+
+
 
 # Only for testing from Blender Text Editor
 if __name__ == "__main__" and inside_blender:

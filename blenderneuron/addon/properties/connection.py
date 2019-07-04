@@ -126,3 +126,12 @@ class blenderneuron_properties(bpy.types.PropertyGroup):
                     "NEURON. Printed output can be seen in the Blender console window",
         get=neuron_last_command_get, set=neuron_last_command_set, update=on_neuron_last_command_updated
     )
+
+
+def register():
+    # Load config properties
+    bpy.types.Scene.BlenderNEURON_properties = \
+        bpy.props.PointerProperty(type=blenderneuron_properties)
+
+def unregister():
+    del bpy.types.Scene.BlenderNEURON_properties
