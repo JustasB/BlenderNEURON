@@ -35,6 +35,15 @@ class CUSTOM_PT_NEURON_CellGroups(BlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_CellGroups'
     bl_label = "Cell Groups"
 
+    @classmethod
+    def poll(cls, context):
+        """
+        Checks if a connection to NEURON has been established
+        """
+        return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
+               bpy.types.Object.BlenderNEURON_node is not None and \
+               bpy.types.Object.BlenderNEURON_node.client is not None
+
     def draw(self, context):
         scene = context.scene
 
@@ -59,15 +68,13 @@ class CUSTOM_PT_NEURON_GroupCells(BlenderNEURONPanel, Panel):
         return BlenderNEURONPanel.groups_exist(context)
 
     def draw(self, context):
-        scene = context.scene
+        group = self.get_group(context)
 
-        # Get the group for which the list of cells will be shown
-        group_index = scene.BlenderNEURON_neuron_cellgroups_index
-        group = scene.BlenderNEURON_neuron_cellgroups[group_index]
+        self.layout.operator("custom.get_cell_list_from_neuron", text="Refresh NEURON Cell List", icon="FILE_REFRESH")
 
         self.layout.template_list("CUSTOM_UL_CellListWidget", "", \
-                                  group, "group_cells", \
-                                  group, "group_cells_index", \
+                                  group, "cells", \
+                                  group, "cells_index", \
                                   rows=5)
 
         col = self.layout.split(0.33)
@@ -85,27 +92,32 @@ class CUSTOM_PT_NEURON_GroupSettings(BlenderNEURONPanel, Panel):
         return BlenderNEURONPanel.groups_exist(context)
 
     def draw(self, context):
-        scene = context.scene
+
+        group = self.get_group(context)
 
         col = self.layout
-        col.prop(scene, "BlenderNEURON_import_recording_granularity", text="Record")
-        col.prop(scene, "BlenderNEURON_record_variable", text="Variable")
-        col.prop(scene, "BlenderNEURON_import_interaction_granularity", text="Interact")
+        col.prop(group, "recording_granularity", text="Record")
+        col.prop(group, "record_variable", text="Variable")
+        col.prop(group, "interaction_granularity", text="Interact")
         col.separator()
 
         row = col.split(0.5)
-        row.prop(scene, "BlenderNEURON_import_activity", text="Import Activity")
-        row.prop(scene, "BlenderNEURON_import_synapses", text="Import Synapses")
+        row.prop(group, "import_activity", text="Import Activity")
+        row.prop(group, "import_synapses", text="Import Synapses")
 
 
-class CUSTOM_PT_NEURON_SimulationSettings(BlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
+class CUSTOM_PT_NEURON_Import(BlenderNEURONPanel, Panel):
+    bl_idname = 'CUSTOM_PT_NEURON_Import'
     bl_label = "Import"
+
+    @classmethod
+    def poll(cls, context):
+        return BlenderNEURONPanel.groups_exist(context)
 
     def draw(self, context):
         scene = context.scene
 
-        self.layout.operator("custom.import_selected_neuron_cells", text="Display Selected Cells in Blender",
+        self.layout.operator("custom.import_selected_groups", text="Show Selected Cell Groups in Blender",
                              icon="PLAY")
 
 
@@ -113,14 +125,31 @@ class CUSTOM_PT_NEURON_SimulationSettings(BlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
     bl_label = "Simulation"
 
+    @classmethod
+    def poll(cls, context):
+        """
+        Checks if a connection to NEURON has been established
+        """
+        return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
+               bpy.types.Object.BlenderNEURON_node is not None and \
+               bpy.types.Object.BlenderNEURON_node.client is not None
+
     def draw(self, context):
-        scene = context.scene
+        settings = self.get_sim_settings(context)
 
         col = self.layout
-        col.prop(scene, "BlenderNEURON_neuron_tstop", text="Stop Time")
-        col.prop(scene, "BlenderNEURON_temperature", text="Temperature")
 
-        col.operator("custom.import_selected_neuron_cells", text="Open Voltage Plot", icon="FCURVE")
-        col.prop(scene, "BlenderNEURON_integration_method")
-        col.operator("custom.import_selected_neuron_cells", text="Init & Run", icon="POSE_DATA")
+        col.prop(settings, "neuron_tstop", text="Stop Time")
+        col.prop(settings, "temperature", text="Temperature")
+
+        col.operator("custom.import_selected_groups", text="Open Voltage Plot", icon="FCURVE")
+        col.prop(settings, "integration_method")
+
+        if settings.integration_method == 0:
+            col.prop(settings, "time_step")
+
+        if settings.integration_method == 1:
+            col.prop(settings, "abs_tolerance")
+
+        col.operator("custom.import_selected_groups", text="Init & Run", icon="POSE_DATA")
 

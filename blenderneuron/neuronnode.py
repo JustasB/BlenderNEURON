@@ -7,6 +7,8 @@ class NeuronNode(CommNode):
     def __init__(self, *args, **kwargs):
         super(NeuronNode, self).__init__("NEURON", *args, **kwargs)
 
+        h.load_file('stdrun.hoc')
+
         self.server.register_function(self.get_root_section_names)
 
     def get_cell_data(self, root_ids, render_options):

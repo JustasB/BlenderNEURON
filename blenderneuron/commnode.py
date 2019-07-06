@@ -24,28 +24,28 @@ from socketserver import ThreadingMixIn
 debug = True
 
 class CommNode(object):
-    def __init__(self, end, connect_back=True):
+    def __init__(self, end):
         self.load_config()
 
         if end in self.config["end_types"]:
             self.server_end = end
-            self.client_end = (set(self.config["end_types"])-set([end])).pop()
+            self.client_end = "NEURON" if end == "Blender" else "Blender"
         else:
             raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(self.config["end_types"]))
 
         # Try connecting to the other node (if it's running)
         self.try_setup_client()
 
-        self.connect_back = connect_back
+        # 'Control' nodes are 1-directional (a node with a connected client, but no server of it's own)
+        if self.server_end == 'Control':
+            return
 
         # Create a server
         self.setup_server()
 
         # If successfully connected, then instruct the other node to connect back
         # and complete the 2nd half of the connection
-        # Note: when `connect_back` is False, this keeps the node 1-directional (a node with a connected client, but
-        # no connections to the server)
-        if self.client is not None and self.connect_back:
+        if self.client is not None:
             self.client.try_setup_client()
 
             if self.client is not None and self.server is not None:
@@ -101,10 +101,10 @@ class CommNode(object):
         self.server.register_function(self.sm_run_method, 'run_method')
 
         # Asynchronous task execution queueing
-        self.server.register_function(self.sm_enqueue_method, 'enqueue_method')
+        self.server.register_function(self.sm_enqueue_method,  'enqueue_method')
         self.server.register_function(self.sm_enqueue_command, 'enqueue_command')
         self.server.register_function(self.sm_get_task_status, 'get_task_status')
-        self.server.register_function(self.sm_get_task_error, 'get_task_error')
+        self.server.register_function(self.sm_get_task_error,  'get_task_error')
         self.server.register_function(self.sm_get_task_result, 'get_task_result')
 
         # Start the server in a separate thread - it will place tasks onto queue
@@ -119,8 +119,7 @@ class CommNode(object):
         self.service_thread.start()
 
         # Communicate the address of the server to the client
-        if self.connect_back:
-            self.save_server_address_file()
+        self.save_server_address_file()
 
         self.print_safe("Started " + self.server_end + " server at: " + self.server_address)
 

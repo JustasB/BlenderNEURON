@@ -1,18 +1,21 @@
 [
     {
-        "NEURON_last_command": "h.run()",
+        "NEURON_last_command": "s2 = h.Section(name='soma4')",
         "NEURON_launch_command": "nrngui -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
             "Blender": "127.0.0.1",
+            "Control": "127.0.0.1",
             "NEURON": "127.0.0.1"
         },
         "default_port": {
             "Blender": "",
+            "Control": "",
             "NEURON": ""
         },
         "end_types": [
             "NEURON",
-            "Blender"
+            "Blender",
+            "Control"
         ],
         "imports": {
             "Blender": "import bpy, mathutils",
