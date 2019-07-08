@@ -55,6 +55,9 @@ if inside_blender:
 
         register_module_classes(blenderneuron.addon.operators.cellgroups)
         register_module_classes(blenderneuron.addon.panels.cellgroups)
+
+        bpy.utils.register_class(blenderneuron.addon.properties.cellgroups.CUSTOM_NEURON_Activity)
+        bpy.utils.register_class(blenderneuron.addon.properties.cellgroups.CUSTOM_NEURON_CellSection)
         register_module_classes(blenderneuron.addon.properties.cellgroups)
 
         blenderneuron.addon.properties.cellgroups.register()

@@ -13,8 +13,15 @@ class blenderneuron_node_start(bpy.types.Operator):
                      "bi-directional communication with NEURON"
 
     def execute(self, context):
+        def test():
+            context.scene.BlenderNEURON_simulator_settings.from_neuron()
+
+
         # Create the communications node for Blender end
-        node = CommNode("Blender")
+        node = CommNode(
+            end="Blender",
+            on_client_connected=test
+        )
 
         # Save it so it's accessible globally from Blender
         bpy.types.Object.BlenderNEURON_node = node
@@ -45,6 +52,11 @@ class blenderneuron_stop_neuron(bpy.types.Operator):
     bl_description = "Stops the NEURON process, if any, that was launched from Blender"
 
     def execute(self, context):
+        try:
+            bpy.ops.custom.reset_groups()
+        except:
+            pass
+
         stop_neuron()
 
         # If a client was connected, try re-connect or cleanup

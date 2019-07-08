@@ -15,7 +15,7 @@ class BlenderNEURONPanel(object):
         """
         Checks if there are any cell groups
         """
-        return len(context.scene.BlenderNEURON_neuron_cellgroups) > 0
+        return len(context.scene.BlenderNEURON_cellgroups) > 0
 
     def get_group(self, context):
         """
@@ -27,8 +27,8 @@ class BlenderNEURONPanel(object):
         scene = context.scene
 
         # Get the group for which the list of cells will be shown
-        group_index = scene.BlenderNEURON_neuron_cellgroups_index
-        group = scene.BlenderNEURON_neuron_cellgroups[group_index]
+        group_index = scene.BlenderNEURON_cellgroups_index
+        group = scene.BlenderNEURON_cellgroups[group_index]
 
         return group
 

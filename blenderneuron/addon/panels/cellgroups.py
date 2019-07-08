@@ -50,8 +50,8 @@ class CUSTOM_PT_NEURON_CellGroups(BlenderNEURONPanel, Panel):
         row = self.layout.row()
 
         row.template_list("CUSTOM_UL_CellGroupListWidget", "", \
-                          scene, "BlenderNEURON_neuron_cellgroups", \
-                          scene, "BlenderNEURON_neuron_cellgroups_index", \
+                          scene, "BlenderNEURON_cellgroups", \
+                          scene, "BlenderNEURON_cellgroups_index", \
                           rows=3)
 
         col = row.column(align=True)
@@ -117,7 +117,7 @@ class CUSTOM_PT_NEURON_Import(BlenderNEURONPanel, Panel):
     def draw(self, context):
         scene = context.scene
 
-        self.layout.operator("custom.import_selected_groups", text="Show Selected Cell Groups in Blender",
+        self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
                              icon="PLAY")
 
 
@@ -139,17 +139,27 @@ class CUSTOM_PT_NEURON_SimulationSettings(BlenderNEURONPanel, Panel):
 
         col = self.layout
 
-        col.prop(settings, "neuron_tstop", text="Stop Time")
-        col.prop(settings, "temperature", text="Temperature")
+        col.prop(settings, "neuron_tstop", text="Stop Time (ms)")
+        col.prop(settings, "temperature", text=u"Temperature (°C)")
+        col.separator()
 
-        col.operator("custom.import_selected_groups", text="Open Voltage Plot", icon="FCURVE")
+        col.operator("custom.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
+        col.separator()
+
         col.prop(settings, "integration_method")
 
-        if settings.integration_method == 0:
-            col.prop(settings, "time_step")
+        if settings.integration_method == '0':
+            col.prop(settings, "time_step", "Time Step (ms)")
 
-        if settings.integration_method == 1:
-            col.prop(settings, "abs_tolerance")
+        if settings.integration_method == '1':
+            col.prop(settings, "abs_tolerance", text="Absolute tolerance")
 
-        col.operator("custom.import_selected_groups", text="Init & Run", icon="POSE_DATA")
+        col.separator()
+        col.operator("custom.init_and_run", text="Init & Run", icon="POSE_DATA")
+        col.separator()
+        col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
+        col.separator()
+        col.operator("wm.blenderneuron_exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
+
+        col.operator("custom.sim_settings_from_neuron", text="Get Sim Params From NEURON", icon="FORWARD")
 

@@ -21,10 +21,10 @@ except:
 
 from socketserver import ThreadingMixIn
 
-debug = True
+debug = False
 
 class CommNode(object):
-    def __init__(self, end):
+    def __init__(self, end, on_client_connected=None, on_server_setup=None):
         self.load_config()
 
         if end in self.config["end_types"]:
@@ -33,10 +33,13 @@ class CommNode(object):
         else:
             raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(self.config["end_types"]))
 
+        self.on_client_connected = on_client_connected
+        self.on_server_setup = on_server_setup
+
         # Try connecting to the other node (if it's running)
         self.try_setup_client()
 
-        # 'Control' nodes are 1-directional (a node with a connected client, but no server of it's own)
+        # 'Control' nodes are 1-directional (a node with a connected client, but no server of its own)
         if self.server_end == 'Control':
             return
 
@@ -46,6 +49,7 @@ class CommNode(object):
         # If successfully connected, then instruct the other node to connect back
         # and complete the 2nd half of the connection
         if self.client is not None:
+
             self.client.try_setup_client()
 
             if self.client is not None and self.server is not None:
@@ -118,6 +122,9 @@ class CommNode(object):
         self.service_thread_continue = True # When false, queue servicing thread will stop
         self.service_thread.start()
 
+        if self.on_server_setup is not None:
+            self.on_server_setup()
+
         # Communicate the address of the server to the client
         self.save_server_address_file()
 
@@ -182,6 +189,9 @@ class CommNode(object):
 
             self.client = None
             self.client_address = None
+
+        if self.client is not None and self.on_client_connected is not None:
+            self.on_client_connected()
 
     def read_client_address_file(self):
         """

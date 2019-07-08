@@ -38,9 +38,6 @@ class blenderneuron_nodes_panel(BlenderNEURONPanel, bpy.types.Panel):
             else:
                 col.label(text="Status: Connected")
                 col.label(text="Address: " + self.node.client_address)
-                col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
-                col.separator()
-                col.operator("wm.blenderneuron_exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
 
             if blender_launched_neuron_running():
                 col.separator()

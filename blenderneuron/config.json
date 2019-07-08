@@ -1,6 +1,6 @@
 [
     {
-        "NEURON_last_command": "s2 = h.Section(name='soma4')",
+        "NEURON_last_command": "print(len(h.Graph))",
         "NEURON_launch_command": "nrngui -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
             "Blender": "127.0.0.1",

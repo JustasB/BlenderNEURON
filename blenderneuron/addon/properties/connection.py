@@ -127,6 +127,20 @@ class blenderneuron_properties(bpy.types.PropertyGroup):
         get=neuron_last_command_get, set=neuron_last_command_set, update=on_neuron_last_command_updated
     )
 
+    # -------------------------------------------------- #
+
+    def frames_per_ms_set(self, value):
+        self.set_config_prop("Blender_frames_per_ms", value)
+
+    def frames_per_ms_get(self):
+        return self.get_config_prop("Blender_frames_per_ms")
+
+    frames_per_ms = bpy.props.StringProperty(
+        name="Frames per ms",
+        description="The number of Blender frames to represent one NEURON millisecond",
+        get=frames_per_ms_get, set=frames_per_ms_set
+    )
+
 
 def register():
     # Load config properties

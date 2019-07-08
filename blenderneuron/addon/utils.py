@@ -64,7 +64,8 @@ def register_module_classes(module, unreg=False):
                 bpy.utils.unregister_class(cls)
             else:
                 bpy.utils.register_class(cls)
+                # print('REGISTERED', cls)
         except:
-            #print('Could not register', cls)
+            # print('Could not register', cls)
             pass
 
