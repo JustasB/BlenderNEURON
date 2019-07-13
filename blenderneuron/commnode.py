@@ -1,3 +1,5 @@
+import zlib
+
 try:
     import Queue as queue
 except:
@@ -75,6 +77,15 @@ class CommNode(object):
 
     def setup_server(self):
 
+        class ErrorHandler(SimpleXMLRPCRequestHandler):
+            def _dispatch(self, method, params):
+                try:
+                    return self.server.funcs[method](*params)
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    raise
+
         class CommNodeServer(ThreadingMixIn, SimpleXMLRPCServer, object):
             """
             A helper class to create an XML-RCP server
@@ -82,7 +93,12 @@ class CommNode(object):
 
             def __init__(self, param):
                 self.daemon_threads = True
-                super(CommNodeServer, self).__init__(param, allow_none=True, logRequests=False)
+                super(CommNodeServer, self).__init__(
+                    param,
+                    requestHandler=ErrorHandler,
+                    allow_none=True,
+                    logRequests=False
+                )
 
         self.init_task_queue()
 
@@ -402,4 +418,19 @@ class CommNode(object):
                 self.work_on_queue_tasks()
             else:
                 time.sleep(0.1)
+
+    def compress(self, obj):
+        compressed = str(obj)
+
+        try:
+            compressed = xmlrpclib.Binary(zlib.compress(compressed, 2))
+        except:
+            compressed = xmlrpclib.Binary(zlib.compress(compressed.encode('utf8'), 2))
+
+        return compressed
+
+    def decompress(self, compressed):
+        uncompressed = eval(zlib.decompress(compressed.data).decode('utf-8'))
+
+        return uncompressed
 

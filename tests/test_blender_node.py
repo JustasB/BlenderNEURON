@@ -56,7 +56,7 @@ class TestCommNode(BlenderTestCase):
                     self.assertEqual([1, 0], cn.client.run_command(
                         "groups = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups;"
                         "count = len(groups);"
-                        "index = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups_index;"
+                        "index = bpy.data.scenes['Scene'].BlenderNEURON_groups_index;"
                         "return_value = [count, index];"
                     ))
 
@@ -65,19 +65,19 @@ class TestCommNode(BlenderTestCase):
                     self.assertEqual(2, cn.client.run_command(
                         "bpy.ops.custom.get_cell_list_from_neuron();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = len(group.cells);"
+                        "return_value = len(group.root_entries);"
                     ))
 
                     # The last cell listed is the last cell created
                     self.assertEqual("soma2", cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = group.cells[-1].name"
+                        "return_value = group.root_entries[-1].name"
                     ))
 
                     # Check that both cells are selected
                     self.assertEqual(True, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = all(cell.selected for cell in group.cells)"
+                        "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
                     # Create a second cell group
@@ -90,22 +90,22 @@ class TestCommNode(BlenderTestCase):
                     # Check that there are 2 cells within the 2nd group
                     self.assertEqual(2, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
-                        "return_value = len(group.cells)"
+                        "return_value = len(group.root_entries)"
                     ))
 
                     # Check that NONE of the cells are selected in 2nd group
                     self.assertEqual(True, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
-                        "return_value = all(cell.selected == False for cell in group.cells)"
+                        "return_value = all(cell.selected == False for cell in group.root_entries)"
                     ))
 
                     # Select the last cell of the *2nd* group
                     # Check that the last cell of the *1st* group becomes unselected
                     self.assertEqual(False, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
-                        "group.cells[-1].selected = True;"
+                        "group.root_entries[-1].selected = True;"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = group.cells[-1].selected"
+                        "return_value = group.root_entries[-1].selected"
                     ))
 
                     # Now select the first cell of the 2nd group (both cells should be selected)
@@ -113,7 +113,7 @@ class TestCommNode(BlenderTestCase):
                     # Check that a group was removed
                     self.assertEqual(1, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
-                        "group.cells[0].selected = True;"
+                        "group.root_entries[0].selected = True;"
                         "bpy.ops.custom.cell_group_remove();"
                         "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON_cellgroups)"
                     ))
@@ -128,7 +128,7 @@ class TestCommNode(BlenderTestCase):
                     # Check that both cells are selected
                     self.assertEqual(True, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
-                        "return_value = all(cell.selected for cell in group.cells)"
+                        "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
                 finally:
@@ -158,22 +158,22 @@ class TestCommNode(BlenderTestCase):
                     self.assertEqual(True, cn.client.run_command(
                         "bpy.ops.custom.select_none_neuron_cells();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = all(cell.selected == False for cell in group.cells)"
+                        "return_value = all(cell.selected == False for cell in group.root_entries)"
                     ))
 
                     # Select all, Check that all cells are selected
                     self.assertEqual(True, cn.client.run_command(
                         "bpy.ops.custom.select_all_neuron_cells();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "return_value = all(cell.selected for cell in group.cells)"
+                        "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
                     # Unselect last cell, invert selection, and check that first cell is unselected
                     self.assertEqual(False, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
-                        "group.cells[-1].selected = False;"
+                        "group.root_entries[-1].selected = False;"
                         "bpy.ops.custom.select_invert_neuron_cells();"
-                        "return_value = group.cells[0].selected"
+                        "return_value = group.root_entries[0].selected"
                     ))
 
                 finally:
