@@ -65,6 +65,6 @@ ForBlender/cython_debug/
 
 doctrees/
 
-blender/
+/blender
 
 ForBlender/blender_neuron_addon_v\.zip
