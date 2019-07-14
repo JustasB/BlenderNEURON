@@ -22,11 +22,17 @@ except:
     from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
 
 from socketserver import ThreadingMixIn
+from collections import OrderedDict
 
 debug = False
 
 class CommNode(object):
+
     def __init__(self, end, on_client_connected=None, on_server_setup=None):
+
+        self.groups = OrderedDict()
+        self.root_index = OrderedDict()
+
         self.load_config()
 
         if end in self.config["end_types"]:
@@ -303,7 +309,17 @@ class CommNode(object):
         """
         def exec_lambda():
             end_imports = self.config["imports"][self.server_end]
-            exec(end_imports + "; " + command_string, globals())
+            try:
+                exec(end_imports + "; " + command_string, globals())
+            except SystemExit:
+                raise
+            except:
+                print('Error while attempting to run the following command(s) within ' + self.server_end + ':')
+                print('------------ Command ------------')
+                print(command_string.replace(";","\n"))
+                print('---------------------------------')
+                raise
+
             return globals().pop('return_value', None)
 
         return exec_lambda

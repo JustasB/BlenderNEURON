@@ -1,4 +1,4 @@
-from blenderneuron.neuron.neuronnode import NeuronNode
+from blenderneuron.nrn.neuronnode import NeuronNode
 
 globals()["BlenderNEURON"] = NeuronNode()
 

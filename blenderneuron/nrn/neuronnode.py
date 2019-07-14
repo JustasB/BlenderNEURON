@@ -1,7 +1,6 @@
 from neuron import h
-
 from blenderneuron.commnode import CommNode
-from blenderneuron.neuron.neuronrootgroup import NeuronRootGroup
+from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
 
 try:
     import xmlrpclib
@@ -13,10 +12,7 @@ class NeuronNode(CommNode):
 
     def __init__(self, *args, **kwargs):
         def init():
-            self.h = h
             h.load_file('stdrun.hoc')
-
-            self.groups = []
 
             self.server.register_function(self.get_roots)
 
@@ -49,11 +45,17 @@ class NeuronNode(CommNode):
 
     def set_groups(self, blender_groups):
 
-        self.groups = [NeuronRootGroup(group, self) for group in blender_groups]
+        for blender_group in blender_groups:
+            name = blender_group["name"]
+
+            nrn_group = NeuronRootGroup()
+            nrn_group.from_skeletal_blender_group(blender_group, node=self)
+
+            self.groups[name] = nrn_group
 
         h.run()
 
-        result = [group.to_dict() for group in self.groups]
+        result = [group.to_dict() for group in self.groups.values()]
 
         return self.compress(result)
 
@@ -239,7 +241,7 @@ class NeuronNode(CommNode):
         return (along_x, along_y, along_z)
 
     def get_along_coord_dim(self, dim, section, coord_i, along_start_coord):
-        dim = getattr(self.h, dim + "3d")
+        dim = getattr(h, dim + "3d")
         start = dim(coord_i, sec=section)
         end = dim(coord_i + 1, sec=section)
         length = end - start

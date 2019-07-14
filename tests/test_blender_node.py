@@ -54,9 +54,9 @@ class TestCommNode(BlenderTestCase):
 
                     # Check that a group was added
                     self.assertEqual([1, 0], cn.client.run_command(
-                        "groups = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups;"
+                        "groups = bpy.data.scenes['Scene'].BlenderNEURON.groups;"
                         "count = len(groups);"
-                        "index = bpy.data.scenes['Scene'].BlenderNEURON_groups_index;"
+                        "index = bpy.data.scenes['Scene'].BlenderNEURON.groups_index;"
                         "return_value = [count, index];"
                     ))
 
@@ -64,19 +64,19 @@ class TestCommNode(BlenderTestCase):
                     # Check that there are 2 cells within the group
                     self.assertEqual(2, cn.client.run_command(
                         "bpy.ops.custom.get_cell_list_from_neuron();"
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = len(group.root_entries);"
                     ))
 
                     # The last cell listed is the last cell created
                     self.assertEqual("soma2", cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = group.root_entries[-1].name"
                     ))
 
                     # Check that both cells are selected
                     self.assertEqual(True, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
@@ -84,27 +84,27 @@ class TestCommNode(BlenderTestCase):
                     # Check that a group was added
                     self.assertEqual(2, cn.client.run_command(
                         "bpy.ops.custom.cell_group_add();"
-                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON_cellgroups)"
+                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
                     # Check that there are 2 cells within the 2nd group
                     self.assertEqual(2, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "return_value = len(group.root_entries)"
                     ))
 
                     # Check that NONE of the cells are selected in 2nd group
                     self.assertEqual(True, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "return_value = all(cell.selected == False for cell in group.root_entries)"
                     ))
 
                     # Select the last cell of the *2nd* group
                     # Check that the last cell of the *1st* group becomes unselected
                     self.assertEqual(False, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "group.root_entries[-1].selected = True;"
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = group.root_entries[-1].selected"
                     ))
 
@@ -112,22 +112,22 @@ class TestCommNode(BlenderTestCase):
                     # Delete the second cell group (this should free the 2nd group's cells)
                     # Check that a group was removed
                     self.assertEqual(1, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "group.root_entries[0].selected = True;"
                         "bpy.ops.custom.cell_group_remove();"
-                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON_cellgroups)"
+                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
                     # Add a new cell group (it should now contain the free'd cells)
                     # Check that a group was added
                     self.assertEqual(2, cn.client.run_command(
                         "bpy.ops.custom.cell_group_add();"
-                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON_cellgroups)"
+                        "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
                     # Check that both cells are selected
                     self.assertEqual(True, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[1];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
@@ -157,20 +157,20 @@ class TestCommNode(BlenderTestCase):
                     # Unselect all, Check that no cells are selected
                     self.assertEqual(True, cn.client.run_command(
                         "bpy.ops.custom.select_none_neuron_cells();"
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = all(cell.selected == False for cell in group.root_entries)"
                     ))
 
                     # Select all, Check that all cells are selected
                     self.assertEqual(True, cn.client.run_command(
                         "bpy.ops.custom.select_all_neuron_cells();"
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
 
                     # Unselect last cell, invert selection, and check that first cell is unselected
                     self.assertEqual(False, cn.client.run_command(
-                        "group = bpy.data.scenes['Scene'].BlenderNEURON_cellgroups[0];"
+                        "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "group.root_entries[-1].selected = False;"
                         "bpy.ops.custom.select_invert_neuron_cells();"
                         "return_value = group.root_entries[0].selected"
@@ -192,7 +192,7 @@ class TestCommNode(BlenderTestCase):
 
                     # set settings in Blender and send to NEURON and back (should be preserved)
                     cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "params.neuron_tstop = 1111;"
                         "params.time_step = 0.002;"
                         "params.abs_tolerance = 0.005;"
@@ -203,27 +203,27 @@ class TestCommNode(BlenderTestCase):
                     )
 
                     self.assertEqual(1111, cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "return_value = params.neuron_tstop"
                     ))
 
                     self.assertAlmostEqual(0.002, cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "return_value = params.time_step"
                     ), places=3)
 
                     self.assertAlmostEqual(0.005, cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "return_value = params.abs_tolerance"
                     ), places=3)
 
                     self.assertEqual(44, cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "return_value = params.temperature"
                     ))
 
                     self.assertEqual('1', cn.client.run_command(
-                        "params = bpy.data.scenes['Scene'].BlenderNEURON_simulator_settings;"
+                        "params = bpy.data.scenes['Scene'].BlenderNEURON.simulator_settings;"
                         "return_value = params.integration_method"
                     ))
 

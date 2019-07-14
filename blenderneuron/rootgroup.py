@@ -1,35 +1,23 @@
 from abc import ABCMeta, abstractmethod
-
-
-class Activity:
-    times = []
-    values = []
-
-    def clear(self):
-        self.times = []
-        self.values = []
-
-    def to_dict(self):
-        return {
-            "times": self.times,
-            "values": self.values,
-        }
+from collections import OrderedDict
+from blenderneuron.activity import Activity
 
 class RootGroup:
     __metaclass__ = ABCMeta
 
-    name = ""
-    roots = []
+    def __init__(self):
+        self.name = ""
+        self.roots = OrderedDict()
 
-    import_synapses = False
-    interaction_granularity = 'Cell'
+        self.import_synapses = False
+        self.interaction_granularity = 'Cell'
 
-    record_activity = True
-    recording_granularity = "Section"
-    record_variable = "v"
-    recording_period = 1.0
+        self.record_activity = True
+        self.recording_granularity = "Section"
+        self.record_variable = "v"
+        self.recording_period = 1.0
 
-    activity = Activity()
+        self.activity = Activity()
 
     """
     Init options:
@@ -43,79 +31,32 @@ class RootGroup:
         level = self.recording_granularity
 
         if level == '3D Segment':
-            for root in self.roots:
+            for root in self.roots.values():
                 root.clear_3d_segment_activity()
 
         elif level == 'Section':
-            for root in self.roots:
+            for root in self.roots.values():
                 root.clear_activity(recursive=True)
 
         elif level == 'root':
-            for root in self.roots:
+            for root in self.roots.values():
                 root.clear_activity(recursive=False)
 
         else:
             self.activity.clear()
 
-    @abstractmethod
-    def to_dict(self):
-        pass
-
-
-
-class Section:
-    __metaclass__ = ABCMeta
-
-    name = ""
-    hash = ""
-
-    point_count = 0
-    coords = []
-    radii = []
-    segments_3D = []
-
-    children = []
-    parent_connection_loc = -1
-    connection_end = -1
-
-    activity = Activity()
-
     def to_dict(self):
         return {
             "name": self.name,
-            "hash": self.hash,
-            "coords": self.coords,
-            "radii": self.radii,
-            "children": [child.to_dict() for child in self.children],
-            "parent_connection_loc": self.parent_connection_loc,
-            "connection_end": self.connection_end,
+            "roots": [root.to_dict() for root in self.roots.values()],
+            "import_synapses": self.import_synapses,
+            "interaction_granularity": self.interaction_granularity,
+            "record_activity": self.record_activity,
+            "recording_granularity": self.recording_granularity,
+            "record_variable": self.record_variable,
+            "recording_period": self.recording_period,
             "activity": self.activity.to_dict(),
-            "segment_3d_activity": [ seg.activity.to_dict() for seg in self.segments_3D ]
         }
 
-    def clear_3d_segment_activity(self):
-        for seg in self.segments_3D:
-            seg.activity.clear()
 
-        for child in self.children:
-            child.clear_3d_segment_activity()
-
-    def clear_activity(self, recursive):
-        self.activity.clear()
-
-        if recursive:
-            for child in self.children:
-                child.clear_activity(recursive=True)
-
-
-class Segment3D:
-    __metaclass__ = ABCMeta
-
-    section = None
-    activity = Activity()
-    point_index = -1
-
-    def __init__(self, section, point_index):
-        self.section = section
-        self.point_index = point_index
 
