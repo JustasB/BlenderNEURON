@@ -1,9 +1,13 @@
 from collections import OrderedDict
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-
+from blenderneuron.blender.group2cells import CellObjectView
 
 class BlenderRootGroup(RootGroup):
+
+    @property
+    def ui_group(self):
+        return self.node.ui_properties.groups[self.name]
 
     def __init__(self, name, node):
         super(BlenderRootGroup, self).__init__()
@@ -12,6 +16,15 @@ class BlenderRootGroup(RootGroup):
         self.name = name
         self.node = node
 
+        # Group display properties
+        self.smooth_sections = True
+        self.spherize_soma_if_DeqL=True
+        self.as_lines=False
+        self.segment_subdivisions=3
+        self.circular_subdivisions=12
+        self.default_color = [1, 1, 1]
+
+
     def from_full_NEURON_group(self, nrn_group):
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
@@ -19,9 +32,21 @@ class BlenderRootGroup(RootGroup):
 
         self.activity.from_dict(nrn_group["activity"])
 
-    @property
-    def ui_group(self):
-        return self.node.ui_properties.groups[self.name]
+    def show(self, view_class):
+        if not hasattr(view_class, "show"):
+            raise Exception(str(view_class) + ' does not implement show() method')
+
+        self.view = view_class(self)
+        self.view.show()
+
+    def from_view(self):
+        if self.view is None:
+            return
+
+        if not hasattr(self.view, "update_group"):
+            raise Exception(str(self.view.__class__) + ' does not implement update_group() method')
+
+        self.view.update_group()
 
     def add_to_UI(self):
         i = len(self.node.groups.keys())-1

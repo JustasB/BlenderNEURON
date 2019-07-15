@@ -1,4 +1,5 @@
 import bpy, random, zlib
+from blenderneuron.blender.group2cells import CellObjectView
 
 from bpy.types import (Operator,
                        Panel,
@@ -184,12 +185,30 @@ class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
         nrn_groups = self.node.decompress(compressed)
         del compressed
 
+        for nrn_group in nrn_groups:
+            self.node.groups[nrn_group["name"]].from_full_NEURON_group(nrn_group)
+
+        for group in self.node.groups.values():
+            if group.selected:
+                group.show(CellObjectView)
+
+        return{'FINISHED'}
+
+
+class CUSTOM_OT_export_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+    bl_idname = "custom.export_selected_groups"
+    bl_label = "Export Group Data"
+    bl_description = "Exports cell group data (morhology) to NEURON"
+
+    def execute(self, context):
 
         import pydevd
         pydevd.settrace('192.168.0.100', port=4200)
 
-        for nrn_group in nrn_groups:
-            self.node.groups[nrn_group["name"]].from_full_NEURON_group(nrn_group)
+        for group in self.node.groups.values():
+            if group.selected:
+                group.from_view()
+
 
         return{'FINISHED'}
 

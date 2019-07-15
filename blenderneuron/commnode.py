@@ -213,7 +213,7 @@ class CommNode(object):
             self.client_address = None
 
         if self.client is not None and self.on_client_connected is not None:
-            self.on_client_connected()
+            self.on_client_connected(self)
 
     def read_client_address_file(self):
         """

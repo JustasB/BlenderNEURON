@@ -1,9 +1,13 @@
 from blenderneuron.section import Section
 from blenderneuron.blender.blendersegment3d import BlenderSegment3D
+import numpy as np
 
 class BlenderSection(Section):
 
     def from_full_NEURON_section(self, nrn_section):
+        self.hash = nrn_section["hash"]
+        self.name = nrn_section["name"]
+
         self.point_count = nrn_section["point_count"]
         self.coords = nrn_section["coords"]
         self.radii = nrn_section["radii"]

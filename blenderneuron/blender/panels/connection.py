@@ -6,6 +6,7 @@ from blenderneuron.blender.utils import blender_launched_neuron_running
 
 class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
     bl_label = "Node Status"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
 

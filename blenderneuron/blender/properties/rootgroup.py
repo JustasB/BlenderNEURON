@@ -136,19 +136,25 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
     smooth_sections = BoolProperty(
         default=True,
         description="Whether to render sections as smooth bezier curves, instead of straight lines. "
-                    "True results in more visually appealing morphology, but requires more polygons."
+                    "True results in more visually appealing morphology, but requires more polygons.",
+        get=get_prop("smooth_sections"),
+        set=set_prop("smooth_sections")
     )
 
     # TODO move this to a map property
     spherize_soma_if_DeqL = BoolProperty(
         default=True,
-        description="Whether to display a soma section with diameter ~= length as a sphere in Blender"
+        description="Whether to display a soma section with diameter ~= length as a sphere in Blender",
+        get=get_prop("spherize_soma_if_DeqL"),
+        set=set_prop("spherize_soma_if_DeqL")
     )
 
     # TODO move this to a map property
     as_lines = BoolProperty(
         default=False,
-        description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered."
+        description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered.",
+        get=get_prop("as_lines"),
+        set=set_prop("as_lines")
     )
 
     # TODO move this to a map property
@@ -156,7 +162,9 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         default=3,
         min=2,
         description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature, but requires more polygons."
+                    "looking section curvature, but requires more polygons.",
+        get=get_prop("segment_subdivisions"),
+        set=set_prop("segment_subdivisions")
     )
 
     # TODO move this to a map property
@@ -164,7 +172,9 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         default=12,
         min=5,
         description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature."
+                    "looking section curvature.",
+        get=get_prop("circular_subdivisions"),
+        set=set_prop("circular_subdivisions")
     )
 
 class CUSTOM_NEURON_SimulatorSettings(BlenderNodeClass, PropertyGroup):

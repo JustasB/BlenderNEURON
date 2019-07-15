@@ -12,13 +12,18 @@ class blenderneuron_node_start(bpy.types.Operator, BlenderNodeClass):
                      "bi-directional communication with NEURON"
 
     def execute(self, context):
-        def on_client_connected():
+        def on_client_connected(self):
+            # Pull NRN sim params to Blender GUI
             context.scene.BlenderNEURON.simulator_settings.from_neuron()
 
         # Create the communications node for Blender end
         self.node = BlenderNode(
             on_client_connected=on_client_connected
         )
+
+        if self.client is not None:
+            # Add a cell group (will contain all root sections by default)
+            self.node.add_group()
 
         return {'FINISHED'}
 

@@ -7,11 +7,7 @@ from blenderneuron.commnode import CommNode
 
 class BlenderNode(CommNode):
     def __init__(self, *args, **kwargs):
-        def init():
-            # node init code here
-            pass
-
-        super(BlenderNode, self).__init__("Blender", on_server_setup=init, *args, **kwargs)
+        super(BlenderNode, self).__init__("Blender", *args, **kwargs)
 
     @property
     def ui_properties(self):

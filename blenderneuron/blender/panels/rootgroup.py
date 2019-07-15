@@ -34,6 +34,7 @@ class CUSTOM_UL_CellGroupListWidget(UIList):
 class CUSTOM_PT_NEURON_CellGroups(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_CellGroups'
     bl_label = "Cell Groups"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -62,6 +63,7 @@ class CUSTOM_PT_NEURON_CellGroups(AbstractBlenderNEURONPanel, Panel):
 class CUSTOM_PT_NEURON_GroupCells(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_GroupCells'
     bl_label = "Cells in Group"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -86,6 +88,7 @@ class CUSTOM_PT_NEURON_GroupCells(AbstractBlenderNEURONPanel, Panel):
 class CUSTOM_PT_NEURON_GroupSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
     bl_label = "Cell Group Options"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -119,6 +122,9 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
 
         self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
                              icon="PLAY")
+
+        self.layout.operator("custom.export_selected_groups", text="Export Cell Groups to NEURON",
+                             icon="PLAY_REVERSE")
 
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
