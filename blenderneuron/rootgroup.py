@@ -45,18 +45,50 @@ class RootGroup:
         else:
             self.activity.clear()
 
-    def to_dict(self):
-        return {
+    def to_dict(self,
+                include_activity=False,
+                include_root_children=False,
+                include_coords_and_radii=False):
+        """
+
+        When first a group is passed to NRN, it contains only basic root-group membership info
+            -"skeletal"
+            -root children not included
+            -activity is not included
+            -points, radii, segments 3d not included
+            -topology is not included
+
+        When a group comes back from NRN:
+            -"full"
+            -root children, activity, points, radii, segs3d, topology
+
+        When a group comes from CellObjectView
+            -INC:
+                -children, points, raddi,
+            -NOT inc:
+                -activity
+                -segs 3d, topology - these might change later
+
+        :param include_activity:
+        :param include_root_children:
+        :param include_coords_and_radii:
+        :return:
+        """
+        result = {
             "name": self.name,
-            "roots": [root.to_dict() for root in self.roots.values()],
+            "roots": [root.to_dict(include_activity, include_root_children, include_coords_and_radii) for root in self.roots.values()],
             "import_synapses": self.import_synapses,
             "interaction_granularity": self.interaction_granularity,
             "record_activity": self.record_activity,
             "recording_granularity": self.recording_granularity,
             "record_variable": self.record_variable,
             "recording_period": self.recording_period,
-            "activity": self.activity.to_dict(),
         }
 
+        if include_activity:
+            result.update({
+                "activity": self.activity.to_dict(),
+            })
 
+        return result
 

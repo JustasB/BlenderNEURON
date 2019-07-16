@@ -21,19 +21,44 @@ class Section:
 
         self.activity = Activity()
 
-    def to_dict(self):
-        return {
+    def to_dict(self,
+                include_activity=True,
+                include_children=True,
+                include_coords_and_radii=True):
+
+        result = {
             "name": self.name,
             "hash": self.hash,
-            "point_count": self.point_count,
-            "coords": self.coords,
-            "radii": self.radii,
-            "children": [child.to_dict() for child in self.children],
             "parent_connection_loc": self.parent_connection_loc,
-            "connection_end": self.connection_end,
-            "activity": self.activity.to_dict(),
-            "segments_3D": [ seg.to_dict() for seg in self.segments_3D ]
+            "connection_end": self.connection_end
         }
+
+        if include_activity:
+            result.update({
+                "activity": self.activity.to_dict(),
+                "segments_3D": [ seg.to_dict() for seg in self.segments_3D ]
+            })
+
+        if include_children:
+            result.update({
+                "children": [
+                    child.to_dict(
+                        include_activity,
+                        include_children,
+                        include_coords_and_radii
+                    )
+                    for child in self.children
+                ]
+            })
+
+        if include_coords_and_radii:
+            result.update({
+                "point_count": self.point_count,
+                "coords": self.coords,
+                "radii": self.radii,
+            })
+
+        return result
 
     def clear_3d_segment_activity(self):
         for seg in self.segments_3D:

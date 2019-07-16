@@ -2,7 +2,31 @@ from blenderneuron.nrn.neuronsegment3d import NeuronSegment3D
 from blenderneuron.section import Section
 from neuron import h
 
+import numpy as np
+
 class NeuronSection(Section):
+
+    def from_updated_blender_root(self, blender_section):
+
+        self.update_coords_and_radii(blender_section)
+
+        # TODO: Update Topology
+        # parent_seg = nrn_section.parentseg()
+        # self.parent_connection_loc = parent_seg.x if parent_seg is not None else None
+        # self.connection_end = nrn_section.orientation()
+
+        if self.group.recording_granularity == '3D Segment':
+            self.segments_3D = [NeuronSegment3D(self, i) for i in range(1, self.point_count)]
+        else:
+            self.segments_3D = []
+
+        for i, blender_child in enumerate(blender_section["children"]):
+            section = self.children[i]
+
+            assert section.hash == blender_child["hash"]
+
+            section.from_updated_blender_root(blender_child)
+
 
     def from_skeletal_blender_root(self, source_section, group):
         self.from_nrn_section(group.node.section_index[source_section["hash"]], group)
@@ -29,6 +53,30 @@ class NeuronSection(Section):
             self.segments_3D = [NeuronSegment3D(self, i) for i in range(1, self.point_count)]
         else:
             self.segments_3D = []
+
+    def update_coords_and_radii(self, blender_section):
+        self.point_count = blender_section["point_count"]
+        self.coords = blender_section["coords"]
+        self.radii = blender_section["radii"]
+
+        nrn_section = self.nrn_section
+
+        # Use 3D points as the L and diam sources
+        h.pt3dconst(1,sec=nrn_section)
+
+        # Clear the existing points - and allocate room for the incoming points
+        h.pt3dclear(self.point_count, sec=nrn_section)
+
+        # Use vectorization to add the points to section
+        coords = np.array(self.coords).reshape((-1, 3))
+        diams = np.array(self.radii) * 2.0
+
+        xvec = h.Vector(coords[:,0])
+        yvec = h.Vector(coords[:,1])
+        zvec = h.Vector(coords[:,2])
+        dvec = h.Vector(diams)
+
+        h.pt3dadd(xvec, yvec, zvec, dvec, sec=nrn_section)
 
     def get_coords_and_radii(self):
 

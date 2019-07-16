@@ -181,7 +181,7 @@ class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
     def execute(self, context):
         blender_groups = [group.to_dict() for group in self.node.groups.values() if group.selected]
 
-        compressed = self.client.set_groups(blender_groups)
+        compressed = self.client.initialize_groups(blender_groups)
         nrn_groups = self.node.decompress(compressed)
         del compressed
 
@@ -202,13 +202,17 @@ class CUSTOM_OT_export_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
 
     def execute(self, context):
 
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
-
         for group in self.node.groups.values():
             if group.selected:
                 group.from_view()
 
+        blender_groups = [group.to_dict(
+                              include_root_children=True,
+                              include_coords_and_radii=True)
+                          for group in self.node.groups.values()
+                          if group.selected]
+
+        self.client.update_groups(blender_groups)
 
         return{'FINISHED'}
 

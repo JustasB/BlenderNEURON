@@ -19,7 +19,8 @@ class NeuronNode(CommNode):
             self.server.register_function(self.set_sim_params)
             self.server.register_function(self.get_sim_params)
 
-            self.server.register_function(self.set_groups)
+            self.server.register_function(self.initialize_groups)
+            self.server.register_function(self.update_groups)
 
         super(NeuronNode, self).__init__("NEURON", on_server_setup=init, *args, **kwargs)
 
@@ -43,7 +44,7 @@ class NeuronNode(CommNode):
         all_sec = h.allsec()
         self.section_index = {str(hash(sec)): sec for sec in all_sec}
 
-    def set_groups(self, blender_groups):
+    def initialize_groups(self, blender_groups):
 
         for blender_group in blender_groups:
             name = blender_group["name"]
@@ -55,9 +56,23 @@ class NeuronNode(CommNode):
 
         h.run()
 
-        result = [group.to_dict() for group in self.groups.values()]
+        result = [group.to_dict(include_activity=True,
+                  include_root_children=True,
+                  include_coords_and_radii=True)
+                  for group in self.groups.values()]
 
         return self.compress(result)
+
+    def update_groups(self, blender_groups):
+
+
+        import pydevd
+        pydevd.settrace('192.168.0.100', port=4200)
+
+        for blender_group in blender_groups:
+            name = blender_group["name"]
+            nrn_group = self.groups[name]
+            nrn_group.from_updated_blender_group(blender_group)
 
     def set_sim_params(self, params):
         h.tstop = params["tstop"]

@@ -5,15 +5,20 @@ from neuron import h
 
 class NeuronRootGroup(RootGroup):
 
+    def from_updated_blender_group(self, blender_group):
+
+        self.save_recording_params(blender_group)
+
+        # Update selected roots and their children
+        for blender_root in blender_group["roots"]:
+            section = self.roots[blender_root["hash"]]
+            section.from_updated_blender_root(blender_root)
+
     def from_skeletal_blender_group(self, blender_group, node):
         self.node = node
         self.name = blender_group['name']
 
-        # Save recording params
-        self.record_activity = blender_group["record_activity"]
-        self.record_variable = blender_group["record_variable"]
-        self.recording_granularity = blender_group["recording_granularity"]
-        self.recording_period = blender_group["recording_period"]
+        self.save_recording_params(blender_group)
 
         # Initialize selected roots and their children
         for blender_root in blender_group["roots"]:
@@ -27,6 +32,12 @@ class NeuronRootGroup(RootGroup):
 
         # Setup to collect activity during h.run()
         self.create_collector()
+
+    def save_recording_params(self, blender_group):
+        self.record_activity = blender_group["record_activity"]
+        self.record_variable = blender_group["record_variable"]
+        self.recording_granularity = blender_group["recording_granularity"]
+        self.recording_period = blender_group["recording_period"]
 
     def create_collector(self):
         """

@@ -143,9 +143,7 @@ class CurveContainer:
         versor = lengths / length
         extended = end + versor * 0.01 # Extend in the same direction by a small amount
 
-        result = extended.tolist()
-
-        return result
+        return extended
 
     def add_spline(self, coords, radii, smooth):
         curve = self.curve
@@ -213,6 +211,33 @@ class CurveContainer:
         mat_idx = len(mats)-1
         return mat_idx
 
+    def to_global(self, local_coords):
+        """
+        This function performs the fancy fast vectorized multiplication of the container object's
+        world matrix (trans, rot, scale) by the local bezier curve points to obtain the global
+        version of the coordinates.
+
+        :param local_coords: Local coords as returned by bezier_points.foreach_get("co")
+        :return: Global version of the local_coords
+        """
+
+        # Get the world matrix
+        matrix = self.object.matrix_world
+
+        # Reshape coords to Nx3 matrix
+        local_coords.shape = (-1, 3)
+
+        # Add an extra 1.0s column (for matrix dot prod)
+        local_coords = np.c_[local_coords, np.ones(local_coords.shape[0])]
+
+        # Dot product matrix with the coords transpose
+        # Keep the first 3 rows (x,y,z)
+        # Transpose result to Nx3
+        # Flatten
+        global_coords = np.dot(matrix, local_coords.T)[0:3].T.reshape((-1))
+
+        return global_coords
+
     def update_group_section(self, root, recursive=True):
         # Find the spline that corresponds to the section
         spline = self.hash2spline[root.hash]
@@ -224,22 +249,18 @@ class CurveContainer:
         coords = np.zeros(num_coords * 3)
         bezier_points.foreach_get("co", coords)
 
-        # Adjust coords for container origin
-        coords.shape = (-1, 3)
-        coords = coords + self.origin
+        # Adjust coords for container origin and rotation
+        coords = self.to_global(coords)
 
         # Discard the 0-radius end caps
-        coords = coords[1:-1]
+        coords = coords[3:-3]
 
-        # Flatten
-        coords.shape = (-1)
-
-        root.coords = list(coords)
+        root.coords = coords.tolist()
 
         # Get radii
         radii = np.zeros(num_coords)
         bezier_points.foreach_get("radius", radii)
-        root.radii  = list(radii[1:-1])
+        root.radii  = radii[1:-1].tolist()
 
         # Cleanup before recursion
         del spline, bezier_points, num_coords, coords, radii
