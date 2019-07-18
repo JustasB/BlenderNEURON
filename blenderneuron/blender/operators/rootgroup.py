@@ -1,12 +1,10 @@
-import bpy, random, zlib
-from blenderneuron.blender.group2cells import CellObjectView
-
-from bpy.types import (Operator,
-                       Panel,
-                       PropertyGroup,
-                       UIList)
+import bpy
+from bpy.types import (Operator)
 
 from blenderneuron.blender import BlenderNodeClass
+from blenderneuron.blender.views.cellobjectview import CellObjectView
+from blenderneuron.blender.views.sectionobjectview import SectionObjectView
+
 
 class AbstractCUSTOM_OT_cellgroup_operator(BlenderNodeClass):
     bl_options = {'INTERNAL'}
@@ -189,9 +187,14 @@ class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
         for nrn_group in nrn_groups:
             self.node.groups[nrn_group["name"]].from_full_NEURON_group(nrn_group)
 
+
         for group in self.node.groups.values():
             if group.selected:
-                group.show(CellObjectView)
+                if group.interaction_granularity == 'Cell':
+                    group.show(CellObjectView)
+
+                if group.interaction_granularity == 'Section':
+                    group.show(SectionObjectView)
 
         return{'FINISHED'}
 

@@ -1,7 +1,6 @@
-from collections import OrderedDict
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-from blenderneuron.blender.group2cells import CellObjectView
+
 
 class BlenderRootGroup(RootGroup):
 
