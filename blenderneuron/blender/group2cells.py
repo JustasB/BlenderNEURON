@@ -66,6 +66,32 @@ class CellObjectView:
 
         self.zoom_to_containers()
 
+    def get_operator_context_override(self, selected_object = None):
+        override = {}
+
+        try:
+            for area in bpy.data.screens["Default"].areas:
+                if area.type == 'VIEW_3D':
+                    for region in area.regions:
+                        if region.type == 'WINDOW':
+                            override['area'] = area
+                            override['region'] = region
+                            raise StopIteration()
+
+        except StopIteration:
+            pass
+
+        override["window"]        = bpy.context.window_manager.windows[0]
+        override["scene"]         = bpy.data.scenes['Scene']
+        override["screen"]        = bpy.data.screens["Default"]
+
+        if selected_object:
+            override["object"]        = selected_object
+            override["active_object"] = selected_object
+            override["edit_object"]   = selected_object
+
+        return override
+
     def zoom_to_containers(self):
         # Unselect everything
         bpy.ops.object.select_all(action='DESELECT')
@@ -74,7 +100,8 @@ class CellObjectView:
         self.select_containers(True)
 
         # Zoom to selected
-        bpy.ops.view3d.view_selected(use_all_regions=False)
+        context = self.get_operator_context_override()
+        bpy.ops.view3d.view_selected(context, use_all_regions=False)
 
         # Unselect containers
         self.select_containers(False)
@@ -82,6 +109,25 @@ class CellObjectView:
     def select_containers(self, select):
         for container in self.containers.values():
             container.object.select = select
+
+    def remove_container(self, container):
+        # Lookup if passed in a hash
+        if type(container) == str:
+            container = self.containers.get(container)
+            if container is None:
+                return
+
+        container.remove()
+        self.containers.pop(container.root_hash)
+
+    def remove(self):
+        # Remove any previous containers
+        containers = list(self.containers.values())
+        for container in containers:
+            self.remove_container(container)
+
+        # Remove curve template
+        bpy.data.curves.remove(self.curve_template)
 
     def show(self):
         if self.group.interaction_granularity != "Cell":
@@ -107,6 +153,21 @@ class CellObjectView:
             self.containers[root.hash].update_group_section(root, recursive=True)
 
 class CurveContainer:
+
+    def remove(self):
+        self.unlink()
+
+        # materials
+        for mat in self.curve.materials:
+            bpy.data.materials.remove(mat)
+
+        # curve
+        bpy.data.curves.remove(self.curve)
+
+        # object
+        bpy.data.objects.remove(self.object)
+
+
     def __init__(self, root, curve_template, smooth_sections):
 
         self.root_hash = root.hash
@@ -317,6 +378,11 @@ class CurveContainer:
         bpy.context.scene.objects.link(self.object)
 
         self.linked = True
+
+    def unlink(self):
+        bpy.context.scene.objects.unlink(self.object)
+
+        self.linked = False
 
 
 

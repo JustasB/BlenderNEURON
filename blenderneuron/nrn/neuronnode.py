@@ -1,6 +1,7 @@
 from neuron import h
 from blenderneuron.commnode import CommNode
 from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
+from collections import OrderedDict
 
 try:
     import xmlrpclib
@@ -46,6 +47,8 @@ class NeuronNode(CommNode):
 
     def initialize_groups(self, blender_groups):
 
+        self.groups = OrderedDict()
+
         for blender_group in blender_groups:
             name = blender_group["name"]
 
@@ -64,10 +67,6 @@ class NeuronNode(CommNode):
         return self.compress(result)
 
     def update_groups(self, blender_groups):
-
-
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
 
         for blender_group in blender_groups:
             name = blender_group["name"]

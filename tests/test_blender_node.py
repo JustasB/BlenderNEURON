@@ -9,7 +9,7 @@ from unittest import TestCase
 from blenderneuron.commnode import CommNode
 from tests import test_hoc_file, Blender, BlenderTestCase
 
-class TestCommNode(BlenderTestCase):
+class TestBlenderNode(BlenderTestCase):
     def test_server_established(self):
         # Start Blender with a running node
         with Blender(cmd_args="--python blenderneuron/__init__.py", sleep=3):

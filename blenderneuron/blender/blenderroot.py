@@ -46,6 +46,10 @@ class BlenderRoot(BlenderSection):
         return self.node.ui_group[self.name]
 
     def remove(self, node):
+        # Remove view container objects if any
+        if self.group.view is not None:
+            self.group.view.remove_container(self.hash)
+
         # remove from UI and from node groups
         self.remove_from_group()
 

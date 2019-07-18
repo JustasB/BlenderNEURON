@@ -179,6 +179,7 @@ class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
     bl_description = "Imports cell group data (morhology and activity) into Blender"
 
     def execute(self, context):
+
         blender_groups = [group.to_dict() for group in self.node.groups.values() if group.selected]
 
         compressed = self.client.initialize_groups(blender_groups)
@@ -205,6 +206,7 @@ class CUSTOM_OT_export_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
         for group in self.node.groups.values():
             if group.selected:
                 group.from_view()
+
 
         blender_groups = [group.to_dict(
                               include_root_children=True,

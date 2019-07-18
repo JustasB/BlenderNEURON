@@ -16,6 +16,8 @@ class BlenderRootGroup(RootGroup):
         self.name = name
         self.node = node
 
+        self.view = None
+
         # Group display properties
         self.smooth_sections = True
         self.spherize_soma_if_DeqL=True
@@ -35,6 +37,9 @@ class BlenderRootGroup(RootGroup):
     def show(self, view_class):
         if not hasattr(view_class, "show"):
             raise Exception(str(view_class) + ' does not implement show() method')
+
+        if self.view is not None:
+            self.view.remove()
 
         self.view = view_class(self)
         self.view.show()
@@ -70,8 +75,10 @@ class BlenderRootGroup(RootGroup):
 
 
     def remove(self):
+        if self.view is not None:
+            self.view.remove()
 
-        # Remove the group roots from the group before deleting it
+        # Remove the group roots from the group before deleting group
         roots = list(self.roots.values())
         for root in roots:
             root.remove_from_group()
