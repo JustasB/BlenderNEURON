@@ -1,12 +1,25 @@
-import bpy
 import threading
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 
+import bpy
+
 from blenderneuron.blender.views.curvecontainer import CurveContainer
 
 
-class ObjectViewAbstract:
+class ViewAbstract(object):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def show(self):
+        pass
+
+    @abstractmethod
+    def update_group(self):
+        pass
+
+
+class ObjectViewAbstract(ViewAbstract):
     __metaclass__ = ABCMeta
 
     has_linked = False
@@ -131,14 +144,6 @@ class ObjectViewAbstract:
 
         # Remove curve template
         bpy.data.curves.remove(self.curve_template)
-
-    @abstractmethod
-    def show(self):
-        pass
-
-    @abstractmethod
-    def update_group(self):
-        pass
 
     def create_section_container(self, section, include_children, origin_type):
 

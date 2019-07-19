@@ -126,6 +126,9 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
         self.layout.operator("custom.export_selected_groups", text="Export Cell Groups to NEURON",
                              icon="PLAY_REVERSE")
 
+        self.layout.operator("custom.save_selected_groups", text="Save Changes to NEURON .py file",
+                             icon="PLAY_REVERSE")
+
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'

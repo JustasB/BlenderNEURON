@@ -1,12 +1,13 @@
 import bpy
 from bpy.types import (Operator)
+from bpy_extras.io_utils import ExportHelper
 
 from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
+from blenderneuron.blender.views.commandview import CommandView
 
-
-class AbstractCUSTOM_OT_cellgroup_operator(BlenderNodeClass):
+class CellGroupOperatorAbstract(BlenderNodeClass):
     bl_options = {'INTERNAL'}
 
     @classmethod
@@ -19,7 +20,7 @@ class AbstractCUSTOM_OT_cellgroup_operator(BlenderNodeClass):
                bpy.types.Object.BlenderNEURON_node.client is not None
 
 
-class CUSTOM_OT_cell_group_add(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_cell_group_add(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.cell_group_add"
     bl_label = "Add new cell display group"
     bl_description = "Add new cell display group. Each group allows cells within it to have their own granularity " \
@@ -33,7 +34,7 @@ class CUSTOM_OT_cell_group_add(Operator, AbstractCUSTOM_OT_cellgroup_operator):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_cell_group_remove(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_cell_group_remove(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.cell_group_remove"
     bl_label = "Remove a cell display group"
     bl_description = "Remove a cell display group"
@@ -50,7 +51,7 @@ class CUSTOM_OT_cell_group_remove(Operator, AbstractCUSTOM_OT_cellgroup_operator
 
         return{'FINISHED'}
 
-class CUSTOM_OT_get_cell_list_from_neuron(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_get_cell_list_from_neuron(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.get_cell_list_from_neuron"
     bl_label = "List NEURON Cells"
     bl_description = "Get all cells (root sections) currently instantiated in NEURON. Automatically " \
@@ -71,7 +72,7 @@ class CUSTOM_OT_get_cell_list_from_neuron(Operator, AbstractCUSTOM_OT_cellgroup_
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_all_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_select_all_neuron_cells(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.select_all_neuron_cells"
     bl_label = "Select All"
     bl_description = "Select all cells to be shown in Blender"
@@ -85,7 +86,7 @@ class CUSTOM_OT_select_all_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup_op
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_none_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_select_none_neuron_cells(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.select_none_neuron_cells"
     bl_label = "None"
     bl_description = "Unselect all cells for showing in Blender"
@@ -99,7 +100,7 @@ class CUSTOM_OT_select_none_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup_o
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_invert_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_select_invert_neuron_cells(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.select_invert_neuron_cells"
     bl_label = "Invert"
     bl_description = "Invert the selection of cells for showing in Blender"
@@ -113,7 +114,7 @@ class CUSTOM_OT_select_invert_neuron_cells(Operator, AbstractCUSTOM_OT_cellgroup
         return{'FINISHED'}
 
 
-class CUSTOM_OT_sim_settings_to_neuron(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_sim_settings_to_neuron(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.sim_settings_to_neuron"
     bl_label = "Send simulation parameters to NEURON"
     bl_description = "Sends simulation parameters set in Blender to NEURON"
@@ -123,7 +124,7 @@ class CUSTOM_OT_sim_settings_to_neuron(Operator, AbstractCUSTOM_OT_cellgroup_ope
         return{'FINISHED'}
 
 
-class CUSTOM_OT_sim_settings_from_neuron(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_sim_settings_from_neuron(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.sim_settings_from_neuron"
     bl_label = "Get simulation parameters from NEURON"
     bl_description = "Reads simulation parameters set in NEURON into Blender. Use this when one of the above " \
@@ -135,7 +136,7 @@ class CUSTOM_OT_sim_settings_from_neuron(Operator, AbstractCUSTOM_OT_cellgroup_o
         return{'FINISHED'}
 
 
-class CUSTOM_OT_show_voltage_plot(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_show_voltage_plot(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.show_voltage_plot"
     bl_label = "Show Voltage Plot"
     bl_description = "Show the NEURON > Graph > Voltage Axis plot (v of the active section vs time)"
@@ -146,7 +147,7 @@ class CUSTOM_OT_show_voltage_plot(Operator, AbstractCUSTOM_OT_cellgroup_operator
         return{'FINISHED'}
 
 
-class CUSTOM_OT_init_and_run(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_init_and_run(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.init_and_run"
     bl_label = "Init & Run NEURON"
     bl_description = "Initializes and runs the NEURON simulation (i.e. `h.run()`)"
@@ -157,7 +158,7 @@ class CUSTOM_OT_init_and_run(Operator, AbstractCUSTOM_OT_cellgroup_operator):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_reset_groups(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_reset_groups(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.reset_groups"
     bl_label = "Reset Cell Groups"
     bl_description = "Removes all groups and clears the NEURON cell index"
@@ -171,7 +172,7 @@ class CUSTOM_OT_reset_groups(Operator, AbstractCUSTOM_OT_cellgroup_operator):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.import_selected_groups"
     bl_label = "Import Group Data"
     bl_description = "Imports cell group data (morhology and activity) into Blender"
@@ -199,7 +200,7 @@ class CUSTOM_OT_import_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
         return{'FINISHED'}
 
 
-class CUSTOM_OT_export_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_operator):
+class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.export_selected_groups"
     bl_label = "Export Group Data"
     bl_description = "Exports cell group data (morhology) to NEURON"
@@ -220,5 +221,27 @@ class CUSTOM_OT_export_selected_groups(Operator, AbstractCUSTOM_OT_cellgroup_ope
         self.client.update_groups(blender_groups)
 
         return{'FINISHED'}
+
+
+
+class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
+    bl_idname = "custom.save_selected_groups"
+    bl_label = "Save Group Data"
+    bl_description = "Save Changes to NEURON .py file"
+
+    # ExportHelper mixin class uses this
+    filename_ext = ".py"
+
+    def execute(self, context):
+        group = self.node.ui_properties.group.node_group
+
+        group.from_view()
+
+        content = CommandView(group).show()
+
+        with open(self.filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        return {'FINISHED'}
 
 
