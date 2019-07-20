@@ -245,3 +245,31 @@ class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
         return {'FINISHED'}
 
 
+class CUSTOM_OT_select_aligner_fixed_sections(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.select_aligner_fixed_sections"
+    bl_label = "Select Fixed Sections"
+    bl_description = "Selects/Highlights the sections that will be fixed during layer alignment"
+
+    def execute(self, context):
+
+        group = self.node.ui_properties.group.node_group
+
+        return{'FINISHED'}
+
+
+class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.align_to_layer"
+    bl_label = "Align to Layer"
+    bl_description = "Aligns sections that match the align pattern to the " \
+                     "selected layer using a force-based physics simulation"
+
+    def execute(self, context):
+
+        group = self.node.ui_properties.group.node_group
+
+        group.align_to_layer()
+
+        return{'FINISHED'}
+
+
+

@@ -31,6 +31,8 @@ class ObjectViewAbstract(ViewAbstract):
         self.containers = OrderedDict()
         self.make_curve_template()
 
+        self.closed_ends = True
+
     def make_curve_template(self):
         self.curve_template = bpy.data.curves.new("bezier", type='CURVE')
         self.curve_template.dimensions = '3D'
@@ -38,6 +40,8 @@ class ObjectViewAbstract(ViewAbstract):
         self.curve_template.fill_mode = 'FULL'
         self.curve_template.bevel_depth = 0.0 if self.group.as_lines else 1.0
         self.curve_template.bevel_resolution = int((self.group.circular_subdivisions - 4) / 2.0)
+        self.curve_template.show_normal_face = False
+        self.curve_template.show_handles = False
 
     def on_first_link(self):
         # Set viewport params
@@ -50,6 +54,9 @@ class ObjectViewAbstract(ViewAbstract):
 
                         # Set viewport clipping distance
                         space.clip_end = 99999
+
+                        # Disable relationship lines
+                        space.show_relationship_lines = False
 
         # Add a sun lamp - at 500,500,500 um
         sun_exists = False
@@ -108,13 +115,18 @@ class ObjectViewAbstract(ViewAbstract):
 
         return override
 
-    def select_containers(self, select):
+    def select_containers(self, select=True, pattern=None, pattern_inverse=False):
+        # First, unselect everything
+        bpy.ops.object.select_all(action='DESELECT')
+
+        # Then select the containers
         for container in self.containers.values():
-            container.object.select = select
+            if pattern is None or \
+                    (not pattern_inverse and pattern in container.name) or \
+                    (pattern_inverse and pattern not in container.name):
+                container.object.select = select
 
     def zoom_to_containers(self):
-        # Unselect everything
-        bpy.ops.object.select_all(action='DESELECT')
 
         # Select the container objects
         self.select_containers(True)
@@ -152,7 +164,15 @@ class ObjectViewAbstract(ViewAbstract):
             self.curve_template,
             self.group.smooth_sections,
             include_children,
-            origin_type
+            origin_type,
+            self.closed_ends,
         )
 
         self.containers[container.root_hash] = container
+
+    def containers_to_mesh(self):
+        self.select_containers()
+
+        # Convert the selected container curves to mesh
+        bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+        bpy.ops.object.convert(target='MESH', keep_original=False)

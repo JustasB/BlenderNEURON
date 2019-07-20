@@ -12,7 +12,8 @@ from bpy.props import (IntProperty,
 from bpy.types import (Operator,
                        Panel,
                        PropertyGroup,
-                       UIList)
+                       UIList,
+                       Object)
 
 
 class CUSTOM_NEURON_IU_Root(PropertyGroup, BlenderNodeClass):
@@ -25,6 +26,30 @@ class CUSTOM_NEURON_IU_Root(PropertyGroup, BlenderNodeClass):
         self.node.root_index[self.hash].add_to_group(new_group)
 
     selected = BoolProperty(default=False, update=on_selected_updated)
+
+
+
+class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
+    layer_mesh = PointerProperty(
+        type=Object,
+        name="Layer",
+        description="The mesh to which align the pattern matching sections"
+    )
+
+    fixed_sections_pattern = StringProperty(
+        name="Fixed",
+        default="soma",
+        description="If value of this property is part of a name of a section, "
+                    "the section(s) will remain fixed in place"
+    )
+
+    moveable_sections_pattern = StringProperty(
+        name="Aligned",
+        default="dend",
+        description="If value of this property is part of a name of a section, "
+                    "the section(s) will be aligned to the seleccted layer"
+    )
+
 
 class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
 
@@ -130,7 +155,9 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_gran_prop("interaction_granularity")
     )
 
-
+    layer_aligner_settings = PointerProperty(
+        type=CUSTOM_NEURON_LayerAlignment
+    )
 
     # TODO move this to a map property
     smooth_sections = BoolProperty(
@@ -243,6 +270,8 @@ class CUSTOM_NEURON_SimulatorSettings(BlenderNodeClass, PropertyGroup):
         default='1',
         update=to_neuron
     )
+
+
 
 class CUSTOM_BlenderNEURON(PropertyGroup):
 

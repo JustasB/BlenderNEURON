@@ -18,6 +18,10 @@ if inside_blender:
     from blenderneuron.blender.panels.rootgroup import *
     from blenderneuron.blender.properties.rootgroup import *
 
+
+    from blenderneuron.blender.panels.layeralignment import *
+    from blenderneuron.blender.properties.layeralignment import *
+
     from blenderneuron.blender.utils import register_module_classes
 
     bl_info = {
@@ -59,6 +63,11 @@ if inside_blender:
 
         blenderneuron.blender.properties.rootgroup.register()
 
+        register_module_classes(blenderneuron.blender.panels.layeralignment)
+        register_module_classes(blenderneuron.blender.properties.layeralignment)
+
+        blenderneuron.blender.properties.layeralignment.register()
+
         # This ensures the server starts on Blender load (self-removing)
         bpy.app.handlers.scene_update_post.append(auto_start)
 
@@ -81,6 +90,11 @@ if inside_blender:
         register_module_classes(blenderneuron.blender.properties.rootgroup, unreg=True)
 
         blenderneuron.blender.properties.rootgroup.unregister()
+
+        register_module_classes(blenderneuron.blender.panels.layeralignment, unreg=True)
+        register_module_classes(blenderneuron.blender.properties.layeralignment, unreg=True)
+
+        blenderneuron.blender.properties.layeralignment.unregister()
 
 
 

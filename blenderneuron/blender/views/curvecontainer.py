@@ -5,12 +5,14 @@ import numpy as np
 
 class CurveContainer:
 
-    def __init__(self, root, curve_template, smooth_sections, recursive=True, origin_type="center"):
+    def __init__(self, root, curve_template, smooth_sections,
+                 recursive=True, origin_type="center", closed_ends=True):
 
         self.root_hash = root.hash
         self.name = root.name
         self.smooth_sections = smooth_sections
         self.default_color = [1,1,1]
+        self.closed_ends = closed_ends
 
         # copy the curve template and make a new blender object out of it
         self.curve = curve_template.copy()
@@ -18,6 +20,8 @@ class CurveContainer:
 
         self.linked = False
         self.material_indices = []
+
+        self.joints = []
 
         # Quickly find the spline of a given section
         self.hash2spline_index = {}
@@ -80,12 +84,13 @@ class CurveContainer:
         # relative to the object origin)
         coords = coords - self.origin
 
-        # Add closed, 0-diam caps (to avoid open-ended cylinders)
-        cap1 = self.diam0version(coords[1], coords[0])
-        cap2 = self.diam0version(coords[-2], coords[-1])
+        if self.closed_ends:
+            # Add closed, 0-diam caps (to avoid open-ended cylinders)
+            cap1 = self.diam0version(coords[1], coords[0])
+            cap2 = self.diam0version(coords[-2], coords[-1])
 
-        coords = np.concatenate(([cap1], coords, [cap2]))
-        radii = np.concatenate(([0],radii,[0]))
+            coords = np.concatenate(([cap1], coords, [cap2]))
+            radii = np.concatenate(([0],radii,[0]))
 
         # Flatten the coords back (needed by the foreach_set() functions below)
         coords.shape = (-1)
@@ -183,8 +188,9 @@ class CurveContainer:
         # Adjust coords for container origin and rotation
         coords = self.to_global(coords)
 
-        # Discard the 0-radius end caps
-        coords = coords[3:-3]
+        if self.closed_ends:
+            # Discard the 0-radius end caps
+            coords = coords[3:-3]
 
         root.coords = coords.tolist()
 
@@ -253,11 +259,80 @@ class CurveContainer:
             self.object.location = coords[0]
 
     def link(self):
-        bpy.context.scene.objects.link(self.object)
+        link = bpy.context.scene.objects.link
+
+        link(self.object)
+
+        for empty in self.joints:
+            link(empty)
 
         self.linked = True
 
     def unlink(self):
-        bpy.context.scene.objects.unlink(self.object)
+        unlink = bpy.context.scene.objects.unlink
+
+        unlink(self.object)
+
+        for empty in self.joints:
+            unlink(empty)
 
         self.linked = False
+        
+    def to_mesh(self):
+        name = self.object.name
+
+        sec_mesh = self.object.to_mesh(bpy.context.scene, apply_modifiers=False, settings='RENDER')
+
+        # Remove old curve and it's object
+        bpy.data.curves.remove(self.object.data, do_unlink=True)
+        # bpy.data.objects.remove(self.object)
+
+        sec_obj = bpy.data.objects.new(name, sec_mesh)
+
+        return sec_obj
+
+    def create_joint_with(self, child):
+        joint_location = child.origin # Child origin should be the location of the branch
+
+        # Create an "Empty" object
+        empty = bpy.data.objects.new("Joint", None) # None creates "Empty"
+        empty.location = joint_location
+        empty.empty_draw_type = 'SPHERE'
+        empty.empty_draw_size = 0.5
+
+        # Add rigid body constraint to the empty
+        bpy.context.scene.objects.link(empty)
+        bpy.context.scene.objects.active = empty
+        bpy.ops.rigidbody.constraint_add()
+
+        # Set the joint params
+        constraint = empty.rigid_body_constraint
+        constraint.type = 'GENERIC'
+
+        constraint.use_limit_lin_x = \
+            constraint.use_limit_lin_y = \
+            constraint.use_limit_lin_z = \
+            constraint.use_limit_ang_x = \
+            constraint.use_limit_ang_y = \
+            constraint.use_limit_ang_z = True
+
+        constraint.limit_lin_x_upper = \
+            limit_lin_y_upper = \
+            limit_lin_z_upper = 0.1
+
+        constraint.limit_lin_x_lower = \
+            constraint.limit_lin_y_lower = \
+            constraint.limit_lin_z_lower = -0.1
+        
+        constraint.limit_ang_x_lower = \
+            constraint.limit_ang_y_lower = \
+            constraint.limit_ang_z_lower = -1.57 # -90 deg
+        
+        constraint.limit_ang_x_upper = \
+            constraint.limit_ang_y_upper = \
+            constraint.limit_ang_z_upper = 1.57 # 90 deg
+
+        constraint.object1 = self.object # parent
+        constraint.object2 = child.object
+
+        self.joints.append(empty)

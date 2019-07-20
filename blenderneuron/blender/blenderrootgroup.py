@@ -1,6 +1,6 @@
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-
+from blenderneuron.blender.views.linesectionobjectview import LineSectionObjectView
 
 class BlenderRootGroup(RootGroup):
 
@@ -97,6 +97,10 @@ class BlenderRootGroup(RootGroup):
         for root in self.node.root_index.values():
             if root.group is None:
                 root.add_to_group(self)
+
+    def align_to_layer(self):
+
+        self.show(LineSectionObjectView)
 
 
 

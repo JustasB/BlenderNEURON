@@ -129,6 +129,33 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
         self.layout.operator("custom.save_selected_groups", text="Save Changes to NEURON .py file",
                              icon="PLAY_REVERSE")
 
+class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
+    bl_idname = 'CUSTOM_PT_NEURON_AlignToLayer'
+    bl_label = "Align To Layer"
+
+    # def poll(cls, context):
+    #     return AbstractBlenderNEURONPanel.groups_exist(context)
+
+    def draw(self, context):
+        scene = context.scene
+
+        group_aligner = self.get_group(context).layer_aligner_settings
+
+        row = self.layout.row()
+        row.prop(group_aligner, "layer_mesh")
+
+        col = self.layout.column(align=True)
+        row = col.row()
+        row.prop(group_aligner, "fixed_sections_pattern")
+        row.operator("custom.select_aligner_fixed_sections", text="", icon="RESTRICT_VIEW_OFF")
+
+        col = self.layout.column()
+        row = col.row()
+        row.prop(group_aligner, "moveable_sections_pattern")
+        row.operator("custom.select_aligner_fixed_sections", text="", icon="RESTRICT_VIEW_OFF")
+
+        col = self.layout.column()
+        col.operator("custom.align_to_layer",text="Align", icon="SURFACE_DATA")
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
