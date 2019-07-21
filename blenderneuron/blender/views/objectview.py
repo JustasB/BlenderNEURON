@@ -108,6 +108,9 @@ class ObjectViewAbstract(ViewAbstract):
         override["scene"]         = bpy.data.scenes['Scene']
         override["screen"]        = bpy.data.screens["Default"]
 
+        override["edit_object"] = None
+        override["gpencil_data"] = None
+
         if selected_object:
             override["object"]        = selected_object
             override["active_object"] = selected_object
@@ -176,3 +179,10 @@ class ObjectViewAbstract(ViewAbstract):
         # Convert the selected container curves to mesh
         bpy.context.scene.objects.active = bpy.context.selected_objects[0]
         bpy.ops.object.convert(target='MESH', keep_original=False)
+
+    def mesh_containers_to_curves(self):
+        self.select_containers()
+
+        # Convert the selected container meshes to curves
+        bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+        bpy.ops.object.convert(target='CURVE', keep_original=False)

@@ -83,6 +83,7 @@ class NeuronNode(CommNode):
     def get_sim_params(self):
         params = {}
 
+        params["t"] = h.t
         params["tstop"] = h.tstop
         params["dt"] = h.dt
         params["atol"] = h.cvode.atol()

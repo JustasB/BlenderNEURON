@@ -4,9 +4,6 @@ import bpy
 
 class SectionObjectView(ObjectViewAbstract):
     def show(self):
-        if self.group.interaction_granularity != "Section":
-            raise NotImplementedError()
-
         if self.group.recording_granularity != "Section":
             raise NotImplementedError()
 

@@ -1,6 +1,7 @@
 import bpy
+from blenderneuron.blender import BlenderNodeClass
 
-class AbstractBlenderNEURONPanel(object):
+class AbstractBlenderNEURONPanel(BlenderNodeClass):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_context = "objectmode"
@@ -9,13 +10,6 @@ class AbstractBlenderNEURONPanel(object):
 
     def draw(self, context):
         pass
-
-    @staticmethod
-    def groups_exist(context):
-        """
-        Checks if there are any cell groups
-        """
-        return len(context.scene.BlenderNEURON.groups) > 0
 
     def get_group(self, context):
         """

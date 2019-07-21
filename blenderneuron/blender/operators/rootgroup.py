@@ -7,6 +7,7 @@ from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
 
+
 class CellGroupOperatorAbstract(BlenderNodeClass):
     bl_options = {'INTERNAL'}
 
@@ -147,6 +148,17 @@ class CUSTOM_OT_show_voltage_plot(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
+class CUSTOM_OT_show_shape_plot(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.show_shape_plot"
+    bl_label = "Show Shape Plot"
+    bl_description = "Show the NEURON > Graph > Shape plot (a rough rendering of NEURON sections)"
+
+    def execute(self, context):
+        self.client.run_command("h.newshapeplot()")
+
+        return{'FINISHED'}
+
+
 class CUSTOM_OT_init_and_run(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.init_and_run"
     bl_label = "Init & Run NEURON"
@@ -154,6 +166,9 @@ class CUSTOM_OT_init_and_run(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
         self.client.run_command("h.run()")
+
+        # Update the current time
+        bpy.ops.custom.sim_settings_from_neuron()
 
         return{'FINISHED'}
 
@@ -186,8 +201,29 @@ class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
         del compressed
 
         for nrn_group in nrn_groups:
-            self.node.groups[nrn_group["name"]].from_full_NEURON_group(nrn_group)
+            node_group = self.node.groups[nrn_group["name"]]
 
+            if node_group.view is not None:
+                node_group.view.remove()
+                node_group.view = None
+
+            node_group.from_full_NEURON_group(nrn_group)
+
+        bpy.ops.custom.display_selected_groups()
+
+        return{'FINISHED'}
+
+
+class CUSTOM_OT_display_selected_groups(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.display_selected_groups"
+    bl_label = "Show Imported Groups"
+    bl_description = "Displays imported groups based on their interaction level"
+
+    @classmethod
+    def poll(cls, context):
+        return BlenderNodeClass.imported_groups_exist(context)
+
+    def execute(self, context):
 
         for group in self.node.groups.values():
             if group.selected:
@@ -200,10 +236,14 @@ class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.export_selected_groups"
-    bl_label = "Export Group Data"
-    bl_description = "Exports cell group data (morhology) to NEURON"
+class CUSTOM_OT_update_groups_from_view(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.update_groups_from_view"
+    bl_label = "Update Groups with View Changes"
+    bl_description = "Updates group data with the changes made in the 3D View"
+
+    @classmethod
+    def poll(cls, context):
+        return BlenderNodeClass.visible_groups_exist(context)
 
     def execute(self, context):
 
@@ -211,6 +251,19 @@ class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
             if group.selected:
                 group.from_view()
 
+        return{'FINISHED'}
+
+
+class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.export_selected_groups"
+    bl_label = "Export Group Data"
+    bl_description = "Exports cell group data (morhology) to NEURON"
+
+    @classmethod
+    def poll(cls, context):
+        return BlenderNodeClass.imported_groups_exist(context)
+
+    def execute(self, context):
 
         blender_groups = [group.to_dict(
                               include_root_children=True,
@@ -228,6 +281,10 @@ class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
     bl_idname = "custom.save_selected_groups"
     bl_label = "Save Group Data"
     bl_description = "Save Changes to NEURON .py file"
+
+    @classmethod
+    def poll(cls, context):
+        return BlenderNodeClass.imported_groups_exist(context)
 
     # ExportHelper mixin class uses this
     filename_ext = ".py"

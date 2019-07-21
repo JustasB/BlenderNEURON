@@ -23,3 +23,26 @@ class BlenderNodeClass:
             return self.node.client
         except:
             return None
+
+
+    @staticmethod
+    def groups_exist(context):
+        """
+        Checks if there are any cell groups
+        """
+        return any(context.scene.BlenderNEURON.groups)
+
+    @staticmethod
+    def imported_groups_exist(context):
+        """
+        Checks if there are any imported cell groups
+        """
+        return any([g for g in context.scene.BlenderNEURON.groups if g.node_group.state == 'imported'])
+
+
+    @staticmethod
+    def visible_groups_exist(context):
+        """
+        Checks if there are any cell groups whose view is visible
+        """
+        return any([g for g in context.scene.BlenderNEURON.groups if g.node_group.view is not None])

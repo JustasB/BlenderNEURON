@@ -15,8 +15,7 @@ class CurveContainer:
         self.closed_ends = closed_ends
 
         # copy the curve template and make a new blender object out of it
-        self.curve = curve_template.copy()
-        self.object = bpy.data.objects.new(self.name, self.curve)
+        self.object = bpy.data.objects.new(self.name, curve_template.copy())
 
         self.linked = False
         self.material_indices = []
@@ -28,6 +27,22 @@ class CurveContainer:
 
         # Recursively add section splines and corresponding materials to the container
         self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
+
+    @property
+    def curve(self):
+        if self.object.type == 'CURVE':
+            return self.object.data
+
+        raise Exception("Attempting to access curve data of an object that is not a curve: " + self.name)
+
+
+    @property
+    def mesh(self):
+        if self.object.type == 'MESH':
+            return self.object.data
+
+        raise Exception("Attempting to access mesh data of an object that is not a mesh: " + self.name)
+
 
     def set_parent_object(self, parent_container):
         if not self.linked or not parent_container.linked:
@@ -44,14 +59,23 @@ class CurveContainer:
         self.unlink()
 
         # materials
-        for mat in self.curve.materials:
+        for mat in self.object.data.materials:
             bpy.data.materials.remove(mat)
 
         # curve
-        bpy.data.curves.remove(self.curve)
+        if self.object.type == 'CURVE':
+            bpy.data.curves.remove(self.curve)
+
+        # mesh
+        elif self.object.type == 'MESH':
+            bpy.data.meshes.remove(self.mesh)
 
         # object
         bpy.data.objects.remove(self.object)
+
+        # joints
+        for joint in self.joints:
+            bpy.data.objects.remove(joint)
 
     @property
     def origin(self):
@@ -167,23 +191,30 @@ class CurveContainer:
         return global_coords
 
     def update_group_section(self, root, recursive=True):
-        # Find the spline that corresponds to the section
-        spline_i = self.hash2spline_index[root.hash]
+        if self.object.type == 'CURVE':
+            # Find the spline that corresponds to the section
+            spline_i = self.hash2spline_index[root.hash]
 
-        try:
-            spline = self.curve.splines[spline_i]
+            try:
+                spline = self.curve.splines[spline_i]
 
-        except IndexError:
-            print("Could not find spline with index " + str(spline_i) + " in " + self.name +
-                  ". This can happen if a spline is deleted in Edit Mode.")
-            raise
+            except IndexError:
+                print("Could not find spline with index " + str(spline_i) + " in " + self.name +
+                      ". This can happen if a spline is deleted in Edit Mode.")
+                raise
+
+            point_source = spline.bezier_points
+
+            del spline
+
+        elif self.object.type == 'MESH':
+            point_source = self.object.data.vertices
 
         # Get the 3d points
-        bezier_points = spline.bezier_points
-        num_coords = len(bezier_points)
+        num_coords = len(point_source)
 
         coords = np.zeros(num_coords * 3)
-        bezier_points.foreach_get("co", coords)
+        point_source.foreach_get("co", coords)
 
         # Adjust coords for container origin and rotation
         coords = self.to_global(coords)
@@ -194,13 +225,15 @@ class CurveContainer:
 
         root.coords = coords.tolist()
 
-        # Get radii
-        radii = np.zeros(num_coords)
-        bezier_points.foreach_get("radius", radii)
-        root.radii  = radii[1:-1].tolist()
+        # Get radii - if container is a bezier
+        if self.object.type == 'CURVE':
+            radii = np.zeros(num_coords)
+            point_source.foreach_get("radius", radii)
+            root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
+            del radii
 
         # Cleanup before recursion
-        del spline, bezier_points, num_coords, coords, radii
+        del point_source, num_coords, coords
 
         if recursive:
             for child in root.children:
@@ -277,19 +310,7 @@ class CurveContainer:
             unlink(empty)
 
         self.linked = False
-        
-    def to_mesh(self):
-        name = self.object.name
 
-        sec_mesh = self.object.to_mesh(bpy.context.scene, apply_modifiers=False, settings='RENDER')
-
-        # Remove old curve and it's object
-        bpy.data.curves.remove(self.object.data, do_unlink=True)
-        # bpy.data.objects.remove(self.object)
-
-        sec_obj = bpy.data.objects.new(name, sec_mesh)
-
-        return sec_obj
 
     def create_joint_with(self, child):
         joint_location = child.origin # Child origin should be the location of the branch
@@ -299,6 +320,10 @@ class CurveContainer:
         empty.location = joint_location
         empty.empty_draw_type = 'SPHERE'
         empty.empty_draw_size = 0.5
+
+        # Create parent-child relationship between the parent section and the empty
+        empty.parent = self.object
+        empty.matrix_parent_inverse = self.object.matrix_world.inverted()
 
         # Add rigid body constraint to the empty
         bpy.context.scene.objects.link(empty)

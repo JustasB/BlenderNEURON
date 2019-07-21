@@ -121,41 +121,46 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
         scene = context.scene
 
         self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
-                             icon="PLAY")
+                             icon="FORWARD")
+
+        self.layout.operator("custom.display_selected_groups", text="Show Imported Groups",
+                             icon="RESTRICT_VIEW_OFF")
+
+        self.layout.operator("custom.update_groups_from_view", text="Update Groups with View Changes",
+                             icon="FILE_REFRESH")
 
         self.layout.operator("custom.export_selected_groups", text="Export Cell Groups to NEURON",
-                             icon="PLAY_REVERSE")
+                             icon="BACK")
 
         self.layout.operator("custom.save_selected_groups", text="Save Changes to NEURON .py file",
-                             icon="PLAY_REVERSE")
+                             icon="FILESEL")
 
 class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_AlignToLayer'
     bl_label = "Align To Layer"
 
-    # def poll(cls, context):
-    #     return AbstractBlenderNEURONPanel.groups_exist(context)
+    @classmethod
+    def poll(cls, context):
+        return AbstractBlenderNEURONPanel.imported_groups_exist(context)
 
     def draw(self, context):
         scene = context.scene
 
         group_aligner = self.get_group(context).layer_aligner_settings
 
-        row = self.layout.row()
-        row.prop(group_aligner, "layer_mesh")
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Layer:")
+        split.prop(group_aligner, "layer_mesh", text="")
 
-        col = self.layout.column(align=True)
-        row = col.row()
-        row.prop(group_aligner, "fixed_sections_pattern")
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Align:")
+
+        row = split.row(align=True)
+        row.prop(group_aligner, "moveable_sections_pattern", text="")
         row.operator("custom.select_aligner_fixed_sections", text="", icon="RESTRICT_VIEW_OFF")
 
         col = self.layout.column()
-        row = col.row()
-        row.prop(group_aligner, "moveable_sections_pattern")
-        row.operator("custom.select_aligner_fixed_sections", text="", icon="RESTRICT_VIEW_OFF")
-
-        col = self.layout.column()
-        col.operator("custom.align_to_layer",text="Align", icon="SURFACE_DATA")
+        col.operator("custom.align_to_layer", text="Align", icon="SURFACE_DATA")
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
@@ -174,12 +179,18 @@ class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
         settings = self.get_sim_settings(context)
 
         col = self.layout
+        row = col.row()
+        row.enabled = False
+        row.prop(settings, "neuron_t", text="Time (ms)")
 
         col.prop(settings, "neuron_tstop", text="Stop Time (ms)")
         col.prop(settings, "temperature", text=u"Temperature (°C)")
         col.separator()
 
         col.operator("custom.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
+        col.separator()
+
+        col.operator("custom.show_shape_plot", text="Show Shape Plot", icon="RENDER_RESULT")
         col.separator()
 
         col.prop(settings, "integration_method")

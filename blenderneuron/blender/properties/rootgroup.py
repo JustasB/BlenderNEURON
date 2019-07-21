@@ -33,14 +33,7 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
     layer_mesh = PointerProperty(
         type=Object,
         name="Layer",
-        description="The mesh to which align the pattern matching sections"
-    )
-
-    fixed_sections_pattern = StringProperty(
-        name="Fixed",
-        default="soma",
-        description="If value of this property is part of a name of a section, "
-                    "the section(s) will remain fixed in place"
+        description="The mesh to which the pattern matching sections will be aligned"
     )
 
     moveable_sections_pattern = StringProperty(
@@ -48,6 +41,12 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
         default="dend",
         description="If value of this property is part of a name of a section, "
                     "the section(s) will be aligned to the seleccted layer"
+    )
+
+    simulation_frames = IntProperty(
+        default=50,
+        name="Physics simulation frames",
+        description="The number of frames to use for physics simulation",
     )
 
 
@@ -223,11 +222,16 @@ class CUSTOM_NEURON_SimulatorSettings(BlenderNodeClass, PropertyGroup):
 
         params = client.get_sim_params()
 
+        self.neuron_t = params["t"]
         self.neuron_tstop = params["tstop"]
         self.time_step = params["dt"]
         self.abs_tolerance = params["atol"]
         self.temperature = params["celsius"]
         self.integration_method = str(int(float(params["cvode"])))
+
+    neuron_t = FloatProperty(
+        description="The current simulation time (e.g. h.t) in ms"
+    )
 
     neuron_tstop = FloatProperty(
         min = 0,

@@ -4,9 +4,6 @@ from blenderneuron.blender.views.objectview import ObjectViewAbstract
 class CellObjectView(ObjectViewAbstract):
 
     def show(self):
-        if self.group.interaction_granularity != "Cell":
-            raise NotImplementedError()
-
         if self.group.recording_granularity != "Section":
             raise NotImplementedError()
 

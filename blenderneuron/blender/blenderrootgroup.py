@@ -1,6 +1,6 @@
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-from blenderneuron.blender.views.linesectionobjectview import LineSectionObjectView
+from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
 
 class BlenderRootGroup(RootGroup):
 
@@ -25,8 +25,12 @@ class BlenderRootGroup(RootGroup):
         self.circular_subdivisions=12
         self.default_color = [1, 1, 1]
 
+        self.state = 'new'
+
 
     def from_full_NEURON_group(self, nrn_group):
+        self.state = 'imported'
+
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
             self.roots[nrn_root["hash"]].from_full_NEURON_section(nrn_root)
@@ -37,9 +41,12 @@ class BlenderRootGroup(RootGroup):
         if not hasattr(view_class, "show"):
             raise Exception(str(view_class) + ' does not implement show() method')
 
+        # If there is an existing view, get any changes made to it, and remove it
         if self.view is not None:
+            self.from_view()
             self.view.remove()
 
+        # Show the new view
         self.view = view_class(self)
         self.view.show()
 
@@ -100,7 +107,7 @@ class BlenderRootGroup(RootGroup):
 
     def align_to_layer(self):
 
-        self.show(LineSectionObjectView)
+        self.show(PhysicsMeshSectionObjectView)
 
 
 

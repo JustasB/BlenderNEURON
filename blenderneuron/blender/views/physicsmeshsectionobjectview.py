@@ -1,9 +1,9 @@
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 import bpy
 
-class LineSectionObjectView(SectionObjectView):
+class PhysicsMeshSectionObjectView(SectionObjectView):
     def __init__(self, group):
-        super(LineSectionObjectView, self).__init__(group)
+        super(PhysicsMeshSectionObjectView, self).__init__(group)
 
         # Disable any inter-point smoothing
         self.curve_template.resolution_u = 1
@@ -15,16 +15,28 @@ class LineSectionObjectView(SectionObjectView):
         self.closed_ends = False
 
     def show(self):
-        super(LineSectionObjectView, self).show()
+        super(PhysicsMeshSectionObjectView, self).show()
 
         self.containers_to_mesh()
-
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
 
         self.make_containers_rigid_bodies()
 
         self.add_branch_joints()
+
+        self.run_physics_sim()
+
+    def run_physics_sim(self):
+
+        frames = self.group.ui_group.layer_aligner_settings.simulation_frames
+
+        bpy.context.scene.rigidbody_world.point_cache.frame_start = 1
+        bpy.context.scene.rigidbody_world.point_cache.frame_end = frames
+
+        if bpy.context.scene.frame_end < frames:
+            bpy.context.scene.frame_end = frames
+
+        bpy.ops.ptcache.bake_all(bake=True)
+        bpy.context.scene.frame_set(frames)
 
     def make_containers_rigid_bodies(self):
 
@@ -44,13 +56,6 @@ class LineSectionObjectView(SectionObjectView):
         for root in self.group.roots.values():
             self.add_joints_to_children(root)
 
-        # # Add the joint objects (empties) to the scene
-        # link = bpy.context.scene.objects.link
-
-        # for cont in self.containers.values():
-        #     for joint in cont.joints:
-        #         link(joint)
-
     def add_joints_to_children(self, root):
 
         # Create joints between the parent and it's children
@@ -68,4 +73,18 @@ class LineSectionObjectView(SectionObjectView):
             self.add_joints_to_children(child)
 
     def update_group(self):
-        pass
+
+        for root in self.group.roots.values():
+            self.update_each_container_section(root)
+
+    def update_each_container_section(self, section):
+        self.containers[section.hash].update_group_section(section, recursive=False)
+
+        for child_sec in section.children:
+            self.update_each_container_section(child_sec)
+
+    def remove(self):
+        super(PhysicsMeshSectionObjectView, self).remove()
+
+        bpy.ops.rigidbody.world_remove()
+
