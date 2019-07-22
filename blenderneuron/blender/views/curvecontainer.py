@@ -21,6 +21,7 @@ class CurveContainer:
         self.material_indices = []
 
         self.joints = []
+        self.tip = None
 
         # Quickly find the spline of a given section
         self.hash2spline_index = {}
@@ -76,6 +77,9 @@ class CurveContainer:
         # joints
         for joint in self.joints:
             bpy.data.objects.remove(joint)
+
+        if self.tip is not None:
+            bpy.data.objects.remove(self.tip)
 
     @property
     def origin(self):
@@ -312,8 +316,33 @@ class CurveContainer:
         self.linked = False
 
 
+    def add_tip(self, tip_template):
+        if self.object.type != 'MESH':
+            raise Exception('Cannot add tip joint to non-mesh container: ' + self.name)
+
+        # Tip is the last coordinate of the section
+        tip_loc = self.object.data.vertices[-2 if self.closed_ends else -1].co
+        tip_loc = self.to_global(np.array(tip_loc))
+
+        # Create a dummy tip mesh so the force acts on the tips as well
+        tip_object = tip_template.copy()
+        tip_object.location = tip_loc
+
+        # Make the tip a child of the leaf section
+        tip_object.parent = self.object
+        tip_object.matrix_parent_inverse = self.object.matrix_world.inverted()
+
+        # Link and keep a reference to the tip (for cleanup)
+        bpy.context.scene.objects.link(tip_object)
+        self.tip = tip_object
+
+
+        self.create_joint_between(self.object, tip_object, tip_loc)
+
     def create_joint_with(self, child):
-        joint_location = child.origin # Child origin should be the location of the branch
+        self.create_joint_between(self.object, child.object, child.origin)
+
+    def create_joint_between(self, parent_object, child_object, joint_location):
 
         # Create an "Empty" object
         empty = bpy.data.objects.new("Joint", None) # None creates "Empty"
@@ -322,8 +351,8 @@ class CurveContainer:
         empty.empty_draw_size = 0.5
 
         # Create parent-child relationship between the parent section and the empty
-        empty.parent = self.object
-        empty.matrix_parent_inverse = self.object.matrix_world.inverted()
+        empty.parent = parent_object
+        empty.matrix_parent_inverse = parent_object.matrix_world.inverted()
 
         # Add rigid body constraint to the empty
         bpy.context.scene.objects.link(empty)
@@ -357,7 +386,9 @@ class CurveContainer:
             constraint.limit_ang_y_upper = \
             constraint.limit_ang_z_upper = 1.57 # 90 deg
 
-        constraint.object1 = self.object # parent
-        constraint.object2 = child.object
+        constraint.object1 = parent_object # parent
+        constraint.object2 = child_object
 
         self.joints.append(empty)
+
+

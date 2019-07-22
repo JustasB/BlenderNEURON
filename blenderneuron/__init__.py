@@ -20,13 +20,15 @@ if inside_blender:
 
     from blenderneuron.blender.utils import register_module_classes
 
+    import sys
+
     bl_info = {
         "name": "BlenderNEURON",
         "description": "A Blender GUI for NEURON simulator",
         "author": "Justas Birgiolas",
         "version": (2, 0),
         "blender": (2, 79, 0),
-        "location": "View3D > Tools > BlenderNEURON side tab",
+        "location": "3D View > Left Side > BlenderNEURON",
         "wiki_url": "BlenderNEURON.org",
         "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
         "support": "COMMUNITY",
@@ -46,6 +48,8 @@ if inside_blender:
             bpy.utils.register_module(__name__)
         except:
             pass
+
+        sys.setrecursionlimit(1500)
 
         register_module_classes(blenderneuron.blender.operators.rootgroup)
         register_module_classes(blenderneuron.blender.panels.rootgroup)

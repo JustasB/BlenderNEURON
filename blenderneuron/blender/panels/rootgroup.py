@@ -146,21 +146,33 @@ class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         scene = context.scene
 
-        group_aligner = self.get_group(context).layer_aligner_settings
+        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(percentage=0.25)
         split.label(text="Layer:")
         split.prop(group_aligner, "layer_mesh", text="")
 
-        split = self.layout.split(percentage=0.33)
+        if group_aligner.layer_mesh is not None and group_aligner.layer_mesh.type !='MESH':
+            self.layout.label("Layer must be a 'MESH' object", icon='ERROR')
+
+        split = self.layout.split(percentage=0.25)
         split.label(text="Align:")
 
         row = split.row(align=True)
         row.prop(group_aligner, "moveable_sections_pattern", text="")
-        row.operator("custom.select_aligner_fixed_sections", text="", icon="RESTRICT_VIEW_OFF")
+        row.operator("custom.select_aligner_moveable_sections", text="", icon="RESTRICT_VIEW_OFF")
+
+
+        split = self.layout.split(percentage=0.25)
+        split.label(text="Sim Frames:")
+        split.prop(group_aligner, "simulation_frames", text="")
 
         col = self.layout.column()
-        col.operator("custom.align_to_layer", text="Align", icon="SURFACE_DATA")
+        col.operator("custom.setup_aligner", text="Setup Aligner", icon="CONSTRAINT")
+        col.operator("screen.animation_play", text="Align", icon="SURFACE_DATA")
+        col.operator("custom.update_groups_from_view", text="Save Alignment Results",
+                             icon="FILE_REFRESH")
+
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'

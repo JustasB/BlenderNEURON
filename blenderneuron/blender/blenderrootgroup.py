@@ -33,7 +33,7 @@ class BlenderRootGroup(RootGroup):
 
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
-            self.roots[nrn_root["hash"]].from_full_NEURON_section(nrn_root)
+            self.roots[nrn_root["hash"]].from_full_NEURON_section_dict(nrn_root)
 
         self.activity.from_dict(nrn_group["activity"])
 
@@ -105,9 +105,13 @@ class BlenderRootGroup(RootGroup):
             if root.group is None:
                 root.add_to_group(self)
 
-    def align_to_layer(self):
-
+    def setup_aligner(self):
         self.show(PhysicsMeshSectionObjectView)
+
+    def align_to_layer(self):
+        if type(self.view) is PhysicsMeshSectionObjectView:
+            self.view.align()
+
 
 
 

@@ -6,7 +6,7 @@ from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
-
+from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
 
 class CellGroupOperatorAbstract(BlenderNodeClass):
     bl_options = {'INTERNAL'}
@@ -190,7 +190,7 @@ class CUSTOM_OT_reset_groups(Operator, CellGroupOperatorAbstract):
 class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.import_selected_groups"
     bl_label = "Import Group Data"
-    bl_description = "Imports cell group data (morhology and activity) into Blender"
+    bl_description = "Imports cell group data (morhology and activity) from NEURON into Blender"
 
     def execute(self, context):
 
@@ -239,7 +239,7 @@ class CUSTOM_OT_display_selected_groups(Operator, CellGroupOperatorAbstract):
 class CUSTOM_OT_update_groups_from_view(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.update_groups_from_view"
     bl_label = "Update Groups with View Changes"
-    bl_description = "Updates group data with the changes made in the 3D View"
+    bl_description = "Updates group data with the changes visible in the 3D View"
 
     @classmethod
     def poll(cls, context):
@@ -299,26 +299,60 @@ class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
         with open(self.filepath, 'w', encoding='utf-8') as f:
             f.write(content)
 
+        self.report({'INFO'}, 'File saved')
+
         return {'FINISHED'}
 
 
-class CUSTOM_OT_select_aligner_fixed_sections(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.select_aligner_fixed_sections"
+class CUSTOM_OT_select_aligner_moveable_sections(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.select_aligner_moveable_sections"
     bl_label = "Select Fixed Sections"
-    bl_description = "Selects/Highlights the sections that will be fixed during layer alignment"
+    bl_description = "Selects/Highlights the sections that will be aligned with the selected layer"
+
+    def execute(self, context):
+
+        ui_group = self.node.ui_properties.group
+        group = ui_group.node_group
+
+        group.show(SectionObjectView)
+        group.view.select_containers(pattern=ui_group.layer_aligner_settings.moveable_sections_pattern)
+
+        return{'FINISHED'}
+
+class CUSTOM_OT_setup_aligner(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.setup_aligner"
+    bl_label = "Setup Aligner"
+    bl_description = "Sets up joints (at branchpoints), rigid body constraints, and layer force field" \
+                     " to align the pattern matching sections with the layer"
+
+    @classmethod
+    def poll(cls, context):
+
+        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
+
+        # Enable button only when a mesh is selected for layer
+        return group_aligner.layer_mesh is not None and group_aligner.layer_mesh.type == 'MESH'
 
     def execute(self, context):
 
         group = self.node.ui_properties.group.node_group
 
-        return{'FINISHED'}
+        group.setup_aligner()
 
+        return{'FINISHED'}
 
 class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.align_to_layer"
     bl_label = "Align to Layer"
     bl_description = "Aligns sections that match the align pattern to the " \
                      "selected layer using a force-based physics simulation"
+
+    @classmethod
+    def poll(cls, context):
+
+        group = context.scene.BlenderNEURON.group.node_group
+
+        return type(group.view) is PhysicsMeshSectionObjectView
 
     def execute(self, context):
 
