@@ -42,6 +42,9 @@ if inside_blender:
 
         bpy.ops.wm.blenderneuron_node_start()
 
+    @persistent
+    def on_blend_load(scene):
+        bpy.ops.wm.blenderneuron_node_start()
 
     def register():
         try:
@@ -65,6 +68,9 @@ if inside_blender:
 
         # This ensures the server starts on Blender load (self-removing)
         bpy.app.handlers.scene_update_post.append(auto_start)
+
+        # Reload the addon on file open
+        bpy.app.handlers.load_post.append(on_blend_load)
 
     def unregister():
         bpy.ops.wm.blenderneuron_node_stop()

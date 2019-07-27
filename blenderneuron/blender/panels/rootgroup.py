@@ -120,6 +120,13 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         scene = context.scene
 
+
+
+        self.layout.operator("custom.position_mc", text="Position MC",
+                             icon="FORWARD")
+
+        self.layout.separator()
+
         self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
                              icon="FORWARD")
 

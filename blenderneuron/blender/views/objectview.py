@@ -127,7 +127,7 @@ class ObjectViewAbstract(ViewAbstract):
             if pattern is None or \
                     (not pattern_inverse and pattern in container.name) or \
                     (pattern_inverse and pattern not in container.name):
-                container.object.select = select
+                container.get_object().select = select
 
     def zoom_to_containers(self):
 

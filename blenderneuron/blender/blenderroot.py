@@ -132,7 +132,7 @@ class BlenderRoot(BlenderSection):
 
     def remove(self, node):
         # Remove view container objects if any
-        if self.group.view is not None:
+        if self.group is not None and self.group.view is not None:
             self.group.view.remove_container(self.hash)
 
         # remove from UI and from node groups
@@ -155,9 +155,9 @@ class BlenderRoot(BlenderSection):
         current_group.roots.pop(self.hash)
 
         # from ui group
-        root_entry = current_group.ui_group.root_entries[self.name]
+        root_entry = current_group.ui_group.root_entries.get(self.name)
 
-        if root_entry.selected:
+        if root_entry is not None and root_entry.selected:
             root_entry.selected = False
 
 

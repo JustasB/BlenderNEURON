@@ -1,7 +1,6 @@
-from math import sqrt
+from math import sqrt, pi
 import bpy
 import numpy as np
-
 
 class CurveContainer:
 
@@ -15,13 +14,13 @@ class CurveContainer:
         self.closed_ends = closed_ends
 
         # copy the curve template and make a new blender object out of it
-        self.object = bpy.data.objects.new(self.name, curve_template.copy())
+        bpy.data.objects.new(self.name, curve_template.copy())
 
         self.linked = False
         self.material_indices = []
 
-        self.joints = []
-        self.tip = None
+        self.joint_names = []
+        self.tip_name = None
 
         # Quickly find the spline of a given section
         self.hash2spline_index = {}
@@ -29,18 +28,28 @@ class CurveContainer:
         # Recursively add section splines and corresponding materials to the container
         self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
 
+    def get_object(self):
+        return bpy.data.objects[self.name]
+
+    @property
+    def object(self):
+        return bpy.data.objects[self.name]
+
     @property
     def curve(self):
-        if self.object.type == 'CURVE':
-            return self.object.data
+        ob = self.get_object()
+
+        if ob.type == 'CURVE':
+            return ob.data
 
         raise Exception("Attempting to access curve data of an object that is not a curve: " + self.name)
 
-
     @property
     def mesh(self):
-        if self.object.type == 'MESH':
-            return self.object.data
+        ob = self.get_object()
+
+        if ob.type == 'MESH':
+            return ob.data
 
         raise Exception("Attempting to access mesh data of an object that is not a mesh: " + self.name)
 
@@ -50,8 +59,8 @@ class CurveContainer:
             raise Exception("Cannot create parent-child relationship between Blender objects that have not "
                             "been linked to the scene: " + self.name + "->" + parent_container.name )
 
-        child = self.object
-        parent = parent_container.object
+        child = self.get_object()
+        parent = parent_container.get_object()
 
         child.parent = parent
         child.matrix_parent_inverse = parent.matrix_world.inverted()
@@ -59,35 +68,39 @@ class CurveContainer:
     def remove(self):
         self.unlink()
 
+        ob = self.get_object()
+
         # materials
-        for mat in self.object.data.materials:
+        for mat in ob.data.materials:
             bpy.data.materials.remove(mat)
 
         # curve
-        if self.object.type == 'CURVE':
+        if ob.type == 'CURVE':
             bpy.data.curves.remove(self.curve)
 
         # mesh
-        elif self.object.type == 'MESH':
+        elif ob.type == 'MESH':
             bpy.data.meshes.remove(self.mesh)
 
         # object
-        bpy.data.objects.remove(self.object)
+        bl_objects = bpy.data.objects
+
+        bl_objects.remove(ob)
 
         # joints
-        for joint in self.joints:
-            bpy.data.objects.remove(joint)
+        for name in self.joint_names:
+            bl_objects.remove(bl_objects[name])
 
-        if self.tip is not None:
-            bpy.data.objects.remove(self.tip)
+        if self.tip_name is not None:
+            bl_objects.remove(bl_objects[self.tip_name])
 
     @property
     def origin(self):
-        return self.object.location
+        return self.get_object().location
 
     @origin.setter
     def origin(self, value):
-        self.object.location = value
+        self.get_object().location = value
 
     def diam0version(self, start, end):
         lengths = end - start
@@ -178,7 +191,7 @@ class CurveContainer:
         """
 
         # Get the world matrix
-        matrix = self.object.matrix_world
+        matrix = self.get_object().matrix_world
 
         # Reshape coords to Nx3 matrix
         local_coords.shape = (-1, 3)
@@ -195,7 +208,9 @@ class CurveContainer:
         return global_coords
 
     def update_group_section(self, root, recursive=True):
-        if self.object.type == 'CURVE':
+        ob = self.get_object()
+
+        if ob.type == 'CURVE':
             # Find the spline that corresponds to the section
             spline_i = self.hash2spline_index[root.hash]
 
@@ -211,8 +226,14 @@ class CurveContainer:
 
             del spline
 
-        elif self.object.type == 'MESH':
-            point_source = self.object.data.vertices
+        elif ob.type == 'MESH':
+            point_source = ob.data.vertices
+
+        else:
+
+            import pydevd
+            pydevd.settrace('192.168.0.100', port=4200)
+            raise Exception("Unsupported container object type: " + ob.type)
 
         # Get the 3d points
         num_coords = len(point_source)
@@ -230,7 +251,7 @@ class CurveContainer:
         root.coords = coords.tolist()
 
         # Get radii - if container is a bezier
-        if self.object.type == 'CURVE':
+        if ob.type == 'CURVE':
             radii = np.zeros(num_coords)
             point_source.foreach_get("radius", radii)
             root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
@@ -290,38 +311,42 @@ class CurveContainer:
             else:
                 center = coords[center_i]
 
-            self.object.location = center
+            self.get_object().location = center
 
         if type == "first":
-            self.object.location = coords[0]
+            self.get_object().location = coords[0]
 
     def link(self):
         link = bpy.context.scene.objects.link
+        bl_objects = bpy.data.objects
 
-        link(self.object)
+        link(self.get_object())
 
-        for empty in self.joints:
-            link(empty)
+        for name in self.joint_names:
+            link(bl_objects[name])
 
         self.linked = True
 
     def unlink(self):
-        unlink = bpy.context.scene.objects.unlink
+        unlink_from_scene = bpy.context.scene.objects.unlink
+        bl_objects = bpy.data.objects
 
-        unlink(self.object)
+        unlink_from_scene(self.get_object())
 
-        for empty in self.joints:
-            unlink(empty)
+        for name in self.joint_names:
+            unlink_from_scene(bl_objects[name])
 
         self.linked = False
 
 
     def add_tip(self, tip_template):
-        if self.object.type != 'MESH':
+        ob = self.get_object()
+
+        if ob.type != 'MESH':
             raise Exception('Cannot add tip joint to non-mesh container: ' + self.name)
 
         # Tip is the last coordinate of the section
-        tip_loc = self.object.data.vertices[-2 if self.closed_ends else -1].co
+        tip_loc = ob.data.vertices[-2 if self.closed_ends else -1].co
         tip_loc = self.to_global(np.array(tip_loc))
 
         # Create a dummy tip mesh so the force acts on the tips as well
@@ -329,20 +354,22 @@ class CurveContainer:
         tip_object.location = tip_loc
 
         # Make the tip a child of the leaf section
-        tip_object.parent = self.object
-        tip_object.matrix_parent_inverse = self.object.matrix_world.inverted()
+        tip_object.parent = ob
+        tip_object.matrix_parent_inverse = ob.matrix_world.inverted()
 
         # Link and keep a reference to the tip (for cleanup)
         bpy.context.scene.objects.link(tip_object)
-        self.tip = tip_object
+        self.tip_name = tip_object.name
 
 
-        self.create_joint_between(self.object, tip_object, tip_loc)
+        self.create_joint_between(ob, tip_object, tip_loc)
 
     def create_joint_with(self, child):
-        self.create_joint_between(self.object, child.object, child.origin)
+        self.create_joint_between(self.get_object(), child.get_object(), child.origin)
 
     def create_joint_between(self, parent_object, child_object, joint_location):
+
+        deg = 5.0
 
         # Create an "Empty" object
         empty = bpy.data.objects.new("Joint", None) # None creates "Empty"
@@ -372,23 +399,23 @@ class CurveContainer:
 
         constraint.limit_lin_x_upper = \
             limit_lin_y_upper = \
-            limit_lin_z_upper = 0.1
+            limit_lin_z_upper = 0
 
         constraint.limit_lin_x_lower = \
             constraint.limit_lin_y_lower = \
-            constraint.limit_lin_z_lower = -0.1
+            constraint.limit_lin_z_lower = 0
         
         constraint.limit_ang_x_lower = \
             constraint.limit_ang_y_lower = \
-            constraint.limit_ang_z_lower = -1.57 # -90 deg
+            constraint.limit_ang_z_lower = -pi / 180 * deg
         
         constraint.limit_ang_x_upper = \
             constraint.limit_ang_y_upper = \
-            constraint.limit_ang_z_upper = 1.57 # 90 deg
+            constraint.limit_ang_z_upper = pi / 180 * deg
 
         constraint.object1 = parent_object # parent
         constraint.object2 = child_object
 
-        self.joints.append(empty)
+        self.joint_names.append(empty.name)
 
 

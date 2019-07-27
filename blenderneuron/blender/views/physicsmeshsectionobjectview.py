@@ -55,7 +55,8 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         # Enable forcefield
         field.type = 'HARMONIC'
         field.shape = 'SURFACE'
-        field.strength = 10.0
+        field.strength = 50.0
+        field.harmonic_damping = 0.5
         field.rest_length = 1.0
 
     def setup_physics_sim(self):

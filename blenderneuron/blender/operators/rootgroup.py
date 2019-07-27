@@ -364,3 +364,153 @@ class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
 
 
 
+class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
+    bl_idname = "custom.position_mc"
+    bl_label = ""
+    bl_description = ""
+
+    def execute(self, context):
+        import random
+        import numpy as np
+        from mathutils import Vector
+
+        #random.seed(0)
+
+        # pick a random MC point
+        particles = bpy.data.objects['2 ML Particles'].particle_systems[0].particles
+        i = random.randrange(len(particles))
+        mc_loc = particles[i].location
+
+        bpy.data.objects['MCProbe'].location = mc_loc
+
+        #find the closest glom loc
+        gloms = bpy.data.objects['0 GL Particles'].particle_systems[0].particles
+        glom_locs = np.array([np.array(glom.location) for glom in gloms])
+        glom_dists = np.sqrt(np.sum(np.square(glom_locs - mc_loc),axis=1))
+        closest_glom_idxs = np.argsort(glom_dists)
+        closest_glom = gloms[closest_glom_idxs[0]]
+        dist_to_closest_glom = glom_dists[closest_glom_idxs][0]
+
+        bpy.data.objects['GlomProbe'].location = closest_glom.location
+
+        #MC apical lengths
+        #MC1 - 159
+        #MC2 - 223
+        #MC3 - 162
+        #MC4 - 231
+        #MC5 - 225
+
+        mc_names = np.array(['MC1','MC2','MC3','MC4','MC5'])
+        mc_apic_lengths = np.array([159,223,162,231,225])
+        mc_apic_names = np.array(['17','3','13','7','7'])
+        max_apic_idx = np.argmax(mc_apic_lengths)
+        max_apic = mc_apic_lengths[max_apic_idx]
+        max_apic_mc = mc_names[max_apic_idx]
+
+        # Apics are too short
+        if dist_to_closest_glom > max_apic:
+            self.import_mc(max_apic_mc)
+
+            # Use the longest MC
+            mc_soma = bpy.data.objects[max_apic_mc+'[0].soma']
+            apic_id = mc_apic_names[max_apic_idx]
+            mc_apic = bpy.data.objects[max_apic_mc+'[0].apic['+apic_id+']']
+
+            # Align apical towards the closest glom
+            self.position_align_mc(mc_soma, mc_apic, mc_loc, closest_glom.location)
+            
+            # Extend apic to the glom
+            #self.extend_apic(mc_apic, mc_loc, closest_glom.location)
+
+        # Apics are longer than distance            
+        else:
+
+
+            import pydevd
+            pydevd.settrace('192.168.0.100', port=4200)
+
+            # get mcs with apics longer than the closest glom
+            longer_idxs = np.where(mc_apic_lengths > dist_to_closest_glom)[0]
+            
+            # pick a random mc from this list
+            rand_idx = longer_idxs[random.randrange(len(longer_idxs))]
+            mc = mc_names[rand_idx]
+            mc_apic_len = mc_apic_lengths[rand_idx]
+
+            # import mc
+            self.import_mc(mc)
+
+            mc_soma = bpy.data.objects[mc + '[0].soma']
+            apic_id = mc_apic_names[rand_idx]
+            mc_apic = bpy.data.objects[mc+'[0].apic['+apic_id+']']
+
+            # find a glom whose distance is as close to the length of the mc apic
+            matching_glom_idx = np.argmin(np.abs(glom_dists - mc_apic_len))
+            matching_glom = gloms[matching_glom_idx]
+
+            # align the apic towards the matching glom
+            self.position_align_mc(mc_soma, mc_apic, mc_loc, matching_glom.location)
+            
+
+        return {'FINISHED'}
+
+    def import_mc(self, name):
+        # Select only the longest mc for import
+        found = False
+        for re in self.node.groups['Group.000'].ui_group.root_entries:
+            re.selected = False
+            if name in re.name:
+                re.selected = True
+                found = True
+
+        if not found:
+            raise Exception("Did not find cell " + name + "in NEURON")
+
+        # Make sure it's imported as section objects
+        self.node.groups['Group.000'].ui_group.interaction_granularity = 'Section'
+
+        # Import
+        bpy.ops.custom.import_selected_groups()
+
+    def position_align_mc(self, soma, apic, loc, glom_loc):
+        from mathutils import Vector
+        import random
+
+        soma.rotation_euler[2] = random.randrange(360)
+
+        # Compute the start and end alignment vectors (soma->apic TO soma->glom)
+        startVec = Vector(apic.location - soma.location)
+        endVec = Vector(glom_loc - loc)
+
+        # Compute rotation quaternion and rotate the soma by it
+        initMW = soma.matrix_world.copy()
+        rotM = startVec.rotation_difference(endVec).to_matrix().to_4x4()
+        soma.matrix_world = initMW * rotM
+
+        # Position the soma
+        soma.location = loc
+
+
+
+    def extend_apic(self, apic, loc, endLoc):
+        from mathutils import Vector
+
+        soma_loc = loc
+        apic_loc = apic.location
+        cell_vec = Vector(apic_loc - soma_loc)
+
+        dist_to_end = Vector(endLoc - apic_loc).length
+        dist_ratio = dist_to_end / cell_vec.length
+
+        apic.location = cell_vec * dist_ratio
+
+
+        
+
+
+
+
+
+
+
+

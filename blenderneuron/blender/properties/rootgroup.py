@@ -296,6 +296,12 @@ class CUSTOM_BlenderNEURON(PropertyGroup):
         type=CUSTOM_NEURON_SimulatorSettings
     )
 
+    def clear(self):
+        self.property_unset("groups")
+        self.property_unset("groups_index")
+        self.property_unset("simulator_settings")
+
+
 def register():
     bpy.types.Scene.BlenderNEURON = PointerProperty(type=CUSTOM_BlenderNEURON)
 

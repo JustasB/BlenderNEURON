@@ -22,6 +22,9 @@ class blenderneuron_node_start(bpy.types.Operator, BlenderNodeClass):
         )
 
         if self.client is not None:
+            # Clear existing UI groups (if any, eg. saved)
+            context.scene.BlenderNEURON.clear()
+
             # Add a cell group (will contain all root sections by default)
             self.node.add_group()
 
