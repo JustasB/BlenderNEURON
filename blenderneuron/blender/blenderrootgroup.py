@@ -33,7 +33,13 @@ class BlenderRootGroup(RootGroup):
 
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
-            self.roots[nrn_root["hash"]].from_full_NEURON_section_dict(nrn_root)
+
+            hash = nrn_root["hash"]
+
+            if hash not in self.roots:
+                bpy.ops.custom.get_cell_list_from_neuron()
+
+            self.roots[hash].from_full_NEURON_section_dict(nrn_root)
 
         self.activity.from_dict(nrn_group["activity"])
 
@@ -72,12 +78,8 @@ class BlenderRootGroup(RootGroup):
 
         # Fill UI group list with not-selected root sections
         for root in self.node.root_index.values():
-
             # List all roots as available for selection in the group root UI list
-            ui_root = new_ui_group.root_entries.add()
-            ui_root.index = root.index
-            ui_root.hash = root.hash
-            ui_root.name = root.name
+            root.add_to_UI_group(new_ui_group)
 
 
     def remove(self):

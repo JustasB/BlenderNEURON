@@ -29,7 +29,10 @@ class NeuronSection(Section):
 
 
     def from_skeletal_blender_root(self, source_section, group):
-        self.from_nrn_section(group.node.section_index[source_section["hash"]], group)
+        try:
+            self.from_nrn_section(group.node.section_index[source_section["name"]], group)
+        except KeyError:
+            raise Exception("Could not find section: " + source_section["name"] + " loaded in NEURON")
 
     def from_nrn_section(self, nrn_section, group):
         self.group = group

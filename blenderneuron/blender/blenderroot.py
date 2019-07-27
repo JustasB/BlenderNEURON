@@ -128,7 +128,7 @@ class BlenderRoot(BlenderSection):
 
     @property
     def ui_root(self):
-        return self.node.ui_group[self.name]
+        return self.group.ui_group.root_entries[self.name]
 
     def remove(self, node):
         # Remove view container objects if any
@@ -136,12 +136,12 @@ class BlenderRoot(BlenderSection):
             self.group.view.remove_container(self.hash)
 
         # remove from UI and from node groups
-        self.remove_from_group()
+        self.remove_from_group(delete=True)
 
         # remove from index
         node.root_index.pop(self.hash)
 
-    def remove_from_group(self):
+    def remove_from_group(self, delete=False):
         if self.group is None:
             return
 
@@ -160,7 +160,24 @@ class BlenderRoot(BlenderSection):
         if root_entry is not None and root_entry.selected:
             root_entry.selected = False
 
+        if delete:
+            # Remove the root entry from all the UI groups
+            for group in current_group.node.groups.values():
+                entries = group.ui_group.root_entries
+                ui_root = entries.get(self.name)
 
+                if ui_root is not None:
+                    remove_idx = entries.find(self.name)
+                    entries.remove(remove_idx)
+
+    def add_to_UI_group(self, ui_group):
+        ui_root = ui_group.root_entries.add()
+
+        ui_root.index = self.index
+        ui_root.hash = self.hash
+        ui_root.name = self.name
+
+        return ui_root
 
     def add_to_group(self, group):
         if self.group == group:
@@ -179,7 +196,11 @@ class BlenderRoot(BlenderSection):
         self.group.roots[self.hash] = self
 
         # ui
-        root_entry = self.group.ui_group.root_entries[self.name]
+        root_entry = self.group.ui_group.root_entries.get(self.name)
 
-        if not root_entry.selected:
+        # If not on the list of cells (e.g. when newly added in NRN)
+        if root_entry is None:
+            root_entry = self.add_to_UI_group(self.group.ui_group)
+
+        if root_entry is not None and not root_entry.selected:
             root_entry.selected = True

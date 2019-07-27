@@ -30,38 +30,41 @@ class BlenderNode(CommNode):
         group.add_groupless_roots()
 
     def update_root_index(self):
-
-        # Get the list of root sections from NEURON
-        root_data = self.client.get_roots()
-
         # Keep track which roots have been removed from NRN
         roots_to_delete = set(self.root_index.keys())
 
-        # Update new or existing root entries
-        for i, root_info in enumerate(root_data):
-            hash = root_info["hash"]
+        # Get the list of root sections from NEURON
+        try:
+            root_data = self.client.get_roots()
 
-            existing_root = self.root_index.get(hash)
+            # Update new or existing root entries
+            for i, root_info in enumerate(root_data):
+                hash = root_info["hash"]
 
-            # Update existing root
-            if existing_root is not None:
-                existing_root.index = root_info["index"]
-                existing_root.name = root_info["name"]
+                existing_root = self.root_index.get(hash)
 
-                # Don't remove roots that previously existed and are present
-                roots_to_delete.remove(hash)
+                # Update existing root
+                if existing_root is not None:
+                    existing_root.index = root_info["index"]
+                    existing_root.name = root_info["name"]
 
-            # Add a new root
-            else:
-                self.root_index[hash] = BlenderRoot(
-                    root_info["index"],
-                    hash,
-                    root_info["name"]
-                )
+                    # Don't remove roots that previously existed and are present
+                    roots_to_delete.remove(hash)
 
-        # Delete removed roots
-        for hash_to_delete in roots_to_delete:
-            self.root_index[hash_to_delete].remove(node=self)
+                # Add a new root
+                else:
+                    self.root_index[hash] = BlenderRoot(
+                        root_info["index"],
+                        hash,
+                        root_info["name"]
+                    )
+        except ConnectionRefusedError:
+            root_data = []
+
+        finally:
+            # Delete removed roots
+            for hash_to_delete in roots_to_delete:
+                self.root_index[hash_to_delete].remove(node=self)
 
     def find_unique_group_name(self):
         i_name = len(self.groups.values())

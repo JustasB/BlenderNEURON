@@ -294,10 +294,14 @@ class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
 
         group.from_view()
 
-        content = CommandView(group).show()
+        root_commands = CommandView(group).show()
+
+        file_contents = ""
+        for hash in root_commands.keys():
+            file_contents += root_commands[hash]
 
         with open(self.filepath, 'w', encoding='utf-8') as f:
-            f.write(content)
+            f.write(file_contents)
 
         self.report({'INFO'}, 'File saved')
 
@@ -381,8 +385,6 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         i = random.randrange(len(particles))
         mc_loc = particles[i].location
 
-        bpy.data.objects['MCProbe'].location = mc_loc
-
         #find the closest glom loc
         gloms = bpy.data.objects['0 GL Particles'].particle_systems[0].particles
         glom_locs = np.array([np.array(glom.location) for glom in gloms])
@@ -391,7 +393,6 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         closest_glom = gloms[closest_glom_idxs[0]]
         dist_to_closest_glom = glom_dists[closest_glom_idxs][0]
 
-        bpy.data.objects['GlomProbe'].location = closest_glom.location
 
         #MC apical lengths
         #MC1 - 159
@@ -424,10 +425,6 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
 
         # Apics are longer than distance            
         else:
-
-
-            import pydevd
-            pydevd.settrace('192.168.0.100', port=4200)
 
             # get mcs with apics longer than the closest glom
             longer_idxs = np.where(mc_apic_lengths > dist_to_closest_glom)[0]
@@ -490,13 +487,17 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         # Position the soma
         soma.location = loc
 
+        # DEBUG aids
+        bpy.data.objects['MCProbe'].location = loc
+        bpy.data.objects['GlomProbe'].location = glom_loc
+
 
 
     def extend_apic(self, apic, loc, endLoc):
         from mathutils import Vector
 
         soma_loc = loc
-        apic_loc = apic.location
+        apic_loc = apic.location.copy()
         cell_vec = Vector(apic_loc - soma_loc)
 
         dist_to_end = Vector(endLoc - apic_loc).length

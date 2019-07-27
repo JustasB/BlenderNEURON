@@ -230,9 +230,6 @@ class CurveContainer:
             point_source = ob.data.vertices
 
         else:
-
-            import pydevd
-            pydevd.settrace('192.168.0.100', port=4200)
             raise Exception("Unsupported container object type: " + ob.type)
 
         # Get the 3d points

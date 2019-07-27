@@ -12,6 +12,9 @@ except:
 class NeuronNode(CommNode):
 
     def __init__(self, *args, **kwargs):
+        self.roots = None
+        self.section_index = None
+
         def init():
             h.load_file('stdrun.hoc')
 
@@ -43,11 +46,14 @@ class NeuronNode(CommNode):
 
     def update_section_index(self):
         all_sec = h.allsec()
-        self.section_index = {str(hash(sec)): sec for sec in all_sec}
+        self.section_index = {sec.name(): sec for sec in all_sec}
 
     def initialize_groups(self, blender_groups):
 
         self.groups = OrderedDict()
+
+        if self.section_index is None:
+            self.update_section_index()
 
         for blender_group in blender_groups:
             name = blender_group["name"]

@@ -57,7 +57,10 @@ class SectionObjectView(ObjectViewAbstract):
             self.update_each_container_section(root)
 
     def update_each_container_section(self, section):
-        self.containers[section.hash].update_group_section(section, recursive=False)
+        container = self.containers.get(section.hash)
+
+        if container is not None:
+            container.update_group_section(section, recursive=False)
 
         for child_sec in section.children:
             self.update_each_container_section(child_sec)

@@ -9,38 +9,47 @@ class CommandView(ViewAbstract):
         self.group = rootgroup
 
     def show(self):
+        return {root.hash: self.get_root_update_commands(root)
+                 for root in self.group.roots.values()}
 
-        group_coords = {}
+    def get_root_update_commands(self, root):
+        root_coords = {}
 
-        for root in self.group.roots.values():
-            self.get_section_coords(root, result=group_coords)
+        self.get_section_coords(root, result=root_coords)
 
         template = self.template()
 
-        # One long row
-        # rows = str(group_coords)
+        # Get the cell instance name - will be default prefix
+        dot_position = root.name.find('.')
+        prefix = root.name[0:dot_position] if dot_position != -1 else ''
 
-        # Indented, but takes up more space
-        # rows = pprint.pformat(group_coords)
+        bracket_pos = prefix.find('[')
+        cell_class = prefix[0:bracket_pos] if bracket_pos != -1 else 'Sections'
 
         # Manually formatted, somewhat of a compromise between readability and space use
         rows = ""
-        for sec_name in group_coords.keys():
-            coords = group_coords[sec_name]
+        for sec_name in root_coords.keys():
+            coords = root_coords[sec_name]
+            sec_name_no_prefix = sec_name[dot_position + 1:]
 
             row = ""
-            row += "   '" + sec_name + "': {" + "\n"
-            row += "       'x':" + str(coords["x"]) + "," + "\n"
-            row += "       'y':" + str(coords["y"]) + "," + "\n"
-            row += "       'z':" + str(coords["z"]) + "," + "\n"
-            row += "       'diam':" + str(coords["diam"]) + "\n"
-            row += "   }," + "\n"
+            row += "          prefix + '" + sec_name_no_prefix + "': {" + "\n"
+            row += "              'x':" + self.coords2string(coords["x"]) + "," + "\n"
+            row += "              'y':" + self.coords2string(coords["y"]) + "," + "\n"
+            row += "              'z':" + self.coords2string(coords["z"]) + "," + "\n"
+            row += "              'diam':" + self.coords2string(coords["diam"]) + "\n"
+            row += "          }," + "\n"
 
             rows += row + "\n"
 
         template = template.replace("[SECTION_COORDS]", rows)
+        template = template.replace("[CELL_NAME]", cell_class)
+        template = template.replace("[DEFAULT_PREFIX]", prefix)
 
         return template
+
+    def coords2string(self, coord_list):
+        return "[" + str.join(',',map("{0:.3f}".format, coord_list)) + "]"
 
     def template(self):
         dir_path = os.path.dirname(__file__)

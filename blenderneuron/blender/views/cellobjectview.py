@@ -14,4 +14,7 @@ class CellObjectView(ObjectViewAbstract):
 
     def update_group(self):
         for root in self.group.roots.values():
-            self.containers[root.hash].update_group_section(root, recursive=True)
+            container = self.containers.get(root.hash)
+
+            if container is not None:
+                container.update_group_section(root, recursive=True)
