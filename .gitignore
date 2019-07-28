@@ -72,3 +72,5 @@ ForBlender/blender_neuron_addon_v\.zip
 \.vscode/
 
 bn\.code-workspace
+
+line_profiler/

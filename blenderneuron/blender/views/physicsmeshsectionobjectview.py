@@ -16,6 +16,7 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.closed_ends = False
 
         self.tip_template = self.create_tip_template()
+        self.joint_template = None
 
     def create_tip_template(self):
         mesh = bpy.data.meshes.new('TipTemplateMesh')
@@ -25,7 +26,17 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
         object = bpy.data.objects.new('TipTemplate', mesh)
 
-        return object
+        return object.name
+
+    def create_joint_template(self):
+        empty = bpy.data.objects.new("JointTemplate", None)  # None creates "Empty"
+
+        # Add rigid body constraint to the empty
+        bpy.context.scene.objects.link(empty)
+        bpy.context.scene.objects.active = empty
+        bpy.ops.rigidbody.constraint_add()
+
+        return empty.name
 
     def show(self):
         self.split_long_sections()
@@ -103,6 +114,9 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
     def add_branch_joints(self):
 
+        if self.joint_template is None:
+            self.joint_template = self.create_joint_template()
+
         # Recursively add the joints between parent-child sections
         for root in self.group.roots.values():
             self.add_joints_to_children(root)
@@ -139,7 +153,10 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
         bpy.ops.rigidbody.world_remove()
 
-        bpy.data.objects.remove(self.tip_template)
+        bpy.data.objects.remove(bpy.data.objects[self.tip_template])
+
+        if self.joint_template is not None:
+            bpy.data.objects.remove(bpy.data.objects[self.joint_template])
 
 
     def split_long_sections(self):

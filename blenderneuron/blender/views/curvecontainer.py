@@ -347,7 +347,7 @@ class CurveContainer:
         tip_loc = self.to_global(np.array(tip_loc))
 
         # Create a dummy tip mesh so the force acts on the tips as well
-        tip_object = tip_template.copy()
+        tip_object = bpy.data.objects[tip_template].copy()
         tip_object.location = tip_loc
 
         # Make the tip a child of the leaf section
@@ -369,7 +369,7 @@ class CurveContainer:
         deg = 5.0
 
         # Create an "Empty" object
-        empty = bpy.data.objects.new("Joint", None) # None creates "Empty"
+        empty = bpy.data.objects['JointTemplate'].copy()
         empty.location = joint_location
         empty.empty_draw_type = 'SPHERE'
         empty.empty_draw_size = 0.5
@@ -377,11 +377,6 @@ class CurveContainer:
         # Create parent-child relationship between the parent section and the empty
         empty.parent = parent_object
         empty.matrix_parent_inverse = parent_object.matrix_world.inverted()
-
-        # Add rigid body constraint to the empty
-        bpy.context.scene.objects.link(empty)
-        bpy.context.scene.objects.active = empty
-        bpy.ops.rigidbody.constraint_add()
 
         # Set the joint params
         constraint = empty.rigid_body_constraint
