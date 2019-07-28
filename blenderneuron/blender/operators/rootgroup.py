@@ -1,12 +1,15 @@
 import bpy
 from bpy.types import (Operator)
 from bpy_extras.io_utils import ExportHelper
+import numpy as np
 
 from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
+
+from blenderneuron.blender.utils import get_operator_context_override
 
 class CellGroupOperatorAbstract(BlenderNodeClass):
     bl_options = {'INTERNAL'}
@@ -367,6 +370,7 @@ class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
+import random
 
 class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
     bl_idname = "custom.position_mc"
@@ -374,106 +378,153 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
     bl_description = ""
 
     def execute(self, context):
-        import random
-        import numpy as np
-        from mathutils import Vector
 
-        #random.seed(0)
+        random.seed(0)
 
-        # pick a random MC point
-        particles = bpy.data.objects['2 ML Particles'].particle_systems[0].particles
-        i = random.randrange(len(particles))
-        mc_loc = particles[i].location
+        slice = bpy.data.objects['TestSlice']
 
-        #find the closest glom loc
-        gloms = bpy.data.objects['0 GL Particles'].particle_systems[0].particles
-        glom_locs = np.array([np.array(glom.location) for glom in gloms])
-        glom_dists = np.sqrt(np.sum(np.square(glom_locs - mc_loc),axis=1))
-        closest_glom_idxs = np.argsort(glom_dists)
-        closest_glom = gloms[closest_glom_idxs[0]]
-        dist_to_closest_glom = glom_dists[closest_glom_idxs][0]
+        import pydevd
+        pydevd.settrace('192.168.0.100', port=4200)
 
+        # Apply all transformations to the slice
+        slice.select = True
+        bpy.context.scene.objects.active = slice
+        bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+        slice.select = False
 
-        #MC apical lengths
-        #MC1 - 159
-        #MC2 - 223
-        #MC3 - 162
-        #MC4 - 231
-        #MC5 - 225
+        mc_locs = self.get_locs_within_slice(bpy.data.objects['2 ML Particles'], slice)
+        glom_locs = self.get_locs_within_slice(bpy.data.objects['0 GL Particles'], slice)
 
-        mc_names = np.array(['MC1','MC2','MC3','MC4','MC5'])
-        mc_apic_lengths = np.array([159,223,162,231,225])
-        mc_apic_names = np.array(['17','3','13','7','7'])
-        max_apic_idx = np.argmax(mc_apic_lengths)
-        max_apic = mc_apic_lengths[max_apic_idx]
-        max_apic_mc = mc_names[max_apic_idx]
-
-        # Apics are too short
-        if dist_to_closest_glom > max_apic:
-            self.import_mc(max_apic_mc)
-
-            # Use the longest MC
-            mc_soma = bpy.data.objects[max_apic_mc+'[0].soma']
-            apic_id = mc_apic_names[max_apic_idx]
-            mc_apic = bpy.data.objects[max_apic_mc+'[0].apic['+apic_id+']']
-
-            # Align apical towards the closest glom
-            self.position_align_mc(mc_soma, mc_apic, mc_loc, closest_glom.location)
-            
-            # Extend apic to the glom
-            #self.extend_apic(mc_apic, mc_loc, closest_glom.location)
-
-        # Apics are longer than distance            
-        else:
-
-            # get mcs with apics longer than the closest glom
-            longer_idxs = np.where(mc_apic_lengths > dist_to_closest_glom)[0]
-            
-            # pick a random mc from this list
-            rand_idx = longer_idxs[random.randrange(len(longer_idxs))]
-            mc = mc_names[rand_idx]
-            mc_apic_len = mc_apic_lengths[rand_idx]
-
-            # import mc
-            self.import_mc(mc)
-
-            mc_soma = bpy.data.objects[mc + '[0].soma']
-            apic_id = mc_apic_names[rand_idx]
-            mc_apic = bpy.data.objects[mc+'[0].apic['+apic_id+']']
-
-            # find a glom whose distance is as close to the length of the mc apic
-            matching_glom_idx = np.argmin(np.abs(glom_dists - mc_apic_len))
-            matching_glom = gloms[matching_glom_idx]
-
-            # align the apic towards the matching glom
-            self.position_align_mc(mc_soma, mc_apic, mc_loc, matching_glom.location)
-            
+        self.add_mcs(mc_locs, glom_locs)
 
         return {'FINISHED'}
 
-    def import_mc(self, name):
-        # Select only the longest mc for import
-        found = False
-        for re in self.node.groups['Group.000'].ui_group.root_entries:
-            re.selected = False
-            if name in re.name:
-                re.selected = True
-                found = True
+    def add_mcs(self, mc_locs, glom_locs):
+        self.client.run_command("from prev_ob_models.Birgiolas2020.isolated_cells import *;"
+                                "mcs = [];")
 
-        if not found:
-            raise Exception("Did not find cell " + name + "in NEURON")
+        too_short_mcs = []
+        normal_mcs = []
 
-        # Make sure it's imported as section objects
-        self.node.groups['Group.000'].ui_group.interaction_granularity = 'Section'
+        for mc_loc in mc_locs:
+            self.add_mc(mc_loc, glom_locs, too_short_mcs, normal_mcs)
+
+        # Include the created mcs in the import group
+        bpy.ops.custom.get_cell_list_from_neuron()
+
+        # Show as section objects
+        group = self.node.groups['Group.000']
+        group.interaction_granularity = 'Section'
+        group.record_activity = False
 
         # Import
         bpy.ops.custom.import_selected_groups()
 
+        # TODO: move to db
+        mc_apic_names = {
+            'MC1': '17',
+            'MC2': '3',
+            'MC3': '13',
+            'MC4': '7',
+            'MC5': '7'
+        }
+
+        for mc_info in too_short_mcs:
+            mc = mc_info["name"]
+            mc_soma = bpy.data.objects[mc]
+            mc_apic = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_names[mc[0:mc.find('[')]] + ']']
+
+            # Align apical towards the closest glom
+            self.position_align_mc(mc_soma, mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+
+            # Extend apic to the glom
+            self.extend_apic(mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+
+        for mc_info in normal_mcs:
+            mc = mc_info["name"]
+            mc_soma = bpy.data.objects[mc]
+            mc_apic = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_names[mc[0:mc.find('[')]] + ']']
+
+            # align the apic towards the matching glom
+            self.position_align_mc(mc_soma, mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+
+    def add_mc(self, mc_loc, glom_locs, too_short_mcs, normal_mcs):
+        # find the closest glom loc
+        glom_dists = self.dist_to_gloms(mc_loc, glom_locs)
+
+        closest_glom_idxs = np.argsort(glom_dists)
+        closest_glom = glom_locs[closest_glom_idxs]
+        dist_to_closest_glom = glom_dists[closest_glom_idxs][0]
+
+        # Get the MC with the longest apic
+        max_apic_mc, max_apic_length, mc_apic_lengths, mc_names = self.get_longest_apic_mc()
+
+        # Apics are too short
+        if dist_to_closest_glom > max_apic_length:
+            # Use the longest MC
+            too_short_mcs.append({ "name": self.create_mc(max_apic_mc),
+                                   "glom_loc": closest_glom,
+                                   "mc_loc": mc_loc })
+
+        # Apics are longer than distance
+        else:
+            # get mcs with apics longer than the closest glom
+            longer_idxs = np.where(mc_apic_lengths > dist_to_closest_glom)[0]
+
+            # pick a random mc from this list
+            rand_idx = longer_idxs[random.randrange(len(longer_idxs))]
+            mc_apic_len = mc_apic_lengths[rand_idx]
+            mc = mc_names[rand_idx]
+
+            # find a glom whose distance is as close to the length of the mc apic
+            matching_glom_idx = np.argmin(np.abs(glom_dists - mc_apic_len))
+            matching_glom_loc = glom_locs[matching_glom_idx]
+
+            normal_mcs.append({"name": self.create_mc(mc),
+                               "glom_loc": matching_glom_loc,
+                               "mc_loc": mc_loc })
+
+    def create_mc(self, max_apic_mc):
+        # Create the new MC
+        root_name = self.client.run_command("mc = "+max_apic_mc+"();"
+                                "mcs.append(mc);"
+                                "return_value = mc.soma.name();")
+
+        return root_name
+
+    def get_longest_apic_mc(self):
+        # TODO: This should be stored in DB
+        mc_names = np.array(['MC1','MC2','MC3','MC4','MC5'])
+        mc_apic_lengths = np.array([159,223,162,231,225])
+
+        max_apic_idx = np.argmax(mc_apic_lengths)
+        max_apic_length = mc_apic_lengths[max_apic_idx]
+        max_apic_mc = mc_names[max_apic_idx]
+
+        return max_apic_mc, max_apic_length, mc_apic_lengths, mc_names
+
+    def dist_to_gloms(self, mc_loc, glom_locs):
+        return np.sqrt(np.sum(np.square(glom_locs - mc_loc),axis=1))
+
+    def get_locs_within_slice(self, particle_obj, slice_obj):
+        particles = particle_obj.particle_systems[0].particles
+
+        return np.array([np.array(ptc.location)
+                         for ptc in particles
+                         if self.is_inside(ptc.location, slice_obj)])
+
+    def is_inside(self, point, obj):
+        _, closest, normal, _ = obj.closest_point_on_mesh(point)
+        p2 = closest - point
+        v = p2.dot(normal)
+        return not (v < 0.0)
+
     def position_align_mc(self, soma, apic, loc, glom_loc):
         from mathutils import Vector
         import random
+        from math import pi
 
-        soma.rotation_euler[2] = random.randrange(360)
+        soma.rotation_euler[2] = random.randrange(360) / 180.0 * pi
 
         # Compute the start and end alignment vectors (soma->apic TO soma->glom)
         startVec = Vector(apic.location - soma.location)

@@ -1,6 +1,7 @@
 import threading
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from blenderneuron.blender.utils import get_operator_context_override
 
 import bpy
 
@@ -89,35 +90,6 @@ class ObjectViewAbstract(ViewAbstract):
 
         self.zoom_to_containers()
 
-    def get_operator_context_override(self, selected_object = None):
-        override = {}
-
-        try:
-            for area in bpy.data.screens["Default"].areas:
-                if area.type == 'VIEW_3D':
-                    for region in area.regions:
-                        if region.type == 'WINDOW':
-                            override['area'] = area
-                            override['region'] = region
-                            raise StopIteration()
-
-        except StopIteration:
-            pass
-
-        override["window"]        = bpy.context.window_manager.windows[0]
-        override["scene"]         = bpy.data.scenes['Scene']
-        override["screen"]        = bpy.data.screens["Default"]
-
-        override["edit_object"] = None
-        override["gpencil_data"] = None
-
-        if selected_object:
-            override["object"]        = selected_object
-            override["active_object"] = selected_object
-            override["edit_object"]   = selected_object
-
-        return override
-
     def select_containers(self, select=True, pattern=None, pattern_inverse=False):
         # First, unselect everything
         bpy.ops.object.select_all(action='DESELECT')
@@ -135,7 +107,7 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers(True)
 
         # Zoom to selected
-        context = self.get_operator_context_override()
+        context = get_operator_context_override()
         bpy.ops.view3d.view_selected(context, use_all_regions=False)
 
         # Unselect containers

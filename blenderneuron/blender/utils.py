@@ -94,3 +94,33 @@ def register_module_classes(module, unreg=False):
 
 def remove_prop_collection_item(collection, item):
     collection.remove(collection.find(item.name))
+
+
+def get_operator_context_override(selected_object = None):
+    override = {}
+
+    try:
+        for area in bpy.data.screens["Default"].areas:
+            if area.type == 'VIEW_3D':
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        override['area'] = area
+                        override['region'] = region
+                        raise StopIteration()
+
+    except StopIteration:
+        pass
+
+    override["window"]        = bpy.context.window_manager.windows[0]
+    override["scene"]         = bpy.data.scenes['Scene']
+    override["screen"]        = bpy.data.screens["Default"]
+
+    override["edit_object"] = None
+    override["gpencil_data"] = None
+
+    if selected_object:
+        override["object"]        = selected_object
+        override["active_object"] = selected_object
+        override["edit_object"]   = selected_object
+
+    return override
