@@ -25,10 +25,24 @@ class SectionObjectView(ObjectViewAbstract):
             self.set_childrens_parent(root)
 
     def set_childrens_parent(self, parent_sec, recursive=True):
-        parent_cont = self.containers[parent_sec.hash]
+        if parent_sec.was_split:
+            # Parent the split sections together
+            for i, split_sec in enumerate(parent_sec.split_sections[:-1]):
+                start_cont = self.containers[split_sec.hash]
+                end_cont = self.containers[parent_sec.split_sections[i+1].hash]
+                end_cont.set_parent_object(start_cont)
+
+            # The parent container will be the last split section
+            parent_cont = self.containers[parent_sec.split_sections[-1].hash]
+
+        else:
+            parent_cont = self.containers[parent_sec.hash]
 
         for child_sec in parent_sec.children:
-            child_cont = self.containers[child_sec.hash]
+            if child_sec.was_split:
+                child_cont = self.containers[child_sec.split_sections[0].hash]
+            else:
+                child_cont = self.containers[child_sec.hash]
 
             child_cont.set_parent_object(parent_cont)
 
@@ -57,7 +71,10 @@ class SectionObjectView(ObjectViewAbstract):
             self.update_each_container_section(root)
 
     def update_each_container_section(self, section):
-        container = self.containers.get(section.hash)
+        if section.was_split:
+
+        else:
+            container = self.containers.get(section.hash)
 
         if container is not None:
             container.update_group_section(section, recursive=False)

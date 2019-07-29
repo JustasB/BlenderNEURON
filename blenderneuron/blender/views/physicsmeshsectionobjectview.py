@@ -1,6 +1,7 @@
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 import bpy, math
 import numpy as np
+from blenderneuron.blender.utils import create_many_copies
 
 class PhysicsMeshSectionObjectView(SectionObjectView):
     def __init__(self, group):
@@ -10,6 +11,7 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.curve_template.resolution_u = 1
 
         # Disable bevel (line segments only)
+        # When converted to meshes, they collide and cause instabilities
         self.curve_template.bevel_depth = 0
 
         # Don't add the extra end caps
@@ -29,32 +31,61 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         return object.name
 
     def create_joint_template(self):
-        empty = bpy.data.objects.new("JointTemplate", None)  # None creates "Empty"
+        # This does not work - the copy()s of the template do not seem to
+        # copy over constraint data (values do but not behavior)
+        # empty = bpy.data.objects.new("JointTemplate", None)  # None creates "Empty"
+        #
+        # # Add rigid body constraint to the empty - only works when linked to scene
+        # bpy.context.scene.objects.link(empty)
+        # bpy.context.scene.objects.active = empty
+        # bpy.ops.rigidbody.constraint_add()
+        #
+        # return empty.name
 
-        # Add rigid body constraint to the empty
-        bpy.context.scene.objects.link(empty)
-        bpy.context.scene.objects.active = empty
-        bpy.ops.rigidbody.constraint_add()
-
-        return empty.name
+        return "JointTemplate"
 
     def show(self):
-        self.split_long_sections()
 
-        super(PhysicsMeshSectionObjectView, self).show()
+        # This will create section objects using the new split sections
+        for root in self.group.roots.values():
+            self.create_container_for_each_section(root)
 
+        self.link_containers()
+
+        self.parent_containers()
+
+        # Physics sim does not work with curves, need meshes
+        # The meshes will be single strand meshes without radii
+        # This speeds up the simulation and makes it simple to recover the changed coords
         self.containers_to_mesh()
 
         self.make_containers_rigid_bodies()
 
+        # Joints will allow sections to rotate around the branch point
         self.add_branch_joints()
 
+        # Without explicit tips, the final sections tend to not align well
         self.add_branch_tips()
 
         self.add_force_to_layer()
 
         self.setup_physics_sim()
 
+
+    def create_container_for_each_section(self, root, recursive=True, is_top_level=True):
+        if is_top_level:
+            origin_type = "center"
+        else:
+            origin_type = "first"
+
+        self.create_section_container(root,
+                                      include_children=False,
+                                      origin_type=origin_type,
+                                      split_longer_than=200)
+
+        if recursive:
+            for child in root.children:
+                self.create_container_for_each_section(child, recursive=True, is_top_level=False)
 
     def align(self):
         bpy.ops.screen.animation_play()
@@ -80,8 +111,9 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         bpy.context.scene.rigidbody_world.point_cache.frame_start = 1
         bpy.context.scene.rigidbody_world.point_cache.frame_end = frames
 
-        if bpy.context.scene.frame_end < frames:
-            bpy.context.scene.frame_end = frames
+        bpy.context.scene.frame_end = frames
+
+        bpy.context.scene.frame_set(1)
 
     def make_containers_rigid_bodies(self):
 
@@ -90,6 +122,11 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         # Make the sections matching pattern move in response to forces
         self.select_containers(pattern=mov_pattern)
         bpy.ops.rigidbody.objects_add(type='ACTIVE')
+
+        # This seems to cause weird instabilities - but only when set in code ugh...
+        # too tired to report a bug
+        # for ob in bpy.context.selected_objects:
+        #     ob.rigid_body.collision_shape = 'MESH'
 
         # Make all other sections remain fixed
         self.select_containers(pattern=mov_pattern, pattern_inverse=True)
@@ -101,10 +138,16 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
             self.add_branch_tip_mesh(root)
 
     def add_branch_tip_mesh(self, root):
+        if self.joint_template is None:
+            self.joint_template = self.create_joint_template()
 
         if not any(root.children):
-            root_cont = self.containers[root.hash]
-            root_cont.add_tip(self.tip_template)
+            if root.was_split:
+                root_cont = self.containers[root.split_sections[-1].hash]
+            else:
+                root_cont = self.containers[root.hash]
+
+            root_cont.add_tip(self.tip_template, self.joint_template)
             del root_cont
 
         # Recursively create the tip meshes for leaf sections
@@ -113,7 +156,6 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
 
     def add_branch_joints(self):
-
         if self.joint_template is None:
             self.joint_template = self.create_joint_template()
 
@@ -123,12 +165,27 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
     def add_joints_to_children(self, root):
 
-        # Create joints between the parent and it's children
-        root_cont = self.containers[root.hash]
+        # If a long section was split, create joints between the split sections
+        if root.was_split:
+
+            for i, split_sec in enumerate(root.split_sections[:-1]):
+                start_cont = self.containers[split_sec.hash]
+                end_cont = self.containers[root.split_sections[i+1].hash]
+                start_cont.create_joint_with(end_cont, self.joint_template)
+                del start_cont, end_cont
+            # Then link the last split section with original children
+            root_cont = self.containers[root.split_sections[-1].hash]
+
+        else:
+            # Create joints between the parent and it's children
+            root_cont = self.containers[root.hash]
 
         for child in root.children:
-            child_cont = self.containers[child.hash]
-            root_cont.create_joint_with(child_cont)
+            # If a child was split, then use the first spit section as child container
+            child_hash = (child.split_sections[0] if child.was_split else child).hash
+
+            child_cont = self.containers[child_hash]
+            root_cont.create_joint_with(child_cont, self.joint_template)
             del child_cont
 
         del root_cont
@@ -137,38 +194,23 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         for child in root.children:
             self.add_joints_to_children(child)
 
-    def update_group(self):
-
-        for root in self.group.roots.values():
-            self.update_each_container_section(root)
-
-    def update_each_container_section(self, section):
-        self.containers[section.hash].update_group_section(section, recursive=False)
-
-        for child_sec in section.children:
-            self.update_each_container_section(child_sec)
-
     def remove(self):
         super(PhysicsMeshSectionObjectView, self).remove()
 
         bpy.ops.rigidbody.world_remove()
 
-        bpy.data.objects.remove(bpy.data.objects[self.tip_template])
+        tip_temp = bpy.data.objects[self.tip_template]
+        bpy.data.meshes.remove(tip_temp.data)
+        bpy.data.objects.remove(tip_temp)
 
         if self.joint_template is not None:
-            bpy.data.objects.remove(bpy.data.objects[self.joint_template])
+            tmpl = bpy.data.objects.get(self.joint_template)
+            if tmpl:
+                bpy.data.objects.remove(tmpl)
 
+        self.remove_split_sections()
 
-    def split_long_sections(self):
+    def remove_split_sections(self):
         for root in self.group.roots.values():
-            self.split_long_section(root)
+            root.remove_split_sections(recursive=True)
 
-    def split_long_section(self, root):
-        last_split = root.split_long()
-
-        # Skip ahead to the last split section
-        if last_split is not None:
-            root = last_split
-
-        for child_sec in root.children:
-            self.split_long_section(child_sec)

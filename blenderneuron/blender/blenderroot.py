@@ -10,11 +10,7 @@ class BlenderSection(Section):
         super(BlenderSection, self).__init__()
 
         self.was_split = False
-        self.last_split = False
-
-        self.pre_split_children = []
-        self.pre_split_coords = []
-        self.pre_split_radii = []
+        self.split_sections = []
 
 
     def from_full_NEURON_section_dict(self, nrn_section_dict):
@@ -43,9 +39,9 @@ class BlenderSection(Section):
 
         self.activity.from_dict(nrn_section_dict["activity"])
 
-    def split_long(self, max_length=100):
+    def make_split_sections(self, max_length):
         '''
-        Splits a section into smaller chained sub-sections if the arc lenght of the points
+        Splits a section into smaller chained sub-sections if the arc length of the points
         exceeds the specified length. This is used to temporarily split the sections for
         physics simulations.
 
@@ -60,33 +56,19 @@ class BlenderSection(Section):
         if not is_too_long:
             return None
 
-        # Retain previous properties
-        self.pre_split_children = self.children
-        self.pre_split_coords = self.coords
-        self.pre_split_radii = self.radii
-
-        # Mark the the first section as having been split
+        # Mark the the section as having been split
         self.was_split = True
 
         new_length = total_length / num_sections
 
         # Create new sections
-        new_sections = [BlenderSection() for i in range(num_sections-1)]
+        self.split_sections = [BlenderSection() for i in range(num_sections)]
 
-        last_new_section = new_sections[-1]
-
-        # Mark the last split section as such
-        last_new_section.last_split = True
-
-        # The last section gets the original children
-        last_new_section.children = self.pre_split_children
-
-        split_sections = [self] + new_sections
         old_coords = np.array(self.coords).reshape((-1, 3))
         old_radii = np.array(self.radii)
 
         # Assign new properties to the split sections
-        for i, sec in enumerate(split_sections):
+        for i, sec in enumerate(self.split_sections):
             length_start = i * new_length
             length_end = (i+1) * new_length
             coord_idxs = np.where((arc_lengths > length_start) & (arc_lengths <= length_end))
@@ -95,15 +77,22 @@ class BlenderSection(Section):
             sec.radii = old_radii[coord_idxs]
             sec.point_count = len(coord_idxs[0])
 
-            if sec.hash == "":
-                sec.name = self.name + "["+str(i)+"]"
-                sec.hash = hash(sec)
+            sec.name = self.name + "["+str(i)+"]"
+            sec.hash = hash(sec)
 
-            # Chain the new sections together
-            if i < len(split_sections)-1:
-                sec.children = [split_sections[i+1]]
+        return self.split_sections
 
-        return last_new_section
+    def update_coords_from_split_sections(self):
+        if not self.was_split:
+            return
+
+        # Reassemble the coords and radii
+        coords = np.array([sec.coords for sec in self.split_sections])
+        radii = np.array([sec.radii for sec in self.split_sections])
+
+        self.coords = coords.reshape(-1)
+        self.radii = radii.reshape(-1)
+        self.point_count = len(self.radii)
 
     def arc_lengths(self):
         coords = np.array(self.coords).reshape(-1, 3)
@@ -115,6 +104,17 @@ class BlenderSection(Section):
         dist = np.sqrt(sum)
         tot_len = np.cumsum(dist)
         return tot_len
+
+    def remove_split_sections(self, recursive=True):
+        if self.was_split:
+            import pydevd
+            pydevd.settrace('192.168.0.100', port=4200)
+            self.split_sections = []
+            self.was_split = False
+
+        if recursive:
+            for child_sec in self.children:
+                child_sec.remove_split_sections(recursive=True)
 
 class BlenderRoot(BlenderSection):
 

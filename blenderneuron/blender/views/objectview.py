@@ -35,14 +35,20 @@ class ObjectViewAbstract(ViewAbstract):
         self.closed_ends = True
 
     def make_curve_template(self):
-        self.curve_template = bpy.data.curves.new("bezier", type='CURVE')
-        self.curve_template.dimensions = '3D'
-        self.curve_template.resolution_u = self.group.segment_subdivisions
-        self.curve_template.fill_mode = 'FULL'
-        self.curve_template.bevel_depth = 0.0 if self.group.as_lines else 1.0
-        self.curve_template.bevel_resolution = int((self.group.circular_subdivisions - 4) / 2.0)
-        self.curve_template.show_normal_face = False
-        self.curve_template.show_handles = False
+        curve_template = bpy.data.curves.new("bezier", type='CURVE')
+        curve_template.dimensions = '3D'
+        curve_template.resolution_u = self.group.segment_subdivisions
+        curve_template.fill_mode = 'FULL'
+        curve_template.bevel_depth = 0.0 if self.group.as_lines else 1.0
+        curve_template.bevel_resolution = int((self.group.circular_subdivisions - 4) / 2.0)
+        curve_template.show_normal_face = False
+        curve_template.show_handles = False
+
+        self.curve_template_name = curve_template.name
+
+    @property
+    def curve_template(self):
+        return bpy.data.curves[self.curve_template_name]
 
     def on_first_link(self):
         # Set viewport params
@@ -132,18 +138,30 @@ class ObjectViewAbstract(ViewAbstract):
         # Remove curve template
         bpy.data.curves.remove(self.curve_template)
 
-    def create_section_container(self, section, include_children, origin_type):
+    def create_section_container(self, section, include_children, origin_type, split_longer_than=0):
+        if split_longer_than > 0 and include_children:
+            raise Exception("Cannot include child sections in a container when splitting long sections")
 
-        container = CurveContainer(
-            section,
-            self.curve_template,
-            self.group.smooth_sections,
-            include_children,
-            origin_type,
-            self.closed_ends,
-        )
+        to_containers = [section]
 
-        self.containers[container.root_hash] = container
+        if split_longer_than > 0:
+            split_sections = section.make_split_sections(split_longer_than)
+
+            if split_sections is not None:
+                to_containers = split_sections
+
+        for sec in to_containers:
+            container = CurveContainer(
+                sec,
+                self.curve_template,
+                self.group.smooth_sections,
+                include_children,
+                origin_type,
+                self.closed_ends,
+            )
+
+            self.containers[container.root_hash] = container
+
 
     def containers_to_mesh(self):
         self.select_containers()

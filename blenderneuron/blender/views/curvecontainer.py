@@ -1,6 +1,7 @@
 from math import sqrt, pi
 import bpy
 import numpy as np
+from blenderneuron.blender.utils import create_many_copies
 
 class CurveContainer:
 
@@ -183,7 +184,7 @@ class CurveContainer:
     def to_global(self, local_coords):
         """
         This function performs the fancy fast vectorized multiplication of the container object's
-        world matrix (trans, rot, scale) by the local bezier curve points to obtain the global
+        world matrix (trans, rot, scale) by the local points to obtain the global
         version of the coordinates.
 
         :param local_coords: Local coords as returned by bezier_points.foreach_get("co")
@@ -208,6 +209,9 @@ class CurveContainer:
         return global_coords
 
     def update_group_section(self, root, recursive=True):
+        if root.was_split:
+            root.update_coords_from_split_sections()
+
         ob = self.get_object()
 
         if ob.type == 'CURVE':
@@ -336,7 +340,7 @@ class CurveContainer:
         self.linked = False
 
 
-    def add_tip(self, tip_template):
+    def add_tip(self, tip_template, joint_template):
         ob = self.get_object()
 
         if ob.type != 'MESH':
@@ -358,18 +362,39 @@ class CurveContainer:
         bpy.context.scene.objects.link(tip_object)
         self.tip_name = tip_object.name
 
+        self.create_joint_between(ob, tip_object, tip_loc, joint_template)
 
-        self.create_joint_between(ob, tip_object, tip_loc)
+    def create_joint_with(self, child, joint_template):
+        self.create_joint_between(self.get_object(), child.get_object(), child.origin, joint_template)
 
-    def create_joint_with(self, child):
-        self.create_joint_between(self.get_object(), child.get_object(), child.origin)
-
-    def create_joint_between(self, parent_object, child_object, joint_location):
+    def create_joint_between(self, parent_object, child_object, joint_location, joint_template):
 
         deg = 5.0
+        trans = 0.01
 
-        # Create an "Empty" object
-        empty = bpy.data.objects['JointTemplate'].copy()
+        # Create and link an "Empty" object - which serves as the joint
+
+        # COPY METHOD
+        # empty_template = bpy.data.objects.get(joint_template)
+        # if empty_template is not None:
+        #     empty = create_many_copies(empty_template, 1)[0]
+        #     # This does not work - the copied constraints don't seem to be functional
+        #     # Too tired to report a bug... ugh
+        #     # empty = empty_template.copy()
+        #     # bpy.context.scene.objects.link(empty)
+        #
+        # # CREATE NEW METHOD
+        # else:
+
+        # This appears to be the only reliable way to add a constraint
+        # ... it's terribly slow. Profiler shows constraint_add() takes the most time
+        # I have not found any other way to add stable joints ... ugh
+        bpy.ops.object.empty_add(type='SPHERE')
+        bpy.ops.rigidbody.constraint_add()
+        empty = bpy.context.object
+        empty.name = joint_template
+
+
         empty.location = joint_location
         empty.empty_draw_type = 'SPHERE'
         empty.empty_draw_size = 0.5
@@ -389,13 +414,13 @@ class CurveContainer:
             constraint.use_limit_ang_y = \
             constraint.use_limit_ang_z = True
 
-        constraint.limit_lin_x_upper = \
-            limit_lin_y_upper = \
-            limit_lin_z_upper = 0
-
         constraint.limit_lin_x_lower = \
             constraint.limit_lin_y_lower = \
-            constraint.limit_lin_z_lower = 0
+            constraint.limit_lin_z_lower = -trans
+
+        constraint.limit_lin_x_upper = \
+            constraint.limit_lin_y_upper = \
+            constraint.limit_lin_z_upper = trans
         
         constraint.limit_ang_x_lower = \
             constraint.limit_ang_y_lower = \

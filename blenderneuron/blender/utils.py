@@ -5,6 +5,8 @@ import time
 import bpy
 import shlex
 import subprocess
+import bpy
+import numpy as np
 
 def launch_neuron(command):
     command = shlex.split(command)
@@ -124,3 +126,63 @@ def get_operator_context_override(selected_object = None):
         override["edit_object"]   = selected_object
 
     return override
+
+
+def create_many_copies(target_obj, count):
+    """
+    Efficiently creates a large number of copies of a target object. This saves on
+    the overhead incurred from .new() or .copy() calls.
+
+    :param target_obj: Mesh, Empty, or Curve (might work with other types)
+    :param count: Number of copies to create
+    :return: List of the object copies
+    """
+    # Create a particle system container
+    bpy.ops.mesh.primitive_cube_add()
+    cube = bpy.context.object
+
+    # Create a particle system within the container
+    bpy.ops.object.particle_system_add()
+    particle_sys = cube.particle_systems[0].settings
+
+    # Set parameters so all particles show up at once
+    particle_sys.frame_start = -1
+    particle_sys.frame_end = 1
+
+    particle_sys.count = count
+
+    particle_sys.emit_from = 'VOLUME'
+
+    # No random rotations
+    particle_sys.use_rotations = True
+    particle_sys.rotation_mode = 'NONE'
+
+    # No physics
+    particle_sys.physics_type = 'NO'
+
+    # Duplicate the target object for each particle
+    particle_sys.render_type = 'OBJECT'
+    particle_sys.dupli_object = target_obj
+    particle_sys.particle_size = 1.0
+    particle_sys.use_rotation_dupli = True
+    particle_sys.use_scale_dupli = True
+
+    # Make sure we're at the correct frame
+    bpy.context.scene.frame_set(1)
+
+    # Efficiently set the location of the objects (here all to 0,0,0)
+    # must be a flat array/list with all locations pre-set
+    # Otherwise the locations will be random and can be set by
+    # looping over objects (slower than foreach_set)
+    # Rotations can be set in similar fashion
+    locs = np.zeros(count*3)
+    cube.particle_systems[0].particles.foreach_set("location", locs)
+
+    bpy.ops.object.duplicates_make_real()
+
+    # Cleanup
+    bpy.data.meshes.remove(cube.data)
+    bpy.data.objects.remove(cube)
+    bpy.data.particles.remove(particle_sys)
+
+    return bpy.context.selected_objects
