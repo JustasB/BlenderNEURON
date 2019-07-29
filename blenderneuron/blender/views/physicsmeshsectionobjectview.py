@@ -20,30 +20,6 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.tip_template = self.create_tip_template()
         self.joint_template = None
 
-    def create_tip_template(self):
-        mesh = bpy.data.meshes.new('TipTemplateMesh')
-
-        # Add 1 point at the (local) origin
-        mesh.vertices.add(1)
-
-        object = bpy.data.objects.new('TipTemplate', mesh)
-
-        return object.name
-
-    def create_joint_template(self):
-        # This does not work - the copy()s of the template do not seem to
-        # copy over constraint data (values do but not behavior)
-        # empty = bpy.data.objects.new("JointTemplate", None)  # None creates "Empty"
-        #
-        # # Add rigid body constraint to the empty - only works when linked to scene
-        # bpy.context.scene.objects.link(empty)
-        # bpy.context.scene.objects.active = empty
-        # bpy.ops.rigidbody.constraint_add()
-        #
-        # return empty.name
-
-        return "JointTemplate"
-
     def show(self):
 
         # This will create section objects using the new split sections
@@ -70,6 +46,30 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.add_force_to_layer()
 
         self.setup_physics_sim()
+
+    def create_joint_template(self):
+        # This does not work - the copy()s of the template do not seem to
+        # copy over constraint data (values do but not behavior)
+        # empty = bpy.data.objects.new("JointTemplate", None)  # None creates "Empty"
+        #
+        # # Add rigid body constraint to the empty - only works when linked to scene
+        # bpy.context.scene.objects.link(empty)
+        # bpy.context.scene.objects.active = empty
+        # bpy.ops.rigidbody.constraint_add()
+        #
+        # return empty.name
+
+        return "JointTemplate"
+
+    def create_tip_template(self):
+        mesh = bpy.data.meshes.new('TipTemplateMesh')
+
+        # Add 1 point at the (local) origin
+        mesh.vertices.add(1)
+
+        object = bpy.data.objects.new('TipTemplate', mesh)
+
+        return object.name
 
 
     def create_container_for_each_section(self, root, recursive=True, is_top_level=True):

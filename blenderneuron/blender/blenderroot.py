@@ -71,7 +71,12 @@ class BlenderSection(Section):
         for i, sec in enumerate(self.split_sections):
             length_start = i * new_length
             length_end = (i+1) * new_length
-            coord_idxs = np.where((arc_lengths > length_start) & (arc_lengths <= length_end))
+
+            # Include last point in last section
+            if i == num_sections-1:
+                coord_idxs = np.where((arc_lengths >= length_start) & (arc_lengths <= length_end))
+            else:
+                coord_idxs = np.where((arc_lengths >= length_start) & (arc_lengths <  length_end))
 
             sec.coords = old_coords[coord_idxs].reshape(-1)
             sec.radii = old_radii[coord_idxs]
@@ -80,19 +85,29 @@ class BlenderSection(Section):
             sec.name = self.name + "["+str(i)+"]"
             sec.hash = hash(sec)
 
+
+        # Total number of points should be preserved
+        assert self.point_count == sum(len(sec.radii) for sec in self.split_sections)
+
         return self.split_sections
 
     def update_coords_from_split_sections(self):
         if not self.was_split:
             return
 
+
+        import pydevd
+        pydevd.settrace('192.168.0.100', port=4200)
+
         # Reassemble the coords and radii
-        coords = np.array([sec.coords for sec in self.split_sections])
-        radii = np.array([sec.radii for sec in self.split_sections])
+        coords = np.concatenate([sec.coords for sec in self.split_sections])
+        radii = np.concatenate([sec.radii for sec in self.split_sections])
 
         self.coords = coords.reshape(-1)
         self.radii = radii.reshape(-1)
-        self.point_count = len(self.radii)
+
+        # This should not change
+        assert self.point_count == len(self.radii)
 
     def arc_lengths(self):
         coords = np.array(self.coords).reshape(-1, 3)
@@ -102,13 +117,11 @@ class BlenderSection(Section):
         sq = np.square(diff)
         sum = np.sum(sq, axis=1)
         dist = np.sqrt(sum)
-        tot_len = np.cumsum(dist)
+        tot_len = np.concatenate(([0],np.cumsum(dist)))
         return tot_len
 
     def remove_split_sections(self, recursive=True):
         if self.was_split:
-            import pydevd
-            pydevd.settrace('192.168.0.100', port=4200)
             self.split_sections = []
             self.was_split = False
 

@@ -209,8 +209,6 @@ class CurveContainer:
         return global_coords
 
     def update_group_section(self, root, recursive=True):
-        if root.was_split:
-            root.update_coords_from_split_sections()
 
         ob = self.get_object()
 

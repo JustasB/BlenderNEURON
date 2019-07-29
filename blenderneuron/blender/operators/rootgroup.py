@@ -250,9 +250,6 @@ class CUSTOM_OT_update_groups_from_view(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
-
         for group in self.node.groups.values():
             if group.selected:
                 group.from_view()

@@ -72,12 +72,21 @@ class SectionObjectView(ObjectViewAbstract):
 
     def update_each_container_section(self, section):
         if section.was_split:
+            # Update split sections with the split container coords
+            for split_sec in section.split_sections:
+                container = self.containers.get(split_sec.hash)
+
+                if container is not None:
+                    container.update_group_section(section, recursive=False)
+
+            # Update the coords of the unsplit section with the coords from the splits
+            section.update_coords_from_split_sections()
 
         else:
             container = self.containers.get(section.hash)
 
-        if container is not None:
-            container.update_group_section(section, recursive=False)
+            if container is not None:
+                container.update_group_section(section, recursive=False)
 
         for child_sec in section.children:
             self.update_each_container_section(child_sec)
