@@ -32,12 +32,15 @@ class BlenderSection(Section):
             self.children.append(child)
 
         self.segments_3D = []
-        for i, nrn_seg_3D in enumerate(nrn_section_dict["segments_3D"]):
-            seg = BlenderSegment3D(self, i+1)
-            seg.from_dict(nrn_seg_3D)
-            self.segments_3D.append(seg)
 
-        self.activity.from_dict(nrn_section_dict["activity"])
+        if "segments_3D" in nrn_section_dict:
+            for i, nrn_seg_3D in enumerate(nrn_section_dict["segments_3D"]):
+                seg = BlenderSegment3D(self, i+1)
+                seg.from_dict(nrn_seg_3D)
+                self.segments_3D.append(seg)
+
+        if "activity" in nrn_section_dict:
+            self.activity.from_dict(nrn_section_dict["activity"])
 
     def make_split_sections(self, max_length):
         '''
@@ -59,6 +62,7 @@ class BlenderSection(Section):
         # Mark the the section as having been split
         self.was_split = True
 
+        # Get the maximum length of the new sections
         new_length = total_length / num_sections
 
         # Create new sections
@@ -67,20 +71,27 @@ class BlenderSection(Section):
         old_coords = np.array(self.coords).reshape((-1, 3))
         old_radii = np.array(self.radii)
 
-        # Assign new properties to the split sections
+        # Split the coords and radii
+        split_length = new_length
+        split_idxs = []
+
+        for pi in range(len(old_radii)):
+            if arc_lengths[pi] >= split_length:
+                split_idxs.append(pi)
+                split_length += new_length
+
+                if len(split_idxs) == num_sections-1:
+                    break
+
+        split_coords = np.split(old_coords, split_idxs)
+        split_radii = np.split(old_radii, split_idxs)
+
+
+        # Assign them to the split sections
         for i, sec in enumerate(self.split_sections):
-            length_start = i * new_length
-            length_end = (i+1) * new_length
-
-            # Include last point in last section
-            if i == num_sections-1:
-                coord_idxs = np.where((arc_lengths >= length_start) & (arc_lengths <= length_end))
-            else:
-                coord_idxs = np.where((arc_lengths >= length_start) & (arc_lengths <  length_end))
-
-            sec.coords = old_coords[coord_idxs].reshape(-1)
-            sec.radii = old_radii[coord_idxs]
-            sec.point_count = len(coord_idxs[0])
+            sec.coords = split_coords[i].reshape(-1)
+            sec.radii = split_radii[i]
+            sec.point_count = len(sec.radii)
 
             sec.name = self.name + "["+str(i)+"]"
             sec.hash = hash(sec)
@@ -94,10 +105,6 @@ class BlenderSection(Section):
     def update_coords_from_split_sections(self):
         if not self.was_split:
             return
-
-
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
 
         # Reassemble the coords and radii
         coords = np.concatenate([sec.coords for sec in self.split_sections])

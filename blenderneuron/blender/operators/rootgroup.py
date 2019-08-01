@@ -379,6 +379,9 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
+        import pydevd
+        pydevd.settrace('192.168.0.100', port=4200)
+
         random.seed(0)
 
         slice = bpy.data.objects['TestSlice']
@@ -389,7 +392,7 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
         slice.select = False
 
-        mc_locs = self.get_locs_within_slice(bpy.data.objects['2 ML Particles'], slice)
+        mc_locs = self.get_locs_within_slice(bpy.data.objects['2 ML Particles'], slice)[:1]
         glom_locs = self.get_locs_within_slice(bpy.data.objects['0 GL Particles'], slice)
 
         self.add_mcs(mc_locs, glom_locs)
@@ -418,7 +421,15 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         bpy.ops.custom.import_selected_groups()
 
         # TODO: move to db
-        mc_apic_names = {
+        mc_apic_start_names = {
+            'MC1': '1',
+            'MC2': '0',
+            'MC3': '2',
+            'MC4': '2',
+            'MC5': '2'
+        }
+
+        mc_apic_end_names = {
             'MC1': '17',
             'MC2': '3',
             'MC3': '13',
@@ -429,21 +440,23 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         for mc_info in too_short_mcs:
             mc = mc_info["name"]
             mc_soma = bpy.data.objects[mc]
-            mc_apic = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_names[mc[0:mc.find('[')]] + ']']
+            mc_apic_start = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_start_names[mc[0:mc.find('[')]] + ']']
+            mc_apic_end = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_end_names[mc[0:mc.find('[')]] + ']']
 
             # Align apical towards the closest glom
-            self.position_align_mc(mc_soma, mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+            self.position_align_mc(mc_soma, mc_apic_start, mc_apic_end, mc_info["mc_loc"], mc_info["glom_loc"])
 
             # Extend apic to the glom
-            self.extend_apic(mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+            # self.extend_apic(mc_apic_end, mc_info["mc_loc"], mc_info["glom_loc"])
 
         for mc_info in normal_mcs:
             mc = mc_info["name"]
             mc_soma = bpy.data.objects[mc]
-            mc_apic = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_names[mc[0:mc.find('[')]] + ']']
+            mc_apic_start = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_start_names[mc[0:mc.find('[')]] + ']']
+            mc_apic_end = bpy.data.objects[mc.replace('soma', '') + 'apic[' + mc_apic_end_names[mc[0:mc.find('[')]] + ']']
 
             # align the apic towards the matching glom
-            self.position_align_mc(mc_soma, mc_apic, mc_info["mc_loc"], mc_info["glom_loc"])
+            self.position_align_mc(mc_soma, mc_apic_start, mc_apic_end, mc_info["mc_loc"], mc_info["glom_loc"])
 
     def add_mc(self, mc_loc, glom_locs, too_short_mcs, normal_mcs):
         # find the closest glom loc
@@ -516,42 +529,52 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         v = p2.dot(normal)
         return not (v < 0.0)
 
-    def position_align_mc(self, soma, apic, loc, glom_loc):
+    def position_align_mc(self, soma, apic_start, apic_end, loc, glom_loc):
         from mathutils import Vector
         import random
         from math import pi
 
+        # Add random rotation around the apical axis
         soma.rotation_euler[2] = random.randrange(360) / 180.0 * pi
-
-        # Compute the start and end alignment vectors (soma->apic TO soma->glom)
-        startVec = Vector(apic.location - soma.location)
-        endVec = Vector(glom_loc - loc)
-
-        # Compute rotation quaternion and rotate the soma by it
-        initMW = soma.matrix_world.copy()
-        rotM = startVec.rotation_difference(endVec).to_matrix().to_4x4()
-        soma.matrix_world = initMW * rotM
 
         # Position the soma
         soma.location = loc
+
+        # Update child matrices
+        bpy.context.scene.update()
+
+        # Compute the start and end alignment vectors (start apic->end apic TO start apic->glom)
+        apic_end_loc = apic_end.location
+        apic_start_loc = apic_start.location
+        glom_loc_rel2apic_start = apic_start.matrix_world.inverted() * Vector(glom_loc)
+
+        startVec = Vector(apic_end_loc - apic_start_loc)
+        endVec = Vector(glom_loc_rel2apic_start - apic_start_loc)
+
+        # Compute rotation quaternion and rotate the start apic by it
+        initML = apic_start.matrix_local.copy()
+        rotM = startVec.rotation_difference(endVec).to_matrix().to_4x4()
+        apic_start.matrix_local = initML * rotM
 
         # DEBUG aids
         bpy.data.objects['MCProbe'].location = loc
         bpy.data.objects['GlomProbe'].location = glom_loc
 
 
+        bpy.context.scene.update()
 
-    def extend_apic(self, apic, loc, endLoc):
+
+
+    def extend_apic(self, apic_end, apic_start_loc, glom_loc):
         from mathutils import Vector
 
-        soma_loc = loc
-        apic_loc = apic.location.copy()
-        cell_vec = Vector(apic_loc - soma_loc)
+        apic_end_loc = apic_end.location.copy()
+        apic_vec = Vector(apic_end_loc - apic_start_loc)
 
-        dist_to_end = Vector(endLoc - apic_loc).length
-        dist_ratio = dist_to_end / cell_vec.length
+        dist_to_end = Vector(glom_loc - apic_end_loc).length
+        dist_ratio = dist_to_end / apic_vec.length
 
-        apic.location = cell_vec * dist_ratio
+        apic_end.location = apic_vec * dist_ratio
 
 
         

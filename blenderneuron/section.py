@@ -30,7 +30,7 @@ class Section:
             "name": self.name,
             "hash": self.hash,
             "parent_connection_loc": self.parent_connection_loc,
-            "connection_end": self.connection_end
+            "connection_end": self.connection_end,
         }
 
         if include_activity:
@@ -54,8 +54,8 @@ class Section:
         if include_coords_and_radii:
             result.update({
                 "point_count": self.point_count,
-                "coords": self.coords,
-                "radii": self.radii,
+                "coords": self.coords if type(self.coords) == list else self.coords.tolist(),
+                "radii": self.radii if type(self.radii) == list else self.radii.tolist(),
             })
 
         return result

@@ -1,3 +1,16 @@
+bl_info = {
+    "name": "BlenderNEURON",
+    "description": "A Blender GUI for NEURON simulator",
+    "author": "Justas Birgiolas",
+    "version": (2, 0),
+    "blender": (2, 79, 0),
+    "location": "3D View > Left Side > BlenderNEURON",
+    "wiki_url": "BlenderNEURON.org",
+    "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
+    "support": "COMMUNITY",
+    "category": "Import-Export",
+}
+
 try:
     import bpy
     inside_blender = True
@@ -21,19 +34,6 @@ if inside_blender:
     from blenderneuron.blender.utils import register_module_classes
 
     import sys
-
-    bl_info = {
-        "name": "BlenderNEURON",
-        "description": "A Blender GUI for NEURON simulator",
-        "author": "Justas Birgiolas",
-        "version": (2, 0),
-        "blender": (2, 79, 0),
-        "location": "3D View > Left Side > BlenderNEURON",
-        "wiki_url": "BlenderNEURON.org",
-        "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
-        "support": "COMMUNITY",
-        "category": "Import-Export",
-    }
 
     @persistent
     def auto_start(scene):

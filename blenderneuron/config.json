@@ -1,16 +1,16 @@
 [
     {
-        "NEURON_last_command": "print(len(h.Graph))",
+        "NEURON_last_command": "mcs = []",
         "NEURON_launch_command": "nrngui -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
-            "Blender": "127.0.0.1",
+            "Blender": "192.168.0.100",
             "Control": "127.0.0.1",
-            "NEURON": "127.0.0.1"
+            "NEURON": "192.168.162.128"
         },
         "default_port": {
-            "Blender": "",
+            "Blender": "5201",
             "Control": "",
-            "NEURON": ""
+            "NEURON": "5202"
         },
         "end_types": [
             "NEURON",

@@ -186,3 +186,9 @@ def create_many_copies(target_obj, count):
     bpy.data.particles.remove(particle_sys)
 
     return bpy.context.selected_objects
+
+def fast_get(coll, prop_name, sub_items_per_item=1):
+    count = len(coll)
+    result = np.empty(count*sub_items_per_item)
+    coll.foreach_get(prop_name, result)
+    return result

@@ -63,9 +63,10 @@ class NeuronNode(CommNode):
 
             self.groups[name] = nrn_group
 
-        h.run()
+        if any([g.record_activity for g in self.groups.values()]):
+            h.run()
 
-        result = [group.to_dict(include_activity=True,
+        result = [group.to_dict(include_activity=group.record_activity,
                   include_root_children=True,
                   include_coords_and_radii=True)
                   for group in self.groups.values()]

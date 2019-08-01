@@ -183,7 +183,7 @@ class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
 
 class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
-    bl_label = "Simulation"
+    bl_label = "NEURON"
 
     @classmethod
     def poll(cls, context):

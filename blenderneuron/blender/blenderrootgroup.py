@@ -41,7 +41,8 @@ class BlenderRootGroup(RootGroup):
 
             self.roots[hash].from_full_NEURON_section_dict(nrn_root)
 
-        self.activity.from_dict(nrn_group["activity"])
+        if "activity" in nrn_group:
+            self.activity.from_dict(nrn_group["activity"])
 
     def show(self, view_class):
         if not hasattr(view_class, "show"):

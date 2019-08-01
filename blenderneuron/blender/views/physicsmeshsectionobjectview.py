@@ -111,6 +111,9 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         bpy.context.scene.rigidbody_world.point_cache.frame_start = 1
         bpy.context.scene.rigidbody_world.point_cache.frame_end = frames
 
+        bpy.context.scene.rigidbody_world.steps_per_second = 240
+        bpy.context.scene.rigidbody_world.solver_iterations = 100
+
         bpy.context.scene.frame_end = frames
 
         bpy.context.scene.frame_set(1)
@@ -197,7 +200,18 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
     def remove(self):
         super(PhysicsMeshSectionObjectView, self).remove()
 
-        bpy.ops.rigidbody.world_remove()
+        if bpy.context.scene.rigidbody_world is not None:
+            rbw_group = bpy.context.scene.rigidbody_world.group
+
+            if rbw_group is not None:
+                bpy.data.groups.remove(rbw_group)
+
+            rbw_constraints = bpy.context.scene.rigidbody_world.constraints
+
+            if rbw_constraints is not None:
+                bpy.data.groups.remove(rbw_constraints)
+
+            bpy.ops.rigidbody.world_remove()
 
         tip_temp = bpy.data.objects[self.tip_template]
         bpy.data.meshes.remove(tip_temp.data)
