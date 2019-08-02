@@ -360,15 +360,12 @@ class CurveContainer:
         bpy.context.scene.objects.link(tip_object)
         self.tip_name = tip_object.name
 
-        self.create_joint_between(ob, tip_object, tip_loc, joint_template)
+        self.create_joint_between(ob, tip_object, tip_loc, joint_template, max_bend_angle=0)
 
-    def create_joint_with(self, child, joint_template):
-        self.create_joint_between(self.get_object(), child.get_object(), child.origin, joint_template)
+    def create_joint_with(self, child, joint_template, max_bend_angle):
+        self.create_joint_between(self.get_object(), child.get_object(), child.origin, joint_template, max_bend_angle)
 
-    def create_joint_between(self, parent_object, child_object, joint_location, joint_template):
-
-        deg = 5.0
-        trans = 0.01
+    def create_joint_between(self, parent_object, child_object, joint_location, joint_template, max_bend_angle):
 
         # Create and link an "Empty" object - which serves as the joint
 
@@ -414,19 +411,19 @@ class CurveContainer:
 
         constraint.limit_lin_x_lower = \
             constraint.limit_lin_y_lower = \
-            constraint.limit_lin_z_lower = -trans
+            constraint.limit_lin_z_lower = 0
 
         constraint.limit_lin_x_upper = \
             constraint.limit_lin_y_upper = \
-            constraint.limit_lin_z_upper = trans
+            constraint.limit_lin_z_upper = 0
         
         constraint.limit_ang_x_lower = \
             constraint.limit_ang_y_lower = \
-            constraint.limit_ang_z_lower = -pi / 180 * deg
+            constraint.limit_ang_z_lower = -pi / 180 * max_bend_angle
         
         constraint.limit_ang_x_upper = \
             constraint.limit_ang_y_upper = \
-            constraint.limit_ang_z_upper = pi / 180 * deg
+            constraint.limit_ang_z_upper = pi / 180 * max_bend_angle
 
         constraint.object1 = parent_object # parent
         constraint.object2 = child_object

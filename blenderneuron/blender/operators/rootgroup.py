@@ -379,9 +379,6 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
-
         random.seed(0)
 
         slice = bpy.data.objects['TestSlice']
@@ -529,10 +526,25 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         v = p2.dot(normal)
         return not (v < 0.0)
 
+    def unparent(self, obj):
+        prev_parent = obj.parent
+        parented_wm = obj.matrix_world.copy()
+        obj.parent = None
+        obj.matrix_world = parented_wm
+        return prev_parent
+
+    def parent(self, obj, parent):
+        obj.parent = parent
+        obj.matrix_parent_inverse = parent.matrix_world.inverted()
+
     def position_align_mc(self, soma, apic_start, apic_end, loc, glom_loc):
         from mathutils import Vector
         import random
         from math import pi
+
+        # DEBUG aids
+        bpy.data.objects['MCProbe'].location = loc
+        bpy.data.objects['GlomProbe'].location = glom_loc
 
         # Add random rotation around the apical axis
         soma.rotation_euler[2] = random.randrange(360) / 180.0 * pi
@@ -543,23 +555,29 @@ class CUSTOM_OT_position_mc(Operator, CellGroupOperatorAbstract):
         # Update child matrices
         bpy.context.scene.update()
 
+        # Temporarily unparent the apic start (location becomes global)
+        apic_start_parent = self.unparent(apic_start)
+        apic_end_parent = self.unparent(apic_end)
+
         # Compute the start and end alignment vectors (start apic->end apic TO start apic->glom)
-        apic_end_loc = apic_end.location
-        apic_start_loc = apic_start.location
-        glom_loc_rel2apic_start = apic_start.matrix_world.inverted() * Vector(glom_loc)
+        # Relative to apic_start
+        apic_start_wmi = apic_start.matrix_world.inverted()
+        apic_start_loc = apic_start_wmi * apic_start.location # Can be 0,0,0?
+        apic_end_loc = apic_start_wmi * apic_end.location
 
         startVec = Vector(apic_end_loc - apic_start_loc)
-        endVec = Vector(glom_loc_rel2apic_start - apic_start_loc)
+        endVec = Vector(apic_start_wmi * Vector(glom_loc) - apic_start_loc)
+
+        #Reparent the apic end (so it rotates with the start apic)
+        self.parent(apic_end, apic_end_parent)
 
         # Compute rotation quaternion and rotate the start apic by it
-        initML = apic_start.matrix_local.copy()
+        initMW = apic_start.matrix_world.copy()
         rotM = startVec.rotation_difference(endVec).to_matrix().to_4x4()
-        apic_start.matrix_local = initML * rotM
+        apic_start.matrix_world = initMW * rotM
 
-        # DEBUG aids
-        bpy.data.objects['MCProbe'].location = loc
-        bpy.data.objects['GlomProbe'].location = glom_loc
-
+        # Reparent the apic end (so it rotates with the start apic)
+        self.parent(apic_start, apic_start_parent)
 
         bpy.context.scene.update()
 

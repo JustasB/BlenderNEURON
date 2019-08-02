@@ -44,9 +44,40 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
     )
 
     simulation_frames = IntProperty(
-        default=50,
+        default=250,
         name="Physics simulation frames",
         description="The number of frames to use for physics simulation",
+    )
+
+    max_bend_angle = FloatProperty(
+        default=45,
+        min=0,
+        name="Max bend angle (degrees)",
+        description="The maximum angle by which the dendritic sections are allowed to"
+                    " deviate from their original positions"
+    )
+
+    physics_steps_per_sec = FloatProperty(
+        default=120,
+        min=1,
+        name="Physics Steps/sec",
+        description="The number of integration steps per second the physics solver should "
+                    "use for physics simulations"
+    )
+
+    physics_solver_iterations_per_step = FloatProperty(
+        default=10,
+        min=1,
+        name="Physics iterations per step",
+        description="The number of iterations the physics solver should use for "
+                    "each simulation step"
+    )
+
+    max_section_length = FloatProperty(
+        default=200,
+        min=1,
+        name="Maximum section length",
+        description="Sections that are longer than this value will be split into smaller sections"
     )
 
 

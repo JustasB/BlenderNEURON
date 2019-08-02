@@ -20,6 +20,14 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.tip_template = self.create_tip_template()
         self.joint_template = None
 
+    @property
+    def max_bend_angle(self):
+        return self.group.ui_group.layer_aligner_settings.max_bend_angle
+
+    @property
+    def max_section_length(self):
+        return self.group.ui_group.layer_aligner_settings.max_section_length
+
     def show(self):
 
         # This will create section objects using the new split sections
@@ -81,7 +89,7 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         self.create_section_container(root,
                                       include_children=False,
                                       origin_type=origin_type,
-                                      split_longer_than=200)
+                                      split_longer_than=self.max_section_length)
 
         if recursive:
             for child in root.children:
@@ -103,20 +111,21 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
 
     def setup_physics_sim(self):
 
-        frames = self.group.ui_group.layer_aligner_settings.simulation_frames
+        settings = self.group.ui_group.layer_aligner_settings
 
         # Disable gravity
         bpy.context.scene.use_gravity = False
 
         bpy.context.scene.rigidbody_world.point_cache.frame_start = 1
-        bpy.context.scene.rigidbody_world.point_cache.frame_end = frames
+        bpy.context.scene.rigidbody_world.point_cache.frame_end = settings.simulation_frames
 
-        bpy.context.scene.rigidbody_world.steps_per_second = 240
-        bpy.context.scene.rigidbody_world.solver_iterations = 100
 
-        bpy.context.scene.frame_end = frames
+        bpy.context.scene.rigidbody_world.steps_per_second = settings.physics_steps_per_sec
+        bpy.context.scene.rigidbody_world.solver_iterations = settings.physics_solver_iterations_per_step
 
-        bpy.context.scene.frame_set(1)
+        bpy.context.scene.frame_end = settings.simulation_frames
+
+        bpy.context.scene.frame_set(settings.simulation_frames)
 
     def make_containers_rigid_bodies(self):
 
@@ -125,11 +134,6 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         # Make the sections matching pattern move in response to forces
         self.select_containers(pattern=mov_pattern)
         bpy.ops.rigidbody.objects_add(type='ACTIVE')
-
-        # This seems to cause weird instabilities - but only when set in code ugh...
-        # too tired to report a bug
-        # for ob in bpy.context.selected_objects:
-        #     ob.rigid_body.collision_shape = 'MESH'
 
         # Make all other sections remain fixed
         self.select_containers(pattern=mov_pattern, pattern_inverse=True)
@@ -174,7 +178,7 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
             for i, split_sec in enumerate(root.split_sections[:-1]):
                 start_cont = self.containers[split_sec.hash]
                 end_cont = self.containers[root.split_sections[i+1].hash]
-                start_cont.create_joint_with(end_cont, self.joint_template)
+                start_cont.create_joint_with(end_cont, self.joint_template, self.max_bend_angle)
                 del start_cont, end_cont
             # Then link the last split section with original children
             root_cont = self.containers[root.split_sections[-1].hash]
@@ -188,7 +192,7 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
             child_hash = (child.split_sections[0] if child.was_split else child).hash
 
             child_cont = self.containers[child_hash]
-            root_cont.create_joint_with(child_cont, self.joint_template)
+            root_cont.create_joint_with(child_cont, self.joint_template, self.max_bend_angle)
             del child_cont
 
         del root_cont

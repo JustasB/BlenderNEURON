@@ -171,12 +171,32 @@ class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
 
 
         split = self.layout.split(percentage=0.25)
+        split.label(text="Max Bend:")
+        split.prop(group_aligner, "max_bend_angle", text="")
+
+        split = self.layout.split(percentage=0.25)
+        split.label(text="Max Length:")
+        split.prop(group_aligner, "max_section_length", text="")
+
+        self.layout.separator()
+
+        split = self.layout.split(percentage=0.25)
         split.label(text="Sim Frames:")
         split.prop(group_aligner, "simulation_frames", text="")
 
+        split = self.layout.split(percentage=0.25)
+        split.label(text="Steps/sec:")
+        split.prop(group_aligner, "physics_steps_per_sec", text="")
+
+        split = self.layout.split(percentage=0.25)
+        split.label(text="Iterations/step:")
+        split.prop(group_aligner, "physics_solver_iterations_per_step", text="")
+
+        self.layout.separator()
+
         col = self.layout.column()
         col.operator("custom.setup_aligner", text="Setup Aligner", icon="CONSTRAINT")
-        col.operator("screen.animation_play", text="Align", icon="SURFACE_DATA")
+        col.operator("ptcache.bake_all", text="Align", icon="SURFACE_DATA").bake=False
         col.operator("custom.update_groups_from_view", text="Save Alignment Results",
                              icon="FILE_REFRESH")
 

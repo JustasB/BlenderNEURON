@@ -1,6 +1,7 @@
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
+import bpy
 
 class BlenderRootGroup(RootGroup):
 
@@ -50,7 +51,11 @@ class BlenderRootGroup(RootGroup):
 
         # If there is an existing view, get any changes made to it, and remove it
         if self.view is not None:
-            self.from_view()
+
+            # Don't apply changes from an existing physics view
+            if type(self.view) != PhysicsMeshSectionObjectView:
+                self.from_view()
+
             self.view.remove()
 
         # Show the new view
