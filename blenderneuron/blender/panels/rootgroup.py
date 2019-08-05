@@ -99,9 +99,9 @@ class CUSTOM_PT_NEURON_GroupSettings(AbstractBlenderNEURONPanel, Panel):
         group = self.get_group(context)
 
         col = self.layout
-        col.prop(group, "recording_granularity", text="Record")
+        col.prop(group, "recording_granularity", text="Record", expand=True)
         col.prop(group, "record_variable", text="Variable")
-        col.prop(group, "interaction_granularity", text="Interact")
+        col.prop(group, "interaction_granularity", text="Interact", expand=True)
         col.separator()
 
         row = col.split(0.5)
@@ -119,13 +119,6 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
 
     def draw(self, context):
         scene = context.scene
-
-
-
-        self.layout.operator("custom.position_mc", text="Position MC",
-                             icon="FORWARD")
-
-        self.layout.separator()
 
         self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
                              icon="FORWARD")

@@ -1,7 +1,7 @@
 [
     {
-        "NEURON_last_command": "mcs = []",
-        "NEURON_launch_command": "nrngui -python -c 'from blenderneuron import neuronstart'",
+        "NEURON_last_command": "import blenderneuron as bn; print(bn.bl_info);",
+        "NEURON_launch_command": "nrniv -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
             "Blender": "192.168.0.100",
             "Control": "127.0.0.1",

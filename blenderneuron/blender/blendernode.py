@@ -13,11 +13,11 @@ class BlenderNode(CommNode):
     def ui_properties(self):
         return bpy.data.scenes[0].BlenderNEURON
 
-
-    def add_group(self):
+    def add_group(self, name=None, include_groupless_roots=True):
         self.update_root_index()
 
-        name = self.find_unique_group_name()
+        if name is None:
+            name = self.find_unique_group_name()
 
         group = BlenderRootGroup(name, self)
 
@@ -27,7 +27,10 @@ class BlenderNode(CommNode):
         # Add group to the UI list
         group.add_to_UI()
 
-        group.add_groupless_roots()
+        if include_groupless_roots:
+            group.add_groupless_roots()
+
+        return group
 
     def update_root_index(self):
         # Keep track which roots have been removed from NRN
@@ -78,6 +81,3 @@ class BlenderNode(CommNode):
                 break
 
         return name
-
-
-

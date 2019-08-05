@@ -11,6 +11,8 @@ bl_info = {
     "category": "Import-Export",
 }
 
+vars = {}
+
 try:
     import bpy
     inside_blender = True

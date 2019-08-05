@@ -1,7 +1,9 @@
+from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
 import bpy
+
 
 class BlenderRootGroup(RootGroup):
 
@@ -113,12 +115,41 @@ class BlenderRootGroup(RootGroup):
             if root.group is None:
                 root.add_to_group(self)
 
+    def set_layer(self, layer_object_name):
+        layer = bpy.data.objects[layer_object_name]
+
+        self.ui_group.layer_aligner_settings.layer_mesh = layer
+
     def setup_aligner(self):
         self.show(PhysicsMeshSectionObjectView)
 
     def align_to_layer(self):
         if type(self.view) is PhysicsMeshSectionObjectView:
             self.view.align()
+
+    def include_roots_by_name(self, names, exclude_others=False):
+        names = set(names)
+
+        for root in self.node.root_index.values():
+            if root.name in names:
+                root.add_to_group(self)
+
+            else:
+                if exclude_others:
+                    root.remove_from_group()
+
+    def to_file(self, file_name):
+        self.from_view()
+
+        root_commands = CommandView(self).show()
+
+        file_contents = ""
+        for hash in root_commands.keys():
+            file_contents += root_commands[hash]
+
+        with open(file_name, 'w', encoding='utf-8') as f:
+            f.write(file_contents)
+
 
 
 

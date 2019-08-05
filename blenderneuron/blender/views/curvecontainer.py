@@ -4,15 +4,17 @@ import numpy as np
 from blenderneuron.blender.utils import create_many_copies
 
 class CurveContainer:
+    default_color = [1, 1, 1]
 
     def __init__(self, root, curve_template, smooth_sections,
-                 recursive=True, origin_type="center", closed_ends=True):
+                 recursive=True, origin_type="center", closed_ends=True,
+                 container_material=None):
 
         self.root_hash = root.hash
         self.name = root.name
         self.smooth_sections = smooth_sections
-        self.default_color = [1,1,1]
         self.closed_ends = closed_ends
+        self.assigned_container_material = container_material
 
         # copy the curve template and make a new blender object out of it
         bpy.data.objects.new(self.name, curve_template.copy())
@@ -69,24 +71,28 @@ class CurveContainer:
     def remove(self):
         self.unlink()
 
+        bl_objects = bpy.data.objects
+
         ob = self.get_object()
+        object_name = ob.name
 
         # materials
         for mat in ob.data.materials:
-            bpy.data.materials.remove(mat)
+            if mat is not None:
+                bpy.data.materials.remove(mat)
 
         # curve
         if ob.type == 'CURVE':
-            bpy.data.curves.remove(self.curve)
+            bpy.data.curves.remove(ob.data)
 
         # mesh
         elif ob.type == 'MESH':
-            bpy.data.meshes.remove(self.mesh)
+            bpy.data.meshes.remove(ob.data)
+
 
         # object
-        bl_objects = bpy.data.objects
-
-        bl_objects.remove(ob)
+        if object_name in bl_objects:
+            bl_objects.remove(ob)
 
         # joints
         for name in self.joint_names:
@@ -159,10 +165,11 @@ class CurveContainer:
         return sec_spline
 
 
-    def create_material(self, name):
+    @staticmethod
+    def create_material(name):
         result = bpy.data.materials.new(name)
 
-        result.diffuse_color = self.default_color
+        result.diffuse_color = CurveContainer.default_color
 
         # Ambient and back lighting
         result.ambient = 0.85
@@ -271,15 +278,22 @@ class CurveContainer:
         if in_top_level:
             self.set_origin(coords, origin_type)
 
-        # Add section spline and material to the cell object
+        # Add section spline to the cell object
         spline = self.add_spline(coords, root.radii, self.smooth_sections)
 
-        # Each section gets a material, whose emit property will be animated
-        material = self.create_material(root.name)
+        # If material is not provided, create one
+        if self.assigned_container_material is None:
+            material = CurveContainer.create_material(root.name)
+
+        # If material is provided, assign it to the spline
+        else:
+            material = self.assigned_container_material
+
         mat_idx = self.add_material_to_object(material)
 
         # Assign the material to the new spline
         spline.material_index = mat_idx
+
 
         # Save spline index for later lookup
         # Note: In Blender, using edit-mode on a curve object, results in creation of
@@ -330,10 +344,17 @@ class CurveContainer:
         unlink_from_scene = bpy.context.scene.objects.unlink
         bl_objects = bpy.data.objects
 
-        unlink_from_scene(self.get_object())
+        try:
+            unlink_from_scene(self.get_object())
+        except KeyError:
+            pass
 
         for name in self.joint_names:
-            unlink_from_scene(bl_objects[name])
+            try:
+                unlink_from_scene(bl_objects[name])
+            except KeyError:
+                pass
+
 
         self.linked = False
 

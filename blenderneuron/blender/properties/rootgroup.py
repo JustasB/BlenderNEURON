@@ -163,7 +163,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         name="Recording granularity",
         description="The granularity used to record from selected cells. Finest recording "
                     "granularity requires more time and memory, coarsest less so.",
-        default='Section',
+        default='Cell',
         get=get_gran_prop("recording_granularity"),
         set=set_gran_prop("recording_granularity")
     )

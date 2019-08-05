@@ -1,14 +1,23 @@
 from blenderneuron.blender.views.objectview import ObjectViewAbstract
 import bpy
-
+from blenderneuron.blender.views.curvecontainer import CurveContainer
 
 class SectionObjectView(ObjectViewAbstract):
     def show(self):
-        if self.group.recording_granularity != "Section":
-            raise NotImplementedError()
+
+        if self.group.recording_granularity not in ["Section", "Cell"]:
+            raise NotImplementedError(self.group.recording_granularity)
 
         for root in self.group.roots.values():
-            self.create_container_for_each_section(root)
+            # Create one material for the whole cell
+            if self.group.recording_granularity == 'Cell':
+                material = CurveContainer.create_material(root.name)
+
+            # Let each container create their own material
+            else:
+                material = None
+
+            self.create_container_for_each_section(root, material=material)
 
         self.link_containers()
 
@@ -54,17 +63,22 @@ class SectionObjectView(ObjectViewAbstract):
             for child_sec in parent_sec.children:
                 self.set_childrens_parent(child_sec)
 
-    def create_container_for_each_section(self, root, recursive=True, is_top_level=True):
+    def create_container_for_each_section(self, root, recursive=True, is_top_level=True, material = None):
         if is_top_level:
             origin_type = "center"
         else:
             origin_type = "first"
 
-        self.create_section_container(root, include_children=False, origin_type=origin_type)
+        self.create_section_container(root, include_children=False,
+                                      origin_type=origin_type,
+                                      container_material=material)
 
         if recursive:
             for child in root.children:
-                self.create_container_for_each_section(child, recursive=True, is_top_level=False)
+                self.create_container_for_each_section(child,
+                                                       recursive=True,
+                                                       is_top_level=False,
+                                                       material=material)
 
     def update_group(self):
         for root in self.group.roots.values():

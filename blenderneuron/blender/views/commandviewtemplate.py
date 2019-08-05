@@ -6,7 +6,7 @@ class Transform[CELL_NAME]:
 
         # Create a section lookup by section name
         # Note: this assumes each section has a unique name
-        self.name2section = dict([(sec.name(), sec) for sec in h.allsec()])
+        self.name2section = { sec.name(): sec for sec in h.allsec() }
 
         # This will store the new section coordinates
         self.section_coords = { }

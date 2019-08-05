@@ -138,7 +138,8 @@ class ObjectViewAbstract(ViewAbstract):
         # Remove curve template
         bpy.data.curves.remove(self.curve_template)
 
-    def create_section_container(self, section, include_children, origin_type, split_longer_than=0):
+    def create_section_container(self, section, include_children, origin_type,
+                                 split_longer_than=0, container_material=None):
         if split_longer_than > 0 and include_children:
             raise Exception("Cannot include child sections in a container when splitting long sections")
 
@@ -158,6 +159,7 @@ class ObjectViewAbstract(ViewAbstract):
                 include_children,
                 origin_type,
                 self.closed_ends,
+                container_material,
             )
 
             self.containers[container.root_hash] = container
