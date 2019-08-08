@@ -169,7 +169,10 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers()
 
         # Convert the selected container curves to mesh
-        bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+        active_ob = next(o for o in bpy.context.scene.objects if o.select)
+        bpy.context.scene.objects.active = active_ob
+        
+        #context = get_operator_context_override(selected_object=active_ob)
         bpy.ops.object.convert(target='MESH', keep_original=False)
 
     def mesh_containers_to_curves(self):

@@ -359,7 +359,7 @@ class CurveContainer:
         self.linked = False
 
 
-    def add_tip(self, tip_template, joint_template):
+    def add_tip(self, tip_template, empty_obj):
         ob = self.get_object()
 
         if ob.type != 'MESH':
@@ -381,39 +381,13 @@ class CurveContainer:
         bpy.context.scene.objects.link(tip_object)
         self.tip_name = tip_object.name
 
-        self.create_joint_between(ob, tip_object, tip_loc, joint_template, max_bend_angle=0)
+        self.create_joint_between(ob, tip_object, tip_loc, empty_obj)
 
-    def create_joint_with(self, child, joint_template, max_bend_angle):
-        self.create_joint_between(self.get_object(), child.get_object(), child.origin, joint_template, max_bend_angle)
+    def create_joint_with(self, child, empty_obj):
+        self.create_joint_between(self.get_object(), child.get_object(), child.origin, empty_obj)
 
-    def create_joint_between(self, parent_object, child_object, joint_location, joint_template, max_bend_angle):
-
-        # Create and link an "Empty" object - which serves as the joint
-
-        # COPY METHOD
-        # empty_template = bpy.data.objects.get(joint_template)
-        # if empty_template is not None:
-        #     empty = create_many_copies(empty_template, 1)[0]
-        #     # This does not work - the copied constraints don't seem to be functional
-        #     # Too tired to report a bug... ugh
-        #     # empty = empty_template.copy()
-        #     # bpy.context.scene.objects.link(empty)
-        #
-        # # CREATE NEW METHOD
-        # else:
-
-        # This appears to be the only reliable way to add a constraint
-        # ... it's terribly slow. Profiler shows constraint_add() takes the most time
-        # I have not found any other way to add stable joints ... ugh
-        bpy.ops.object.empty_add(type='SPHERE')
-        bpy.ops.rigidbody.constraint_add()
-        empty = bpy.context.object
-        empty.name = joint_template
-
-
+    def create_joint_between(self, parent_object, child_object, joint_location, empty):
         empty.location = joint_location
-        empty.empty_draw_type = 'SPHERE'
-        empty.empty_draw_size = 0.5
 
         # Create parent-child relationship between the parent section and the empty
         empty.parent = parent_object
@@ -421,30 +395,6 @@ class CurveContainer:
 
         # Set the joint params
         constraint = empty.rigid_body_constraint
-        constraint.type = 'GENERIC'
-
-        constraint.use_limit_lin_x = \
-            constraint.use_limit_lin_y = \
-            constraint.use_limit_lin_z = \
-            constraint.use_limit_ang_x = \
-            constraint.use_limit_ang_y = \
-            constraint.use_limit_ang_z = True
-
-        constraint.limit_lin_x_lower = \
-            constraint.limit_lin_y_lower = \
-            constraint.limit_lin_z_lower = 0
-
-        constraint.limit_lin_x_upper = \
-            constraint.limit_lin_y_upper = \
-            constraint.limit_lin_z_upper = 0
-        
-        constraint.limit_ang_x_lower = \
-            constraint.limit_ang_y_lower = \
-            constraint.limit_ang_z_lower = -pi / 180 * max_bend_angle
-        
-        constraint.limit_ang_x_upper = \
-            constraint.limit_ang_y_upper = \
-            constraint.limit_ang_z_upper = pi / 180 * max_bend_angle
 
         constraint.object1 = parent_object # parent
         constraint.object2 = child_object

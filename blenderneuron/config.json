@@ -3,12 +3,12 @@
         "NEURON_last_command": "import blenderneuron as bn; print(bn.bl_info);",
         "NEURON_launch_command": "nrniv -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
-            "Blender": "192.168.0.100",
+            "Blender": "127.0.0.1",
             "Control": "127.0.0.1",
             "NEURON": "192.168.162.128"
         },
         "default_port": {
-            "Blender": "5201",
+            "Blender": "",
             "Control": "",
             "NEURON": "5202"
         },

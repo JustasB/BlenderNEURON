@@ -57,6 +57,21 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
                     " deviate from their original positions"
     )
 
+    spring_stiffness = FloatProperty(
+        default=10,
+        min=0,
+        name="Joint Stiffness",
+        description="Joint stiffness coefficient"
+    )
+
+    spring_damping = FloatProperty(
+        default=0.5,
+        min=0,
+        max=1,
+        name="Joint Damping",
+        description="Joint damping coefficient"
+    )
+
     physics_steps_per_sec = FloatProperty(
         default=120,
         min=1,
