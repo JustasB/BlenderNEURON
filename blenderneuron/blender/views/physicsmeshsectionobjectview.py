@@ -132,6 +132,18 @@ class PhysicsMeshSectionObjectView(SectionObjectView):
         constraint = empty.rigid_body_constraint
         constraint.type = 'GENERIC_SPRING'
 
+        constraint.use_spring_x = \
+            constraint.use_spring_y = \
+            constraint.use_spring_z = True
+
+        constraint.spring_stiffness_x = \
+            constraint.spring_stiffness_y = \
+            constraint.spring_stiffness_z = self.spring_stiffness
+
+        constraint.spring_damping_x = \
+            constraint.spring_damping_y = \
+            constraint.spring_damping_z = self.spring_damping
+
         constraint.use_spring_ang_x = \
             constraint.use_spring_ang_y = \
             constraint.use_spring_ang_z = True
