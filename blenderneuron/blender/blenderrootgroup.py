@@ -1,7 +1,7 @@
 from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
+from blenderneuron.blender.views.physicsalignerview import VectorAlignerView
 import bpy
 
 
@@ -55,7 +55,7 @@ class BlenderRootGroup(RootGroup):
         if self.view is not None:
 
             # Don't apply changes from an existing physics view
-            if type(self.view) != PhysicsMeshSectionObjectView:
+            if type(self.view) != VectorAlignerView:
                 self.from_view()
 
             self.view.remove()
@@ -118,13 +118,13 @@ class BlenderRootGroup(RootGroup):
     def set_layer(self, layer_object_name):
         layer = bpy.data.objects[layer_object_name]
 
-        self.ui_group.layer_aligner_settings.layer_mesh = layer
+        self.ui_group.layer_aligner_settings.start_mesh = layer
 
     def setup_aligner(self):
-        self.show(PhysicsMeshSectionObjectView)
+        self.show(VectorAlignerView)
 
     def align_to_layer(self):
-        if type(self.view) is PhysicsMeshSectionObjectView:
+        if type(self.view) is VectorAlignerView:
             self.view.align()
 
     def include_roots_by_name(self, names, exclude_others=False):

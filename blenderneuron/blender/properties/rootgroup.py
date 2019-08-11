@@ -30,31 +30,62 @@ class CUSTOM_NEURON_IU_Root(PropertyGroup, BlenderNodeClass):
 
 
 class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
-    layer_mesh = PointerProperty(
+    start_mesh = PointerProperty(
         type=Object,
-        name="Layer",
-        description="The mesh to which the pattern matching sections will be aligned"
+        name="Start Layer",
+        description="The mesh above which the pattern matching sections will be confined"
+    )
+
+    end_mesh = PointerProperty(
+        type=Object,
+        name="End Layer",
+        description="The second mesh under which the sections will be confined"
     )
 
     moveable_sections_pattern = StringProperty(
         name="Aligned",
         default="dend",
         description="If value of this property is part of a name of a section, "
-                    "the section(s) will be aligned to the seleccted layer"
+                    "the section(s) will be confined between the selected layers"
+    )
+
+    max_bend_angle = FloatProperty(
+        default=15,
+        min=0,
+        name="Max bend angle (degrees)",
+        description="The maximum angle by which the sections are allowed to"
+                    " deviate from their original positions"
+    )
+
+    height_min = FloatProperty(
+        default=0,
+        name="Layer height min fraction",
+        description="The fraction of distance between the two layers where the confinement"
+                    "begins. 0: as close to the starting layer. 1: as close to the end layer. Negative"
+                    "values will start confinement below the starting layer. >1 values will end the confinement"
+                    "above the end layer."
+    )
+
+    height_max = FloatProperty(
+        default=0.5,
+        name="Layer height max fraction",
+        description="The fraction of distance between the two layers where the confinement"
+                    "stops. 0: as close to the starting layer. 1: as close to the end layer. Negative"
+                    "values will start confinement below the starting layer. >1 values will end the confinement"
+                    "above the end layer."
+    )
+
+    max_section_length = FloatProperty(
+        default=200,
+        min=1,
+        name="Maximum section length",
+        description="Sections that are longer than this value will be split into smaller sections"
     )
 
     simulation_frames = IntProperty(
         default=250,
         name="Physics simulation frames",
         description="The number of frames to use for physics simulation",
-    )
-
-    max_bend_angle = FloatProperty(
-        default=45,
-        min=0,
-        name="Max bend angle (degrees)",
-        description="The maximum angle by which the dendritic sections are allowed to"
-                    " deviate from their original positions"
     )
 
     spring_stiffness = FloatProperty(
@@ -86,13 +117,6 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
         name="Physics iterations per step",
         description="The number of iterations the physics solver should use for "
                     "each simulation step"
-    )
-
-    max_section_length = FloatProperty(
-        default=200,
-        min=1,
-        name="Maximum section length",
-        description="Sections that are longer than this value will be split into smaller sections"
     )
 
 

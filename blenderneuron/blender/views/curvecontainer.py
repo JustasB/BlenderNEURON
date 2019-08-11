@@ -32,7 +32,7 @@ class CurveContainer:
         self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
 
     def get_object(self):
-        return bpy.data.objects[self.name]
+        return bpy.data.objects.get(self.name)
 
     @property
     def object(self):
@@ -74,25 +74,27 @@ class CurveContainer:
         bl_objects = bpy.data.objects
 
         ob = self.get_object()
-        object_name = ob.name
 
-        # materials
-        for mat in ob.data.materials:
-            if mat is not None:
-                bpy.data.materials.remove(mat)
+        if ob is not None:
+            object_name = ob.name
 
-        # curve
-        if ob.type == 'CURVE':
-            bpy.data.curves.remove(ob.data)
+            # materials
+            for mat in ob.data.materials:
+                if mat is not None:
+                    bpy.data.materials.remove(mat)
 
-        # mesh
-        elif ob.type == 'MESH':
-            bpy.data.meshes.remove(ob.data)
+            # curve
+            if ob.type == 'CURVE':
+                bpy.data.curves.remove(ob.data)
+
+            # mesh
+            elif ob.type == 'MESH':
+                bpy.data.meshes.remove(ob.data)
 
 
-        # object
-        if object_name in bl_objects:
-            bl_objects.remove(ob)
+            # object
+            if object_name in bl_objects:
+                bl_objects.remove(ob)
 
         # joints
         for name in self.joint_names:

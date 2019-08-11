@@ -7,7 +7,7 @@ from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
-from blenderneuron.blender.views.physicsmeshsectionobjectview import PhysicsMeshSectionObjectView
+from blenderneuron.blender.views.physicsalignerview import VectorAlignerView
 
 from blenderneuron.blender.utils import get_operator_context_override
 
@@ -327,7 +327,7 @@ class CUSTOM_OT_setup_aligner(Operator, CellGroupOperatorAbstract):
         group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
 
         # Enable button only when a mesh is selected for layer
-        return group_aligner.layer_mesh is not None and group_aligner.layer_mesh.type == 'MESH'
+        return group_aligner.start_mesh is not None and group_aligner.start_mesh.type == 'MESH'
 
     def execute(self, context):
 
@@ -346,13 +346,17 @@ class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
     @classmethod
     def poll(cls, context):
 
-        group = context.scene.BlenderNEURON.group.node_group
+        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
 
-        return type(group.view) is PhysicsMeshSectionObjectView
+        # Enable button only when a mesh is selected for layer
+        return group_aligner.start_mesh is not None and group_aligner.start_mesh.type == 'MESH' and \
+            group_aligner.end_mesh is not None and group_aligner.end_mesh.type == 'MESH'
 
     def execute(self, context):
 
         group = self.node.ui_properties.group.node_group
+
+        group.setup_aligner()
 
         group.align_to_layer()
 
