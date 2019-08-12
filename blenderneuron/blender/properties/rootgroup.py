@@ -16,7 +16,7 @@ from bpy.types import (Operator,
                        Object)
 
 
-class CUSTOM_NEURON_IU_Root(PropertyGroup, BlenderNodeClass):
+class BlenderRootProperties(PropertyGroup, BlenderNodeClass):
     name = StringProperty()
     index = IntProperty()
     hash = StringProperty()
@@ -28,8 +28,7 @@ class CUSTOM_NEURON_IU_Root(PropertyGroup, BlenderNodeClass):
     selected = BoolProperty(default=False, update=on_selected_updated)
 
 
-
-class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
+class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
     start_mesh = PointerProperty(
         type=Object,
         name="Start Layer",
@@ -52,22 +51,27 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
     max_bend_angle = FloatProperty(
         default=15,
         min=0,
+        max=180,
         name="Max bend angle (degrees)",
-        description="The maximum angle by which the sections are allowed to"
+        description="The maximum angle (degrees) by which the sections are allowed to"
                     " deviate from their original positions"
     )
 
     height_min = FloatProperty(
+        min=-3,
         default=0,
+        max=3,
         name="Layer height min fraction",
         description="The fraction of distance between the two layers where the confinement"
-                    "begins. 0: as close to the starting layer. 1: as close to the end layer. Negative"
+                    "bfegins. 0: as close to the starting layer. 1: as close to the end layer. Negative"
                     "values will start confinement below the starting layer. >1 values will end the confinement"
                     "above the end layer."
     )
 
     height_max = FloatProperty(
+        min=-3,
         default=0.5,
+        max=3,
         name="Layer height max fraction",
         description="The fraction of distance between the two layers where the confinement"
                     "stops. 0: as close to the starting layer. 1: as close to the end layer. Negative"
@@ -79,7 +83,8 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
         default=200,
         min=1,
         name="Maximum section length",
-        description="Sections that are longer than this value will be split into smaller sections"
+        description="Sections that are longer than this value will be split into smaller, same length sections. "
+                    "Set to value longer than longest section (e.g. 99999) to disable splitting."
     )
 
     simulation_frames = IntProperty(
@@ -120,7 +125,7 @@ class CUSTOM_NEURON_LayerAlignment(PropertyGroup, BlenderNodeClass):
     )
 
 
-class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
+class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
     @property
     def node_group(self):
@@ -140,7 +145,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
     index = IntProperty(get=get_prop("index"), set=set_prop("index"))
     selected = BoolProperty(default=True, get=get_prop("selected"), set=set_prop("selected"))
 
-    root_entries = CollectionProperty(type=CUSTOM_NEURON_IU_Root)
+    root_entries = CollectionProperty(type=BlenderRootProperties)
     root_entries_index = IntProperty()
 
     record_activity = BoolProperty(
@@ -170,7 +175,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         get=get_prop("record_variable"),
         set=set_prop("record_variable"),
         description="The NEURON section variable to record"
-                    " (e.g. 'v' of soma(0.5).v) and display as segment brigthness in Blender"
+                    " (e.g. 'v' of soma(0.5).v) and use to animate segments in Blender"
     )
 
     gran2int = {
@@ -210,7 +215,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
     interaction_granularity = bpy.props.EnumProperty(
         items=[
             ('Group', 'Cell Group', 'Coarsest. The group of selected cells is represented as '
-                                'one object in Blender', 3),
+                                    'one object in Blender', 3),
             ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
             ('Section', 'Section', 'Finest. Each cell section is represented as a Blender object', 1),
         ],
@@ -218,17 +223,17 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         description="The granularity used to represent selected cells in Blender. "
                     "Finer granularity allows interaction with smaller parts of cells, "
                     "but can result in performance issues if the number of cells/sections "
-                    "is large. Coarser interativity increases performance for larger models.",
+                    "is large. Coarser interactivity increases performance for larger models.",
         default='Cell',
         get=get_gran_prop("interaction_granularity"),
         set=set_gran_prop("interaction_granularity")
     )
 
-    layer_aligner_settings = PointerProperty(
-        type=CUSTOM_NEURON_LayerAlignment
+    layer_confiner_settings = PointerProperty(
+        type=LayerConfinerProperties
     )
 
-    # TODO move this to a map property
+
     smooth_sections = BoolProperty(
         default=True,
         description="Whether to render sections as smooth bezier curves, instead of straight lines. "
@@ -237,7 +242,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_prop("smooth_sections")
     )
 
-    # TODO move this to a map property
+
     spherize_soma_if_DeqL = BoolProperty(
         default=True,
         description="Whether to display a soma section with diameter ~= length as a sphere in Blender",
@@ -245,7 +250,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_prop("spherize_soma_if_DeqL")
     )
 
-    # TODO move this to a map property
+
     as_lines = BoolProperty(
         default=False,
         description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered.",
@@ -253,7 +258,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_prop("as_lines")
     )
 
-    # TODO move this to a map property
+
     segment_subdivisions = IntProperty(
         default=3,
         min=2,
@@ -263,7 +268,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_prop("segment_subdivisions")
     )
 
-    # TODO move this to a map property
+
     circular_subdivisions = IntProperty(
         default=12,
         min=5,
@@ -273,7 +278,7 @@ class CUSTOM_NEURON_UI_Root_Group(PropertyGroup, BlenderNodeClass):
         set=set_prop("circular_subdivisions")
     )
 
-class CUSTOM_NEURON_SimulatorSettings(BlenderNodeClass, PropertyGroup):
+class SimulatorSettings(BlenderNodeClass, PropertyGroup):
 
     def to_neuron(self, context=None):
         self.client.set_sim_params({
@@ -347,12 +352,12 @@ class CUSTOM_NEURON_SimulatorSettings(BlenderNodeClass, PropertyGroup):
 
 
 
-class CUSTOM_BlenderNEURON(PropertyGroup):
+class BlenderNEURONProperties(PropertyGroup):
 
     groups_index = IntProperty()
 
     groups = CollectionProperty(
-        type=CUSTOM_NEURON_UI_Root_Group
+        type=RootGroupProperties
     )
 
     @property
@@ -363,7 +368,7 @@ class CUSTOM_BlenderNEURON(PropertyGroup):
         return self.groups[self.groups_index]
 
     simulator_settings = PointerProperty(
-        type=CUSTOM_NEURON_SimulatorSettings
+        type=SimulatorSettings
     )
 
     def clear(self):
@@ -373,7 +378,7 @@ class CUSTOM_BlenderNEURON(PropertyGroup):
 
 
 def register():
-    bpy.types.Scene.BlenderNEURON = PointerProperty(type=CUSTOM_BlenderNEURON)
+    bpy.types.Scene.BlenderNEURON = PointerProperty(type=BlenderNEURONProperties)
 
 def unregister():
     del bpy.types.Scene.BlenderNEURON

@@ -42,11 +42,11 @@ if inside_blender:
         # Remove auto-execute command after starting
         bpy.app.handlers.scene_update_post.remove(auto_start)
 
-        bpy.ops.wm.blenderneuron_node_start()
+        bpy.ops.blenderneuron.node_start()
 
     @persistent
     def on_blend_load(scene):
-        bpy.ops.wm.blenderneuron_node_start()
+        bpy.ops.blenderneuron.node_start()
 
     def register():
         try:
@@ -75,7 +75,7 @@ if inside_blender:
         bpy.app.handlers.load_post.append(on_blend_load)
 
     def unregister():
-        bpy.ops.wm.blenderneuron_node_stop()
+        bpy.ops.blenderneuron.node_stop()
 
         try:
             bpy.utils.unregister_module(__name__)

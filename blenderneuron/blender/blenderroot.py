@@ -4,6 +4,7 @@ import numpy as np
 import math
 import numpy as np
 
+
 class BlenderSection(Section):
 
     def __init__(self):
@@ -22,7 +23,6 @@ class BlenderSection(Section):
         self.radii = nrn_section_dict["radii"]
         self.parent_connection_loc = nrn_section_dict["parent_connection_loc"]
         self.connection_end = nrn_section_dict["connection_end"]
-
 
         # Parse the children
         self.children = []
@@ -43,14 +43,14 @@ class BlenderSection(Section):
             self.activity.from_dict(nrn_section_dict["activity"])
 
     def make_split_sections(self, max_length):
-        '''
+        """
         Splits a section into smaller chained sub-sections if the arc length of the points
         exceeds the specified length. This is used to temporarily split the sections for
         physics simulations.
 
         :param max_length: maximum allowed section length in um
         :return: None
-        '''
+        """
         arc_lengths = self.arc_lengths()
         total_length = arc_lengths[-1]
         num_sections = math.ceil(total_length / max_length)
@@ -86,7 +86,6 @@ class BlenderSection(Section):
         split_coords = np.split(old_coords, split_idxs)
         split_radii = np.split(old_radii, split_idxs)
 
-
         # Assign them to the split sections
         for i, sec in enumerate(self.split_sections):
             sec.coords = split_coords[i].reshape(-1)
@@ -95,7 +94,6 @@ class BlenderSection(Section):
 
             sec.name = self.name + "["+str(i)+"]"
             sec.hash = hash(sec)
-
 
         # Total number of points should be preserved
         assert self.point_count == sum(len(sec.radii) for sec in self.split_sections)
@@ -126,6 +124,17 @@ class BlenderSection(Section):
         dist = np.sqrt(sum)
         tot_len = np.concatenate(([0],np.cumsum(dist)))
         return tot_len
+
+    def dist_to_closest_coord(self, target):
+        coords = np.array(self.coords).reshape(-1, 3)
+        target = np.array(target).reshape((1, 3))
+
+        diff = coords - target
+        sq = np.square(diff)
+        sum = np.sum(sq, axis=1)
+        dists = np.sqrt(sum)
+
+        return np.min(dists)
 
     def remove_split_sections(self, recursive=True):
         if self.was_split:
@@ -167,6 +176,11 @@ class BlenderRoot(BlenderSection):
 
         # Keep a reference to group
         current_group = self.group
+
+        # Remove group from 3D view
+        if self.group.view is not None:
+            self.group.view.remove()
+            self.group.view = None
 
         # Set group to none in the root_index
         self.group = None

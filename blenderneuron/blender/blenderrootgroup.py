@@ -1,7 +1,7 @@
 from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
-from blenderneuron.blender.views.physicsalignerview import VectorAlignerView
+from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
 
 
@@ -40,7 +40,7 @@ class BlenderRootGroup(RootGroup):
             hash = nrn_root["hash"]
 
             if hash not in self.roots:
-                bpy.ops.custom.get_cell_list_from_neuron()
+                bpy.ops.blenderneuron.get_cell_list_from_neuron()
 
             self.roots[hash].from_full_NEURON_section_dict(nrn_root)
 
@@ -55,7 +55,7 @@ class BlenderRootGroup(RootGroup):
         if self.view is not None:
 
             # Don't apply changes from an existing physics view
-            if type(self.view) != VectorAlignerView:
+            if type(self.view) != VectorConfinerView:
                 self.from_view()
 
             self.view.remove()
@@ -115,17 +115,31 @@ class BlenderRootGroup(RootGroup):
             if root.group is None:
                 root.add_to_group(self)
 
-    def set_layer(self, layer_object_name):
-        layer = bpy.data.objects[layer_object_name]
+    def set_confiner_layers(self,
+                            start_layer_object_name,
+                            end_layer_object_name,
+                            max_angle,
+                            height_start,
+                            height_end):
 
-        self.ui_group.layer_aligner_settings.start_mesh = layer
+        start_layer = bpy.data.objects[start_layer_object_name]
+        end_layer = bpy.data.objects[end_layer_object_name]
 
-    def setup_aligner(self):
-        self.show(VectorAlignerView)
+        settings = self.ui_group.layer_confiner_settings
 
-    def align_to_layer(self):
-        if type(self.view) is VectorAlignerView:
-            self.view.align()
+        settings.start_mesh = start_layer
+        settings.end_mesh = end_layer
+
+        settings.max_bend_angle = max_angle
+        settings.height_min = height_start
+        settings.height_max = height_end
+
+    def setup_confiner(self):
+        self.show(VectorConfinerView)
+
+    def confine_between_layers(self):
+        if type(self.view) is VectorConfinerView:
+            self.view.confine()
 
     def include_roots_by_name(self, names, exclude_others=False):
         names = set(names)

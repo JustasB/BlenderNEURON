@@ -21,7 +21,7 @@ class TestBlenderNode(BlenderTestCase):
         with Blender(cmd_args="--python blenderneuron/__init__.py", sleep=3):
             with CommNode("Control") as control_node:
                 # Tell Blender to launch own NEURON process
-                control_node.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                control_node.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                 sleep(1)
 
                 # See if Blender is able to connect to the NEURON process node
@@ -29,7 +29,7 @@ class TestBlenderNode(BlenderTestCase):
                 self.assertIn("Proxy", result)
 
                 # Stop NEURON
-                control_node.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                control_node.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
                 # Check if the client was cleaned up
                 result = control_node.client.run_command("return_value = str(bpy.types.Object.BlenderNEURON_node.client)")
@@ -42,14 +42,14 @@ class TestBlenderNode(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # Create a few named root sections in NEURON, Create a new cell group
                     cn.client.run_command(
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('s1 = h.Section(name=\"soma1\")');"
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('s2 = h.Section(name=\"soma2\")');"
-                        "bpy.ops.custom.cell_group_add();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
                     )
 
                     # Check that a group was added
@@ -63,7 +63,7 @@ class TestBlenderNode(BlenderTestCase):
                     # Refresh the list after adding the cells - this should not break the later tests
                     # Check that there are 2 cells within the group
                     self.assertEqual(2, cn.client.run_command(
-                        "bpy.ops.custom.get_cell_list_from_neuron();"
+                        "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = len(group.root_entries);"
                     ))
@@ -83,7 +83,7 @@ class TestBlenderNode(BlenderTestCase):
                     # Create a second cell group
                     # Check that a group was added
                     self.assertEqual(2, cn.client.run_command(
-                        "bpy.ops.custom.cell_group_add();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
                         "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
@@ -114,14 +114,14 @@ class TestBlenderNode(BlenderTestCase):
                     self.assertEqual(1, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
                         "group.root_entries[0].selected = True;"
-                        "bpy.ops.custom.cell_group_remove();"
+                        "bpy.ops.blenderneuron.cell_group_remove();"
                         "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
                     # Add a new cell group (it should now contain the free'd cells)
                     # Check that a group was added
                     self.assertEqual(2, cn.client.run_command(
-                        "bpy.ops.custom.cell_group_add();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
                         "return_value = len(bpy.data.scenes['Scene'].BlenderNEURON.groups)"
                     ))
 
@@ -133,7 +133,7 @@ class TestBlenderNode(BlenderTestCase):
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
     def test_group_select_all_none_invert(self):
         # Start Blender with a running node
@@ -142,7 +142,7 @@ class TestBlenderNode(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # Create a few named root sections in NEURON
@@ -152,18 +152,18 @@ class TestBlenderNode(BlenderTestCase):
                     )
 
                     # Create a new cell group
-                    cn.client.run_command("bpy.ops.custom.cell_group_add()")
+                    cn.client.run_command("bpy.ops.blenderneuron.cell_group_add()")
 
                     # Unselect all, Check that no cells are selected
                     self.assertEqual(True, cn.client.run_command(
-                        "bpy.ops.custom.select_none_neuron_cells();"
+                        "bpy.ops.blenderneuron.unselect_all_cells();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = all(cell.selected == False for cell in group.root_entries)"
                     ))
 
                     # Select all, Check that all cells are selected
                     self.assertEqual(True, cn.client.run_command(
-                        "bpy.ops.custom.select_all_neuron_cells();"
+                        "bpy.ops.blenderneuron.select_all_cells();"
                         "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "return_value = all(cell.selected for cell in group.root_entries)"
                     ))
@@ -172,13 +172,13 @@ class TestBlenderNode(BlenderTestCase):
                     self.assertEqual(False, cn.client.run_command(
                         "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
                         "group.root_entries[-1].selected = False;"
-                        "bpy.ops.custom.select_invert_neuron_cells();"
+                        "bpy.ops.blenderneuron.invert_cell_selection();"
                         "return_value = group.root_entries[0].selected"
                     ))
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
     def test_simulator_settings_exchange(self):
         # Start Blender with a running node
@@ -187,7 +187,7 @@ class TestBlenderNode(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # set settings in Blender and send to NEURON and back (should be preserved)
@@ -198,8 +198,8 @@ class TestBlenderNode(BlenderTestCase):
                         "params.abs_tolerance = 0.005;"
                         "params.temperature = 44;"
                         "params.integration_method = '1';"
-                        "bpy.ops.custom.sim_settings_to_neuron();"
-                        "bpy.ops.custom.sim_settings_from_neuron();"
+                        "bpy.ops.blenderneuron.sim_settings_to_neuron();"
+                        "bpy.ops.blenderneuron.sim_settings_from_neuron();"
                     )
 
                     self.assertEqual(1111, cn.client.run_command(
@@ -229,7 +229,7 @@ class TestBlenderNode(BlenderTestCase):
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
     def test_simulator_run_plot(self):
         # Start Blender with a running node
@@ -238,7 +238,7 @@ class TestBlenderNode(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # Create a root section in NEURON
@@ -249,8 +249,8 @@ class TestBlenderNode(BlenderTestCase):
 
                     # Open the v plot window and run the sim
                     cn.client.run_command(
-                        "bpy.ops.custom.show_voltage_plot();"
-                        "bpy.ops.custom.init_and_run()"
+                        "bpy.ops.blenderneuron.show_voltage_plot();"
+                        "bpy.ops.blenderneuron.init_and_run_neuron()"
                     )
 
                     # Check that sim time is advanced
@@ -265,7 +265,7 @@ class TestBlenderNode(BlenderTestCase):
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
 if __name__ == '__main__':
     unittest.main()

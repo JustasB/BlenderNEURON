@@ -7,7 +7,7 @@ from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
-from blenderneuron.blender.views.physicsalignerview import VectorAlignerView
+from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 
 from blenderneuron.blender.utils import get_operator_context_override
 
@@ -24,8 +24,8 @@ class CellGroupOperatorAbstract(BlenderNodeClass):
                bpy.types.Object.BlenderNEURON_node.client is not None
 
 
-class CUSTOM_OT_cell_group_add(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.cell_group_add"
+class CellGroupAddOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.cell_group_add"
     bl_label = "Add new cell display group"
     bl_description = "Add new cell display group. Each group allows cells within it to have their own granularity " \
                      "and variable recording settings. E.g. to allow customization of cell display detail"
@@ -38,8 +38,8 @@ class CUSTOM_OT_cell_group_add(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_cell_group_remove(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.cell_group_remove"
+class CellGroupRemoveOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.cell_group_remove"
     bl_label = "Remove a cell display group"
     bl_description = "Remove a cell display group"
 
@@ -55,8 +55,8 @@ class CUSTOM_OT_cell_group_remove(Operator, CellGroupOperatorAbstract):
 
         return{'FINISHED'}
 
-class CUSTOM_OT_get_cell_list_from_neuron(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.get_cell_list_from_neuron"
+class GetCellListFromNeuronOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.get_cell_list_from_neuron"
     bl_label = "List NEURON Cells"
     bl_description = "Get all cells (root sections) currently instantiated in NEURON. Automatically " \
                      "selects roots that are not included in any other groups."
@@ -76,8 +76,8 @@ class CUSTOM_OT_get_cell_list_from_neuron(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_all_neuron_cells(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.select_all_neuron_cells"
+class SelectAllCellsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.select_all_cells"
     bl_label = "Select All"
     bl_description = "Select all cells to be shown in Blender"
 
@@ -90,8 +90,8 @@ class CUSTOM_OT_select_all_neuron_cells(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_none_neuron_cells(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.select_none_neuron_cells"
+class UnselectAllCellsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.unselect_all_cells"
     bl_label = "None"
     bl_description = "Unselect all cells for showing in Blender"
 
@@ -104,8 +104,8 @@ class CUSTOM_OT_select_none_neuron_cells(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_select_invert_neuron_cells(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.select_invert_neuron_cells"
+class InvertCellSelectionOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.invert_cell_selection"
     bl_label = "Invert"
     bl_description = "Invert the selection of cells for showing in Blender"
 
@@ -118,8 +118,8 @@ class CUSTOM_OT_select_invert_neuron_cells(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_sim_settings_to_neuron(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.sim_settings_to_neuron"
+class SimulationSettingsToNeuronOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.sim_settings_to_neuron"
     bl_label = "Send simulation parameters to NEURON"
     bl_description = "Sends simulation parameters set in Blender to NEURON"
 
@@ -128,8 +128,8 @@ class CUSTOM_OT_sim_settings_to_neuron(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_sim_settings_from_neuron(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.sim_settings_from_neuron"
+class SimulationSettingsFromNeuronOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.sim_settings_from_neuron"
     bl_label = "Get simulation parameters from NEURON"
     bl_description = "Reads simulation parameters set in NEURON into Blender. Use this when one of the above " \
                      "parameters (e.g. h.tstop) is changed outside of Blender (e.g. via a script or NEURON GUI)."
@@ -140,8 +140,8 @@ class CUSTOM_OT_sim_settings_from_neuron(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_show_voltage_plot(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.show_voltage_plot"
+class ShowVoltagePlotOpearator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.show_voltage_plot"
     bl_label = "Show Voltage Plot"
     bl_description = "Show the NEURON > Graph > Voltage Axis plot (v of the active section vs time)"
 
@@ -151,8 +151,8 @@ class CUSTOM_OT_show_voltage_plot(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_show_shape_plot(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.show_shape_plot"
+class ShowShapePlotOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.show_shape_plot"
     bl_label = "Show Shape Plot"
     bl_description = "Show the NEURON > Graph > Shape plot (a rough rendering of NEURON sections)"
 
@@ -162,8 +162,8 @@ class CUSTOM_OT_show_shape_plot(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_init_and_run(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.init_and_run"
+class InitAndRunNeuronOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.init_and_run_neuron"
     bl_label = "Init & Run NEURON"
     bl_description = "Initializes and runs the NEURON simulation (i.e. `h.run()`)"
 
@@ -171,13 +171,13 @@ class CUSTOM_OT_init_and_run(Operator, CellGroupOperatorAbstract):
         self.client.run_command("h.run()")
 
         # Update the current time
-        bpy.ops.custom.sim_settings_from_neuron()
+        bpy.ops.blenderneuron.sim_settings_from_neuron()
 
         return{'FINISHED'}
 
 
-class CUSTOM_OT_reset_groups(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.reset_groups"
+class RemoveAllGroupsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.remove_all_groups"
     bl_label = "Reset Cell Groups"
     bl_description = "Removes all groups and clears the NEURON cell index"
 
@@ -190,8 +190,8 @@ class CUSTOM_OT_reset_groups(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.import_selected_groups"
+class ImportGroupsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.import_groups"
     bl_label = "Import Group Data"
     bl_description = "Imports cell group data (morhology and activity) from NEURON into Blender"
 
@@ -212,13 +212,13 @@ class CUSTOM_OT_import_selected_groups(Operator, CellGroupOperatorAbstract):
 
             node_group.from_full_NEURON_group(nrn_group)
 
-        bpy.ops.custom.display_selected_groups()
+        bpy.ops.blenderneuron.display_groups()
 
         return{'FINISHED'}
 
 
-class CUSTOM_OT_display_selected_groups(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.display_selected_groups"
+class DisplayGroupsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.display_groups"
     bl_label = "Show Imported Groups"
     bl_description = "Displays imported groups based on their interaction level"
 
@@ -227,7 +227,7 @@ class CUSTOM_OT_display_selected_groups(Operator, CellGroupOperatorAbstract):
         return BlenderNodeClass.imported_groups_exist(context)
 
     def execute(self, context):
-
+        
         for group in self.node.groups.values():
             if group.selected:
                 if group.interaction_granularity == 'Cell':
@@ -239,8 +239,8 @@ class CUSTOM_OT_display_selected_groups(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_update_groups_from_view(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.update_groups_from_view"
+class UpdateGroupsWithViewDataOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.update_groups_with_view_data"
     bl_label = "Update Groups with View Changes"
     bl_description = "Updates group data with the changes visible in the 3D View"
 
@@ -257,8 +257,8 @@ class CUSTOM_OT_update_groups_from_view(Operator, CellGroupOperatorAbstract):
         return{'FINISHED'}
 
 
-class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.export_selected_groups"
+class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.export_groups"
     bl_label = "Export Group Data"
     bl_description = "Exports cell group data (morhology) to NEURON"
 
@@ -280,8 +280,8 @@ class CUSTOM_OT_export_selected_groups(Operator, CellGroupOperatorAbstract):
 
 
 
-class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
-    bl_idname = "custom.save_selected_groups"
+class SaveGroupsToFileOperator(Operator, ExportHelper, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.save_groups_to_file"
     bl_label = "Save Group Data"
     bl_description = "Save Changes to NEURON .py file"
 
@@ -300,10 +300,11 @@ class SaveModelCoords(Operator, ExportHelper, CellGroupOperatorAbstract):
         return {'FINISHED'}
 
 
-class CUSTOM_OT_select_aligner_moveable_sections(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.select_aligner_moveable_sections"
+class SelectConfineableSections(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.select_confineable_sections"
     bl_label = "Select Fixed Sections"
-    bl_description = "Selects/Highlights the sections that will be aligned with the selected layer"
+    bl_description = "Selects/Highlights the sections that will be confined between the " \
+                     "selected layers"
 
     def execute(self, context):
 
@@ -311,54 +312,54 @@ class CUSTOM_OT_select_aligner_moveable_sections(Operator, CellGroupOperatorAbst
         group = ui_group.node_group
 
         group.show(SectionObjectView)
-        group.view.select_containers(pattern=ui_group.layer_aligner_settings.moveable_sections_pattern)
+        group.view.select_containers(pattern=ui_group.layer_confiner_settings.moveable_sections_pattern)
 
         return{'FINISHED'}
 
-class CUSTOM_OT_setup_aligner(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.setup_aligner"
-    bl_label = "Setup Aligner"
-    bl_description = "Sets up joints (at branchpoints), rigid body constraints, and layer force field" \
-                     " to align the pattern matching sections with the layer"
+class SetupConfiner(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.setup_confiner"
+    bl_label = "Setup Confiner"
+    bl_description = "Prepares cell sections for confinement between selected layers"
 
     @classmethod
     def poll(cls, context):
 
-        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
+        settings = context.scene.BlenderNEURON.group.layer_confiner_settings
 
         # Enable button only when a mesh is selected for layer
-        return group_aligner.start_mesh is not None and group_aligner.start_mesh.type == 'MESH'
+        return settings.start_mesh is not None and settings.start_mesh.type == 'MESH' and \
+               settings.end_mesh is not None and settings.end_mesh.type == 'MESH'
 
     def execute(self, context):
 
         group = self.node.ui_properties.group.node_group
 
-        group.setup_aligner()
+        group.setup_confiner()
 
         return{'FINISHED'}
 
-class CUSTOM_OT_align_to_layer(Operator, CellGroupOperatorAbstract):
-    bl_idname = "custom.align_to_layer"
-    bl_label = "Align to Layer"
-    bl_description = "Aligns sections that match the align pattern to the " \
-                     "selected layer using a force-based physics simulation"
+class ConfineBetweenLayers(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.confine_between_layers"
+    bl_label = "Confine Between Layers"
+    bl_description = "Confines sections that match the name pattern between the " \
+                     "selected layers"
 
     @classmethod
     def poll(cls, context):
 
-        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
+        settings = context.scene.BlenderNEURON.group.layer_confiner_settings
 
         # Enable button only when a mesh is selected for layer
-        return group_aligner.start_mesh is not None and group_aligner.start_mesh.type == 'MESH' and \
-            group_aligner.end_mesh is not None and group_aligner.end_mesh.type == 'MESH'
+        return settings.start_mesh is not None and settings.start_mesh.type == 'MESH' and \
+               settings.end_mesh is not None and settings.end_mesh.type == 'MESH'
 
     def execute(self, context):
 
         group = self.node.ui_properties.group.node_group
 
-        group.setup_aligner()
+        group.setup_confiner()
 
-        group.align_to_layer()
+        group.confine_between_layers()
 
         return{'FINISHED'}
 

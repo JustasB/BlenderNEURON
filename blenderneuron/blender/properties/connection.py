@@ -1,6 +1,6 @@
 import bpy, os, json, inspect, blenderneuron
 
-class blenderneuron_properties(bpy.types.PropertyGroup):
+class BlenderNEURONProperties(bpy.types.PropertyGroup):
     config_cache_valid = False
 
     def load_config(self):
@@ -118,7 +118,7 @@ class blenderneuron_properties(bpy.types.PropertyGroup):
         return self.get_config_prop("NEURON_last_command")
 
     def on_neuron_last_command_updated(self, value):
-        bpy.ops.wm.blenderneuron_exec_neuron_command()
+        bpy.ops.blenderneuron.exec_neuron_command()
 
     neuron_last_command = bpy.props.StringProperty(
         name="Send command",
@@ -145,7 +145,7 @@ class blenderneuron_properties(bpy.types.PropertyGroup):
 def register():
     # Load config properties
     bpy.types.Scene.BlenderNEURON_properties = \
-        bpy.props.PointerProperty(type=blenderneuron_properties)
+        bpy.props.PointerProperty(type=BlenderNEURONProperties)
 
 def unregister():
     del bpy.types.Scene.BlenderNEURON_properties

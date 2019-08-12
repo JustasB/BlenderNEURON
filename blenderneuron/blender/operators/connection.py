@@ -5,8 +5,8 @@ from blenderneuron.blender.blendernode import BlenderNode
 from blenderneuron.blender.utils import *
 from blenderneuron.blender import BlenderNodeClass
 
-class blenderneuron_node_start(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_node_start"
+class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.node_start"
     bl_label = "Start BlenderNEURON Blender node"
     bl_description = "Starts a communications node in Blender which creates a server and a client for " \
                      "bi-directional communication with NEURON"
@@ -31,14 +31,14 @@ class blenderneuron_node_start(bpy.types.Operator, BlenderNodeClass):
         return {'FINISHED'}
 
 
-class blenderneuron_node_stop(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_node_stop"
+class NodeStopOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.node_stop"
     bl_label = "Stop BlenderNEURON Blender node"
     bl_description = "Stops the Blender node, including the server and any NEURON processes that were " \
                      "started from Blender"
 
     def execute(self, context):
-        bpy.ops.wm.blenderneuron_stop_neuron()
+        bpy.ops.blenderneuron.stop_neuron()
 
         if hasattr(bpy.types.Object, "BlenderNEURON_node") and \
            bpy.types.Object.BlenderNEURON_node is not None:
@@ -48,14 +48,14 @@ class blenderneuron_node_stop(bpy.types.Operator, BlenderNodeClass):
         return {'FINISHED'}
 
 
-class blenderneuron_stop_neuron(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_stop_neuron"
+class StopNeuronOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.stop_neuron"
     bl_label = "Stop NEURON that was launched from Blender"
     bl_description = "Stops the NEURON process, if any, that was launched from Blender"
 
     def execute(self, context):
         try:
-            bpy.ops.custom.reset_groups()
+            bpy.ops.blenderneuron.remove_all_groups()
         except:
             pass
 
@@ -71,14 +71,14 @@ class blenderneuron_stop_neuron(bpy.types.Operator, BlenderNodeClass):
 
 
 
-class blenderneuron_launch_neuron(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_launch_neuron"
+class LaunchNeuronOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.launch_neuron"
     bl_label = "Start NEURON from Blender"
     bl_description = "Optionally launch NEURON from Blender. NEURON+BlenderNEURON package can be " \
                      "launched separatelly if needed."
 
     def execute(self, context):
-        bpy.ops.wm.blenderneuron_stop_neuron()
+        bpy.ops.blenderneuron.stop_neuron()
 
         # Launch a new NEURON process in parallel
         command = context.scene.BlenderNEURON_properties.neuron_launch_command
@@ -88,8 +88,8 @@ class blenderneuron_launch_neuron(bpy.types.Operator, BlenderNodeClass):
 
 
 
-class blenderneuron_try_connect_to_neuron(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_try_connect_to_neuron"
+class TryConnectToNeuronOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.try_connect_to_neuron"
     bl_label = "Attempt to connect to NEURON running a BlenderNEURON node."
     bl_description = "Attemps to connect to NEURON+BlenderNEURON process at the above IP address and port"
 
@@ -97,8 +97,8 @@ class blenderneuron_try_connect_to_neuron(bpy.types.Operator, BlenderNodeClass):
         bpy.types.Object.BlenderNEURON_node.try_setup_client()
         return {'FINISHED'}
 
-class blenderneuron_exec_neuron_command(bpy.types.Operator, BlenderNodeClass):
-    bl_idname = "wm.blenderneuron_exec_neuron_command"
+class ExecNeuronCommandOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.exec_neuron_command"
     bl_label = "Execute a Python command in NEURON"
     bl_description = "Runs a command in NEURON. Printed result is visible in Blender's console window."
 

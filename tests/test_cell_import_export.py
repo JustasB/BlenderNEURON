@@ -18,14 +18,14 @@ class TestCellImportExport(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # Load TestCell.hoc - create a group
                     cn.client.run_command(
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('h.load_file(\"tests/TestCell.hoc\")');"
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('tc = h.TestCell()');"
-                        "bpy.ops.custom.cell_group_add();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
                     )
 
                     # Check that the cell was loaded
@@ -36,7 +36,7 @@ class TestCellImportExport(BlenderTestCase):
 
                     # Import the cell and check if created in correct location
                     x,y,z = cn.client.run_command(
-                        "bpy.ops.custom.import_selected_groups();"
+                        "bpy.ops.blenderneuron.import_groups();"
                         "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
                     )
 
@@ -57,7 +57,7 @@ class TestCellImportExport(BlenderTestCase):
                     # Shift the cell up by 100 um, and export to NRN
                     cn.client.run_command(
                         "bpy.data.objects['TestCell[0].soma'].location = [150, -176, 100];"
-                        "bpy.ops.custom.export_selected_groups();"
+                        "bpy.ops.blenderneuron.export_groups();"
                     )
 
                     # Test if coordinates in NRN changed by same amount
@@ -72,7 +72,7 @@ class TestCellImportExport(BlenderTestCase):
 
                     # Re-import the cell and check if change persists
                     x,y,z = cn.client.run_command(
-                        "bpy.ops.custom.import_selected_groups();"
+                        "bpy.ops.blenderneuron.import_groups();"
                         "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
                     )
 
@@ -89,7 +89,7 @@ class TestCellImportExport(BlenderTestCase):
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
     def test_import_remove_import_again(self):
         # Start Blender with a running node
@@ -98,19 +98,19 @@ class TestCellImportExport(BlenderTestCase):
             with CommNode("Control") as cn:
                 # Tell Blender to launch own NEURON process
                 try:
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_launch_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.launch_neuron()")
                     sleep(1)
 
                     # Load TestCell.hoc - create a group
                     cn.client.run_command(
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('h.load_file(\"tests/TestCell.hoc\")');"
                         "bpy.types.Object.BlenderNEURON_node.client.run_command('tc = h.TestCell()');"
-                        "bpy.ops.custom.cell_group_add();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
                     )
 
                     # Import the cell and check if created in correct location
                     x,y,z = cn.client.run_command(
-                        "bpy.ops.custom.import_selected_groups();"
+                        "bpy.ops.blenderneuron.import_groups();"
                         "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
                     )
 
@@ -125,7 +125,7 @@ class TestCellImportExport(BlenderTestCase):
 
                     # Re-Import the cell and check if overwrote the shift above
                     x,y,z = cn.client.run_command(
-                        "bpy.ops.custom.import_selected_groups();"
+                        "bpy.ops.blenderneuron.import_groups();"
                         "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
                     )
 
@@ -138,14 +138,14 @@ class TestCellImportExport(BlenderTestCase):
 
                     # Remove the group, there should be no cell objects
                     count = cn.client.run_command(
-                        "bpy.ops.custom.cell_group_remove();"
+                        "bpy.ops.blenderneuron.cell_group_remove();"
                         "return_value = len([ob for ob in bpy.data.objects if 'TestCell[0].soma' in ob.name])"
                     )
 
                     # Add a new group, import it
                     x,y,z = cn.client.run_command(
-                        "bpy.ops.custom.cell_group_add();"
-                        "bpy.ops.custom.import_selected_groups();"
+                        "bpy.ops.blenderneuron.cell_group_add();"
+                        "bpy.ops.blenderneuron.import_groups();"
                         "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
                     )
 
@@ -154,7 +154,7 @@ class TestCellImportExport(BlenderTestCase):
 
                 finally:
                     # Stop NEURON
-                    cn.client.run_command("bpy.ops.wm.blenderneuron_stop_neuron()")
+                    cn.client.run_command("bpy.ops.blenderneuron.stop_neuron()")
 
 
 if __name__ == '__main__':

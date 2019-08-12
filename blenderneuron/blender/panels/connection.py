@@ -15,7 +15,7 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
             self.layout.label(text="Blender Node is not running")
             self.layout.prop(context.scene.BlenderNEURON_properties, "server_ip")
             self.layout.prop(context.scene.BlenderNEURON_properties, "server_port")
-            self.layout.operator("wm.blenderneuron_node_start", text="Start Blender Node", icon="PLAY")
+            self.layout.operator("blenderneuron.node_start", text="Start Blender Node", icon="PLAY")
 
         else:  # Node is running
 
@@ -28,12 +28,12 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
                 col.prop(context.scene.BlenderNEURON_properties, "client_ip")
                 col.prop(context.scene.BlenderNEURON_properties, "client_port")
                 col.separator()
-                col.operator("wm.blenderneuron_try_connect_to_neuron", text="Try Connecting to NEURON", icon="PLAY")
+                col.operator("blenderneuron.try_connect_to_neuron", text="Try Connecting to NEURON", icon="PLAY")
                 col.separator()
 
                 if not blender_launched_neuron_running():
                     col.prop(context.scene.BlenderNEURON_properties, "neuron_launch_command")
-                    col.operator("wm.blenderneuron_launch_neuron", text="Launch NEURON", icon="PLAY")
+                    col.operator("blenderneuron.launch_neuron", text="Launch NEURON", icon="PLAY")
 
             else:
                 col.label(text="Status: Connected")
@@ -41,7 +41,7 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
 
             if blender_launched_neuron_running():
                 col.separator()
-                col.operator("wm.blenderneuron_stop_neuron", text="Stop NEURON", icon="CANCEL")
+                col.operator("blenderneuron.stop_neuron", text="Stop NEURON", icon="CANCEL")
 
 
             # ----------- #
@@ -58,4 +58,4 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
 
             # ----------- #
 
-            self.layout.operator("wm.blenderneuron_node_stop", text="Stop Blender Node", icon="CANCEL")
+            self.layout.operator("blenderneuron.node_stop", text="Stop Blender Node", icon="CANCEL")

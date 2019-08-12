@@ -13,7 +13,7 @@ from bpy.types import (Operator,
                        UIList)
 
 
-class CUSTOM_UL_CellListWidget(UIList):
+class CellListWidget(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
         layout.label(item.name)
@@ -22,7 +22,7 @@ class CUSTOM_UL_CellListWidget(UIList):
         pass
 
 
-class CUSTOM_UL_CellGroupListWidget(UIList):
+class CellGroupListWidget(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
         layout.prop(item, "name", text="", emboss=False)
@@ -31,7 +31,7 @@ class CUSTOM_UL_CellGroupListWidget(UIList):
         pass
 
 
-class CUSTOM_PT_NEURON_CellGroups(AbstractBlenderNEURONPanel, Panel):
+class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_CellGroups'
     bl_label = "Cell Groups"
     bl_options = {'DEFAULT_CLOSED'}
@@ -50,17 +50,17 @@ class CUSTOM_PT_NEURON_CellGroups(AbstractBlenderNEURONPanel, Panel):
 
         row = self.layout.row()
 
-        row.template_list("CUSTOM_UL_CellGroupListWidget", "", \
-                          scene.BlenderNEURON, "groups", \
-                          scene.BlenderNEURON, "groups_index", \
+        row.template_list("CellGroupListWidget", "",
+                          scene.BlenderNEURON, "groups",
+                          scene.BlenderNEURON, "groups_index",
                           rows=3)
 
         col = row.column(align=True)
-        col.operator("custom.cell_group_add", icon='ZOOMIN', text="")
-        col.operator("custom.cell_group_remove", icon='ZOOMOUT', text="")
+        col.operator("blenderneuron.cell_group_add", icon='ZOOMIN', text="")
+        col.operator("blenderneuron.cell_group_remove", icon='ZOOMOUT', text="")
 
 
-class CUSTOM_PT_NEURON_GroupCells(AbstractBlenderNEURONPanel, Panel):
+class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_GroupCells'
     bl_label = "Cells in Group"
     bl_options = {'DEFAULT_CLOSED'}
@@ -72,20 +72,21 @@ class CUSTOM_PT_NEURON_GroupCells(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         group = self.get_group(context)
 
-        self.layout.operator("custom.get_cell_list_from_neuron", text="Refresh NEURON Cell List", icon="FILE_REFRESH")
+        self.layout.operator("blenderneuron.get_cell_list_from_neuron", text="Refresh NEURON Cell List",
+                             icon="FILE_REFRESH")
 
-        self.layout.template_list("CUSTOM_UL_CellListWidget", "", \
-                                  group, "root_entries", \
-                                  group, "root_entries_index", \
+        self.layout.template_list("CellListWidget", "",
+                                  group, "root_entries",
+                                  group, "root_entries_index",
                                   rows=5)
 
         col = self.layout.split(0.33)
-        col.operator("custom.select_all_neuron_cells")
-        col.operator("custom.select_none_neuron_cells")
-        col.operator("custom.select_invert_neuron_cells")
+        col.operator("blenderneuron.select_all_cells")
+        col.operator("blenderneuron.unselect_all_cells")
+        col.operator("blenderneuron.invert_cell_selection")
 
 
-class CUSTOM_PT_NEURON_GroupSettings(AbstractBlenderNEURONPanel, Panel):
+class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
     bl_label = "Cell Group Options"
     bl_options = {'DEFAULT_CLOSED'}
@@ -95,7 +96,6 @@ class CUSTOM_PT_NEURON_GroupSettings(AbstractBlenderNEURONPanel, Panel):
         return AbstractBlenderNEURONPanel.groups_exist(context)
 
     def draw(self, context):
-
         group = self.get_group(context)
 
         col = self.layout
@@ -109,7 +109,7 @@ class CUSTOM_PT_NEURON_GroupSettings(AbstractBlenderNEURONPanel, Panel):
         row.prop(group, "import_synapses", text="Import Synapses")
 
 
-class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
+class ImportPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_Import'
     bl_label = "Import"
 
@@ -120,24 +120,25 @@ class CUSTOM_PT_NEURON_Import(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         scene = context.scene
 
-        self.layout.operator("custom.import_selected_groups", text="Import Cell Groups to Blender",
+        self.layout.operator("blenderneuron.import_groups", text="Import Cell Groups to Blender",
                              icon="FORWARD")
 
-        self.layout.operator("custom.display_selected_groups", text="Show Imported Groups",
+        self.layout.operator("blenderneuron.display_groups", text="Show Imported Groups",
                              icon="RESTRICT_VIEW_OFF")
 
-        self.layout.operator("custom.update_groups_from_view", text="Update Groups with View Changes",
+        self.layout.operator("blenderneuron.update_groups_with_view_data", text="Update Groups with View Changes",
                              icon="FILE_REFRESH")
 
-        self.layout.operator("custom.export_selected_groups", text="Export Cell Groups to NEURON",
+        self.layout.operator("blenderneuron.export_groups", text="Export Cell Groups to NEURON",
                              icon="BACK")
 
-        self.layout.operator("custom.save_selected_groups", text="Save Changes to NEURON .py file",
+        self.layout.operator("blenderneuron.save_groups_to_file", text="Save Changes to NEURON .py file",
                              icon="FILESEL")
 
-class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_AlignToLayer'
-    bl_label = "Align To Layer"
+
+class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
+    bl_idname = 'CUSTOM_PT_NEURON_ConfineBetweenLayers'
+    bl_label = "Confine Between Layers"
 
     @classmethod
     def poll(cls, context):
@@ -146,74 +147,78 @@ class CUSTOM_PT_NEURON_AlignToLayer(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         scene = context.scene
 
-        group_aligner = context.scene.BlenderNEURON.group.layer_aligner_settings
+        settings = context.scene.BlenderNEURON.group.layer_confiner_settings
 
         split = self.layout.split(percentage=0.33)
-        split.label(text="Layer:")
-        split.prop(group_aligner, "start_mesh", text="")
+        split.label(text="Start Layer:")
+        split.prop(settings, "start_mesh", text="")
 
-        if group_aligner.start_mesh is not None and group_aligner.start_mesh.type !='MESH':
-            self.layout.label("Layer must be a 'MESH' object", icon='ERROR')
-
-        split = self.layout.split(percentage=0.33)
-        split.label(text="Outer Layer:")
-        split.prop(group_aligner, "end_mesh", text="")
-
-        if group_aligner.end_mesh is not None and group_aligner.end_mesh.type !='MESH':
-            self.layout.label("Outer layer must be a 'MESH' object", icon='ERROR')
+        if settings.start_mesh is not None and settings.start_mesh.type != 'MESH':
+            self.layout.label("Start layer must be a 'MESH' object", icon='ERROR')
 
         split = self.layout.split(percentage=0.33)
-        split.label(text="Align:")
+        split.label(text="End Layer:")
+        split.prop(settings, "end_mesh", text="")
+
+        if settings.end_mesh is not None and settings.end_mesh.type != 'MESH':
+            self.layout.label("End layer must be a 'MESH' object", icon='ERROR')
+
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Name Contains:")
 
         row = split.row(align=True)
-        row.prop(group_aligner, "moveable_sections_pattern", text="")
-        row.operator("custom.select_aligner_moveable_sections", text="", icon="RESTRICT_VIEW_OFF")
+        row.prop(settings, "moveable_sections_pattern", text="")
+        row.operator("blenderneuron.select_confineable_sections", text="", icon="RESTRICT_VIEW_OFF")
 
         split = self.layout.split(percentage=0.33)
         split.label(text="Min Height:")
-        split.prop(group_aligner, "height_min", text="")
+        split.prop(settings, "height_min", text="", slider=True)
 
         split = self.layout.split(percentage=0.33)
         split.label(text="Max Height:")
-        split.prop(group_aligner, "height_max", text="")
+        split.prop(settings, "height_max", text="", slider=True)
+
+        self.layout.separator()
 
         split = self.layout.split(percentage=0.33)
-        split.label(text="Max Bend:")
-        split.prop(group_aligner, "max_bend_angle", text="")
+        split.label(text="Max Angle:")
+        split.prop(settings, "max_bend_angle", text="", slider=True)
+
+        self.layout.separator()
 
         split = self.layout.split(percentage=0.33)
         split.label(text="Max Length:")
-        split.prop(group_aligner, "max_section_length", text="")
+        split.prop(settings, "max_section_length", text="")
 
         self.layout.separator()
 
         # split = self.layout.split(percentage=0.33)
         # split.label(text="Sim Frames:")
-        # split.prop(group_aligner, "simulation_frames", text="")
+        # split.prop(settings, "simulation_frames", text="")
         #
         # split = self.layout.split(percentage=0.33)
         # split.label(text="Steps/sec:")
-        # split.prop(group_aligner, "physics_steps_per_sec", text="")
+        # split.prop(settings, "physics_steps_per_sec", text="")
         #
         # split = self.layout.split(percentage=0.33)
         # split.label(text="Iterations/step:")
-        # split.prop(group_aligner, "physics_solver_iterations_per_step", text="")
+        # split.prop(settings, "physics_solver_iterations_per_step", text="")
         #
         # self.layout.separator()
         #
         # col = self.layout.column()
-        # col.operator("custom.setup_aligner", text="Setup Aligner", icon="CONSTRAINT")
+        # col.operator("blenderneuron.setup_confiner", text="Setup Aligner", icon="CONSTRAINT")
         # col.operator("ptcache.bake_all", text="Align", icon="SURFACE_DATA").bake=False
-        # col.operator("custom.update_groups_from_view", text="Save Alignment Results",
+        # col.operator("blenderneuron.update_groups_with_view_data", text="Save Alignment Results",
         #                      icon="FILE_REFRESH")
 
         col = self.layout.column()
-        col.operator("custom.align_to_layer", text="Align", icon="SURFACE_DATA")
-        col.operator("custom.update_groups_from_view", text="Save Alignment Results",
-                             icon="FILE_REFRESH")
+        col.operator("blenderneuron.confine_between_layers", text="Confine", icon="SURFACE_DATA")
+        col.operator("blenderneuron.update_groups_with_view_data", text="Update Groups with Confinement Results",
+                     icon="FILE_REFRESH")
 
 
-class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
+class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
     bl_label = "NEURON"
 
@@ -238,10 +243,10 @@ class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
         col.prop(settings, "temperature", text=u"Temperature (°C)")
         col.separator()
 
-        col.operator("custom.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
+        col.operator("blenderneuron.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
         col.separator()
 
-        col.operator("custom.show_shape_plot", text="Show Shape Plot", icon="RENDER_RESULT")
+        col.operator("blenderneuron.show_shape_plot", text="Show Shape Plot", icon="RENDER_RESULT")
         col.separator()
 
         col.prop(settings, "integration_method")
@@ -253,11 +258,10 @@ class CUSTOM_PT_NEURON_SimulationSettings(AbstractBlenderNEURONPanel, Panel):
             col.prop(settings, "abs_tolerance", text="Absolute tolerance")
 
         col.separator()
-        col.operator("custom.init_and_run", text="Init & Run", icon="POSE_DATA")
+        col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="POSE_DATA")
         col.separator()
         col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
         col.separator()
-        col.operator("wm.blenderneuron_exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
+        col.operator("blenderneuron.exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
 
-        col.operator("custom.sim_settings_from_neuron", text="Get Sim Params From NEURON", icon="FORWARD")
-
+        col.operator("blenderneuron.sim_settings_from_neuron", text="Get Sim Params From NEURON", icon="FORWARD")

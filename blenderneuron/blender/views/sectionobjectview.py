@@ -34,34 +34,86 @@ class SectionObjectView(ObjectViewAbstract):
             self.set_childrens_parent(root)
 
     def set_childrens_parent(self, parent_sec, recursive=True):
+        # If the parent was split, the split sections need to be chained together first
+        # Then the split section that is closest to the child will be the child's container's parent
         if parent_sec.was_split:
-            # Parent the split sections together
+
+            # Parent chain the split sections together
             for i, split_sec in enumerate(parent_sec.split_sections[:-1]):
                 start_cont = self.containers[split_sec.hash]
                 end_cont = self.containers[parent_sec.split_sections[i+1].hash]
                 end_cont.set_parent_object(start_cont)
 
-            # The parent container will be the last split section
-            parent_cont = self.containers[parent_sec.split_sections[-1].hash]
+            for child_sec in parent_sec.children:
 
+                # Get the child container
+                # If the child was split, child's first split section container will be the child
+                if child_sec.was_split:
+                    child_cont = self.containers[child_sec.split_sections[0].hash]
+
+                # Otherwise child's normal container will be child
+                else:
+                    child_cont = self.containers[child_sec.hash]
+
+                # When the parent was split, find the split section that's closest to the child
+                closest_split, _ = self.get_closest_split_section(
+                    parent_sec.split_sections,
+                    child_sec.coords[0:3]
+                )
+
+                # it will become the child section container's parent container
+                parent_cont = self.containers[closest_split.hash]
+
+                # Set the relationship between the containers
+                child_cont.set_parent_object(parent_cont)
+
+                del child_cont, parent_cont
+
+        # If the parent was not split, then the parent container is its normal container
         else:
             parent_cont = self.containers[parent_sec.hash]
 
-        for child_sec in parent_sec.children:
-            if child_sec.was_split:
-                child_cont = self.containers[child_sec.split_sections[0].hash]
-            else:
-                child_cont = self.containers[child_sec.hash]
+            for child_sec in parent_sec.children:
 
-            child_cont.set_parent_object(parent_cont)
+                # Get the child container
+                # If the child was split, child's first split section container will be the child
+                if child_sec.was_split:
+                    try:
+                        child_cont = self.containers[child_sec.split_sections[0].hash]
+                    except:
+                        raise
 
-            del child_cont
+                # Otherwise child's normal container will be child
+                else:
+                    child_cont = self.containers[child_sec.hash]
 
-        del parent_cont
+                # Set the relationship between the containers
+                child_cont.set_parent_object(parent_cont)
+
+                del child_cont
+
+            # Cleanup before recursing
+            del parent_cont
 
         if recursive:
             for child_sec in parent_sec.children:
                 self.set_childrens_parent(child_sec)
+
+    def get_closest_split_section(self, split_sections, coord):
+        closest_sec = split_sections[0]
+        min_dist = closest_sec.dist_to_closest_coord(coord)
+
+        for split_sec in split_sections[1:]:
+            dist = split_sec.dist_to_closest_coord(coord)
+
+            if dist < min_dist:
+                closest_sec = split_sec
+                min_dist = dist
+
+                if min_dist == 0:
+                    break
+
+        return closest_sec, min_dist
 
     def create_container_for_each_section(self, root, recursive=True, is_top_level=True, material = None):
         if is_top_level:
