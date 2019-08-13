@@ -99,8 +99,12 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         group = self.get_group(context)
 
         col = self.layout
+        col.label(text="Recording Settings:")
         col.prop(group, "recording_granularity", text="Record", expand=True)
-        col.prop(group, "record_variable", text="Variable")
+        col.prop(group, "record_variable", text="Variable", expand=True)
+        col.separator()
+
+        col.label(text="Interaction Settings:")
         col.prop(group, "interaction_granularity", text="Interact", expand=True)
         col.separator()
 

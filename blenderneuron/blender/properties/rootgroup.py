@@ -197,12 +197,14 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
             setattr(self.node_group, prop, self.int2gran[value])
         return set
 
+    '''
+    ('Group', 'Cell Group', 'Coarsest. Reports the mean value across all selected cell somas (root segments)', 3),
+    ('3D Segment', '3D Segment', 'Finest. Reports values between each cell section 3D point', 0),    
+    '''
     recording_granularity = bpy.props.EnumProperty(
         items=[
-            ('Group', 'Cell Group', 'Coarsest. Reports the mean value across all selected cell somas (root segments)', 3),
             ('Cell', 'Soma', 'Reports the value at each selected cell soma (root)', 2),
             ('Section', 'Section', 'Reports values at each selected cell section', 1),
-            ('3D Segment', '3D Segment', 'Finest. Reports values between each cell section 3D point', 0),
         ],
         name="Recording granularity",
         description="The granularity used to record from selected cells. Finest recording "
@@ -212,11 +214,13 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_gran_prop("recording_granularity")
     )
 
+    '''
+    ('Group', 'Cell Group', 'Coarsest. The group of selected cells is represented as '
+                            'one object in Blender', 3),
+    '''
     interaction_granularity = bpy.props.EnumProperty(
         items=[
-            ('Group', 'Cell Group', 'Coarsest. The group of selected cells is represented as '
-                                    'one object in Blender', 3),
-            ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
+           ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
             ('Section', 'Section', 'Finest. Each cell section is represented as a Blender object', 1),
         ],
         name="Interaction granularity",

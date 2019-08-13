@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from math import acos, pi
 from random import random
-from mathutils import Euler, Vector
+from mathutils import Euler, Vector, Matrix
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 import bpy
 
@@ -68,7 +68,7 @@ class VectorConfinerView(SectionObjectView):
             )
 
     @staticmethod
-    def confine_between_meshes(obj, start_mesh, end_mesh, height_low, height_high, max_angle=89, iters=3):
+    def confine_between_meshes(obj, start_mesh, end_mesh, height_low, height_high, max_angle, iters=3):
         self = VectorConfinerView
 
         height_fraction = height_low + (height_high - height_low) * random()
@@ -92,8 +92,6 @@ class VectorConfinerView(SectionObjectView):
             align_target = closest_on_start + vec_start2tip * height * height_fraction
 
             self.align_object_towards(obj, align_target, max_angle / iters)
-
-            bpy.context.scene.update()
 
     @staticmethod
     def closest_point_on_object(global_pt, mesh_obj):
@@ -122,9 +120,14 @@ class VectorConfinerView(SectionObjectView):
         # Clamp rotation angles
         q = Euler(list(map(lambda angle: min(max(angle, -max_angle), max_angle), q))).to_quaternion()
 
-        ob.matrix_local = ob.matrix_local.copy() * q.to_matrix().to_4x4()
+        ob.matrix_basis = ob.matrix_basis.copy() * q.to_matrix().to_4x4()
 
-        ob.rotation_euler[2] *= 1  # This updates the scene
+        # Update matrices
+        if ob.parent is None:
+            ob.matrix_world = ob.matrix_basis
+        else:
+            ob.matrix_world = ob.parent.matrix_world * ob.matrix_parent_inverse * ob.matrix_basis
+
 
     @staticmethod
     def confine_curve(curve_obj, mesh, outer_mesh, name_pattern, height_range, max_angle):
