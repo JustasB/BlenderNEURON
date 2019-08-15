@@ -125,6 +125,67 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
     )
 
 
+
+class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
+
+    def get_group_list(self, context):
+        return [(g.name, g.name, g.name) for g in context.scene.BlenderNEURON.groups.values()]
+
+    group_from = bpy.props.EnumProperty(items=get_group_list,
+                                        name="From Cell Group",
+                                        description="Cells in this BlenderNEURON group will"
+                                                    "be connected to cells in the other group")
+
+    group_to = bpy.props.EnumProperty(items=get_group_list,
+                                      name="To Cell Group",
+                                      description="Cells in this groups will receive connections"
+                                                  " from cells in the first group")
+
+    max_distance = FloatProperty(
+        default=5,
+        min=0,
+        name="Max Proximity Distance (um)",
+        description="The maximum distance between segments that will be used to form synapses"
+    )
+
+    use_radius = BoolProperty(
+        default=True,
+        name="Use Radius",
+        description="Whether 3D point radii should be utilized when searching for synapse "
+                    "formation locations. When False, the proximity distance only uses "
+                    "distances between 3D points without including diameters (slightly faster)."
+    )
+
+    synapse_name = StringProperty(
+        default="ExpSyn",
+        name="Synapse Class Name",
+        description="The name of NEURON synaptic mechanism to use to build the synapse"
+    )
+
+    conduction_velocity = FloatProperty(
+        default=1,
+        min=0,
+        name="Conduction Velocity (m/s)",
+        description="Conduction velocity to use when computing the synaptic delay"
+    )
+
+    initial_weight = FloatProperty(
+        default=1,
+        min=0,
+        name="Initial Weight",
+        description="The initial synaptic weight"
+    )
+
+    threshold = FloatProperty(
+        default=0,
+        name="Firing Threshold (mV)",
+        description="The threshold that the source cell segment membrane potential "
+                    "must cross to trigger the synaptic event."
+    )
+
+
+
+
 class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
     @property
@@ -358,12 +419,6 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
 
 class BlenderNEURONProperties(PropertyGroup):
 
-    groups_index = IntProperty()
-
-    groups = CollectionProperty(
-        type=RootGroupProperties
-    )
-
     @property
     def group(self):
         """
@@ -371,14 +426,26 @@ class BlenderNEURONProperties(PropertyGroup):
         """
         return self.groups[self.groups_index]
 
-    simulator_settings = PointerProperty(
-        type=SimulatorSettings
-    )
 
     def clear(self):
         self.property_unset("groups")
         self.property_unset("groups_index")
         self.property_unset("simulator_settings")
+        self.property_unset("synapse_connector_settings")
+
+    groups_index = IntProperty()
+
+    groups = CollectionProperty(
+        type=RootGroupProperties
+    )
+
+    simulator_settings = PointerProperty(
+        type=SimulatorSettings
+    )
+
+    synapse_connector_settings = PointerProperty(
+        type=SynapseConnectorProperties
+    )
 
 
 def register():

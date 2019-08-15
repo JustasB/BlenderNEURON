@@ -35,6 +35,15 @@ class AbstractBlenderNEURONPanel(BlenderNodeClass):
         """
         return context.scene.BlenderNEURON.simulator_settings
 
+    def get_synapse_connector_settings(self, context):
+        """
+        Returns the synapse connector settings
+
+        :param context:
+        :return:
+        """
+        return context.scene.BlenderNEURON.synapse_connector_settings
+
     def set_node(self):
         try:
             self.node = bpy.types.Object.BlenderNEURON_node

@@ -9,11 +9,11 @@ class CellObjectView(ObjectViewAbstract):
             raise NotImplementedError(self.group.recording_granularity)
 
         for root in self.group.roots.values():
-            # Create one material for the whole cell
+            # Cell gran: create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
                 material = CurveContainer.create_material(root.name)
 
-            # Let each container create their own material
+            # Section gran: let each container create their own material
             else:
                 material = None
 

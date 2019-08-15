@@ -363,6 +363,32 @@ class ConfineBetweenLayers(Operator, CellGroupOperatorAbstract):
 
         return{'FINISHED'}
 
+class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.create_synapses"
+    bl_label = "Create Synapses"
+    bl_description = "Creates NEURON synapses between cells in two BlenderNEURON groups"
+
+    @classmethod
+    def poll(cls, context):
+
+        settings = context.scene.BlenderNEURON.synapse_connector_settings
+
+        # Enable only when two different groups are selected
+        return settings.group_from is not None and \
+               settings.group_to is not None and \
+               settings.group_from != settings.group_to
+
+    def execute(self, context):
+
+        settings = context.scene.BlenderNEURON.synapse_connector_settings
+
+        from_group = self.node.groups[settings.group_from]
+        to_group = self.node.groups[settings.group_to]
+
+        from_group.create_synapses_to(to_group)
+
+        return{'FINISHED'}
+
 
 
 

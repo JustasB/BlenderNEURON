@@ -222,6 +222,89 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
                      icon="FILE_REFRESH")
 
 
+class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
+    bl_idname = 'CUSTOM_PT_NEURON_FormSynapses'
+    bl_label = "Form Synapses"
+
+    @classmethod
+    def poll(cls, context):
+        """
+        Checks if a connection to NEURON has been established and there are imported groups
+        """
+        return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
+               bpy.types.Object.BlenderNEURON_node is not None and \
+               bpy.types.Object.BlenderNEURON_node.client is not None and \
+               AbstractBlenderNEURONPanel.imported_groups_exist(context)
+
+    def draw(self, context):
+        # From Cell Group      [ 'Group.001' ]
+        # To Cell Group         [ 'Group.002']
+        # Proximity Distance       [      5um]
+        # Use radius                       [X]
+        # Synapse name                [ExpSyn]
+        # Conduction Velocity (m/s)      [1.0]
+        # Initial Weight                 [1.0]
+        # Threshold (mV)                 [0.0]
+        #          [Create Synapses]
+
+        settings = self.get_synapse_connector_settings(context)
+
+        layout = self.layout
+
+        layout.prop(settings, "group_from")
+        layout.prop(settings, "group_to")
+
+        if settings.group_from == settings.group_to:
+            self.layout.label("From and To groups must be different", icon='ERROR')
+
+        layout.prop(settings, "max_distance")
+
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Use Radii:")
+        split.prop(settings, "use_radius", text="")
+
+        layout.prop(settings, "synapse_name")
+        layout.prop(settings, "conduction_velocity")
+        layout.prop(settings, "initial_weight")
+        layout.prop(settings, "threshold")
+
+        layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
+
+        # settings = self.get_sim_settings(context)
+        #
+        # col = self.layout
+        # row = col.row()
+        # row.enabled = False
+        # row.prop(settings, "neuron_t", text="Time (ms)")
+        #
+        # col.prop(settings, "neuron_tstop", text="Stop Time (ms)")
+        # col.prop(settings, "temperature", text=u"Temperature (°C)")
+        # col.separator()
+        #
+        # col.operator("blenderneuron.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
+        # col.separator()
+        #
+        # col.operator("blenderneuron.show_shape_plot", text="Show Shape Plot", icon="RENDER_RESULT")
+        # col.separator()
+        #
+        # col.prop(settings, "integration_method")
+        #
+        # if settings.integration_method == '0':
+        #     col.prop(settings, "time_step", "Time Step (ms)")
+        #
+        # if settings.integration_method == '1':
+        #     col.prop(settings, "abs_tolerance", text="Absolute tolerance")
+        #
+        # col.separator()
+        # col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="POSE_DATA")
+        # col.separator()
+        # col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
+        # col.separator()
+        # col.operator("blenderneuron.exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
+        #
+        # col.operator("blenderneuron.sim_settings_from_neuron", text="Get Sim Params From NEURON", icon="FORWARD")
+
+
 class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
     bl_label = "NEURON"
