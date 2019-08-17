@@ -4,6 +4,11 @@ from blenderneuron.blender.views.objectview import ObjectViewAbstract
 
 class CellObjectView(ObjectViewAbstract):
 
+    def __init__(self, rootgroup, closed_ends=True):
+        super(CellObjectView, self).__init__(rootgroup)
+
+        self.closed_ends = closed_ends
+
     def show(self):
         if self.group.recording_granularity not in ["Section", "Cell"]:
             raise NotImplementedError(self.group.recording_granularity)

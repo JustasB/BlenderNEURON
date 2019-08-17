@@ -247,62 +247,43 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         # Threshold (mV)                 [0.0]
         #          [Create Synapses]
 
+
         settings = self.get_synapse_connector_settings(context)
 
         layout = self.layout
 
-        layout.prop(settings, "group_from")
-        layout.prop(settings, "group_to")
+        layout.label(text='Source Cells:')
+        layout.prop(settings, "group_source", text="Group")
+        layout.prop(settings, "section_pattern_source", text="Sections")
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Is Reciprocal:")
+        split.prop(settings, "is_reciprocal", text="")
+        if settings.is_reciprocal:
+            layout.prop(settings, "synapse_name_source", text="Synapse")
+        layout.separator()
 
-        if settings.group_from == settings.group_to:
-            self.layout.label("From and To groups must be different", icon='ERROR')
-
-        layout.prop(settings, "max_distance")
+        layout.label(text='Destination Cells:')
+        layout.prop(settings, "group_dest", text="Group")
+        layout.prop(settings, "section_pattern_dest", text="Sections")
+        layout.prop(settings, "synapse_name_dest", text="Synapse")
+        layout.separator()
 
         split = self.layout.split(percentage=0.33)
         split.label(text="Use Radii:")
         split.prop(settings, "use_radius", text="")
 
-        layout.prop(settings, "synapse_name")
+        layout.prop(settings, "max_distance")
+        layout.prop(settings, "max_syns_per_pt")
         layout.prop(settings, "conduction_velocity")
         layout.prop(settings, "initial_weight")
         layout.prop(settings, "threshold")
 
-        layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
+        if settings.group_source == settings.group_dest:
+            self.layout.label("Source and Destination groups must be different. ", icon='ERROR')
+            self.layout.label("Use 'Cell Groups' section to create a new group.")
 
-        # settings = self.get_sim_settings(context)
-        #
-        # col = self.layout
-        # row = col.row()
-        # row.enabled = False
-        # row.prop(settings, "neuron_t", text="Time (ms)")
-        #
-        # col.prop(settings, "neuron_tstop", text="Stop Time (ms)")
-        # col.prop(settings, "temperature", text=u"Temperature (°C)")
-        # col.separator()
-        #
-        # col.operator("blenderneuron.show_voltage_plot", text="Show Voltage Plot", icon="FCURVE")
-        # col.separator()
-        #
-        # col.operator("blenderneuron.show_shape_plot", text="Show Shape Plot", icon="RENDER_RESULT")
-        # col.separator()
-        #
-        # col.prop(settings, "integration_method")
-        #
-        # if settings.integration_method == '0':
-        #     col.prop(settings, "time_step", "Time Step (ms)")
-        #
-        # if settings.integration_method == '1':
-        #     col.prop(settings, "abs_tolerance", text="Absolute tolerance")
-        #
-        # col.separator()
-        # col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="POSE_DATA")
-        # col.separator()
-        # col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
-        # col.separator()
-        # col.operator("blenderneuron.exec_neuron_command", text="Send Command to NEURON", icon="CONSOLE")
-        #
-        # col.operator("blenderneuron.sim_settings_from_neuron", text="Get Sim Params From NEURON", icon="FORWARD")
+        layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEWZOOM')
+        layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
 
 
 class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):

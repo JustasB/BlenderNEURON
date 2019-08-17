@@ -27,6 +27,7 @@ class CurveContainer:
 
         # Quickly find the spline of a given section
         self.hash2spline_index = {}
+        self.spline_index2section = {}
 
         # Recursively add section splines and corresponding materials to the container
         self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
@@ -302,7 +303,9 @@ class CurveContainer:
         # new spline instances when returning to object-mode. If references to the
         # old splines are kept, Blender usually crashes. Here we retain the spline index,
         # which is preserved (if splines are not deleted in edit-mode).
-        self.hash2spline_index[root.hash] = len(self.curve.splines) - 1
+        spline_index = len(self.curve.splines) - 1
+        self.hash2spline_index[root.hash] = spline_index
+        self.spline_index2section[spline_index] = root
 
         # Cleanup before starting recursion
         del spline, material, mat_idx

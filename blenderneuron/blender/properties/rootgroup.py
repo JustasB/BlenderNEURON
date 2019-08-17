@@ -131,14 +131,14 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     def get_group_list(self, context):
         return [(g.name, g.name, g.name) for g in context.scene.BlenderNEURON.groups.values()]
 
-    group_from = bpy.props.EnumProperty(items=get_group_list,
-                                        name="From Cell Group",
-                                        description="Cells in this BlenderNEURON group will"
+    group_source = bpy.props.EnumProperty(items=get_group_list,
+                                          name="From Cell Group",
+                                          description="Cells in this BlenderNEURON group will "
                                                     "be connected to cells in the other group")
 
-    group_to = bpy.props.EnumProperty(items=get_group_list,
-                                      name="To Cell Group",
-                                      description="Cells in this groups will receive connections"
+    group_dest = bpy.props.EnumProperty(items=get_group_list,
+                                        name="To Cell Group",
+                                        description="Cells in this groups will receive connections"
                                                   " from cells in the first group")
 
     max_distance = FloatProperty(
@@ -156,10 +156,45 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "distances between 3D points without including diameters (slightly faster)."
     )
 
-    synapse_name = StringProperty(
+    max_syns_per_pt = IntProperty(
+        default=4,
+        name="Max Syns/Pt",
+        description="The maximum number of synapses that are allowed to be positioned at a given"
+                    "section 3D point."
+    )
+
+    section_pattern_source = StringProperty(
+        default="*apic*",
+        name="From Section Pattern",
+        description="The section name pattern to use when selecting source cell sections. "
+                    "Use ? and * wildcards to match one or more characters respectively."
+    )
+
+    section_pattern_dest = StringProperty(
+        default="*dend*",
+        name="To section pattern",
+        description="The section name pattern to use when selecting destination cell sections. "
+                    "Use ? and * wildcards to match one or more characters respectively."
+    )
+
+    synapse_name_dest = StringProperty(
         default="ExpSyn",
         name="Synapse Class Name",
-        description="The name of NEURON synaptic mechanism to use to build the synapse"
+        description="The name of NEURON synaptic mechanism that will be "
+                    "placed on the destination cell"
+    )
+
+    is_reciprocal = BoolProperty(
+        default=False,
+        name="Is Reciprocal",
+        description="Whether the synapses should be reciprocal (from->to->from) or uni-directional (from->to)."
+    )
+
+    synapse_name_source = StringProperty(
+        default="ExpSyn",
+        name="Reciprocal Synapse Class Name",
+        description="The name of NEURON synaptic mechanism that will be placed on the "
+                    "source cell (when reciprocal)"
     )
 
     conduction_velocity = FloatProperty(

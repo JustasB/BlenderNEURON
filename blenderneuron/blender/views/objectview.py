@@ -35,7 +35,7 @@ class ObjectViewAbstract(ViewAbstract):
         self.closed_ends = True
 
     def make_curve_template(self):
-        curve_template = bpy.data.curves.new("bezier", type='CURVE')
+        curve_template = bpy.data.curves.new("bezier_"+self.group.name, type='CURVE')
         curve_template.dimensions = '3D'
         curve_template.resolution_u = self.group.segment_subdivisions
         curve_template.fill_mode = 'FULL'
@@ -48,7 +48,7 @@ class ObjectViewAbstract(ViewAbstract):
 
     @property
     def curve_template(self):
-        return bpy.data.curves[self.curve_template_name]
+        return bpy.data.curves.get(self.curve_template_name)
 
     def on_first_link(self):
         # Set viewport params
@@ -136,7 +136,10 @@ class ObjectViewAbstract(ViewAbstract):
             self.remove_container(container)
 
         # Remove curve template
-        bpy.data.curves.remove(self.curve_template)
+        try:
+            bpy.data.curves.remove(self.curve_template)
+        except TypeError:
+            pass
 
     def create_section_container(self, section, include_children, origin_type,
                                  split_longer_than=0, container_material=None):

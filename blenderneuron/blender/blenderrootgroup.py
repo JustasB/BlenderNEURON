@@ -47,7 +47,7 @@ class BlenderRootGroup(RootGroup):
         if "activity" in nrn_group:
             self.activity.from_dict(nrn_group["activity"])
 
-    def show(self, view_class):
+    def show(self, view_class, *args, **kwargs):
         if not hasattr(view_class, "show"):
             raise Exception(str(view_class) + ' does not implement show() method')
 
@@ -61,8 +61,10 @@ class BlenderRootGroup(RootGroup):
             self.view.remove()
 
         # Show the new view
-        self.view = view_class(self)
+        self.view = view_class(self, *args, **kwargs)
         self.view.show()
+
+        return self.view
 
     def from_view(self):
         if self.view is None:

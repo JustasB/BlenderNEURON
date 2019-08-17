@@ -7,6 +7,7 @@ from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
+from blenderneuron.blender.views.synapseformerview import SynapseFormerView
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 
 from blenderneuron.blender.utils import get_operator_context_override
@@ -374,20 +375,54 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
         settings = context.scene.BlenderNEURON.synapse_connector_settings
 
         # Enable only when two different groups are selected
-        return settings.group_from is not None and \
-               settings.group_to is not None and \
-               settings.group_from != settings.group_to
+        return settings.group_source is not None and \
+               settings.group_dest is not None and \
+               settings.group_source != settings.group_dest
 
     def execute(self, context):
 
         settings = context.scene.BlenderNEURON.synapse_connector_settings
 
-        from_group = self.node.groups[settings.group_from]
-        to_group = self.node.groups[settings.group_to]
+        from_group = self.node.groups[settings.group_source]
+        to_group = self.node.groups[settings.group_dest]
 
         from_group.create_synapses_to(to_group)
 
         return{'FINISHED'}
+
+class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.find_synapse_locations"
+    bl_label = "Find Synapse Locations"
+    bl_description = "Finds the locations where synapses will be formed"
+
+    @classmethod
+    def poll(cls, context):
+
+        settings = context.scene.BlenderNEURON.synapse_connector_settings
+
+        # Enable only when two different groups are selected
+        return settings.group_source is not None and \
+               settings.group_dest is not None and \
+               settings.group_source != settings.group_dest
+
+    def execute(self, context):
+
+        settings = context.scene.BlenderNEURON.synapse_connector_settings
+
+        source_group = self.node.groups[settings.group_source]
+        dest_group = self.node.groups[settings.group_dest]
+
+        source_group.show(SynapseFormerView, dest_group)
+
+        source_group.view.get_synapse_locations(
+            settings.max_distance,
+            settings.use_radius,
+            settings.max_syns_per_pt,
+            settings.section_pattern_source,
+            settings.section_pattern_dest
+        )
+
+        return {'FINISHED'}
 
 
 
