@@ -33,6 +33,13 @@ class BlenderNodeClass:
         return any(context.scene.BlenderNEURON.groups)
 
     @staticmethod
+    def group_count(context):
+        """
+        Checks if there are any cell groups
+        """
+        return len(context.scene.BlenderNEURON.groups.keys())
+
+    @staticmethod
     def imported_groups_exist(context):
         """
         Checks if there are any imported cell groups

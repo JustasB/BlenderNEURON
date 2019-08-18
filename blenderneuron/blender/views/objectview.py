@@ -2,7 +2,7 @@ import threading
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from blenderneuron.blender.utils import get_operator_context_override
-
+from fnmatch import fnmatch
 import bpy
 
 from blenderneuron.blender.views.curvecontainer import CurveContainer
@@ -103,8 +103,8 @@ class ObjectViewAbstract(ViewAbstract):
         # Then select the containers
         for container in self.containers.values():
             if pattern is None or \
-                    (not pattern_inverse and pattern in container.name) or \
-                    (pattern_inverse and pattern not in container.name):
+                    (not pattern_inverse and fnmatch(container.name, pattern)) or \
+                    (pattern_inverse and not fnmatch(container.name, pattern)):
                 container.get_object().select = select
 
     def zoom_to_containers(self):

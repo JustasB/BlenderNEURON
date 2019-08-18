@@ -25,7 +25,7 @@ class CellListWidget(UIList):
 class CellGroupListWidget(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
-        layout.prop(item, "name", text="", emboss=False)
+        layout.prop(item, "name_editable", text="", emboss=False)
 
     def invoke(self, context, event):
         pass
@@ -229,12 +229,12 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
     @classmethod
     def poll(cls, context):
         """
-        Checks if a connection to NEURON has been established and there are imported groups
+        Checks if a connection to NEURON has been established and there are 2+ imported groups
         """
         return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
                bpy.types.Object.BlenderNEURON_node is not None and \
                bpy.types.Object.BlenderNEURON_node.client is not None and \
-               AbstractBlenderNEURONPanel.imported_groups_exist(context)
+               AbstractBlenderNEURONPanel.group_count(context) > 1
 
     def draw(self, context):
         # From Cell Group      [ 'Group.001' ]

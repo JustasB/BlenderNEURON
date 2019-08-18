@@ -1,6 +1,6 @@
 [
     {
-        "NEURON_last_command": "import blenderneuron as bn; print(bn.bl_info);",
+        "NEURON_last_command": "print(BN.section_index.keys()[0:10])",
         "NEURON_launch_command": "nrniv -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
             "Blender": "127.0.0.1",

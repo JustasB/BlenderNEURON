@@ -42,9 +42,9 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
     )
 
     moveable_sections_pattern = StringProperty(
-        name="Aligned",
-        default="dend",
-        description="If value of this property is part of a name of a section, "
+        name="Section Pattern",
+        default="*dend*",
+        description="If the name of a section matches this pattern (* and ? wildcards allowed), "
                     "the section(s) will be confined between the selected layers"
     )
 
@@ -123,7 +123,6 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         description="The number of iterations the physics solver should use for "
                     "each simulation step"
     )
-
 
 
 class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
@@ -219,9 +218,42 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     )
 
 
-
-
 class RootGroupProperties(PropertyGroup, BlenderNodeClass):
+
+
+    #
+    #
+
+    #
+    # name = StringProperty(get=get_name, set=set_name)
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, new_name):
+
+        
+        # Don't update to an existing name
+        if (new_name in self.node.groups and self.name != '') or \
+           new_name == '' or \
+           self.name == new_name:
+            return
+
+        # To rename a group, we need to change the key name
+        if self.name != '':
+
+            # This is done by removing the old value
+            # and placing it at the new name key
+            node_group = self.node.groups.pop(self.name)
+            self.node.groups[new_name] = node_group
+
+            # Update the node group name
+            node_group.name = new_name
+
+        # Update UI group name
+        self.name = new_name
+
+    name_editable = StringProperty(get=get_name, set=set_name)
 
     @property
     def node_group(self):
@@ -378,6 +410,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_prop("circular_subdivisions")
     )
 
+
 class SimulatorSettings(BlenderNodeClass, PropertyGroup):
 
     def to_neuron(self, context=None):
@@ -451,7 +484,6 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
     )
 
 
-
 class BlenderNEURONProperties(PropertyGroup):
 
     @property
@@ -485,6 +517,7 @@ class BlenderNEURONProperties(PropertyGroup):
 
 def register():
     bpy.types.Scene.BlenderNEURON = PointerProperty(type=BlenderNEURONProperties)
+
 
 def unregister():
     del bpy.types.Scene.BlenderNEURON

@@ -81,3 +81,40 @@ class BlenderNode(CommNode):
                 break
 
         return name
+
+    def get_group_data_from_neuron(self, group_list):
+
+        # Convert blender groups to skeletal dicts (needed for XML rcp with NRN)
+        # These dicts contain basic information (e.g. no 3D data, activity)
+        blender_groups = self.get_group_dicts(group_list)
+
+        # Send a request to NRN for the selected groups
+        compressed = self.client.initialize_groups(blender_groups)
+
+        # Decompress the result
+        nrn_groups = self.decompress(compressed)
+
+        return nrn_groups
+
+    def import_groups_from_neuron(self, group_list):
+
+        nrn_groups = self.get_group_data_from_neuron(group_list)
+
+        # Update each blender node group with the data received from NRN
+        for nrn_group in nrn_groups:
+            node_group = self.groups[nrn_group["name"]]
+
+            # Remove any views of the cells
+            if node_group.view is not None:
+                node_group.view.remove()
+                node_group.view = None
+
+            # Update blender node group with the data received from NRN
+            node_group.from_full_NEURON_group(nrn_group)
+
+    def get_selected_groups(self):
+        return [group for group in self.groups.values() if group.selected]
+
+    def get_group_dicts(self, group_list):
+        return [group.to_dict() for group in group_list]
+

@@ -14,6 +14,7 @@ class NeuronNode(CommNode):
     def __init__(self, *args, **kwargs):
         self.roots = None
         self.section_index = None
+        self.synapses = [] # (netcon, syn)
 
         def init():
             h.load_file('stdrun.hoc')
@@ -25,6 +26,8 @@ class NeuronNode(CommNode):
 
             self.server.register_function(self.initialize_groups)
             self.server.register_function(self.update_groups)
+
+            self.server.register_function(self.create_synapses)
 
         super(NeuronNode, self).__init__("NEURON", on_server_setup=init, *args, **kwargs)
 
@@ -98,6 +101,60 @@ class NeuronNode(CommNode):
         params["cvode"] = str(h.cvode_active())
 
         return params
+
+    def create_synapses(self, syn_entries):
+
+        import pydevd
+        pydevd.settrace('192.168.0.100', port=4200)
+
+        for entry in syn_entries:
+            dest_sec = self.section_index[entry['dest_section']]
+            dest_x = h.arc3d(entry['dest_pt_idx'], sec=dest_sec) / dest_sec.L
+
+            source_sec = self.section_index[entry['source_section']]
+            source_x = h.arc3d(entry['source_pt_idx'], sec=source_sec) / source_sec.L
+
+            syn_class = getattr(h, entry['dest_syn'])
+
+            # e.g. syn = h.ExpSyn(dend(0.5))
+            syn = syn_class(dest_sec(dest_x))
+
+            netcon = h.NetCon(
+                source_sec(source_x)._ref_v,
+                syn,
+                entry['threshold'],
+                entry['delay'],
+                entry['weight'],
+                sec=source_sec
+            )
+
+            self.synapses.append((netcon, syn))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

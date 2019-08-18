@@ -222,52 +222,53 @@ class CurveContainer:
 
         ob = self.get_object()
 
-        if ob.type == 'CURVE':
-            # Find the spline that corresponds to the section
-            spline_i = self.hash2spline_index[root.hash]
+        if ob is not None:
+            if ob.type == 'CURVE':
+                # Find the spline that corresponds to the section
+                spline_i = self.hash2spline_index[root.hash]
 
-            try:
-                spline = self.curve.splines[spline_i]
+                try:
+                    spline = self.curve.splines[spline_i]
 
-            except IndexError:
-                print("Could not find spline with index " + str(spline_i) + " in " + self.name +
-                      ". This can happen if a spline is deleted in Edit Mode.")
-                raise
+                except IndexError:
+                    print("Could not find spline with index " + str(spline_i) + " in " + self.name +
+                          ". This can happen if a spline is deleted in Edit Mode.")
+                    raise
 
-            point_source = spline.bezier_points
+                point_source = spline.bezier_points
 
-            del spline
+                del spline
 
-        elif ob.type == 'MESH':
-            point_source = ob.data.vertices
+            elif ob.type == 'MESH':
+                point_source = ob.data.vertices
 
-        else:
-            raise Exception("Unsupported container object type: " + ob.type)
+            else:
+                raise Exception("Unsupported container object type: " + ob.type)
 
-        # Get the 3d points
-        num_coords = len(point_source)
+            # Get the 3d points
+            num_coords = len(point_source)
 
-        coords = np.zeros(num_coords * 3)
-        point_source.foreach_get("co", coords)
+            coords = np.zeros(num_coords * 3)
+            point_source.foreach_get("co", coords)
 
-        # Adjust coords for container origin and rotation
-        coords = self.to_global(coords)
+            # Adjust coords for container origin and rotation
+            coords = self.to_global(coords)
 
-        if self.closed_ends:
-            # Discard the 0-radius end caps
-            coords = coords[3:-3]
+            if self.closed_ends:
+                # Discard the 0-radius end caps
+                coords = coords[3:-3]
 
-        root.coords = coords.tolist()
+            root.coords = coords.tolist()
 
-        # Get radii - if container is a bezier
-        if ob.type == 'CURVE':
-            radii = np.zeros(num_coords)
-            point_source.foreach_get("radius", radii)
-            root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
-            del radii
+            # Get radii - if container is a bezier
+            if ob.type == 'CURVE':
+                radii = np.zeros(num_coords)
+                point_source.foreach_get("radius", radii)
+                root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
+                del radii
 
-        # Cleanup before recursion
-        del point_source, num_coords, coords
+            # Cleanup before recursion
+            del point_source, num_coords, coords
 
         if recursive:
             for child in root.children:
@@ -350,7 +351,11 @@ class CurveContainer:
         bl_objects = bpy.data.objects
 
         try:
-            unlink_from_scene(self.get_object())
+            ob = self.get_object()
+
+            if ob is not None:
+                unlink_from_scene(ob)
+
         except KeyError:
             pass
 

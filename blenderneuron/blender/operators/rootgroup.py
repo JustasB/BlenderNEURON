@@ -194,24 +194,13 @@ class RemoveAllGroupsOperator(Operator, CellGroupOperatorAbstract):
 class ImportGroupsOperator(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.import_groups"
     bl_label = "Import Group Data"
-    bl_description = "Imports cell group data (morhology and activity) from NEURON into Blender"
+    bl_description = "Imports cell group data (e.g. morphology and activity) from NEURON into Blender"
 
     def execute(self, context):
 
-        blender_groups = [group.to_dict() for group in self.node.groups.values() if group.selected]
+        selected_groups = self.node.get_selected_groups()
 
-        compressed = self.client.initialize_groups(blender_groups)
-        nrn_groups = self.node.decompress(compressed)
-        del compressed
-
-        for nrn_group in nrn_groups:
-            node_group = self.node.groups[nrn_group["name"]]
-
-            if node_group.view is not None:
-                node_group.view.remove()
-                node_group.view = None
-
-            node_group.from_full_NEURON_group(nrn_group)
+        self.node.import_groups_from_neuron(selected_groups)
 
         bpy.ops.blenderneuron.display_groups()
 
@@ -375,18 +364,23 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
         settings = context.scene.BlenderNEURON.synapse_connector_settings
 
         # Enable only when two different groups are selected
-        return settings.group_source is not None and \
-               settings.group_dest is not None and \
-               settings.group_source != settings.group_dest
+        return type(bpy.types.Object.BlenderNEURON_node.groups[settings.group_source].view) is SynapseFormerView
+
 
     def execute(self, context):
 
         settings = context.scene.BlenderNEURON.synapse_connector_settings
 
         from_group = self.node.groups[settings.group_source]
-        to_group = self.node.groups[settings.group_dest]
 
-        from_group.create_synapses_to(to_group)
+        from_group.view.create_synapses(
+            settings.synapse_name_dest,
+            settings.conduction_velocity,
+            settings.initial_weight,
+            settings.threshold,
+            settings.is_reciprocal,
+            settings.synapse_name_source,
+        )
 
         return{'FINISHED'}
 
@@ -412,15 +406,30 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
         source_group = self.node.groups[settings.group_source]
         dest_group = self.node.groups[settings.group_dest]
 
+        # Detect if any of the selected groups haven't been imported (no 3d data)
+        import_groups = [group for group in [source_group, dest_group] if group.state != 'imported']
+
+        # Import them
+        if len(import_groups) > 0:
+            for group in import_groups:
+                group.interaction_granularity = 'Cell'
+                group.recording_granularity = 'Cell'
+                group.record_activity = False
+                group.import_synapses = False
+
+            self.node.import_groups_from_neuron(import_groups)
+
         source_group.show(SynapseFormerView, dest_group)
 
-        source_group.view.get_synapse_locations(
+        pairs = source_group.view.get_synapse_locations(
             settings.max_distance,
             settings.use_radius,
             settings.max_syns_per_pt,
             settings.section_pattern_source,
             settings.section_pattern_dest
         )
+
+        self.report({'INFO'}, 'Found ' + str(len(pairs)) + ' synapse locations')
 
         return {'FINISHED'}
 
