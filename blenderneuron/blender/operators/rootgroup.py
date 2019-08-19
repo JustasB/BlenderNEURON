@@ -361,7 +361,7 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
     @classmethod
     def poll(cls, context):
 
-        settings = context.scene.BlenderNEURON.synapse_connector_settings
+        settings = context.scene.BlenderNEURON.synapse_set
 
         # Enable only when two different groups are selected
         return type(bpy.types.Object.BlenderNEURON_node.groups[settings.group_source].view) is SynapseFormerView
@@ -369,17 +369,24 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
-        settings = context.scene.BlenderNEURON.synapse_connector_settings
+        synapse_set = context.scene.BlenderNEURON.synapse_set
 
-        from_group = self.node.groups[settings.group_source]
+        from_group = self.node.groups[synapse_set.group_source]
 
         from_group.view.create_synapses(
-            settings.synapse_name_dest,
-            settings.conduction_velocity,
-            settings.initial_weight,
-            settings.threshold,
-            settings.is_reciprocal,
-            settings.synapse_name_source,
+            synapse_set.name,
+            synapse_set.synapse_name_dest,
+            synapse_set.synapse_params_dest,
+            synapse_set.conduction_velocity,
+            synapse_set.initial_weight,
+            synapse_set.threshold,
+            synapse_set.is_reciprocal,
+            synapse_set.synapse_name_source,
+            synapse_set.synapse_params_source,
+            synapse_set.create_spines,
+            synapse_set.spine_neck_diameter,
+            synapse_set.spine_head_diameter,
+            synapse_set.spine_name_prefix
         )
 
         return{'FINISHED'}
@@ -392,7 +399,7 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
     @classmethod
     def poll(cls, context):
 
-        settings = context.scene.BlenderNEURON.synapse_connector_settings
+        settings = context.scene.BlenderNEURON.synapse_set
 
         # Enable only when two different groups are selected
         return settings.group_source is not None and \
@@ -401,7 +408,7 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
-        settings = context.scene.BlenderNEURON.synapse_connector_settings
+        settings = context.scene.BlenderNEURON.synapse_set
 
         source_group = self.node.groups[settings.group_source]
         dest_group = self.node.groups[settings.group_dest]
@@ -433,8 +440,39 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
 
         return {'FINISHED'}
 
+class SynapseSetAddOperator(Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.synapse_set_add"
+    bl_label = "Create a new synapse set"
+    bl_description = "Create a new synapse set"
+
+    @classmethod
+    def poll(cls, context):
+        """
+        Checks if there are 2+ groups
+        """
+        return BlenderNodeClass.group_count(context) > 1
+
+    def execute(self, context):
+        context.scene.BlenderNEURON.add_synapse_set()
+
+        return {'FINISHED'}
 
 
+class SynapseSetRemoveOperator(Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.synapse_set_remove"
+    bl_label = "Remove highlighted synapse set"
+    bl_description = "Remove highlighted synapse set"
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.scene.BlenderNEURON.synapse_sets) > 1
+
+    def execute(self, context):
+        UI_properties = context.scene.BlenderNEURON
+        UI_properties.synapse_sets.remove(UI_properties.synapse_sets_index)
+        UI_properties.synapse_sets_index = max(0, UI_properties.synapse_sets_index - 1)
+
+        return {'FINISHED'}
 
 
 

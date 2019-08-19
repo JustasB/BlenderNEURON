@@ -14,7 +14,7 @@ class NeuronNode(CommNode):
     def __init__(self, *args, **kwargs):
         self.roots = None
         self.section_index = None
-        self.synapses = [] # (netcon, syn)
+        self.synapse_sets = {}  # 'set_name': [(netcon, syn, head, neck)]
 
         def init():
             h.load_file('stdrun.hoc')
@@ -102,10 +102,15 @@ class NeuronNode(CommNode):
 
         return params
 
-    def create_synapses(self, syn_entries):
+    def create_synapses(self, syn_set):
 
         import pydevd
         pydevd.settrace('192.168.0.100', port=4200)
+
+        set_name = syn_set['name']
+        syn_entries = syn_set['entries']
+
+        synapses = self.synapse_sets[set_name] = []
 
         for entry in syn_entries:
             dest_sec = self.section_index[entry['dest_section']]
@@ -114,10 +119,58 @@ class NeuronNode(CommNode):
             source_sec = self.section_index[entry['source_section']]
             source_x = h.arc3d(entry['source_pt_idx'], sec=source_sec) / source_sec.L
 
-            syn_class = getattr(h, entry['dest_syn'])
+            # Assume no spines
+            neck = None
+            head = None
 
+            # Unless indicated otherwise
+            if entry['create_spine']:
+                prefix = set_name+"_"+entry['prefix']+"["+str(len(synapses))+"]"
+
+                # Create the spine head
+                head = h.Section(name=prefix + ".head")
+
+                # basic passive params
+                head.insert('pas')
+
+                # Add the 3D coords
+                self.add_spine_pt3d(head, entry['head_start'], entry['head_diameter'])
+                self.add_spine_pt3d(head, entry['head_end'], entry['head_diameter'])
+
+                # Create the head (if there is enough room)
+                if entry['neck_start'] is not None:
+                    neck = h.Section(name=prefix+".neck")
+                    neck.insert('pas')
+
+                    self.add_spine_pt3d(neck, entry['neck_start'], entry['neck_diameter'])
+                    self.add_spine_pt3d(neck, entry['neck_end'], entry['neck_diameter'])
+
+                    # Connect the spine together to the source section
+                    neck.connect(source_sec(source_x), 0)
+                    head.connect(neck)
+
+                else:
+                    # If there is no neck, connect the head to section directly
+                    head.connect(source_sec(source_x), 0)
+
+                # Point process should now be placed on the spine head
+                source_sec = head
+                source_x = 0.5
+
+                # Delay is now 0 - propagation is taken care of by the spine
+                entry['delay'] = 0
+
+
+            # Create synapse point process
             # e.g. syn = h.ExpSyn(dend(0.5))
+            syn_class = getattr(h, entry['dest_syn'])
             syn = syn_class(dest_sec(dest_x))
+
+            params = entry['dest_syn_params']
+            if params != '':
+                params = eval(params)
+                for key in params.keys():
+                    setattr(syn, key, params[key])
 
             netcon = h.NetCon(
                 source_sec(source_x)._ref_v,
@@ -128,49 +181,12 @@ class NeuronNode(CommNode):
                 sec=source_sec
             )
 
-            self.synapses.append((netcon, syn))
+            # Keep references to the synapse parts
+            synapses.append((netcon, syn, neck, head))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @staticmethod
+    def add_spine_pt3d(sec, xyz, diam):
+        h.pt3dadd(xyz[0], xyz[1], xyz[2], diam, sec=sec)
 
     def send_model(self):
         """

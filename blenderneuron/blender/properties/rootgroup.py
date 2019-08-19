@@ -65,7 +65,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         description="The fraction of distance between the two layers where the confinement"
                     "bfegins. 0: as close to the starting layer. 1: as close to the end layer. Negative"
                     "values will start confinement below the starting layer. >1 values will end the confinement"
-                    "above the end layer."
+                    "above the end layer"
     )
 
     height_max = FloatProperty(
@@ -76,7 +76,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         description="The fraction of distance between the two layers where the confinement"
                     "stops. 0: as close to the starting layer. 1: as close to the end layer. Negative"
                     "values will start confinement below the starting layer. >1 values will end the confinement"
-                    "above the end layer."
+                    "above the end layer"
     )
 
     max_section_length = FloatProperty(
@@ -84,7 +84,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         min=1,
         name="Maximum section length",
         description="Sections that are longer than this value will be split into smaller, same length sections. "
-                    "Set to value longer than longest section (e.g. 99999) to disable splitting."
+                    "Set to value longer than longest section (e.g. 99999) to disable splitting"
     )
 
     simulation_frames = IntProperty(
@@ -127,6 +127,23 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
 
 class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
 
+    def get_name(self):
+        return self.name
+
+    def set_name(self, new_name):
+
+        syn_sets = bpy.context.scene.BlenderNEURON.synapse_sets
+
+        # Don't update to an existing set name
+        if (new_name in syn_sets.keys() and self.name != '') or \
+           new_name == '' or \
+           self.name == new_name:
+            return
+
+        self.name = new_name
+
+    name_editable = StringProperty(get=get_name, set=set_name)
+
     def get_group_list(self, context):
         return [(g.name, g.name, g.name) for g in context.scene.BlenderNEURON.groups.values()]
 
@@ -152,28 +169,28 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         name="Use Radius",
         description="Whether 3D point radii should be utilized when searching for synapse "
                     "formation locations. When False, the proximity distance only uses "
-                    "distances between 3D points without including diameters (slightly faster)."
+                    "distances between 3D points without including diameters (slightly faster)"
     )
 
     max_syns_per_pt = IntProperty(
         default=4,
         name="Max Syns/Pt",
         description="The maximum number of synapses that are allowed to be positioned at a given"
-                    "section 3D point."
+                    "section 3D point"
     )
 
     section_pattern_source = StringProperty(
         default="*apic*",
         name="From Section Pattern",
         description="The section name pattern to use when selecting source cell sections. "
-                    "Use ? and * wildcards to match one or more characters respectively."
+                    "Use ? and * wildcards to match one or more characters respectively"
     )
 
     section_pattern_dest = StringProperty(
         default="*dend*",
         name="To section pattern",
         description="The section name pattern to use when selecting destination cell sections. "
-                    "Use ? and * wildcards to match one or more characters respectively."
+                    "Use ? and * wildcards to match one or more characters respectively"
     )
 
     synapse_name_dest = StringProperty(
@@ -183,10 +200,16 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "placed on the destination cell"
     )
 
+    synapse_params_dest = StringProperty(
+        default="{'g':1,'tau':10}",
+        name="Parameters",
+        description="Optional synapse mechanism parameters as a Python dictionary e.g. {'g':1,'tau':10}"
+    )
+
     is_reciprocal = BoolProperty(
         default=False,
         name="Is Reciprocal",
-        description="Whether the synapses should be reciprocal (from->to->from) or uni-directional (from->to)."
+        description="Whether the synapses should be reciprocal (from->to->from) or uni-directional (from->to)"
     )
 
     synapse_name_source = StringProperty(
@@ -194,6 +217,40 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         name="Reciprocal Synapse Class Name",
         description="The name of NEURON synaptic mechanism that will be placed on the "
                     "source cell (when reciprocal)"
+    )
+
+    synapse_params_source = StringProperty(
+        default="{'g':1,'tau':10}",
+        name="Parameters",
+        description="Optional reciprocal synapse mechanism parameters as a Python dictionary e.g. {'g':1,'tau':10}"
+    )
+
+    create_spines = BoolProperty(
+        default=True,
+        name="Create Spines",
+        description="Whether a spine (neck+head) should be created from source to destination sections"
+    )
+
+    spine_neck_diameter = FloatProperty(
+        default=0.2,
+        min=0,
+        name="Neck Diam (um)",
+        description="Diameter of spine necks (um). Length is determined by the distance between source and "
+                    "destination sections. If distance between source and destination section is less than "
+                    "the head diameter, the spine neck is omitted"
+    )
+
+    spine_head_diameter = FloatProperty(
+        default=1,
+        min=0,
+        name="Head Diam (um)",
+        description="Diameter of spine heads (um). Length is same as diameter (e.g. spherical)"
+    )
+
+    spine_name_prefix = StringProperty(
+        default="Spine",
+        name="Prefix",
+        description="The prefix used in names of spine sections. E.g. 'Spine' becomes Spine[0...N].neck/.head"
     )
 
     conduction_velocity = FloatProperty(
@@ -214,18 +271,11 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         default=0,
         name="Firing Threshold (mV)",
         description="The threshold that the source cell segment membrane potential "
-                    "must cross to trigger the synaptic event."
+                    "must cross to trigger the synaptic event"
     )
 
 
 class RootGroupProperties(PropertyGroup, BlenderNodeClass):
-
-
-    #
-    #
-
-    #
-    # name = StringProperty(get=get_name, set=set_name)
 
     def get_name(self):
         return self.name
@@ -336,7 +386,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         ],
         name="Recording granularity",
         description="The granularity used to record from selected cells. Finest recording "
-                    "granularity requires more time and memory, coarsest less so.",
+                    "granularity requires more time and memory, coarsest less so",
         default='Cell',
         get=get_gran_prop("recording_granularity"),
         set=set_gran_prop("recording_granularity")
@@ -355,7 +405,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         description="The granularity used to represent selected cells in Blender. "
                     "Finer granularity allows interaction with smaller parts of cells, "
                     "but can result in performance issues if the number of cells/sections "
-                    "is large. Coarser interactivity increases performance for larger models.",
+                    "is large. Coarser interactivity increases performance for larger models",
         default='Cell',
         get=get_gran_prop("interaction_granularity"),
         set=set_gran_prop("interaction_granularity")
@@ -369,7 +419,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     smooth_sections = BoolProperty(
         default=True,
         description="Whether to render sections as smooth bezier curves, instead of straight lines. "
-                    "True results in more visually appealing morphology, but requires more polygons.",
+                    "True results in more visually appealing morphology, but requires more polygons",
         get=get_prop("smooth_sections"),
         set=set_prop("smooth_sections")
     )
@@ -385,7 +435,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
     as_lines = BoolProperty(
         default=False,
-        description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered.",
+        description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered",
         get=get_prop("as_lines"),
         set=set_prop("as_lines")
     )
@@ -395,7 +445,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         default=3,
         min=2,
         description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature, but requires more polygons.",
+                    "looking section curvature, but requires more polygons",
         get=get_prop("segment_subdivisions"),
         set=set_prop("segment_subdivisions")
     )
@@ -405,7 +455,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         default=12,
         min=5,
         description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature.",
+                    "looking section curvature",
         get=get_prop("circular_subdivisions"),
         set=set_prop("circular_subdivisions")
     )
@@ -478,7 +528,7 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
         ],
         name="Integrator",
         description="Variable step tends to be faster for single cells and low firing "
-                    "rates. Fixed step tends to be faster for networks and high firing rates.",
+                    "rates. Fixed step tends to be faster for networks and high firing rates",
         default='1',
         update=to_neuron
     )
@@ -493,12 +543,31 @@ class BlenderNEURONProperties(PropertyGroup):
         """
         return self.groups[self.groups_index]
 
+    @property
+    def synapse_set(self):
+        return self.synapse_sets[self.synapse_sets_index]
+
+    def add_synapse_set(self):
+        new_set = self.synapse_sets.add()
+
+        i_name = len(self.synapse_sets.values())
+
+        while True:
+            name = "SynapseSet." + str(i_name).zfill(3)
+
+            if name in self.synapse_sets.keys():
+                i_name += 1
+            else:
+                break
+
+        new_set.name = name
 
     def clear(self):
         self.property_unset("groups")
         self.property_unset("groups_index")
         self.property_unset("simulator_settings")
-        self.property_unset("synapse_connector_settings")
+        self.property_unset("synapse_sets")
+        self.property_unset("synapse_sets_index")
 
     groups_index = IntProperty()
 
@@ -510,7 +579,9 @@ class BlenderNEURONProperties(PropertyGroup):
         type=SimulatorSettings
     )
 
-    synapse_connector_settings = PointerProperty(
+    synapse_sets_index = IntProperty()
+
+    synapse_sets = CollectionProperty(
         type=SynapseConnectorProperties
     )
 

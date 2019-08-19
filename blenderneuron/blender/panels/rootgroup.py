@@ -115,7 +115,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_Import'
-    bl_label = "Import"
+    bl_label = "Import / Export / Save"
 
     @classmethod
     def poll(cls, context):
@@ -222,6 +222,14 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
                      icon="FILE_REFRESH")
 
 
+class SynapseSetListWidget(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.prop(item, "name_editable", text="", emboss=False)
+
+    def invoke(self, context, event):
+        pass
+
+
 class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_FormSynapses'
     bl_label = "Form Synapses"
@@ -237,53 +245,76 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
                AbstractBlenderNEURONPanel.group_count(context) > 1
 
     def draw(self, context):
-        # From Cell Group      [ 'Group.001' ]
-        # To Cell Group         [ 'Group.002']
-        # Proximity Distance       [      5um]
-        # Use radius                       [X]
-        # Synapse name                [ExpSyn]
-        # Conduction Velocity (m/s)      [1.0]
-        # Initial Weight                 [1.0]
-        # Threshold (mV)                 [0.0]
-        #          [Create Synapses]
 
+        settings = self.get_synapse_set(context)
+        scene = context.scene
 
-        settings = self.get_synapse_connector_settings(context)
+        row = self.layout.row()
+
+        row.template_list("SynapseSetListWidget", "",
+                          context.scene.BlenderNEURON, "synapse_sets",
+                          context.scene.BlenderNEURON, "synapse_sets_index",
+                          rows=4)
+
+        col = row.column(align=True)
+        col.operator("blenderneuron.synapse_set_add", icon='ZOOMIN', text="")
+        col.operator("blenderneuron.synapse_set_remove", icon='ZOOMOUT', text="")
 
         layout = self.layout
-
         layout.label(text='Source Cells:')
+
+        layout = self.layout.box()
+
         layout.prop(settings, "group_source", text="Group")
         layout.prop(settings, "section_pattern_source", text="Sections")
-        split = self.layout.split(percentage=0.33)
+
+        split = layout.split(percentage=0.33)
         split.label(text="Is Reciprocal:")
         split.prop(settings, "is_reciprocal", text="")
+
         if settings.is_reciprocal:
             layout.prop(settings, "synapse_name_source", text="Synapse")
-        layout.separator()
+            layout.prop(settings, "synapse_params_source")
 
-        layout.label(text='Destination Cells:')
+        split = layout.split(percentage=0.33)
+        split.label(text="Create Spines:")
+        split.prop(settings, "create_spines", text="")
+
+        if settings.create_spines:
+            layout.prop(settings, "spine_neck_diameter")
+            layout.prop(settings, "spine_head_diameter")
+            layout.prop(settings, "spine_name_prefix")
+
+        self.layout.label(text='Destination Cells:')
+
+        layout = self.layout.box()
         layout.prop(settings, "group_dest", text="Group")
         layout.prop(settings, "section_pattern_dest", text="Sections")
         layout.prop(settings, "synapse_name_dest", text="Synapse")
-        layout.separator()
+        layout.prop(settings, "synapse_params_dest")
 
-        split = self.layout.split(percentage=0.33)
+        layout = self.layout
+        split = layout.split(percentage=0.33)
         split.label(text="Use Radii:")
         split.prop(settings, "use_radius", text="")
 
         layout.prop(settings, "max_distance")
         layout.prop(settings, "max_syns_per_pt")
+
+        layout.separator()
+
         layout.prop(settings, "conduction_velocity")
         layout.prop(settings, "initial_weight")
         layout.prop(settings, "threshold")
+        layout.separator()
 
         if settings.group_source == settings.group_dest:
-            self.layout.label("Source and Destination groups must be different. ", icon='ERROR')
-            self.layout.label("Use 'Cell Groups' section to create a new group.")
+            layout.label("Source and Destination groups must be different. ", icon='ERROR')
+            layout.label("Use 'Cell Groups' section to create a new group.")
 
         layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEWZOOM')
         layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
+
 
 
 class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
