@@ -83,10 +83,7 @@ class SelectAllCellsOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Select all cells to be shown in Blender"
 
     def execute(self, context):
-        roots = self.node.ui_properties.group.root_entries
-
-        for item in roots:
-            item.selected = True
+        self.node.ui_properties.group.node_group.select_roots('All')
 
         return{'FINISHED'}
 
@@ -97,10 +94,7 @@ class UnselectAllCellsOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Unselect all cells for showing in Blender"
 
     def execute(self, context):
-        roots = self.node.ui_properties.group.root_entries
-
-        for item in roots:
-            item.selected = False
+        self.node.ui_properties.group.node_group.select_roots('None')
 
         return{'FINISHED'}
 
@@ -111,10 +105,7 @@ class InvertCellSelectionOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Invert the selection of cells for showing in Blender"
 
     def execute(self, context):
-        roots = self.node.ui_properties.group.root_entries
-
-        for item in roots:
-            item.selected = not item.selected
+        self.node.ui_properties.group.node_group.select_roots('Invert')
 
         return{'FINISHED'}
 
@@ -217,16 +208,9 @@ class DisplayGroupsOperator(Operator, CellGroupOperatorAbstract):
         return BlenderNodeClass.imported_groups_exist(context)
 
     def execute(self, context):
-        
-        for group in self.node.groups.values():
-            if group.selected:
-                if group.interaction_granularity == 'Cell':
-                    group.show(CellObjectView)
+        self.node.display_groups()
 
-                if group.interaction_granularity == 'Section':
-                    group.show(SectionObjectView)
-
-        return{'FINISHED'}
+        return {'FINISHED'}
 
 
 class UpdateGroupsWithViewDataOperator(Operator, CellGroupOperatorAbstract):
@@ -353,43 +337,6 @@ class ConfineBetweenLayers(Operator, CellGroupOperatorAbstract):
 
         return{'FINISHED'}
 
-class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
-    bl_idname = "blenderneuron.create_synapses"
-    bl_label = "Create Synapses"
-    bl_description = "Creates NEURON synapses between cells in two BlenderNEURON groups"
-
-    @classmethod
-    def poll(cls, context):
-
-        settings = context.scene.BlenderNEURON.synapse_set
-
-        # Enable only when two different groups are selected
-        return type(bpy.types.Object.BlenderNEURON_node.groups[settings.group_source].view) is SynapseFormerView
-
-
-    def execute(self, context):
-
-        synapse_set = context.scene.BlenderNEURON.synapse_set
-
-        from_group = self.node.groups[synapse_set.group_source]
-
-        from_group.view.create_synapses(
-            synapse_set.name,
-            synapse_set.synapse_name_dest,
-            synapse_set.synapse_params_dest,
-            synapse_set.conduction_velocity,
-            synapse_set.initial_weight,
-            synapse_set.threshold,
-            synapse_set.is_reciprocal,
-            synapse_set.synapse_name_source,
-            synapse_set.synapse_params_source,
-            synapse_set.create_spines,
-            synapse_set.spine_neck_diameter,
-            synapse_set.spine_head_diameter,
-            synapse_set.spine_name_prefix
-        )
-
-        return{'FINISHED'}
 
 class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.find_synapse_locations"
@@ -440,6 +387,45 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
 
         return {'FINISHED'}
 
+
+class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.create_synapses"
+    bl_label = "Create Synapses"
+    bl_description = "Creates NEURON synapses between cells in two BlenderNEURON groups"
+
+    @classmethod
+    def poll(cls, context):
+
+        settings = context.scene.BlenderNEURON.synapse_set
+
+        # Enable only when two different groups are selected
+        return type(bpy.types.Object.BlenderNEURON_node.groups[settings.group_source].view) is SynapseFormerView
+
+
+    def execute(self, context):
+
+        synapse_set = context.scene.BlenderNEURON.synapse_set
+
+        from_group = self.node.groups[synapse_set.group_source]
+
+        from_group.view.create_synapses(
+            synapse_set.name,
+            synapse_set.synapse_name_dest,
+            synapse_set.synapse_params_dest,
+            synapse_set.conduction_velocity,
+            synapse_set.initial_weight,
+            synapse_set.threshold,
+            synapse_set.is_reciprocal,
+            synapse_set.synapse_name_source,
+            synapse_set.synapse_params_source,
+            synapse_set.create_spines,
+            synapse_set.spine_neck_diameter,
+            synapse_set.spine_head_diameter,
+            synapse_set.spine_name_prefix
+        )
+
+        return{'FINISHED'}
+
 class SynapseSetAddOperator(Operator, BlenderNodeClass):
     bl_idname = "blenderneuron.synapse_set_add"
     bl_label = "Create a new synapse set"
@@ -453,7 +439,7 @@ class SynapseSetAddOperator(Operator, BlenderNodeClass):
         return BlenderNodeClass.group_count(context) > 1
 
     def execute(self, context):
-        context.scene.BlenderNEURON.add_synapse_set()
+        self.node.add_synapse_set()
 
         return {'FINISHED'}
 
@@ -471,6 +457,26 @@ class SynapseSetRemoveOperator(Operator, BlenderNodeClass):
         UI_properties = context.scene.BlenderNEURON
         UI_properties.synapse_sets.remove(UI_properties.synapse_sets_index)
         UI_properties.synapse_sets_index = max(0, UI_properties.synapse_sets_index - 1)
+
+        return {'FINISHED'}
+
+
+
+
+
+
+
+class AddNeonEffectOperator(Operator, BlenderNodeClass):
+    bl_idname = "blenderneuron.add_neon_effect"
+    bl_label = "Add neon effect to rendered images"
+    bl_description = "Adds a glare filter via compositing nodes"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        self.node.add_neon_effect()
 
         return {'FINISHED'}
 

@@ -1,9 +1,11 @@
+from blenderneuron.blender.views.cellobjectview import CellObjectView
+from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
-
+from fnmatch import fnmatch
 
 class BlenderRootGroup(RootGroup):
 
@@ -24,12 +26,14 @@ class BlenderRootGroup(RootGroup):
         self.smooth_sections = True
         self.spherize_soma_if_DeqL=True
         self.as_lines=False
-        self.segment_subdivisions=3
-        self.circular_subdivisions=12
+        self.segment_subdivisions=1
+        self.circular_subdivisions=5
         self.default_color = [1, 1, 1]
 
         self.state = 'new'
 
+    def highlight(self):
+        self.node.ui_properties.groups_index = self.ui_group.index
 
     def from_full_NEURON_group(self, nrn_group):
         self.state = 'imported'
@@ -47,18 +51,32 @@ class BlenderRootGroup(RootGroup):
         if "activity" in nrn_group:
             self.activity.from_dict(nrn_group["activity"])
 
-    def show(self, view_class, *args, **kwargs):
-        if not hasattr(view_class, "show"):
-            raise Exception(str(view_class) + ' does not implement show() method')
+    def import_group(self):
+        self.node.import_groups_from_neuron([self])
 
-        # If there is an existing view, get any changes made to it, and remove it
+    def remove_view(self):
         if self.view is not None:
 
-            # Don't apply changes from an existing physics view
+            # Save any view changes
+            # Except don't apply changes from an existing physics view
             if type(self.view) != VectorConfinerView:
                 self.from_view()
 
             self.view.remove()
+
+    def show(self, view_class=None, *args, **kwargs):
+        if view_class is None:
+            if self.interaction_granularity == 'Cell':
+                view_class = CellObjectView
+
+            if self.interaction_granularity == 'Section':
+                view_class = SectionObjectView
+
+        if not hasattr(view_class, "show"):
+            raise Exception(str(view_class) + ' does not implement show() method')
+
+        # If there is an existing view, get any changes made in view, then remove view
+        self.remove_view()
 
         # Show the new view
         self.view = view_class(self, *args, **kwargs)
@@ -97,9 +115,7 @@ class BlenderRootGroup(RootGroup):
             self.view.remove()
 
         # Remove the group roots from the group before deleting group
-        roots = list(self.roots.values())
-        for root in roots:
-            root.remove_from_group()
+        self.select_roots('None')
 
         # remove group from the UI list
         self.remove_from_UI()
@@ -117,12 +133,36 @@ class BlenderRootGroup(RootGroup):
             if root.group is None:
                 root.add_to_group(self)
 
+    def select_roots(self, condition='All', pattern=None):
+        if condition == 'None':
+            for root in self.roots.values():
+                root.remove_from_group()
+
+        else:
+            for root in self.node.root_index.values():
+                if condition == 'All':
+                    root.add_to_group(self)
+
+                elif condition == 'Pattern':
+                    if fnmatch(root.name, pattern):
+                        root.add_to_group(self)
+
+                elif condition == 'Invert':
+                    if root.group == self:
+                        root.remove_from_group()
+                    else:
+                        root.add_to_group(self)
+
+
+
     def set_confiner_layers(self,
                             start_layer_object_name,
                             end_layer_object_name,
                             max_angle,
                             height_start,
                             height_end):
+
+        self.highlight()
 
         start_layer = bpy.data.objects[start_layer_object_name]
         end_layer = bpy.data.objects[end_layer_object_name]
@@ -137,9 +177,13 @@ class BlenderRootGroup(RootGroup):
         settings.height_max = height_end
 
     def setup_confiner(self):
+        self.highlight()
+
         self.show(VectorConfinerView)
 
     def confine_between_layers(self):
+        self.highlight()
+
         if type(self.view) is VectorConfinerView:
             self.view.confine()
 

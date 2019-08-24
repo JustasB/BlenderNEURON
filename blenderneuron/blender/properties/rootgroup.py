@@ -331,7 +331,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         get=get_prop("record_activity"),
         set=set_prop("record_activity"),
         description="Imports the recorded values from the selected variable (based on granularity) "
-                    "and shows it at variation in Blender segment brightness")
+                    "and shows it as variation in Blender segment brightness")
 
     import_synapses = BoolProperty(
         default=True,
@@ -415,6 +415,13 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         type=LayerConfinerProperties
     )
 
+    default_color = FloatVectorProperty(
+        default=[1.0] * 3,
+        subtype='COLOR',
+        get=get_prop("default_color"),
+        set=set_prop("default_color"),
+        description='The initial color of all sections in the group'
+    )
 
     smooth_sections = BoolProperty(
         default=True,
@@ -435,15 +442,16 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
     as_lines = BoolProperty(
         default=False,
-        description="Whether to display sections as line segments (no radius). This is fast, but cannot be rendered",
+        description="Whether to display sections as line segments (no radius). This is fast, but does not show "
+                    "up in rendered images",
         get=get_prop("as_lines"),
         set=set_prop("as_lines")
     )
 
-
     segment_subdivisions = IntProperty(
         default=3,
-        min=2,
+        min=1,
+        max=10,
         description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
                     "looking section curvature, but requires more polygons",
         get=get_prop("segment_subdivisions"),
@@ -452,10 +460,10 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
 
     circular_subdivisions = IntProperty(
-        default=12,
-        min=5,
-        description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature",
+        default=5,
+        min=4,
+        max=12,
+        description="Number of sides to use when creating circular section cross-sections",
         get=get_prop("circular_subdivisions"),
         set=set_prop("circular_subdivisions")
     )
@@ -546,21 +554,6 @@ class BlenderNEURONProperties(PropertyGroup):
     @property
     def synapse_set(self):
         return self.synapse_sets[self.synapse_sets_index]
-
-    def add_synapse_set(self):
-        new_set = self.synapse_sets.add()
-
-        i_name = len(self.synapse_sets.values())
-
-        while True:
-            name = "SynapseSet." + str(i_name).zfill(3)
-
-            if name in self.synapse_sets.keys():
-                i_name += 1
-            else:
-                break
-
-        new_set.name = name
 
     def clear(self):
         self.property_unset("groups")

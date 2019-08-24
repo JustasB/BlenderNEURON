@@ -21,6 +21,9 @@ class Section:
 
         self.activity = Activity()
 
+    def __str__(self):
+        return self.name
+
     def to_dict(self,
                 include_activity=True,
                 include_children=True,

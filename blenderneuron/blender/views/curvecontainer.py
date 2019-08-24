@@ -170,20 +170,51 @@ class CurveContainer:
 
     @staticmethod
     def create_material(name):
-        result = bpy.data.materials.new(name)
+        mat = bpy.data.materials.new(name)
 
-        result.diffuse_color = CurveContainer.default_color
+        mat.diffuse_color = CurveContainer.default_color
 
         # Ambient and back lighting
-        result.ambient = 0.85
-        result.translucency = 0.85
+        mat.ambient = 0.85
+        mat.translucency = 0.85
 
         # Raytraced reflections
-        result.raytrace_mirror.use = True
-        result.raytrace_mirror.reflect_factor = 0.1
-        result.raytrace_mirror.fresnel = 2.0
+        mat.raytrace_mirror.use = True
+        mat.raytrace_mirror.reflect_factor = 0.1
+        mat.raytrace_mirror.fresnel = 2.0
 
-        return result
+        # Add Blender render and Cycles nodes
+        mat.use_nodes = True
+
+        nodes = mat.node_tree.nodes
+        links = mat.node_tree.links
+
+        links.clear()
+        nodes.clear()
+
+        # Cycles nodes
+        cl_out = nodes.new('ShaderNodeOutputMaterial')
+        cl_emit = nodes.new('ShaderNodeEmission')
+        cl_emit.location = [-200, 0]
+        cl_emit.inputs['Strength'].default_value = 0.1
+        cl_trans = nodes.new('ShaderNodeBsdfTransparent')
+        cl_trans.location = [-200, 100]
+        cl_trans.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
+
+        links.new(cl_trans.outputs['BSDF'], cl_out.inputs['Surface'])
+        links.new(cl_emit.outputs['Emission'], cl_out.inputs['Volume'])
+
+        # Blender render nodes
+        br_out = nodes.new('ShaderNodeOutput')
+        br_out.location = [0, -200]
+        br_mat = nodes.new('ShaderNodeExtendedMaterial')
+        br_mat.location = [-200, -200]
+        br_mat.material = mat
+
+        links.new(br_mat.outputs['Color'], br_out.inputs['Color'])
+        links.new(br_mat.outputs['Alpha'], br_out.inputs['Alpha'])
+
+        return mat
 
     def add_material_to_object(self, material):
         mats = self.curve.materials
@@ -356,13 +387,13 @@ class CurveContainer:
             if ob is not None:
                 unlink_from_scene(ob)
 
-        except KeyError:
-            pass
+        except RuntimeError:
+            pass  # ignore if already unlinked
 
         for name in self.joint_names:
             try:
                 unlink_from_scene(bl_objects[name])
-            except KeyError:
+            except RuntimeError:
                 pass
 
 

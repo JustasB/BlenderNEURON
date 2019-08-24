@@ -99,18 +99,61 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         group = self.get_group(context)
 
         col = self.layout
-        col.label(text="Recording Settings:")
-        col.prop(group, "recording_granularity", text="Record", expand=True)
-        col.prop(group, "record_variable", text="Variable", expand=True)
-        col.separator()
-
         col.label(text="Interaction Settings:")
-        col.prop(group, "interaction_granularity", text="Interact", expand=True)
-        col.separator()
+        col = self.layout.box()
+        col.label('Interact with each:')
+        col.row().prop(group, "interaction_granularity", text="Interact", expand=True)
 
-        row = col.split(0.5)
-        row.prop(group, "record_activity", text="Import Activity")
-        row.prop(group, "import_synapses", text="Import Synapses")
+        col = self.layout
+        col.label(text="Section Display Settings:")
+        box = col.box().column()
+        box.prop(group, "as_lines", text="Sections as Line Segments?")
+
+        box = box.column()
+        box.enabled = not group.as_lines
+        col = box.split(percentage=0.33)
+        col.label('Color:')
+        col.prop(group, "default_color", text='')
+
+        col = box.split(percentage=0.33)
+        col.label('Smooth curves:')
+        col.prop(group, "smooth_sections", text='')
+
+        col = box.split(percentage=0.33)
+        col.enabled = group.smooth_sections
+        col.label('Subdivisions:')
+        col.prop(group, "segment_subdivisions", text='')
+
+        col = box.split(percentage=0.33)
+        col.label('N-gon Sides:')
+        col.prop(group, "circular_subdivisions", text='')
+
+        col = box.split(percentage=0.33)
+        col.label('Spherical Somas:')
+        col.prop(group, "spherize_soma_if_DeqL", text='')
+
+        col = self.layout
+        col.separator()
+        col.label(text="Recording Settings:")
+        col = self.layout.box().column()
+        col.prop(group, "record_activity", text="Record Activity")
+
+        col = col.column()
+        col.enabled = group.record_activity
+        col.label('Record from each:')
+        col.row().prop(group, "recording_granularity", expand=True)
+        col.separator()
+        col.prop(group, "record_variable", text="Record", expand=True)
+
+        col = col.split(percentage=0.33)
+        col.label('Sampling Period (ms):')
+        col.prop(group, "recording_period", text="")
+
+        col = self.layout
+        col.separator()
+        col.label(text="Connectivity Settings:")
+        col = self.layout.box()
+        col.prop(group, "import_synapses", text="Import Synapses")
 
 
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
@@ -303,7 +346,9 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
         layout.separator()
 
-        layout.prop(settings, "conduction_velocity")
+        if not settings.create_spines:
+            layout.prop(settings, "conduction_velocity")
+
         layout.prop(settings, "initial_weight")
         layout.prop(settings, "threshold")
         layout.separator()

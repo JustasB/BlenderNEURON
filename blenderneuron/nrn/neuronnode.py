@@ -160,29 +160,60 @@ class NeuronNode(CommNode):
                 # Delay is now 0 - propagation is taken care of by the spine
                 entry['delay'] = 0
 
-
-            # Create synapse point process
-            # e.g. syn = h.ExpSyn(dend(0.5))
-            syn_class = getattr(h, entry['dest_syn'])
-            syn = syn_class(dest_sec(dest_x))
-
-            params = entry['dest_syn_params']
-            if params != '':
-                params = eval(params)
-                for key in params.keys():
-                    setattr(syn, key, params[key])
-
-            netcon = h.NetCon(
-                source_sec(source_x)._ref_v,
-                syn,
+            netcon, syn = self.create_netcon_syn(
+                entry['dest_syn'],
+                dest_sec,
+                dest_x,
+                entry['dest_syn_params'],
+                source_sec,
+                source_x,
                 entry['threshold'],
                 entry['delay'],
-                entry['weight'],
-                sec=source_sec
+                entry['weight']
             )
 
+            if entry['is_reciprocal']:
+                netcon_recip, syn_recip = self.create_netcon_syn(
+                    entry['source_syn'],
+                    source_sec,
+                    source_x,
+                    entry['source_syn_params'],
+                    dest_sec,
+                    dest_x,
+                    entry['threshold'],
+                    entry['delay'],
+                    entry['weight']
+                )
+            else:
+                netcon_recip, syn_recip = None, None
+
             # Keep references to the synapse parts
-            synapses.append((netcon, syn, neck, head))
+            synapses.append((netcon, syn, neck, head, netcon_recip, syn_recip))
+
+    def create_netcon_syn(self,
+                          syn_class_name, syn_sec, syn_sec_x, syn_params,
+                          source_sec, source_x, threshold, delay, weight):
+
+        # Create synapse point process
+        # e.g. syn = h.ExpSyn(dend(0.5))
+        syn_class = getattr(h, syn_class_name)
+        syn = syn_class(syn_sec(syn_sec_x))
+
+        if syn_params != '':
+            syn_params = eval(syn_params)
+            for key in syn_params.keys():
+                setattr(syn, key, syn_params[key])
+
+        netcon = h.NetCon(
+            source_sec(source_x)._ref_v,
+            syn,
+            threshold,
+            delay,
+            weight,
+            sec=source_sec
+        )
+
+        return netcon, syn
 
     @staticmethod
     def add_spine_pt3d(sec, xyz, diam):

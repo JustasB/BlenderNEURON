@@ -4,6 +4,7 @@ from random import random
 from mathutils import Euler, Vector, Matrix
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 import bpy
+from fnmatch import fnmatch
 
 class VectorConfinerView(SectionObjectView):
     __metaclass__ = ABCMeta
@@ -71,26 +72,99 @@ class VectorConfinerView(SectionObjectView):
     def confine_between_meshes(obj, start_mesh, end_mesh, height_low, height_high, max_angle, iters=3):
         self = VectorConfinerView
 
+        # A random height fraction between start and end layers
         height_fraction = height_low + (height_high - height_low) * random()
 
+        # Section proximal location in global coords
+        sec_start_loc = obj.matrix_world * obj.data.splines[0].bezier_points[0].co
+
         for i in range(iters):
+            # Section distal location in global coords
             tip_loc = obj.matrix_world * obj.data.splines[0].bezier_points[-1].co
 
+            # Section direction vector
+            vec_sec_dir = (tip_loc - sec_start_loc).normalized()
+
+            # Closest point on start mesh from the tip
             closest_on_start, _ = self.closest_point_on_object(tip_loc, start_mesh)
+
+            # Closest point on end mesh from tip
             closest_on_end, _ = self.closest_point_on_object(tip_loc, end_mesh)
 
+            # Normal vector from closest point on start to end mesh
             vec_start2end = (closest_on_end - closest_on_start).normalized()
+
+            # Section steepness within the two layers
+            steepness_now = abs(90 - acos(min(max(vec_sec_dir.dot(vec_start2end), -1), 1)) * 180 / pi)
+
+            # Normal vector from closest on start mesh to section tip
             vec_start2tip = (tip_loc - closest_on_start).normalized()
+
+            # Degree angle between start2tip and start2end vectors
             angle = acos(min(max(vec_start2end.dot(vec_start2tip), -1), 1)) * 180 / pi
+
+            # Tip is above start mesh (between start and end meshes)
             above = angle < 90 - 0.02
 
             # Above = when on the same side as the end_mesh, below when on the other side
             if not above:
                 vec_start2tip *= -1  # Flip direction
 
+            # Total dist between closest points on start and end meshes
             height = (closest_on_end - closest_on_start).length
-            align_target = closest_on_start + vec_start2tip * height * height_fraction
 
+            # Target is a random location along the closest start-end point vector
+            align_target = closest_on_start + vec_start2end * height * height_fraction
+
+
+            # # Confinement test
+            # layer_height = height * (height_high - height_low)
+            # start_pt = closest_on_start + vec_start2end * height * height_low
+            # end_pt = closest_on_start + vec_start2end * height * height_high
+            #
+            # dist_to_start = (tip_loc - start_pt).length
+            # dist_to_end = (tip_loc - end_pt).length
+            #
+            # # Quick radius based approximation
+            # if dist_to_start > layer_height or dist_to_end > layer_height:
+            #     is_confined = False
+            #
+            # # More accurate test
+            # else:
+            #     is_confined = (layer_height * layer_height) > \
+            #                   (dist_to_start * dist_to_start + dist_to_end * dist_to_end)
+            #
+            #
+            # obj["is_confined"] = int(is_confined)
+            # obj["layer_height"] = layer_height
+            # obj["dist_to_start"] = dist_to_start
+            # obj["dist_to_end"] = dist_to_end
+            #
+            # if not is_confined:
+            #     if dist_to_end < dist_to_start:
+            #         align_target = end_pt
+            #     else:
+            #         align_target = start_pt
+            #
+            # # If confined, check steepness
+            # else:
+            #
+            #     # Section direction vector assuming pointing at target
+            #     vec_align_target = (align_target - sec_start_loc).normalized()
+            #
+            #     # # Steepness of the align target
+            #     # steepness_target = abs(90 - acos(min(max(vec_align_target.dot(vec_start2end), -1), 1)) * 180 / pi)
+            #
+            #     # Limit steepness increases
+            #     # When steepness is not controlled, child sections can exceed layer limits
+            #     # requiring sharp turns to stay confined
+            #     # limiting steepness, limits this problem.
+            #     # This is usually a problem for sections that are already steep (e.g. close to the soma)
+            #     # if steepness_target > steepness_now and steepness_target > 45:
+            #     #     return
+
+
+            # With each iteration, the target approaches a stable limit
             self.align_object_towards(obj, align_target, max_angle / iters)
 
     @staticmethod
@@ -133,7 +207,7 @@ class VectorConfinerView(SectionObjectView):
     def confine_curve(curve_obj, mesh, outer_mesh, name_pattern, height_range, max_angle):
         self = VectorConfinerView
 
-        if name_pattern is None or name_pattern in curve_obj.name:
+        if name_pattern is None or fnmatch(curve_obj.name, name_pattern):
             self.confine_between_meshes(curve_obj, mesh, outer_mesh, height_range[0], height_range[1], max_angle)
 
         if len(curve_obj.children) > 0:

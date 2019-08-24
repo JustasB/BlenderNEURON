@@ -230,11 +230,14 @@ class BlenderRoot(BlenderSection):
         self.group.roots[self.hash] = self
 
         # ui
-        root_entry = self.group.ui_group.root_entries.get(self.name)
+        group.highlight()
+
+        ui_group = self.group.ui_group
+        root_entry = ui_group.root_entries.get(self.name)
 
         # If not on the list of cells (e.g. when newly added in NRN)
         if root_entry is None:
-            root_entry = self.add_to_UI_group(self.group.ui_group)
+            root_entry = self.add_to_UI_group(ui_group)
 
         if root_entry is not None and not root_entry.selected:
             root_entry.selected = True

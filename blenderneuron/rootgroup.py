@@ -27,6 +27,9 @@ class RootGroup:
         update of a group within blender by getting full info from nrn 
     """
 
+    def __str__(self):
+        return self.name
+
     def clear_activity(self):
         level = self.recording_granularity
 

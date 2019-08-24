@@ -28,7 +28,8 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
             # Add a cell group (will contain all root sections by default)
             self.node.add_group()
 
-            context.scene.BlenderNEURON.add_synapse_set()
+            # Add a blank synapse set
+            self.node.add_synapse_set()
 
         return {'FINISHED'}
 

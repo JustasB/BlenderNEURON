@@ -56,11 +56,16 @@ class BlenderNode(CommNode):
 
                 # Add a new root
                 else:
-                    self.root_index[hash] = BlenderRoot(
+                    new_root = self.root_index[hash] = BlenderRoot(
                         root_info["index"],
                         hash,
                         root_info["name"]
                     )
+
+                    # Make sure it's listed as selectable in all groups
+                    for group in self.groups.values():
+                        new_root.add_to_UI_group(group.ui_group)
+
         except ConnectionRefusedError:
             root_data = []
 
@@ -118,3 +123,56 @@ class BlenderNode(CommNode):
     def get_group_dicts(self, group_list):
         return [group.to_dict() for group in group_list]
 
+
+    @property
+    def synapse_sets(self):
+        return bpy.context.scene.BlenderNEURON.synapse_sets
+
+    def add_synapse_set(self, name=None):
+        new_set = self.synapse_sets.add()
+
+        if name is None:
+            i_name = len(self.synapse_sets.values())
+
+            while True:
+                name = "SynapseSet." + str(i_name).zfill(3)
+
+                if name in self.synapse_sets.keys():
+                    i_name += 1
+                else:
+                    break
+
+        new_set.name = name
+
+        return new_set
+
+    def display_groups(self):
+        for group in self.groups.values():
+
+            if group.selected:
+                group.show()
+
+            else:
+                group.remove_view()
+
+
+    def add_neon_effect(self):
+        scene = bpy.context.scene
+        scene.use_nodes = True
+
+        links = scene.node_tree.links
+        nodes = scene.node_tree.nodes
+
+        layers = nodes.get('Render Layers')
+        glare = nodes.new('CompositorNodeGlare')
+        composite = nodes.get('Composite')
+
+        links.new(layers.outputs['Image'], glare.inputs['Image'])
+        links.new(glare.outputs['Image'], composite.inputs['Image'])
+
+        glare.quality = 'MEDIUM'
+        glare.iterations = 3
+        glare.color_modulation = 0.2
+        glare.threshold = 0.1
+        glare.streaks = 7
+        glare.fade = 0.75

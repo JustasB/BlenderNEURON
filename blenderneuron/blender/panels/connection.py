@@ -59,3 +59,5 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
             # ----------- #
 
             self.layout.operator("blenderneuron.node_stop", text="Stop Blender Node", icon="CANCEL")
+
+            self.layout.operator("blenderneuron.add_neon_effect", text="Add Neon Effect", icon="PARTICLES")
