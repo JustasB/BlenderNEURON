@@ -13,6 +13,10 @@ class BlenderRootGroup(RootGroup):
     def ui_group(self):
         return self.node.ui_properties.groups[self.name]
 
+    @property
+    def color_ramp_material(self):
+        return bpy.data.materials.get(self.color_ramp_material_name)
+
     def __init__(self, name, node):
         super(BlenderRootGroup, self).__init__()
 
@@ -26,17 +30,39 @@ class BlenderRootGroup(RootGroup):
         self.smooth_sections = True
         self.spherize_soma_if_DeqL=True
         self.as_lines=False
-        self.segment_subdivisions=1
-        self.circular_subdivisions=5
-        self.default_color = [1, 1, 1]
+        self.segment_subdivisions=2
+        self.circular_subdivisions=6
+        self.default_color = [0.14, 0.67, 0.02]  # Pale yellow green
+
+        # Animation properties
+        self.animate_brightness = True
+        self.max_brightness = 5
+        self.animate_color = True
+        self.animation_range_low = -85
+        self.animation_range_high = 20
+        self.simplification_epsilon = 0.1
+        self.frames_per_ms = 1
 
         self.state = 'new'
+
+        self.color_ramp_material_name = self.create_color_ramp_material()
+
+    def create_color_ramp_material(self):
+        name = self.name + '_color_ramp'
+
+        mat = bpy.data.materials.new(name)
+        mat.use_diffuse_ramp = True
+        mat.diffuse_ramp.elements[0].color = self.default_color + [1] # alpha
+        mat.diffuse_ramp.elements[-1].color = [1] * 4 # All white
+
+
+        return name
+
 
     def highlight(self):
         self.node.ui_properties.groups_index = self.ui_group.index
 
     def from_full_NEURON_group(self, nrn_group):
-        self.state = 'imported'
 
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
@@ -50,6 +76,25 @@ class BlenderRootGroup(RootGroup):
 
         if "activity" in nrn_group:
             self.activity.from_dict(nrn_group["activity"])
+
+        # Set activity times from the group time
+        for root in self.roots.values():
+            self.set_activity_times(root, self.activity.times)
+            self.simplify_activity(root)
+            
+        self.state = 'imported'
+
+    def set_activity_times(self, root, times):
+        root.activity.times = times
+
+        for child in root.children:
+            self.set_activity_times(child, times)
+
+    def simplify_activity(self, root):
+        root.activity.simplify(self.simplification_epsilon)
+
+        for child in root.children:
+            self.simplify_activity(child)
 
     def import_group(self):
         self.node.import_groups_from_neuron([self])
@@ -122,6 +167,12 @@ class BlenderRootGroup(RootGroup):
 
         # and from node
         self.node.groups.pop(self.name)
+
+        # Remove color ramp material
+        ramp_mat = self.color_ramp_material
+
+        if ramp_mat is not None:
+            bpy.data.materials.remove(ramp_mat)
 
     def remove_from_UI(self):
         remove_prop_collection_item(self.node.ui_properties.groups, self.ui_group)

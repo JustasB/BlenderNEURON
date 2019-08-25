@@ -27,7 +27,14 @@ class CellObjectView(ObjectViewAbstract):
                                           origin_type="center",
                                           container_material=material)
 
+            # Animate section activity
+            self.animate_section_material(
+                root,
+                recursive=self.group.recording_granularity == 'Section'
+            )
+
         self.link_containers()
+
 
     def update_group(self):
         for root in self.group.roots.values():

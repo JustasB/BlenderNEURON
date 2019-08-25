@@ -104,9 +104,6 @@ class NeuronNode(CommNode):
 
     def create_synapses(self, syn_set):
 
-        import pydevd
-        pydevd.settrace('192.168.0.100', port=4200)
-
         set_name = syn_set['name']
         syn_entries = syn_set['entries']
 

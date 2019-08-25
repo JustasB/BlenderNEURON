@@ -469,7 +469,8 @@ class SynapseSetRemoveOperator(Operator, BlenderNodeClass):
 class AddNeonEffectOperator(Operator, BlenderNodeClass):
     bl_idname = "blenderneuron.add_neon_effect"
     bl_label = "Add neon effect to rendered images"
-    bl_description = "Adds a glare filter via compositing nodes"
+    bl_description = "Adds a glare filter to rendered images. Can be customized in Node Editor > " \
+                     "Compositing > Glare"
 
     @classmethod
     def poll(cls, context):

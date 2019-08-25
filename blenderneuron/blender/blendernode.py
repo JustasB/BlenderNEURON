@@ -157,6 +157,11 @@ class BlenderNode(CommNode):
 
 
     def add_neon_effect(self):
+        """
+        Adds glare filter to the compositing node tree
+
+        :return:
+        """
         scene = bpy.context.scene
         scene.use_nodes = True
 
@@ -164,8 +169,16 @@ class BlenderNode(CommNode):
         nodes = scene.node_tree.nodes
 
         layers = nodes.get('Render Layers')
+
+        if layers is None:
+            layers = nodes.new('CompositorNodeRLayers')
+
         glare = nodes.new('CompositorNodeGlare')
+
         composite = nodes.get('Composite')
+
+        if composite is None:
+            composite = nodes.new('CompositorNodeComposite')
 
         links.new(layers.outputs['Image'], glare.inputs['Image'])
         links.new(glare.outputs['Image'], composite.inputs['Image'])

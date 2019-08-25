@@ -86,76 +86,6 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
         col.operator("blenderneuron.invert_cell_selection")
 
 
-class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
-    bl_label = "Cell Group Options"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        return AbstractBlenderNEURONPanel.groups_exist(context)
-
-    def draw(self, context):
-        group = self.get_group(context)
-
-        col = self.layout
-        col.label(text="Interaction Settings:")
-        col = self.layout.box()
-        col.label('Interact with each:')
-        col.row().prop(group, "interaction_granularity", text="Interact", expand=True)
-
-        col = self.layout
-        col.label(text="Section Display Settings:")
-        box = col.box().column()
-        box.prop(group, "as_lines", text="Sections as Line Segments?")
-
-        box = box.column()
-        box.enabled = not group.as_lines
-        col = box.split(percentage=0.33)
-        col.label('Color:')
-        col.prop(group, "default_color", text='')
-
-        col = box.split(percentage=0.33)
-        col.label('Smooth curves:')
-        col.prop(group, "smooth_sections", text='')
-
-        col = box.split(percentage=0.33)
-        col.enabled = group.smooth_sections
-        col.label('Subdivisions:')
-        col.prop(group, "segment_subdivisions", text='')
-
-        col = box.split(percentage=0.33)
-        col.label('N-gon Sides:')
-        col.prop(group, "circular_subdivisions", text='')
-
-        col = box.split(percentage=0.33)
-        col.label('Spherical Somas:')
-        col.prop(group, "spherize_soma_if_DeqL", text='')
-
-        col = self.layout
-        col.separator()
-        col.label(text="Recording Settings:")
-        col = self.layout.box().column()
-        col.prop(group, "record_activity", text="Record Activity")
-
-        col = col.column()
-        col.enabled = group.record_activity
-        col.label('Record from each:')
-        col.row().prop(group, "recording_granularity", expand=True)
-        col.separator()
-        col.prop(group, "record_variable", text="Record", expand=True)
-
-        col = col.split(percentage=0.33)
-        col.label('Sampling Period (ms):')
-        col.prop(group, "recording_period", text="")
-
-        col = self.layout
-        col.separator()
-        col.label(text="Connectivity Settings:")
-        col = self.layout.box()
-        col.prop(group, "import_synapses", text="Import Synapses")
-
-
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_Import'
     bl_label = "Import / Export / Save"
@@ -181,6 +111,120 @@ class ImportPanel(AbstractBlenderNEURONPanel, Panel):
 
         self.layout.operator("blenderneuron.save_groups_to_file", text="Save Changes to NEURON .py file",
                              icon="FILESEL")
+
+
+class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
+    bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
+    bl_label = "Cell Group Options"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return AbstractBlenderNEURONPanel.groups_exist(context)
+
+    def draw(self, context):
+        group = self.get_group(context)
+
+        col = self.layout
+        col.label(text="Interaction Settings:")
+        col = self.layout.box()
+        col.label('Interact with Each:')
+        col.row().prop(group, "interaction_granularity", text="Interact", expand=True)
+
+        col = self.layout
+        col.label(text="Section Display Settings:")
+        box = col.box().column()
+        row = box.split(percentage=0.9)
+        row.label("Sections as Lines")
+        row.prop(group, "as_lines", text='')
+
+        if not group.as_lines:
+            box = box.column()
+            box.enabled = not group.as_lines
+            col = box.split(percentage=0.33)
+            col.label('Color:')
+            col.prop(group, "default_color", text='')
+
+            col = box.split(percentage=0.9)
+            col.label('Smooth Curves:')
+            col.prop(group, "smooth_sections", text='')
+
+            col = box.split(percentage=0.33)
+            col.enabled = group.smooth_sections
+            col.label('Subdivisions:')
+            col.prop(group, "segment_subdivisions", text='')
+
+            col = box.split(percentage=0.33)
+            col.label('N-gon Sides:')
+            col.prop(group, "circular_subdivisions", text='')
+
+            col = box.split(percentage=0.9)
+            col.label('Spherical Somas:')
+            col.prop(group, "spherize_soma_if_DeqL", text='')
+
+        col = self.layout
+        col.separator()
+        col.label(text="Recording Settings:")
+        col = self.layout.box().column()
+        row = col.split(percentage=0.9)
+        row.label("Record Activity")
+        row.prop(group, "record_activity", text='')
+
+        if group.record_activity:
+            col = col.column()
+            col.enabled = group.record_activity
+            col.label('Record from Each:')
+            col.row().prop(group, "recording_granularity", expand=True)
+            col.separator()
+
+            row = col.split(percentage=0.5)
+            row.label('Record:')
+            row.prop(group, "record_variable", text="")
+
+            row = col.split(percentage=0.5)
+            row.label('Sampling Period:')
+            row.prop(group, "recording_period", text="")
+
+            row = col.split(percentage=0.5)
+            row.label('Frames per Millisecond:')
+            row.prop(group, "frames_per_ms", text="")
+
+            row = col.split(percentage=0.5)
+            row.label('Simplification Tolerance:')
+            row.prop(group, "simplification_epsilon", text="")
+
+
+            row = col.split(percentage=0.5)
+            row.label('Animate Brightness:')
+            row.prop(group, "animate_brightness", text="")
+
+            row = col.split(percentage=0.5)
+            row.label('Animate Color:')
+            row.prop(group, "animate_color", text="")
+
+            if group.animate_color:
+                col.separator()
+                col = col.column()
+                col.template_color_ramp(group.node_group.color_ramp_material, "diffuse_ramp", expand=True)
+                col.separator()
+
+            col.separator()
+            row = col.split(percentage=0.50)
+            row.label('Variable Low:')
+            row.label('High:')
+            row = col.split(percentage=0.50)
+            row.prop(group, "animation_range_low", text="")
+            row.prop(group, "animation_range_high", text="")
+
+
+
+        col = self.layout
+        col.separator()
+        col.label(text="Connectivity Settings:")
+        col = self.layout.box()
+        row = col.split(percentage=0.9)
+        row.label("Import Synapses")
+        row.prop(group, "import_synapses", text='')
 
 
 class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):

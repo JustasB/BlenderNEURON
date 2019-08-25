@@ -1,9 +1,10 @@
 import threading
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from blenderneuron.blender.utils import get_operator_context_override
+from blenderneuron.blender.utils import get_operator_context_override, rdp
 from fnmatch import fnmatch
 import bpy
+import numpy as np
 
 from blenderneuron.blender.views.curvecontainer import CurveContainer
 
@@ -35,7 +36,7 @@ class ObjectViewAbstract(ViewAbstract):
         self.closed_ends = True
 
     def make_curve_template(self):
-        curve_template = bpy.data.curves.new("bezier_"+self.group.name, type='CURVE')
+        curve_template = bpy.data.curves.new(self.group.name+"_bezier", type='CURVE')
         curve_template.dimensions = '3D'
         curve_template.resolution_u = self.group.segment_subdivisions
         curve_template.fill_mode = 'FULL'
@@ -184,3 +185,101 @@ class ObjectViewAbstract(ViewAbstract):
         # Convert the selected container meshes to curves
         bpy.context.scene.objects.active = bpy.context.selected_objects[0]
         bpy.ops.object.convert(target='CURVE', keep_original=False)
+
+    def animate_activity(self, activity, material_name):
+        if activity is None:
+            return
+
+        mat = bpy.data.materials.get(material_name)
+
+        if mat is None:
+            return
+
+        times = activity.times
+        values = activity.values
+        group = self.group
+
+        max_brightness = group.max_brightness
+
+        if len(times) * len(values) == 0:
+            return
+
+        # Convert times to frames
+        frames = np.round(times * self.group.frames_per_ms).astype(int)
+
+        # Store the values in a custom material property
+        # This allows inspecting raw values in the Graph editor
+        for i, frame in enumerate(frames):
+            mat["recorded_value"] = values[i]
+            mat.keyframe_insert(data_path='["recorded_value"]', frame=frame)
+
+        # Map values to 0-1 range
+        # These are then used to determine the brightness and color
+        if group.animate_brightness or group.animate_color:
+            intensity = self.change_range(
+                values,
+                group.animation_range_low, group.animation_range_high,
+                0.0, 1.0
+            )
+
+        if group.animate_brightness:
+            # Get the Cycles emission shader node strength input
+            emit_strength = mat.node_tree.nodes['Emission'].inputs['Strength']
+
+            for i, frame in enumerate(frames):
+                # Set the material emit and Cycles emit node intensity
+                emit_strength.default_value = mat.emit = intensity[i] * max_brightness
+
+                # Set the material and node emit keyframes
+                mat.keyframe_insert(data_path="emit", frame=frame)
+                emit_strength.keyframe_insert(data_path="default_value", frame=frame)
+
+        if group.animate_color:
+            # Get the Cycles color shader node input color
+            node_color = mat.node_tree.nodes['Transparent BSDF'].inputs['Color']
+
+            # Color ramp eval function
+            color_value_at = group.color_ramp_material.diffuse_ramp.evaluate
+
+            for i, frame in enumerate(frames):
+                # Get the color value from the ramp widget
+                frame_color4 = color_value_at(intensity[i])
+
+                # Set the material emit and Cycles emit node intensity
+                node_color.default_value = frame_color4
+                mat.diffuse_color = frame_color4[0:3]  # ignore alpha
+
+                # Set the material and node color keyframes
+                mat.keyframe_insert(data_path="diffuse_color", frame=frame)
+                node_color.keyframe_insert(data_path="default_value", frame=frame)
+
+
+
+    def change_range(self, values, in_min, in_max, out_min, out_max):
+        """
+        Map the values from in_ range to out_ range. Clamping them to be within out_ range.
+        :param values:
+        :param in_min:
+        :param in_max:
+        :param out_min:
+        :param out_max:
+        :return:
+        """
+
+        in_span = in_max - in_min
+        range_position = (values - in_min) / in_span
+
+        out_span = out_max - out_min
+        result = out_span * range_position + out_min
+
+        # Clamp to out range
+        result = np.clip(result, out_min, out_max)
+
+        return result
+
+    def animate_section_material(self, root, recursive=True):
+        self.animate_activity(root.activity, root.name)
+
+        if recursive:
+            for child in root.children:
+                self.animate_section_material(child, True)

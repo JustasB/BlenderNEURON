@@ -356,6 +356,58 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     " (e.g. 'v' of soma(0.5).v) and use to animate segments in Blender"
     )
 
+    animate_brightness = BoolProperty(
+        default=True,
+        get=get_prop("animate_brightness"),
+        set=set_prop("animate_brightness"),
+        description="Whether to translate recorded variable (e.g. Vm) values to brightness"
+    )
+
+    animate_color = BoolProperty(
+        default=True,
+        get=get_prop("animate_color"),
+        set=set_prop("animate_color"),
+        description="Whether to translate recorded variable (e.g. Vm) values to color"
+    )
+
+    animation_range_low = FloatProperty(
+        default=-85,
+        get=get_prop("animation_range_low"),
+        set=set_prop("animation_range_low"),
+        description="This value of the recorded variable (e.g. Vm) will map to the"
+                    " lowest brightness and to the leftmost color (0 position) of the "
+                    "color ramp below"
+    )
+
+    animation_range_high = FloatProperty(
+        default=20,
+        get=get_prop("animation_range_high"),
+        set=set_prop("animation_range_high"),
+        description="This value of the recorded variable (e.g. Vm) will map to the"
+                    " highest brightness and to the rightmost color (1.0 position) of the "
+                    "color ramp below"
+    )
+
+    simplification_epsilon = FloatProperty(
+        default=0.1,
+        min=0,
+        get=get_prop("simplification_epsilon"),
+        set=set_prop("simplification_epsilon"),
+        description="Co-llinearity deviations of this amount will be"
+                    "simplified to the nearest line segment. Units are same as the"
+                    " units of the recording variable (e.g. mV for 'v'). 0 will remove "
+                    "only completely co-linear activity points (e.g. lossless)"
+    )
+
+    frames_per_ms = FloatProperty(
+        default=1,
+        min=0,
+        get=get_prop("frames_per_ms"),
+        set=set_prop("frames_per_ms"),
+        description="The number of Blender frames to use to represent 1 ms of NEURON "
+                    "activity"
+    )
+
     gran2int = {
         "Group": 3,
         "Cell": 2,
@@ -449,21 +501,20 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     )
 
     segment_subdivisions = IntProperty(
-        default=3,
         min=1,
         max=10,
-        description="Number of linear subdivisions to use when displaying a section. Higher results in smooth-"
-                    "looking section curvature, but requires more polygons",
+        description="Number of linear subdivisions to use when displaying a 3D point segment. Higher results in "
+                    "smoother section curvature, but requires more polygons",
         get=get_prop("segment_subdivisions"),
         set=set_prop("segment_subdivisions")
     )
 
 
     circular_subdivisions = IntProperty(
-        default=5,
         min=4,
         max=12,
-        description="Number of sides to use when creating circular section cross-sections",
+        description="Number of sides to use when creating circular section cross-sections. "
+                    "Only even values are allowed. Higher values use more polygons",
         get=get_prop("circular_subdivisions"),
         set=set_prop("circular_subdivisions")
     )
