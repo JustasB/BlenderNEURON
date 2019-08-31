@@ -1,11 +1,12 @@
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
-from blenderneuron.blender.views.commandview import CommandView
+from blenderneuron.blender.views.jsonview import JsonView
 from blenderneuron.blender.utils import remove_prop_collection_item
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
 from fnmatch import fnmatch
+import json
 
 class BlenderRootGroup(RootGroup):
 
@@ -33,6 +34,7 @@ class BlenderRootGroup(RootGroup):
         self.segment_subdivisions=2
         self.circular_subdivisions=6
         self.default_color = [0.14, 0.67, 0.02]  # Pale yellow green
+        self.default_brightness = 1.0
 
         # Animation properties
         self.animate_brightness = True
@@ -67,20 +69,23 @@ class BlenderRootGroup(RootGroup):
         # Update each group root with the NRN root
         for nrn_root in nrn_group["roots"]:
 
-            hash = nrn_root["hash"]
+            name = nrn_root["name"]
 
-            if hash not in self.roots:
+            if name not in self.roots:
                 bpy.ops.blenderneuron.get_cell_list_from_neuron()
 
-            self.roots[hash].from_full_NEURON_section_dict(nrn_root)
+            self.roots[name].from_full_NEURON_section_dict(nrn_root)
 
         if "activity" in nrn_group:
             self.activity.from_dict(nrn_group["activity"])
 
-        # Set activity times from the group time
-        for root in self.roots.values():
-            self.set_activity_times(root, self.activity.times)
-            self.simplify_activity(root)
+            # Set activity times from the group time
+            for root in self.roots.values():
+                self.set_activity_times(root, self.activity.times)
+                self.simplify_activity(root)
+                
+        else:
+            self.clear_activity()
             
         self.state = 'imported'
 
@@ -186,7 +191,7 @@ class BlenderRootGroup(RootGroup):
 
     def select_roots(self, condition='All', pattern=None):
         if condition == 'None':
-            for root in self.roots.values():
+            for root in list(self.roots.values()):
                 root.remove_from_group()
 
         else:
@@ -252,14 +257,10 @@ class BlenderRootGroup(RootGroup):
     def to_file(self, file_name):
         self.from_view()
 
-        root_commands = CommandView(self).show()
+        group_dict = JsonView(self).show()
 
-        file_contents = ""
-        for hash in root_commands.keys():
-            file_contents += root_commands[hash]
-
-        with open(file_name, 'w', encoding='utf-8') as f:
-            f.write(file_contents)
+        with open(file_name, 'w') as f:
+            json.dump(group_dict, f)
 
 
 

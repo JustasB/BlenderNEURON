@@ -229,9 +229,9 @@ class PhysicsAlignerView(VectorConfinerView):
 
         if not any(root.children):
             if root.was_split:
-                root_cont = self.containers[root.split_sections[-1].hash]
+                root_cont = self.containers[root.split_sections[-1].name]
             else:
-                root_cont = self.containers[root.hash]
+                root_cont = self.containers[root.name]
 
             root_cont.add_tip(self.tip_template, self.joint_pool.get())
             del root_cont
@@ -251,23 +251,23 @@ class PhysicsAlignerView(VectorConfinerView):
         if root.was_split:
 
             for i, split_sec in enumerate(root.split_sections[:-1]):
-                start_cont = self.containers[split_sec.hash]
-                end_cont = self.containers[root.split_sections[i+1].hash]
+                start_cont = self.containers[split_sec.name]
+                end_cont = self.containers[root.split_sections[i+1].name]
                 start_cont.create_joint_with(end_cont, self.joint_pool.get())
                 del start_cont, end_cont
 
             # Then link the last split section with original children
-            root_cont = self.containers[root.split_sections[-1].hash]
+            root_cont = self.containers[root.split_sections[-1].name]
 
         else:
             # Create joints between the parent and it's children
-            root_cont = self.containers[root.hash]
+            root_cont = self.containers[root.name]
 
         for child in root.children:
             # If a child was split, then use the first spit section as child container
-            child_hash = (child.split_sections[0] if child.was_split else child).hash
+            child_name = (child.split_sections[0] if child.was_split else child).name
 
-            child_cont = self.containers[child_hash]
+            child_cont = self.containers[child_name]
             root_cont.create_joint_with(child_cont, self.joint_pool.get())
             del child_cont
 

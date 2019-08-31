@@ -257,14 +257,14 @@ class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
 class SaveGroupsToFileOperator(Operator, ExportHelper, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.save_groups_to_file"
     bl_label = "Save Group Data"
-    bl_description = "Save Changes to NEURON .py file"
+    bl_description = "Save Changes to JSON file"
 
     @classmethod
     def poll(cls, context):
         return BlenderNodeClass.imported_groups_exist(context)
 
     # ExportHelper mixin class uses this
-    filename_ext = ".py"
+    filename_ext = ".json"
 
     def execute(self, context):
         self.node.ui_properties.group.node_group.to_file(self.filepath)
@@ -273,22 +273,6 @@ class SaveGroupsToFileOperator(Operator, ExportHelper, CellGroupOperatorAbstract
 
         return {'FINISHED'}
 
-
-class SelectConfineableSections(Operator, CellGroupOperatorAbstract):
-    bl_idname = "blenderneuron.select_confineable_sections"
-    bl_label = "Select Fixed Sections"
-    bl_description = "Selects/Highlights the sections that will be confined between the " \
-                     "selected layers"
-
-    def execute(self, context):
-
-        ui_group = self.node.ui_properties.group
-        group = ui_group.node_group
-
-        group.show(SectionObjectView)
-        group.view.select_containers(pattern=ui_group.layer_confiner_settings.moveable_sections_pattern)
-
-        return{'FINISHED'}
 
 class SetupConfiner(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.setup_confiner"
@@ -355,33 +339,9 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
 
     def execute(self, context):
 
-        settings = context.scene.BlenderNEURON.synapse_set
+        synapse_set = context.scene.BlenderNEURON.synapse_set
 
-        source_group = self.node.groups[settings.group_source]
-        dest_group = self.node.groups[settings.group_dest]
-
-        # Detect if any of the selected groups haven't been imported (no 3d data)
-        import_groups = [group for group in [source_group, dest_group] if group.state != 'imported']
-
-        # Import them
-        if len(import_groups) > 0:
-            for group in import_groups:
-                group.interaction_granularity = 'Cell'
-                group.recording_granularity = 'Cell'
-                group.record_activity = False
-                group.import_synapses = False
-
-            self.node.import_groups_from_neuron(import_groups)
-
-        source_group.show(SynapseFormerView, dest_group)
-
-        pairs = source_group.view.get_synapse_locations(
-            settings.max_distance,
-            settings.use_radius,
-            settings.max_syns_per_pt,
-            settings.section_pattern_source,
-            settings.section_pattern_dest
-        )
+        pairs = synapse_set.get_synapse_locations()
 
         self.report({'INFO'}, 'Found ' + str(len(pairs)) + ' synapse locations')
 
@@ -405,24 +365,35 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
     def execute(self, context):
 
         synapse_set = context.scene.BlenderNEURON.synapse_set
+        synapse_set.create_synapses()
 
-        from_group = self.node.groups[synapse_set.group_source]
+        self.report({'INFO'}, 'Synapses created in NEURON')
 
-        from_group.view.create_synapses(
-            synapse_set.name,
-            synapse_set.synapse_name_dest,
-            synapse_set.synapse_params_dest,
-            synapse_set.conduction_velocity,
-            synapse_set.initial_weight,
-            synapse_set.threshold,
-            synapse_set.is_reciprocal,
-            synapse_set.synapse_name_source,
-            synapse_set.synapse_params_source,
-            synapse_set.create_spines,
-            synapse_set.spine_neck_diameter,
-            synapse_set.spine_head_diameter,
-            synapse_set.spine_name_prefix
-        )
+        return{'FINISHED'}
+
+
+class SaveSynapseSetOperator(Operator, ExportHelper, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.save_synapseset"
+    bl_label = "Save Synapse Set"
+    bl_description = "Saves the synapses in the synapse set to a JSON file"
+
+    # ExportHelper mixin class uses this
+    filename_ext = ".json"
+
+    @classmethod
+    def poll(cls, context):
+
+        settings = context.scene.BlenderNEURON.synapse_set
+
+        # Enable only when two different groups are selected
+        return type(bpy.types.Object.BlenderNEURON_node.groups[settings.group_source].view) is SynapseFormerView
+
+    def execute(self, context):
+
+        synapse_set = context.scene.BlenderNEURON.synapse_set
+        synapse_set.save_synapses(self.filepath)
+
+        self.report({'INFO'}, 'File saved: ' + self.filepath)
 
         return{'FINISHED'}
 

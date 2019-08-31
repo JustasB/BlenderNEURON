@@ -13,19 +13,25 @@ class CellObjectView(ObjectViewAbstract):
         if self.group.recording_granularity not in ["Section", "Cell"]:
             raise NotImplementedError(self.group.recording_granularity)
 
+        color = self.group.default_color
+        brightness = self.group.default_brightness
+
         for root in self.group.roots.values():
             # Cell gran: create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
-                material = CurveContainer.create_material(root.name)
+                material = CurveContainer.create_material(root.name, color, brightness)
 
             # Section gran: let each container create their own material
             else:
                 material = None
 
-            self.create_section_container(root,
+            container = self.create_section_container(root,
                                           include_children=True,
                                           origin_type="center",
                                           container_material=material)
+
+            # Lock scaling the parent (rotations and translations are allowed)
+            container.get_object().lock_scale = [True] * 3
 
             # Animate section activity
             self.animate_section_material(
@@ -38,7 +44,7 @@ class CellObjectView(ObjectViewAbstract):
 
     def update_group(self):
         for root in self.group.roots.values():
-            container = self.containers.get(root.hash)
+            container = self.containers.get(root.name)
 
             if container is not None:
                 container.update_group_section(root, recursive=True)

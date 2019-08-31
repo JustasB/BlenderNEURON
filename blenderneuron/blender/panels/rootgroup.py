@@ -134,31 +134,35 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col = self.layout
         col.label(text="Section Display Settings:")
         box = col.box().column()
-        row = box.split(percentage=0.9)
+        row = box.split(percentage=0.5)
         row.label("Sections as Lines")
         row.prop(group, "as_lines", text='')
 
         if not group.as_lines:
             box = box.column()
             box.enabled = not group.as_lines
-            col = box.split(percentage=0.33)
-            col.label('Color:')
+            col = box.split(percentage=0.5)
+            col.label('Init. Color:')
             col.prop(group, "default_color", text='')
 
-            col = box.split(percentage=0.9)
+            col = box.split(percentage=0.5)
+            col.label('Init. Brightness:')
+            col.prop(group, "default_brightness", text='')
+
+            col = box.split(percentage=0.5)
             col.label('Smooth Curves:')
             col.prop(group, "smooth_sections", text='')
 
-            col = box.split(percentage=0.33)
+            col = box.split(percentage=0.5)
             col.enabled = group.smooth_sections
             col.label('Subdivisions:')
             col.prop(group, "segment_subdivisions", text='')
 
-            col = box.split(percentage=0.33)
+            col = box.split(percentage=0.5)
             col.label('N-gon Sides:')
             col.prop(group, "circular_subdivisions", text='')
 
-            col = box.split(percentage=0.9)
+            col = box.split(percentage=0.5)
             col.label('Spherical Somas:')
             col.prop(group, "spherize_soma_if_DeqL", text='')
 
@@ -166,7 +170,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col.separator()
         col.label(text="Recording Settings:")
         col = self.layout.box().column()
-        row = col.split(percentage=0.9)
+        row = col.split(percentage=0.5)
         row.label("Record Activity")
         row.prop(group, "record_activity", text='')
 
@@ -222,7 +226,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col.separator()
         col.label(text="Connectivity Settings:")
         col = self.layout.box()
-        row = col.split(percentage=0.9)
+        row = col.split(percentage=0.5)
         row.label("Import Synapses")
         row.prop(group, "import_synapses", text='')
 
@@ -259,7 +263,10 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
 
         row = split.row(align=True)
         row.prop(settings, "moveable_sections_pattern", text="")
-        row.operator("blenderneuron.select_confineable_sections", text="", icon="RESTRICT_VIEW_OFF")
+
+        split = self.layout.split(percentage=0.33)
+        split.label(text="Random Seed:")
+        split.prop(settings, "seed", text="")
 
         split = self.layout.split(percentage=0.33)
         split.label(text="Min Height:")
@@ -332,9 +339,9 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
                AbstractBlenderNEURONPanel.group_count(context) > 1
 
     def draw(self, context):
-
-        settings = self.get_synapse_set(context)
         scene = context.scene
+
+        self.layout.label(text='Synapse Sets:')
 
         row = self.layout.row()
 
@@ -346,6 +353,11 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         col = row.column(align=True)
         col.operator("blenderneuron.synapse_set_add", icon='ZOOMIN', text="")
         col.operator("blenderneuron.synapse_set_remove", icon='ZOOMOUT', text="")
+
+        settings = self.get_synapse_set(context)
+
+        if settings is None:
+            return
 
         layout = self.layout
         layout.label(text='Source Cells:')
@@ -403,6 +415,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
         layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEWZOOM')
         layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
+        layout.operator('blenderneuron.save_synapseset', text='Save Synapse Set to .py File', icon='FILESEL')
 
 
 

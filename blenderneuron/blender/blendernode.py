@@ -42,9 +42,9 @@ class BlenderNode(CommNode):
 
             # Update new or existing root entries
             for i, root_info in enumerate(root_data):
-                hash = root_info["hash"]
+                name = root_info["name"]
 
-                existing_root = self.root_index.get(hash)
+                existing_root = self.root_index.get(name)
 
                 # Update existing root
                 if existing_root is not None:
@@ -52,13 +52,12 @@ class BlenderNode(CommNode):
                     existing_root.name = root_info["name"]
 
                     # Don't remove roots that previously existed and are present
-                    roots_to_delete.remove(hash)
+                    roots_to_delete.remove(name)
 
                 # Add a new root
                 else:
-                    new_root = self.root_index[hash] = BlenderRoot(
+                    new_root = self.root_index[name] = BlenderRoot(
                         root_info["index"],
-                        hash,
                         root_info["name"]
                     )
 
@@ -71,8 +70,8 @@ class BlenderNode(CommNode):
 
         finally:
             # Delete removed roots
-            for hash_to_delete in roots_to_delete:
-                self.root_index[hash_to_delete].remove(node=self)
+            for name_to_delete in roots_to_delete:
+                self.root_index[name_to_delete].remove(node=self)
 
     def find_unique_group_name(self):
         i_name = len(self.groups.values())

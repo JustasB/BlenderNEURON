@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from math import acos, pi
-from random import random
+import random
 from mathutils import Euler, Vector, Matrix
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 import bpy
@@ -58,9 +58,11 @@ class VectorConfinerView(SectionObjectView):
     def confine(self):
         settings = self.group.ui_group.layer_confiner_settings
 
+        random.seed(settings.seed)
+
         for root in self.group.roots.values():
             self.confine_curve(
-                self.containers[root.hash].object,
+                self.containers[root.name].object,
                 settings.start_mesh,
                 settings.end_mesh,
                 settings.moveable_sections_pattern,
@@ -73,7 +75,7 @@ class VectorConfinerView(SectionObjectView):
         self = VectorConfinerView
 
         # A random height fraction between start and end layers
-        height_fraction = height_low + (height_high - height_low) * random()
+        height_fraction = height_low + (height_high - height_low) * random.random()
 
         # Section proximal location in global coords
         sec_start_loc = obj.matrix_world * obj.data.splines[0].bezier_points[0].co

@@ -28,6 +28,12 @@ class ObjectViewAbstract(ViewAbstract):
     link_lock = threading.Lock()
 
     def __init__(self, rootgroup):
+        for root in rootgroup.roots.values():
+            if len(root.coords) == 0:
+                raise Exception(
+                    "Section '"+root.name+"' has no 3D coordinates. Make sure the Cell Group "
+                                          "has been imported from NEURON into Blender.")
+
         self.group = rootgroup
 
         self.containers = OrderedDict()
@@ -121,14 +127,14 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers(False)
 
     def remove_container(self, container):
-        # Lookup if passed in a hash
+        # Lookup if passed in a name
         if type(container) == str:
             container = self.containers.get(container)
             if container is None:
                 return
 
         container.remove()
-        self.containers.pop(container.root_hash)
+        self.containers.pop(container.name)
 
     def remove(self):
         # Remove any previous containers
@@ -160,14 +166,17 @@ class ObjectViewAbstract(ViewAbstract):
                 sec,
                 self.curve_template,
                 self.group.smooth_sections,
+                self.group.default_color,
+                self.group.default_brightness,
                 include_children,
                 origin_type,
                 self.closed_ends,
                 container_material,
             )
 
-            self.containers[container.root_hash] = container
+            self.containers[container.name] = container
 
+        return container
 
     def containers_to_mesh(self):
         self.select_containers()
@@ -235,8 +244,8 @@ class ObjectViewAbstract(ViewAbstract):
                 emit_strength.keyframe_insert(data_path="default_value", frame=frame)
 
         if group.animate_color:
-            # Get the Cycles color shader node input color
-            node_color = mat.node_tree.nodes['Transparent BSDF'].inputs['Color']
+            # Get the Cycles emission node input color
+            node_color = mat.node_tree.nodes['Emission'].inputs['Color']
 
             # Color ramp eval function
             color_value_at = group.color_ramp_material.diffuse_ramp.evaluate

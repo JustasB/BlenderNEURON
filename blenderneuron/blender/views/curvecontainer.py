@@ -4,17 +4,17 @@ import numpy as np
 from blenderneuron.blender.utils import create_many_copies
 
 class CurveContainer:
-    default_color = [1, 1, 1]
 
-    def __init__(self, root, curve_template, smooth_sections,
+    def __init__(self, root, curve_template, smooth_sections, color, brightness,
                  recursive=True, origin_type="center", closed_ends=True,
                  container_material=None):
 
-        self.root_hash = root.hash
         self.name = root.name
         self.smooth_sections = smooth_sections
         self.closed_ends = closed_ends
         self.assigned_container_material = container_material
+        self.default_color = color
+        self.default_brightness = brightness
 
         # copy the curve template and make a new blender object out of it
         bpy.data.objects.new(self.name, curve_template.copy())
@@ -26,7 +26,7 @@ class CurveContainer:
         self.tip_name = None
 
         # Quickly find the spline of a given section
-        self.hash2spline_index = {}
+        self.name2spline_index = {}
         self.spline_index2section = {}
 
         # Recursively add section splines and corresponding materials to the container
@@ -69,6 +69,10 @@ class CurveContainer:
         child.parent = parent
         child.matrix_parent_inverse = parent.matrix_world.inverted()
 
+        # Children have their location and scale editing locked (to prevent disconnects)
+        # Rotations are allowed
+        child.lock_location = child.lock_scale = [True] * 3
+
     def remove(self):
         self.unlink()
 
@@ -82,7 +86,18 @@ class CurveContainer:
             # materials
             for mat in ob.data.materials:
                 if mat is not None:
+                    # remove material animation if any
+                    if mat.animation_data is not None:
+                        bpy.data.actions.remove(mat.animation_data.action)
+
+                    # remove material node animation
+                    if mat.node_tree is not None and mat.node_tree.animation_data is not None:
+                        bpy.data.actions.remove(mat.node_tree.animation_data.action)
+
+                    # remove material
                     bpy.data.materials.remove(mat)
+
+
 
             # curve
             if ob.type == 'CURVE':
@@ -169,19 +184,20 @@ class CurveContainer:
 
 
     @staticmethod
-    def create_material(name):
+    def create_material(name, color, brightness):
         mat = bpy.data.materials.new(name)
 
-        mat.diffuse_color = CurveContainer.default_color
+        mat.diffuse_color = color
+        mat.emit = brightness
 
-        # Ambient and back lighting
-        mat.ambient = 0.85
-        mat.translucency = 0.85
-
-        # Raytraced reflections
-        mat.raytrace_mirror.use = True
-        mat.raytrace_mirror.reflect_factor = 0.1
-        mat.raytrace_mirror.fresnel = 2.0
+        # # Ambient and back lighting
+        # mat.ambient = 0.85
+        # mat.translucency = 0.85
+        #
+        # # Raytraced reflections
+        # mat.raytrace_mirror.use = True
+        # mat.raytrace_mirror.reflect_factor = 0.1
+        # mat.raytrace_mirror.fresnel = 2.0
 
         # Add Blender render and Cycles nodes
         mat.use_nodes = True
@@ -196,13 +212,14 @@ class CurveContainer:
         cl_out = nodes.new('ShaderNodeOutputMaterial')
         cl_emit = nodes.new('ShaderNodeEmission')
         cl_emit.location = [-200, 0]
-        cl_emit.inputs['Strength'].default_value = 0.1
-        cl_trans = nodes.new('ShaderNodeBsdfTransparent')
-        cl_trans.location = [-200, 100]
-        cl_trans.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
+        cl_emit.inputs['Strength'].default_value = brightness
+        cl_emit.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
 
-        links.new(cl_trans.outputs['BSDF'], cl_out.inputs['Surface'])
-        links.new(cl_emit.outputs['Emission'], cl_out.inputs['Volume'])
+        # cl_trans = nodes.new('ShaderNodeBsdfTransparent')
+        # cl_trans.location = [-200, 100]
+        # links.new(cl_trans.outputs['BSDF'], cl_out.inputs['Surface'])
+
+        links.new(cl_emit.outputs['Emission'], cl_out.inputs['Surface'])
 
         # Blender render nodes
         br_out = nodes.new('ShaderNodeOutput')
@@ -256,7 +273,7 @@ class CurveContainer:
         if ob is not None:
             if ob.type == 'CURVE':
                 # Find the spline that corresponds to the section
-                spline_i = self.hash2spline_index[root.hash]
+                spline_i = self.name2spline_index[root.name]
 
                 try:
                     spline = self.curve.splines[spline_i]
@@ -318,7 +335,11 @@ class CurveContainer:
 
         # If material is not provided, create one
         if self.assigned_container_material is None:
-            material = CurveContainer.create_material(root.name)
+            material = CurveContainer.create_material(
+                root.name,
+                self.default_color,
+                self.default_brightness
+            )
 
         # If material is provided, assign it to the spline
         else:
@@ -336,7 +357,7 @@ class CurveContainer:
         # old splines are kept, Blender usually crashes. Here we retain the spline index,
         # which is preserved (if splines are not deleted in edit-mode).
         spline_index = len(self.curve.splines) - 1
-        self.hash2spline_index[root.hash] = spline_index
+        self.name2spline_index[root.name] = spline_index
         self.spline_index2section[spline_index] = root
 
         # Cleanup before starting recursion

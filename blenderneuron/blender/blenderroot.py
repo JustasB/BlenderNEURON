@@ -15,7 +15,6 @@ class BlenderSection(Section):
 
 
     def from_full_NEURON_section_dict(self, nrn_section_dict):
-        self.hash = nrn_section_dict["hash"]
         self.name = nrn_section_dict["name"]
 
         self.point_count = nrn_section_dict["point_count"]
@@ -93,7 +92,6 @@ class BlenderSection(Section):
             sec.point_count = len(sec.radii)
 
             sec.name = self.name + "["+str(i)+"]"
-            sec.hash = hash(sec)
 
         # Total number of points should be preserved
         assert self.point_count == sum(len(sec.radii) for sec in self.split_sections)
@@ -147,11 +145,10 @@ class BlenderSection(Section):
 
 class BlenderRoot(BlenderSection):
 
-    def __init__(self, index, hash, name, group=None):
+    def __init__(self, index, name, group=None):
         super(BlenderRoot, self).__init__()
 
         self.index = index
-        self.hash = hash
         self.name = name
         self.group = group
 
@@ -162,13 +159,13 @@ class BlenderRoot(BlenderSection):
     def remove(self, node):
         # Remove view container objects if any
         if self.group is not None and self.group.view is not None:
-            self.group.view.remove_container(self.hash)
+            self.group.view.remove_container(self.name)
 
         # remove from UI and from node groups
         self.remove_from_group(delete=True)
 
         # remove from index
-        node.root_index.pop(self.hash)
+        node.root_index.pop(self.name)
 
     def remove_from_group(self, delete=False):
         if self.group is None:
@@ -186,7 +183,7 @@ class BlenderRoot(BlenderSection):
         self.group = None
 
         # remove from node group
-        current_group.roots.pop(self.hash)
+        current_group.roots.pop(self.name)
 
         # from ui group
         root_entry = current_group.ui_group.root_entries.get(self.name)
@@ -208,7 +205,6 @@ class BlenderRoot(BlenderSection):
         ui_root = ui_group.root_entries.add()
 
         ui_root.index = self.index
-        ui_root.hash = self.hash
         ui_root.name = self.name
 
         return ui_root
@@ -227,7 +223,7 @@ class BlenderRoot(BlenderSection):
             return
 
         # node group
-        self.group.roots[self.hash] = self
+        self.group.roots[self.name] = self
 
         # ui
         group.highlight()

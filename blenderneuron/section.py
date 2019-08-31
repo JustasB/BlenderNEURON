@@ -8,7 +8,6 @@ class Section:
 
     def __init__(self):
         self.name = ""
-        self.hash = ""
 
         self.point_count = 0
         self.coords = []
@@ -31,7 +30,6 @@ class Section:
 
         result = {
             "name": self.name,
-            "hash": self.hash,
             "parent_connection_loc": self.parent_connection_loc,
             "connection_end": self.connection_end,
         }

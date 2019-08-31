@@ -23,8 +23,6 @@ class NeuronSection(Section):
         for i, blender_child in enumerate(blender_section["children"]):
             section = self.children[i]
 
-            assert section.hash == blender_child["hash"]
-
             section.from_updated_blender_root(blender_child)
 
 
@@ -36,7 +34,6 @@ class NeuronSection(Section):
 
     def from_nrn_section(self, nrn_section, group):
         self.group = group
-        self.hash = str(hash(nrn_section))
         self.nrn_section = nrn_section
 
         self.name = nrn_section.name()

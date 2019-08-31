@@ -1,4 +1,6 @@
 import bpy, random, numpy
+
+from blenderneuron.blender.views.synapseformerview import SynapseFormerView
 from blenderneuron.blender import BlenderNodeClass
 
 from bpy.props import (IntProperty,
@@ -19,11 +21,10 @@ from bpy.types import (Operator,
 class BlenderRootProperties(PropertyGroup, BlenderNodeClass):
     name = StringProperty()
     index = IntProperty()
-    hash = StringProperty()
 
     def on_selected_updated(self, context):
         new_group = self.node.ui_properties.group.node_group if self.selected else None
-        self.node.root_index[self.hash].add_to_group(new_group)
+        self.node.root_index[self.name].add_to_group(new_group)
 
     selected = BoolProperty(default=False, update=on_selected_updated)
 
@@ -55,6 +56,13 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         name="Max bend angle (degrees)",
         description="The maximum angle (degrees) by which the sections are allowed to"
                     " deviate from their original positions"
+    )
+
+    seed = IntProperty(
+        default=0,
+        min=0,
+        name="Random seed",
+        description="Random seed for the aligner"
     )
 
     height_min = FloatProperty(
@@ -274,6 +282,82 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "must cross to trigger the synaptic event"
     )
 
+    def get_synapse_locations(self):
+
+        source_group = self.node.groups[self.group_source]
+        dest_group = self.node.groups[self.group_dest]
+
+        # Detect if any of the selected groups haven't been imported (no 3d data)
+        import_groups = [group for group in [source_group, dest_group] if group.state != 'imported']
+
+        # Import them
+        if len(import_groups) > 0:
+            for group in import_groups:
+                group.interaction_granularity = 'Cell'
+                group.recording_granularity = 'Cell'
+                group.record_activity = False
+                group.import_synapses = False
+
+            self.node.import_groups_from_neuron(import_groups)
+
+        source_group.show(SynapseFormerView, dest_group)
+
+        pairs = source_group.view.get_synapse_locations(
+            self.max_distance,
+            self.use_radius,
+            self.max_syns_per_pt,
+            self.section_pattern_source,
+            self.section_pattern_dest
+        )
+
+        return pairs
+    
+    def create_synapses(self):
+        from_group = self.node.groups[self.group_source]
+
+        if type(from_group.view) is not SynapseFormerView:
+            raise Exception('Synapses need to be found before they can be created in NEURON')
+
+        from_group.view.create_synapses(
+            self.name,
+            self.synapse_name_dest,
+            self.synapse_params_dest,
+            self.conduction_velocity,
+            self.initial_weight,
+            self.threshold,
+            self.is_reciprocal,
+            self.synapse_name_source,
+            self.synapse_params_source,
+            self.create_spines,
+            self.spine_neck_diameter,
+            self.spine_head_diameter,
+            self.spine_name_prefix
+        )
+
+    def save_synapses(self, file_name):
+        from_group = self.node.groups[self.group_source]
+
+        if type(from_group.view) is not SynapseFormerView:
+            raise Exception('Synapses need to be found before they can be saved')
+
+        from_group.view.save_synapses(
+            file_name,
+            self.name,
+            self.synapse_name_dest,
+            self.synapse_params_dest,
+            self.conduction_velocity,
+            self.initial_weight,
+            self.threshold,
+            self.is_reciprocal,
+            self.synapse_name_source,
+            self.synapse_params_source,
+            self.create_spines,
+            self.spine_neck_diameter,
+            self.spine_head_diameter,
+            self.spine_name_prefix
+        )
+
+
 
 class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
@@ -468,11 +552,16 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     )
 
     default_color = FloatVectorProperty(
-        default=[1.0] * 3,
         subtype='COLOR',
         get=get_prop("default_color"),
         set=set_prop("default_color"),
         description='The initial color of all sections in the group'
+    )
+
+    default_brightness = FloatProperty(
+        get=get_prop("default_brightness"),
+        set=set_prop("default_brightness"),
+        description='The initial brightness of all sections in the group'
     )
 
     smooth_sections = BoolProperty(
@@ -604,7 +693,12 @@ class BlenderNEURONProperties(PropertyGroup):
 
     @property
     def synapse_set(self):
-        return self.synapse_sets[self.synapse_sets_index]
+        if len(self.synapse_sets) > self.synapse_sets_index:
+            return self.synapse_sets[self.synapse_sets_index]
+        else:
+            return None
+
+
 
     def clear(self):
         self.property_unset("groups")

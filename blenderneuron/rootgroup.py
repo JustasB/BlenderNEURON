@@ -12,65 +12,34 @@ class RootGroup:
         self.import_synapses = False
         self.interaction_granularity = 'Cell'
 
-        self.record_activity = True
-        self.recording_granularity = "Section"
+        self.record_activity = False
+        self.recording_granularity = 'Cell'
         self.record_variable = "v"
         self.recording_period = 1.0
 
         self.activity = Activity()
 
-    """
-    Init options:
-        within blender by selecting the root sections to include
-        within neuron - by passing basic info about selected roots from blender
-
-        update of a group within blender by getting full info from nrn 
-    """
-
     def __str__(self):
         return self.name
 
     def clear_activity(self):
-        level = self.recording_granularity
+        # Clear group level activity
+        self.activity.clear()
 
-        if level == '3D Segment':
-            for root in self.roots.values():
-                root.clear_3d_segment_activity()
+        # Cell and section level activity
+        for root in self.roots.values():
+            root.clear_activity(recursive=True)
 
-        elif level == 'Section':
-            for root in self.roots.values():
-                root.clear_activity(recursive=True)
+        # Segment level
+        for root in self.roots.values():
+            root.clear_3d_segment_activity()
 
-        elif level == 'root':
-            for root in self.roots.values():
-                root.clear_activity(recursive=False)
-
-        else:
-            self.activity.clear()
 
     def to_dict(self,
                 include_activity=False,
                 include_root_children=False,
                 include_coords_and_radii=False):
         """
-
-        When first a group is passed to NRN, it contains only basic root-group membership info
-            -"skeletal"
-            -root children not included
-            -activity is not included
-            -points, radii, segments 3d not included
-            -topology is not included
-
-        When a group comes back from NRN:
-            -"full"
-            -root children, activity, points, radii, segs3d, topology
-
-        When a group comes from CellObjectView
-            -INC:
-                -children, points, raddi,
-            -NOT inc:
-                -activity
-                -segs 3d, topology - these might change later
 
         :param include_activity:
         :param include_root_children:

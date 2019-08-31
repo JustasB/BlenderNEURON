@@ -8,10 +8,13 @@ class SectionObjectView(ObjectViewAbstract):
         if self.group.recording_granularity not in ["Section", "Cell"]:
             raise NotImplementedError(self.group.recording_granularity)
 
+        color = self.group.default_color
+        brightness = self.group.default_brightness
+
         for root in self.group.roots.values():
             # Create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
-                material = CurveContainer.create_material(root.name)
+                material = CurveContainer.create_material(root.name, color, brightness)
 
             # Let each container create their own material
             else:
@@ -33,6 +36,9 @@ class SectionObjectView(ObjectViewAbstract):
         for root in self.group.roots.values():
             self.set_childrens_parent(root)
 
+            # Lock scaling the parent (rotations and translations are allowed)
+            self.containers[root.name].get_object().lock_scale = [True] * 3
+
     def set_childrens_parent(self, parent_sec, recursive=True):
         # If the parent was split, the split sections need to be chained together first
         # Then the split section that is closest to the child will be the child's container's parent
@@ -40,8 +46,8 @@ class SectionObjectView(ObjectViewAbstract):
 
             # Parent chain the split sections together
             for i, split_sec in enumerate(parent_sec.split_sections[:-1]):
-                start_cont = self.containers[split_sec.hash]
-                end_cont = self.containers[parent_sec.split_sections[i+1].hash]
+                start_cont = self.containers[split_sec.name]
+                end_cont = self.containers[parent_sec.split_sections[i+1].name]
                 end_cont.set_parent_object(start_cont)
 
             for child_sec in parent_sec.children:
@@ -49,11 +55,11 @@ class SectionObjectView(ObjectViewAbstract):
                 # Get the child container
                 # If the child was split, child's first split section container will be the child
                 if child_sec.was_split:
-                    child_cont = self.containers[child_sec.split_sections[0].hash]
+                    child_cont = self.containers[child_sec.split_sections[0].name]
 
                 # Otherwise child's normal container will be child
                 else:
-                    child_cont = self.containers[child_sec.hash]
+                    child_cont = self.containers[child_sec.name]
 
                 # When the parent was split, find the split section that's closest to the child
                 closest_split, _ = self.get_closest_split_section(
@@ -62,7 +68,7 @@ class SectionObjectView(ObjectViewAbstract):
                 )
 
                 # it will become the child section container's parent container
-                parent_cont = self.containers[closest_split.hash]
+                parent_cont = self.containers[closest_split.name]
 
                 # Set the relationship between the containers
                 child_cont.set_parent_object(parent_cont)
@@ -71,7 +77,7 @@ class SectionObjectView(ObjectViewAbstract):
 
         # If the parent was not split, then the parent container is its normal container
         else:
-            parent_cont = self.containers[parent_sec.hash]
+            parent_cont = self.containers[parent_sec.name]
 
             for child_sec in parent_sec.children:
 
@@ -79,13 +85,13 @@ class SectionObjectView(ObjectViewAbstract):
                 # If the child was split, child's first split section container will be the child
                 if child_sec.was_split:
                     try:
-                        child_cont = self.containers[child_sec.split_sections[0].hash]
+                        child_cont = self.containers[child_sec.split_sections[0].name]
                     except:
                         raise
 
                 # Otherwise child's normal container will be child
                 else:
-                    child_cont = self.containers[child_sec.hash]
+                    child_cont = self.containers[child_sec.name]
 
                 # Set the relationship between the containers
                 child_cont.set_parent_object(parent_cont)
@@ -141,7 +147,7 @@ class SectionObjectView(ObjectViewAbstract):
 
             # Update split sections with the split container coords
             for split_sec in section.split_sections:
-                container = self.containers.get(split_sec.hash)
+                container = self.containers.get(split_sec.name)
 
                 if container is not None:
                     container.update_group_section(split_sec, recursive=False)
@@ -150,7 +156,7 @@ class SectionObjectView(ObjectViewAbstract):
             section.update_coords_from_split_sections()
 
         else:
-            container = self.containers.get(section.hash)
+            container = self.containers.get(section.name)
 
             if container is not None:
                 container.update_group_section(section, recursive=False)

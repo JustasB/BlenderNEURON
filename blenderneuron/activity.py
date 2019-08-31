@@ -17,16 +17,24 @@ class Activity:
         self.values = []
 
     def to_dict(self):
+        # Ensure times are a python list
+        times = self.times if type(self.times) is list else list(self.times)
+
+        # Trim value floats to 4 sig digits - using sci notation
+        # Using more for display purposes is not necessary
+        # Trimming helps with compression when sending values from NRN to Blender
+        values = [float('%.3E' % v) for v in self.values]
+
         return {
-            "times": self.times if type(self.times) is list else list(self.times),
-            "values": self.values if type(self.values) is list else list(self.values),
+            "times": times,
+            "values": values,
         }
 
     def from_dict(self, source):
         self.times, self.values = source["times"], source["values"]
 
     def simplify(self, epsilon=0.0):
-        if not numpy_available:
+        if len(self.values) * len(self.times) == 0 or not numpy_available:
             return
 
         try:
@@ -36,7 +44,7 @@ class Activity:
             # Run simplification algorithm
             simplified = rdp(formatted, epsilon).T
 
-            # Split the result back to individual times and values columns
+            # Split the result matrix back to individual times and values columns
             self.times, self.values = simplified[0:2]
         except:
 

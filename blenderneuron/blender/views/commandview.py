@@ -9,7 +9,7 @@ class CommandView(ViewAbstract):
         self.group = rootgroup
 
     def show(self):
-        return {root.hash: self.get_root_update_commands(root)
+        return {root.name: self.get_root_update_commands(root)
                  for root in self.group.roots.values()}
 
     def get_root_update_commands(self, root):

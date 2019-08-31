@@ -11,7 +11,7 @@ class NeuronRootGroup(RootGroup):
 
         # Update selected roots and their children
         for blender_root in blender_group["roots"]:
-            section = self.roots[blender_root["hash"]]
+            section = self.roots[blender_root["name"]]
             section.from_updated_blender_root(blender_root)
 
     def from_skeletal_blender_group(self, blender_group, node):
@@ -25,7 +25,7 @@ class NeuronRootGroup(RootGroup):
             section = NeuronSection()
             section.from_skeletal_blender_root(blender_root, group=self)
 
-            self.roots[section.hash] = section
+            self.roots[section.name] = section
 
         # Clear previously recorded activity on h.run()
         self.fih = h.FInitializeHandler(self.clear_activity)
