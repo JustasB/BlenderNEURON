@@ -9,6 +9,7 @@ class Section:
     def __init__(self):
         self.name = ""
 
+        self.nseg = None
         self.point_count = 0
         self.coords = []
         self.radii = []
@@ -54,6 +55,7 @@ class Section:
 
         if include_coords_and_radii:
             result.update({
+                "nseg": self.nseg,
                 "point_count": self.point_count,
                 "coords": self.coords if type(self.coords) == list else self.coords.tolist(),
                 "radii": self.radii if type(self.radii) == list else self.radii.tolist(),

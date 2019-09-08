@@ -3,6 +3,7 @@ from blenderneuron.rootgroup import RootGroup
 from blenderneuron.activity import Activity
 from neuron import h
 
+
 class NeuronRootGroup(RootGroup):
 
     def from_updated_blender_group(self, blender_group):
@@ -11,8 +12,11 @@ class NeuronRootGroup(RootGroup):
 
         # Update selected roots and their children
         for blender_root in blender_group["roots"]:
-            section = self.roots[blender_root["name"]]
-            section.from_updated_blender_root(blender_root)
+            sec_name = self.node.rank_section_name(blender_root["name"])
+
+            if sec_name is not None:
+                section = self.roots[sec_name]
+                section.from_updated_blender_root(blender_root)
 
     def from_skeletal_blender_group(self, blender_group, node):
         self.node = node
@@ -25,13 +29,15 @@ class NeuronRootGroup(RootGroup):
             section = NeuronSection()
             section.from_skeletal_blender_root(blender_root, group=self)
 
-            self.roots[section.name] = section
+            if section.name != '':
+                self.roots[section.name] = section
 
         # Clear previously recorded activity on h.run()
         self.fih = h.FInitializeHandler(self.clear_activity)
 
         # Setup to collect activity during h.run()
         self.create_collector()
+
 
     def save_recording_params(self, blender_group):
         self.record_activity = blender_group["record_activity"]

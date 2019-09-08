@@ -268,6 +268,14 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         description="Conduction velocity to use when computing the synaptic delay"
     )
 
+    synaptic_delay = FloatProperty(
+        default=0.5,
+        min=0.001,
+        name="Synaptic Delay (ms)",
+        description="The time between crossing pre-synaptic threshold and the "
+                    "onset of post-synaptic current (NetCon.delay)"
+    )
+
     initial_weight = FloatProperty(
         default=1,
         min=0,
@@ -323,6 +331,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
             self.synapse_name_dest,
             self.synapse_params_dest,
             self.conduction_velocity,
+            self.synaptic_delay,
             self.initial_weight,
             self.threshold,
             self.is_reciprocal,
@@ -346,6 +355,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
             self.synapse_name_dest,
             self.synapse_params_dest,
             self.conduction_velocity,
+            self.synaptic_delay,
             self.initial_weight,
             self.threshold,
             self.is_reciprocal,

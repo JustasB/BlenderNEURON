@@ -71,7 +71,7 @@ class VectorConfinerView(SectionObjectView):
             )
 
     @staticmethod
-    def confine_between_meshes(obj, start_mesh, end_mesh, height_low, height_high, max_angle, iters=3):
+    def confine_between_meshes(obj, start_mesh, end_mesh, height_low, height_high, max_angle, iters=11):
         self = VectorConfinerView
 
         # A random height fraction between start and end layers
@@ -88,10 +88,10 @@ class VectorConfinerView(SectionObjectView):
             vec_sec_dir = (tip_loc - sec_start_loc).normalized()
 
             # Closest point on start mesh from the tip
-            closest_on_start, _ = self.closest_point_on_object(tip_loc, start_mesh)
+            closest_on_start, dist_to_start = self.closest_point_on_object(tip_loc, start_mesh)
 
             # Closest point on end mesh from tip
-            closest_on_end, _ = self.closest_point_on_object(tip_loc, end_mesh)
+            closest_on_end, dist_to_end = self.closest_point_on_object(tip_loc, end_mesh)
 
             # Normal vector from closest point on start to end mesh
             vec_start2end = (closest_on_end - closest_on_start).normalized()

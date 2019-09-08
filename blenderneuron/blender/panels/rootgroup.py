@@ -405,6 +405,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         if not settings.create_spines:
             layout.prop(settings, "conduction_velocity")
 
+        layout.prop(settings, "synaptic_delay")
         layout.prop(settings, "initial_weight")
         layout.prop(settings, "threshold")
         layout.separator()

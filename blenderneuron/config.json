@@ -10,7 +10,7 @@
         "default_port": {
             "Blender": "",
             "Control": "",
-            "NEURON": "5202"
+            "NEURON": ""
         },
         "end_types": [
             "NEURON",

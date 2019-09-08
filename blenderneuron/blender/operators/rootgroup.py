@@ -138,7 +138,7 @@ class ShowVoltagePlotOpearator(Operator, CellGroupOperatorAbstract):
     bl_description = "Show the NEURON > Graph > Voltage Axis plot (v of the active section vs time)"
 
     def execute(self, context):
-        self.client.run_command("h.newPlotV()")
+        self.client.run_command("from neuron import gui; h.newPlotV();")
 
         return{'FINISHED'}
 
@@ -149,7 +149,7 @@ class ShowShapePlotOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Show the NEURON > Graph > Shape plot (a rough rendering of NEURON sections)"
 
     def execute(self, context):
-        self.client.run_command("h.newshapeplot()")
+        self.client.run_command("from neuron import gui; h.newshapeplot()")
 
         return{'FINISHED'}
 

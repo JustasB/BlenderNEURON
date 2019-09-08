@@ -17,6 +17,7 @@ class BlenderSection(Section):
     def from_full_NEURON_section_dict(self, nrn_section_dict):
         self.name = nrn_section_dict["name"]
 
+        self.nseg = nrn_section_dict["nseg"]
         self.point_count = nrn_section_dict["point_count"]
         self.coords = nrn_section_dict["coords"]
         self.radii = nrn_section_dict["radii"]

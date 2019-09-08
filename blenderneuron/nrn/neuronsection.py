@@ -1,7 +1,6 @@
 from blenderneuron.nrn.neuronsegment3d import NeuronSegment3D
 from blenderneuron.section import Section
 from neuron import h
-
 import numpy as np
 
 class NeuronSection(Section):
@@ -28,9 +27,14 @@ class NeuronSection(Section):
 
     def from_skeletal_blender_root(self, source_section, group):
         try:
-            self.from_nrn_section(group.node.section_index[source_section["name"]], group)
+            sec_name = group.node.rank_section_name(source_section["name"])
+
+            if sec_name is not None:
+                self.from_nrn_section(group.node.section_index[sec_name], group)
         except KeyError:
-            raise Exception("Could not find section: " + source_section["name"] + " loaded in NEURON")
+            raise Exception("Could not find section: " + sec_name + " loaded in NEURON")
+
+
 
     def from_nrn_section(self, nrn_section, group):
         self.group = group
@@ -55,6 +59,7 @@ class NeuronSection(Section):
             self.segments_3D = []
 
     def update_coords_and_radii(self, blender_section):
+        self.nseg = blender_section["nseg"]
         self.point_count = blender_section["point_count"]
         self.coords = blender_section["coords"]
         self.radii = blender_section["radii"]
@@ -102,6 +107,7 @@ class NeuronSection(Section):
 
             radii[c] = h.diam3d(c, sec=nrn_section) / 2.0
 
+        self.nseg = int(nrn_section.nseg)
         self.point_count = point_count
         self.coords = coords
         self.radii = radii
