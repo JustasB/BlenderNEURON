@@ -33,7 +33,6 @@ class BlenderRootGroup(RootGroup):
         self.as_lines=False
         self.segment_subdivisions=2
         self.circular_subdivisions=6
-        self.default_color = [0.14, 0.67, 0.02]  # Pale yellow green
         self.default_brightness = 1.0
 
         # Animation properties
@@ -46,16 +45,22 @@ class BlenderRootGroup(RootGroup):
         self.frames_per_ms = 1
 
         self.state = 'new'
+        self.root_filter = '*'
 
-        self.color_ramp_material_name = self.create_color_ramp_material()
+        # Default: Pale yellowish green
+        self.color_ramp_material_name = self.create_color_ramp_material([0.14, 0.67, 0.02])
 
-    def create_color_ramp_material(self):
+    @property
+    def default_color(self):
+        return self.color_ramp_material.diffuse_ramp.elements[0].color[0:3]
+
+    def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'
 
         mat = bpy.data.materials.new(name)
         mat.use_diffuse_ramp = True
-        mat.diffuse_ramp.elements[0].color = self.default_color + [1] # alpha
-        mat.diffuse_ramp.elements[-1].color = [1] * 4 # All white
+        mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
+        mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
 
 
         return name
@@ -189,19 +194,21 @@ class BlenderRootGroup(RootGroup):
             if root.group is None:
                 root.add_to_group(self)
 
-    def select_roots(self, condition='All', pattern=None):
+    def select_roots(self, condition='All', pattern='*'):
         if condition == 'None':
             for root in list(self.roots.values()):
+                if not fnmatch(root.name, pattern):
+                    continue
+
                 root.remove_from_group()
 
         else:
             for root in self.node.root_index.values():
+                if not fnmatch(root.name, pattern):
+                    continue
+
                 if condition == 'All':
                     root.add_to_group(self)
-
-                elif condition == 'Pattern':
-                    if fnmatch(root.name, pattern):
-                        root.add_to_group(self)
 
                 elif condition == 'Invert':
                     if root.group == self:

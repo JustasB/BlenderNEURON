@@ -4,7 +4,6 @@ from abc import ABCMeta
 class BlenderNodeClass:
     __metaclass__ = ABCMeta
 
-
     @property
     def node(self):
         if hasattr(bpy.types.Object, "BlenderNEURON_node"):
@@ -16,14 +15,12 @@ class BlenderNodeClass:
     def node(self, value):
         bpy.types.Object.BlenderNEURON_node = value
 
-
     @property
     def client(self):
         try:
             return self.node.client
         except:
             return None
-
 
     @staticmethod
     def groups_exist(context):
@@ -46,10 +43,12 @@ class BlenderNodeClass:
         """
         return any([g for g in context.scene.BlenderNEURON.groups if g.node_group.state == 'imported'])
 
-
     @staticmethod
     def visible_groups_exist(context):
         """
         Checks if there are any cell groups whose view is visible
         """
         return any([g for g in context.scene.BlenderNEURON.groups if g.node_group.view is not None])
+
+    def get_group_list(self, context):
+        return [(g.name, g.name, g.name) for g in context.scene.BlenderNEURON.groups.values()]

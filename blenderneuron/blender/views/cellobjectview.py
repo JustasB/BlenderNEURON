@@ -16,7 +16,10 @@ class CellObjectView(ObjectViewAbstract):
         color = self.group.default_color
         brightness = self.group.default_brightness
 
-        for root in self.group.roots.values():
+        total = len(self.group.roots.values())
+        for ri, root in enumerate(self.group.roots.values()):
+            print('Showing cell ' + root.name + ' %s out of %s' % (ri+1, total))
+
             # Cell gran: create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
                 material = CurveContainer.create_material(root.name, color, brightness)

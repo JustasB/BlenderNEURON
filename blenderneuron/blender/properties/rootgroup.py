@@ -152,15 +152,12 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
 
     name_editable = StringProperty(get=get_name, set=set_name)
 
-    def get_group_list(self, context):
-        return [(g.name, g.name, g.name) for g in context.scene.BlenderNEURON.groups.values()]
-
-    group_source = bpy.props.EnumProperty(items=get_group_list,
+    group_source = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
                                           name="From Cell Group",
                                           description="Cells in this BlenderNEURON group will "
                                                     "be connected to cells in the other group")
 
-    group_dest = bpy.props.EnumProperty(items=get_group_list,
+    group_dest = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
                                         name="To Cell Group",
                                         description="Cells in this groups will receive connections"
                                                   " from cells in the first group")
@@ -420,6 +417,11 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     root_entries = CollectionProperty(type=BlenderRootProperties)
     root_entries_index = IntProperty()
 
+    copy_from_group = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
+                                          name="Copy Cell Group",
+                                          description="Group options will be copied to "
+                                                      "the current group from the selected group")
+
     record_activity = BoolProperty(
         default=True,
         get=get_prop("record_activity"),
@@ -470,7 +472,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_prop("animation_range_low"),
         description="This value of the recorded variable (e.g. Vm) will map to the"
                     " lowest brightness and to the leftmost color (0 position) of the "
-                    "color ramp below"
+                    "color ramp above"
     )
 
     animation_range_high = FloatProperty(
@@ -479,7 +481,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_prop("animation_range_high"),
         description="This value of the recorded variable (e.g. Vm) will map to the"
                     " highest brightness and to the rightmost color (1.0 position) of the "
-                    "color ramp below"
+                    "color ramp above"
     )
 
     simplification_epsilon = FloatProperty(
@@ -561,13 +563,6 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         type=LayerConfinerProperties
     )
 
-    default_color = FloatVectorProperty(
-        subtype='COLOR',
-        get=get_prop("default_color"),
-        set=set_prop("default_color"),
-        description='The initial color of all sections in the group'
-    )
-
     default_brightness = FloatProperty(
         get=get_prop("default_brightness"),
         set=set_prop("default_brightness"),
@@ -617,6 +612,34 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         get=get_prop("circular_subdivisions"),
         set=set_prop("circular_subdivisions")
     )
+
+    def copy_from(self, source_group):
+
+        self.interaction_granularity = source_group.interaction_granularity
+
+        self.as_lines = source_group.as_lines
+        self.node_group.color_ramp_material.diffuse_ramp.elements[0].color = \
+            source_group.node_group.color_ramp_material.diffuse_ramp.elements[0].color
+        self.default_brightness = source_group.default_brightness
+        self.smooth_sections = source_group.smooth_sections
+        self.segment_subdivisions = source_group.segment_subdivisions
+        self.circular_subdivisions = source_group.circular_subdivisions
+        self.spherize_soma_if_DeqL = source_group.spherize_soma_if_DeqL
+
+        self.record_activity = source_group.record_activity
+        self.recording_granularity = source_group.recording_granularity
+        self.record_variable = source_group.record_variable
+        self.recording_period = source_group.recording_period
+        self.frames_per_ms = source_group.frames_per_ms
+        self.simplification_epsilon = source_group.simplification_epsilon
+        self.animate_brightness = source_group.animate_brightness
+        self.animate_color = source_group.animate_color
+        self.animation_range_low = source_group.animation_range_low
+        self.animation_range_high = source_group.animation_range_high
+
+        self.import_synapses = source_group.import_synapses
+
+
 
 
 class SimulatorSettings(BlenderNodeClass, PropertyGroup):

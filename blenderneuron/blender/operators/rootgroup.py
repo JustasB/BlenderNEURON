@@ -83,7 +83,8 @@ class SelectAllCellsOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Select all cells to be shown in Blender"
 
     def execute(self, context):
-        self.node.ui_properties.group.node_group.select_roots('All')
+        node_group = self.node.ui_properties.group.node_group
+        node_group.select_roots('All', node_group.root_filter)
 
         return{'FINISHED'}
 
@@ -94,7 +95,8 @@ class UnselectAllCellsOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Unselect all cells for showing in Blender"
 
     def execute(self, context):
-        self.node.ui_properties.group.node_group.select_roots('None')
+        node_group = self.node.ui_properties.group.node_group
+        node_group.select_roots('None', node_group.root_filter)
 
         return{'FINISHED'}
 
@@ -105,7 +107,22 @@ class InvertCellSelectionOperator(Operator, CellGroupOperatorAbstract):
     bl_description = "Invert the selection of cells for showing in Blender"
 
     def execute(self, context):
-        self.node.ui_properties.group.node_group.select_roots('Invert')
+        node_group = self.node.ui_properties.group.node_group
+        node_group.select_roots('Invert', node_group.root_filter)
+
+        return{'FINISHED'}
+
+
+class CopyFromGroupOperator(Operator, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.copy_from_group"
+    bl_label = "Copy Group"
+    bl_description = "Copies cell group settings from the selected group into the active group"
+
+    def execute(self, context):
+        target_group = self.node.ui_properties.group
+        source_group = self.node.ui_properties.groups[target_group.copy_from_group]
+
+        target_group.copy_from(source_group)
 
         return{'FINISHED'}
 

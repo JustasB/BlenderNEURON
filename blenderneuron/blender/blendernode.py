@@ -108,6 +108,8 @@ class BlenderNode(CommNode):
         for nrn_group in nrn_groups:
             node_group = self.groups[nrn_group["name"]]
 
+            print('Importing group: ' + node_group.name + ' from NEURON...')
+
             # Remove any views of the cells
             if node_group.view is not None:
                 node_group.view.remove()
@@ -149,6 +151,7 @@ class BlenderNode(CommNode):
         for group in self.groups.values():
 
             if group.selected:
+                print('Showing group ' + group.name + ' in Blender')
                 group.show()
 
             else:

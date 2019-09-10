@@ -13,10 +13,20 @@ from bpy.types import (Operator,
                        UIList)
 
 
-class CellListWidget(UIList):
+class CellListWidget(AbstractBlenderNEURONPanel, UIList):
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
         layout.label(item.name)
+
+        value = self.filter_name
+
+        if value == '':
+            value = '*'
+        else:
+            value = '*'+value+'*'
+
+        self.get_group(bpy.context).node_group.root_filter = value
 
     def invoke(self, context, event):
         pass
@@ -125,6 +135,13 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
     def draw(self, context):
         group = self.get_group(context)
 
+        if AbstractBlenderNEURONPanel.group_count(context) > 1:
+            col = self.layout
+            col.label(text="Clone group settings from:")
+            row = col.row()
+            row.prop(group, "copy_from_group", text='')
+            row.operator("blenderneuron.copy_from_group", text='Copy',icon='PASTEDOWN')
+
         col = self.layout
         col.label(text="Interaction Settings:")
         col = self.layout.box()
@@ -143,7 +160,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             box.enabled = not group.as_lines
             col = box.split(percentage=0.5)
             col.label('Init. Color:')
-            col.prop(group, "default_color", text='')
+            col.prop(group.node_group.color_ramp_material.diffuse_ramp.elements[0], "color", text='')
 
             col = box.split(percentage=0.5)
             col.label('Init. Brightness:')
@@ -162,9 +179,9 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             col.label('N-gon Sides:')
             col.prop(group, "circular_subdivisions", text='')
 
-            col = box.split(percentage=0.5)
-            col.label('Spherical Somas:')
-            col.prop(group, "spherize_soma_if_DeqL", text='')
+            # col = box.split(percentage=0.5)
+            # col.label('Spherical Somas:')
+            # col.prop(group, "spherize_soma_if_DeqL", text='')
 
         col = self.layout
         col.separator()
@@ -222,13 +239,13 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 
-        col = self.layout
-        col.separator()
-        col.label(text="Connectivity Settings:")
-        col = self.layout.box()
-        row = col.split(percentage=0.5)
-        row.label("Import Synapses")
-        row.prop(group, "import_synapses", text='')
+        # col = self.layout
+        # col.separator()
+        # col.label(text="Connectivity Settings:")
+        # col = self.layout.box()
+        # row = col.split(percentage=0.5)
+        # row.label("Import Synapses")
+        # row.prop(group, "import_synapses", text='')
 
 
 class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
