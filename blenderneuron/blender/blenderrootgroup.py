@@ -54,6 +54,10 @@ class BlenderRootGroup(RootGroup):
     def default_color(self):
         return self.color_ramp_material.diffuse_ramp.elements[0].color[0:3]
 
+    @default_color.setter
+    def default_color(self, value):
+        self.color_ramp_material.diffuse_ramp.elements[0].color = value + [1]
+
     def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'
 
