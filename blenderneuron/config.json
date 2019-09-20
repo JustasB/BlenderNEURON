@@ -5,7 +5,7 @@
         "default_ip": {
             "Blender": "127.0.0.1",
             "Control": "127.0.0.1",
-            "NEURON": "192.168.162.128"
+            "NEURON": "127.0.0.1"
         },
         "default_port": {
             "Blender": "",
@@ -15,7 +15,8 @@
         "end_types": [
             "NEURON",
             "Blender",
-            "Control"
+            "Control",
+            "Package"
         ],
         "imports": {
             "Blender": "import bpy, mathutils",

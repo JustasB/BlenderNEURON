@@ -21,7 +21,11 @@ except:
     from SimpleXMLRPCServer import SimpleXMLRPCServer
     from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
 
-from socketserver import ThreadingMixIn
+try:
+    from socketserver import ThreadingMixIn
+except:
+    from SocketServer import ThreadingMixIn
+
 from collections import OrderedDict
 
 debug = False
@@ -52,7 +56,8 @@ class CommNode(object):
             return
 
         # Create a server
-        self.setup_server()
+        if end != 'Package':
+            self.setup_server()
 
         # If successfully connected, then instruct the other node to connect back
         # and complete the 2nd half of the connection
@@ -244,7 +249,10 @@ class CommNode(object):
         # If the server address is blank (i.e. on cleanup), remove the file if it exists
         if self.server_address is None:
             if os.path.exists(file_name):
-                os.remove(file_name)
+                try:
+                    os.remove(file_name)
+                except OSError:
+                    pass
 
         else:
             with open(file_name, "w") as f:
