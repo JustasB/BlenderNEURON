@@ -65,7 +65,7 @@ class CommNode(object):
 
             self.client.try_setup_client()
 
-            if self.client is not None and self.server is not None:
+            if self.client is not None and hasattr(self, 'server') and self.server is not None:
                 self.print_safe("Two-way communication between Blender and NEURON established")
 
     def __enter__(self):

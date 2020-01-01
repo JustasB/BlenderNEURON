@@ -287,6 +287,13 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "must cross to trigger the synaptic event"
     )
 
+    @property
+    def pairs(self):
+        try:
+            return self.node.groups[self.group_source].view.synapse_pairs
+        except:
+            return []
+
     def get_synapse_locations(self):
 
         source_group = self.node.groups[self.group_source]
@@ -429,6 +436,23 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         description="Imports the recorded values from the selected variable (based on granularity) "
                     "and shows it as variation in Blender segment brightness")
 
+    recording_time_start = FloatProperty(
+        default=0,
+        min=0,
+        get=get_prop("recording_time_start"),
+        set=set_prop("recording_time_start"),
+        description="The simulation time at which to start recording (ms)"
+    )
+
+    recording_time_end = FloatProperty(
+        default=0,
+        min=0,
+        get=get_prop("recording_time_end"),
+        set=set_prop("recording_time_end"),
+        description="The simulation time at which to stop recording (ms). "
+                    "0 will record until the end of simulation"
+    )
+
     import_synapses = BoolProperty(
         default=True,
         get=get_prop("import_synapses"),
@@ -490,9 +514,9 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         get=get_prop("simplification_epsilon"),
         set=set_prop("simplification_epsilon"),
         description="Co-llinearity deviations of this amount will be"
-                    "simplified to the nearest line segment. Units are same as the"
-                    " units of the recording variable (e.g. mV for 'v'). 0 will remove "
-                    "only completely co-linear activity points (e.g. lossless)"
+                    " simplified to the nearest line segment. Units are same as the"
+                    " units of the recording variable (e.g. mV for 'v'). 0 will remove"
+                    " only completely co-linear activity points (e.g. lossless)"
     )
 
     frames_per_ms = FloatProperty(
@@ -630,6 +654,8 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         self.recording_granularity = source_group.recording_granularity
         self.record_variable = source_group.record_variable
         self.recording_period = source_group.recording_period
+        self.recording_time_start = source_group.recording_time_start
+        self.recording_time_end = source_group.recording_time_end
         self.frames_per_ms = source_group.frames_per_ms
         self.simplification_epsilon = source_group.simplification_epsilon
         self.animate_brightness = source_group.animate_brightness

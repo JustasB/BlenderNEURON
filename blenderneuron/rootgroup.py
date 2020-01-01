@@ -16,6 +16,8 @@ class RootGroup:
         self.recording_granularity = 'Cell'
         self.record_variable = "v"
         self.recording_period = 1.0
+        self.recording_time_start = 0
+        self.recording_time_end = 0
 
         self.activity = Activity()
 
@@ -55,6 +57,8 @@ class RootGroup:
             "recording_granularity": self.recording_granularity,
             "record_variable": self.record_variable,
             "recording_period": self.recording_period,
+            "recording_time_start": self.recording_time_start,
+            "recording_time_end": self.recording_time_end,
         }
 
         if include_activity:

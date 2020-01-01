@@ -7,6 +7,7 @@ from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
 from fnmatch import fnmatch
 import json
+import os
 
 class BlenderRootGroup(RootGroup):
 
@@ -201,14 +202,14 @@ class BlenderRootGroup(RootGroup):
     def select_roots(self, condition='All', pattern='*'):
         if condition == 'None':
             for root in list(self.roots.values()):
-                if not fnmatch(root.name, pattern):
+                if not fnmatch(root.name.lower(), pattern):
                     continue
 
                 root.remove_from_group()
 
         else:
             for root in self.node.root_index.values():
-                if not fnmatch(root.name, pattern):
+                if not fnmatch(root.name.lower(), pattern):
                     continue
 
                 if condition == 'All':
@@ -262,13 +263,18 @@ class BlenderRootGroup(RootGroup):
                 root.add_to_group(self)
 
             else:
-                if exclude_others:
+                if exclude_others and root.group is self:
                     root.remove_from_group()
 
     def to_file(self, file_name):
         self.from_view()
 
         group_dict = JsonView(self).show()
+
+        dir = os.path.dirname(file_name)
+
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
         with open(file_name, 'w') as f:
             json.dump(group_dict, f)

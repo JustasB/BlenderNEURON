@@ -5,7 +5,6 @@ from neuron import h
 
 
 class NeuronRootGroup(RootGroup):
-
     def from_updated_blender_group(self, blender_group):
 
         self.save_recording_params(blender_group)
@@ -38,12 +37,13 @@ class NeuronRootGroup(RootGroup):
         # Setup to collect activity during h.run()
         self.create_collector()
 
-
     def save_recording_params(self, blender_group):
         self.record_activity = blender_group["record_activity"]
         self.record_variable = blender_group["record_variable"]
         self.recording_granularity = blender_group["recording_granularity"]
         self.recording_period = blender_group["recording_period"]
+        self.recording_time_start = blender_group["recording_time_start"]
+        self.recording_time_end = blender_group["recording_time_end"]
 
     def create_collector(self):
         """
@@ -53,7 +53,7 @@ class NeuronRootGroup(RootGroup):
 
         if self.record_activity:
             collector_stim = h.NetStim(0.5)
-            collector_stim.start = 0
+            collector_stim.start = self.recording_time_start
             collector_stim.interval = self.recording_period
             collector_stim.number = 1e9
             collector_stim.noise = 0
@@ -72,7 +72,13 @@ class NeuronRootGroup(RootGroup):
         :return: None
         """
 
-        self.activity.times.append(h.t)
+        time = h.t
+
+        if time < self.recording_time_start or \
+                (self.recording_time_end != 0 and time > self.recording_time_end):
+            return
+
+        self.activity.times.append(time)
 
         level = self.recording_granularity
 
@@ -102,4 +108,3 @@ class NeuronRootGroup(RootGroup):
             value = value / len(self.roots)
 
             self.activity.values.append(value)
-

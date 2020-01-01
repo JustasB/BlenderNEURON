@@ -199,6 +199,14 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             col.separator()
 
             row = col.split(percentage=0.5)
+            row.label('Start Recording:')
+            row.prop(group, "recording_time_start", text="")
+
+            row = col.split(percentage=0.5)
+            row.label('Stop Recording:')
+            row.prop(group, "recording_time_end", text="")
+
+            row = col.split(percentage=0.5)
             row.label('Record:')
             row.prop(group, "record_variable", text="")
 

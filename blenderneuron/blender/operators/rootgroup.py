@@ -217,7 +217,7 @@ class ImportGroupsOperator(Operator, CellGroupOperatorAbstract):
 
 class DisplayGroupsOperator(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.display_groups"
-    bl_label = "Show Imported Groups"
+    bl_label = "(Re)Display Imported Groups"
     bl_description = "Displays imported groups based on their interaction level"
 
     @classmethod
