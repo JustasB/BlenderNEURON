@@ -53,7 +53,7 @@ class CommandView(ViewAbstract):
 
     def template(self):
         dir_path = os.path.dirname(__file__)
-        template_path = os.path.join(dir_path, "commandviewtemplate.py")
+        template_path = os.path.join(dir_path, "commandviewtemplate.txt")
 
         with open(template_path, "r") as f:
             template = f.read()

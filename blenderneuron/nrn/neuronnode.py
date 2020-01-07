@@ -15,7 +15,7 @@ class NeuronNode(CommNode):
     # Match Cell[n].section[y] pattern e.g. MC1[0].soma
     section_rx = re.compile('(.+?])\.?(.*)')
 
-    def __init__(self, end=None, *args, **kwargs):
+    def __init__(self, server_end=None, *args, **kwargs):
         self.roots = None
         self.section_index = None
         self.synapse_sets = {}  # 'set_name': [(netcon, syn, head, neck)]
@@ -37,10 +37,10 @@ class NeuronNode(CommNode):
 
             self.server.register_function(self.create_synapses)
 
-        if end is None:
-            end = "NEURON"
+        if server_end is None:
+            server_end = "NEURON"
 
-        super(NeuronNode, self).__init__(end, on_server_setup=init, *args, **kwargs)
+        super(NeuronNode, self).__init__(server_end, on_server_setup=init, *args, **kwargs)
 
     def init_mpi(self, parallel_ctx, mpimap):
         self.parallel_ctx = parallel_ctx

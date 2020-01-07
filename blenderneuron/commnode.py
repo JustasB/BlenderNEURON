@@ -31,19 +31,28 @@ from collections import OrderedDict
 debug = False
 
 class CommNode(object):
+    server_types = {
+        "NEURON": "Blender",
+        "Blender": "NEURON",
+        "Control-Blender": "Blender",
+        "Control-NEURON": "NEURON",
+        "Package": "Blender",
+    }
 
-    def __init__(self, end, on_client_connected=None, on_server_setup=None):
+    def __init__(self, server_end, on_client_connected=None, on_server_setup=None):
 
         self.groups = OrderedDict()
         self.root_index = OrderedDict()
 
         self.load_config()
 
-        if end in self.config["end_types"]:
-            self.server_end = end
-            self.client_end = "NEURON" if end == "Blender" else "Blender"
+        if server_end in self.server_types.keys():
+            self.server_end = server_end
+            self.client_end = self.server_types[server_end]
+
         else:
-            raise Exception("Unrecognized end: " + str(end) + ". Should be one of: " + str(self.config["end_types"]))
+            raise Exception("Unrecognized server_end: " + str(server_end) + ". Should be one of: "
+                            + str(self.server_types.keys()))
 
         self.on_client_connected = on_client_connected
         self.on_server_setup = on_server_setup
@@ -52,11 +61,12 @@ class CommNode(object):
         self.try_setup_client()
 
         # 'Control' nodes are 1-directional (a node with a connected client, but no server of its own)
-        if self.server_end == 'Control':
+        if 'Control' in self.server_end:
             return
 
         # Create a server
-        if end != 'Package':
+        # Package type does not result in server
+        if server_end != 'Package':
             self.setup_server()
 
         # If successfully connected, then instruct the other node to connect back
@@ -66,12 +76,14 @@ class CommNode(object):
             self.client.try_setup_client()
 
             if self.client is not None and hasattr(self, 'server') and self.server is not None:
-                self.print_safe("Two-way communication between Blender and NEURON established")
+                self.print_safe("Two-way communication between %s and %s established"
+                                %(self.server_end, self.client_end))
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.client.end_code_coverage()
         self.stop_server()
 
     def load_config(self):
@@ -138,6 +150,9 @@ class CommNode(object):
         self.server.register_function(self.sm_get_task_error,  'get_task_error')
         self.server.register_function(self.sm_get_task_result, 'get_task_result')
 
+        # Code coverage result saving
+        self.server.register_function(self.sm_end_code_coverage, 'end_code_coverage')
+
         # Start the server in a separate thread - it will place tasks onto queue
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.daemon = True
@@ -158,13 +173,13 @@ class CommNode(object):
         self.print_safe("Started " + self.server_end + " server at: " + self.server_address)
 
     def stop_server(self):
-        if hasattr(self, "service_thread") and self.service_thread is not None and self.service_thread.isAlive():
+        if hasattr(self, "service_thread") and self.service_thread is not None and self.service_thread.is_alive():
             self.service_thread_continue = False
             self.service_thread.join()
             self.service_thread = None
             self.init_task_queue()
 
-        if hasattr(self, "server_thread") and self.server_thread is not None and self.server_thread.isAlive():
+        if hasattr(self, "server_thread") and self.server_thread is not None and self.server_thread.is_alive():
             try:
                 own_server_client = xmlrpclib.ServerProxy(self.server_address, allow_none=True)
                 own_server_client.stop()
@@ -306,6 +321,16 @@ class CommNode(object):
 
         return self._enqueue_lambda(task_lambda)
 
+    def sm_end_code_coverage(self):
+        try:
+            from blenderneuron import COV
+        except:
+            # Dont try to save coverage info if not in coverage
+            return
+
+        COV.stop()
+        COV.save()
+
     def _get_command_lambda(self, command_string):
         """
         Execute arbitrary python command within Blender's python process
@@ -316,6 +341,7 @@ class CommNode(object):
         :return:
         """
         def exec_lambda():
+
             end_imports = self.config["imports"][self.server_end]
             try:
                 exec(end_imports + "; " + command_string, globals())

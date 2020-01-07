@@ -4,7 +4,7 @@ with open('README.txt') as file:
     long_description = file.read()
 
 setup(name='blenderneuron',
-      version='0.1.5',
+      version='2.0.0',
       description='Interface for Blender <-> NEURON',
       long_description=long_description,
       author='Justas Birgiolas',
@@ -16,7 +16,7 @@ setup(name='blenderneuron',
       license="MIT",
       install_requires=[],
       classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
@@ -25,6 +25,5 @@ setup(name='blenderneuron',
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Visualization",
-       ],
-       test_suite="blenderneuron.tests.client",
+       ]
  )

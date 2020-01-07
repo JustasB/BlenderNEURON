@@ -19,6 +19,16 @@ try:
 except:
     inside_blender = False
 
+
+import os
+if 'COVERAGE_PROCESS_START' in os.environ:
+    try:
+        print('Importing COVERAGE','Inside Blender',inside_blender)
+        import coverage
+        COV = coverage.process_startup()
+    except:
+        print('Coverage error. Skipping coverage')
+
 if inside_blender:
     from bpy.app.handlers import persistent
 

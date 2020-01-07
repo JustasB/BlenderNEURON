@@ -29,11 +29,22 @@ class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
                 col.prop(context.scene.BlenderNEURON_properties, "client_port")
                 col.separator()
                 col.operator("blenderneuron.try_connect_to_neuron", text="Try Connecting to NEURON", icon="PLAY")
-                col.separator()
 
-                if not blender_launched_neuron_running():
-                    col.prop(context.scene.BlenderNEURON_properties, "neuron_launch_command")
-                    col.operator("blenderneuron.launch_neuron", text="Launch NEURON", icon="PLAY")
+                # Launching NEURON from within Blender tends to be unreliable:
+                # common issues:
+                #  - blender quits but neuron process remains
+                #  - killing neuron process results in corrupted terminal state (e.g. needs tset'ing)
+                #  - within docker, starting neuron from blender results in X-server errors
+                #       e.g. XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0"
+
+                # For the above reasons, considering removing the feature to start neuron from Blender
+                # instead, the usage pattern would be to 1) start neuron 2) start blender 3) use Control- commnodes
+                # to control neuron and blender processes
+                # col.separator()
+                #
+                # if not blender_launched_neuron_running():
+                #     col.prop(context.scene.BlenderNEURON_properties, "neuron_launch_command")
+                #     col.operator("blenderneuron.launch_neuron", text="Launch NEURON", icon="PLAY")
 
             else:
                 col.label(text="Status: Connected")

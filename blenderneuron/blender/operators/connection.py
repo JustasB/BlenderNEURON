@@ -11,6 +11,10 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
     bl_description = "Starts a communications node in Blender which creates a server and a client for " \
                      "bi-directional communication with NEURON"
 
+    modal_timer = None
+    modal_timer_period = 0.1  # in seconds
+    servicing = False
+
     def execute(self, context):
         def on_client_connected(self):
             # Pull NRN sim params to Blender GUI
@@ -31,7 +35,33 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
             # Add a blank synapse set
             self.node.add_synapse_set()
 
-        return {'FINISHED'}
+        # Create a timer that will trigger task queue servicing during modal operator events
+        # If the queue is serviced during other times, it results in intermittent Blender segfaults
+        # These happen when the queue task is creating/freeing a blender object, but some other Blender thread
+        # is accessing its data e.g. during UI updates
+        # Performing task servicing during modal operator calls is the recommended way to asynchronously update scenes
+        self.node.service_thread_continue = False
+        wm = context.window_manager
+        self.modal_timer = wm.event_timer_add(self.modal_timer_period, context.window)
+        wm.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+    def modal(self, context, event):
+
+        if not self.servicing and event.type == 'TIMER':
+            self.servicing = True
+
+            try:
+                self.node.work_on_queue_tasks()
+
+            finally:
+                self.servicing = False
+
+        return {'PASS_THROUGH'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        wm.event_timer_remove(self.modal_timer)
 
 
 class NodeStopOperator(bpy.types.Operator, BlenderNodeClass):
@@ -57,6 +87,8 @@ class StopNeuronOperator(bpy.types.Operator, BlenderNodeClass):
     bl_description = "Stops the NEURON process, if any, that was launched from Blender"
 
     def execute(self, context):
+        raise NotImplementedError('NOT SUPPORTED')
+
         try:
             bpy.ops.blenderneuron.remove_all_groups()
         except:
@@ -81,6 +113,8 @@ class LaunchNeuronOperator(bpy.types.Operator, BlenderNodeClass):
                      "launched separatelly if needed."
 
     def execute(self, context):
+        raise NotImplementedError('NOT SUPPORTED')
+
         bpy.ops.blenderneuron.stop_neuron()
 
         # Launch a new NEURON process in parallel

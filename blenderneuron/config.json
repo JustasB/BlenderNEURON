@@ -1,6 +1,6 @@
 [
     {
-        "NEURON_last_command": "mc2 = h.MC4()",
+        "NEURON_last_command": "",
         "NEURON_launch_command": "nrniv -python -c 'from blenderneuron import neuronstart'",
         "default_ip": {
             "Blender": "127.0.0.1",
@@ -12,12 +12,6 @@
             "Control": "",
             "NEURON": ""
         },
-        "end_types": [
-            "NEURON",
-            "Blender",
-            "Control",
-            "Package"
-        ],
         "imports": {
             "Blender": "import bpy, mathutils",
             "NEURON": "from neuron import h"

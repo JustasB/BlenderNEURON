@@ -28,3 +28,11 @@ ForNEURON/dist/
 *.c
 
 ForBlender/blender_neuron/build/
+
+crash\.txt
+
+htmlcov/
+
+scripts/blenderneuron
+
+\.coverage\.*

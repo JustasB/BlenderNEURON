@@ -132,8 +132,15 @@ class CurveContainer:
 
         # Versor extension
         length = sqrt(np.power(lengths,2).sum())
-        versor = lengths / length
-        extended = end + versor * 0.01 # Extend in the same direction by a small amount
+
+        # Extend in the same direction by a small amount
+        if length > 0:
+            versor = lengths / length
+            extended = end + versor * 0.01
+
+        # If the points are identical (should not happen), return the end point
+        else:
+            return end
 
         return extended
 

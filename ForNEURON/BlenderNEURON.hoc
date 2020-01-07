@@ -1,1 +1,0 @@
-nrnpython("from blenderneuron.quick import bn")
