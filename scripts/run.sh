@@ -1,11 +1,12 @@
-xhost +local:root
+#xhost +local:root
 
 docker run \
     -it \
     -v $(readlink -f ../):/BlenderNEURON \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -e DISPLAY=$DISPLAY \
-    --device=/dev/dri:/dev/dri \
+    -p 5920:5920 \
     blenderneuron:2.0.0
 
-xhost -local:root
+#    -v /tmp/.X11-unix:/tmp/.X11-unix \
+#    -e DISPLAY=$DISPLAY \
+#    --device=/dev/dri:/dev/dri \
+#xhost -local:root

@@ -1,5 +1,5 @@
 # From repo root, run all tests with 'python tests/test_cell_import_export.py'
-# Run single test with: 'python tests/test_cell_import_export.py TestCellImportExport.test_import_export_cell'
+# Run single test with: 'python tests/test_cell_import_export.py TestCellImportExport.test_object_levels'
 
 import unittest
 import os, sys
@@ -82,6 +82,9 @@ class TestCellImportExport(BlenderTestCase):
 
             self.assertEqual(count, 1)
 
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
     def test_import_remove_import_again(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
@@ -143,6 +146,148 @@ class TestCellImportExport(BlenderTestCase):
 
             # The z position should be the original position (not shifted)
             self.assertAlmostEqual(z, 0, 1)
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
+
+
+    def test_object_levels(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            # Load TestCell.hoc - and add somatic stimulus
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc = h.TestCell();'
+                                   'ic = h.IClamp(0.5);'
+                                   'ic.amp = 1; ic.delay = 1; ic.dur = 10;'
+            )
+
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # ----------------- Cell level objects --------------- #
+            soma_object_exists, dendrite_object_exists = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Cell';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "objs = bpy.data.objects;"
+                "return_value = ('TestCell[0].soma' in objs, 'TestCell[0].dendrites[0]' in objs);"
+            )
+
+            self.assertTrue(soma_object_exists)
+            self.assertFalse(dendrite_object_exists)
+
+            # Import animation - animate WHOLE CELL
+            soma_mat_exists, dendrite_mat_exists,  = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = 'Cell';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma' in mats, 'TestCell[0].dendrites[0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertFalse(dendrite_mat_exists)
+
+            soma_emission_start, soma_emission_end,  = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].soma'].emit;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].soma'].emit;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(soma_emission_start, 0)
+            self.assertGreater(soma_emission_end, soma_emission_start)
+
+            # Import animation - animate EACH SECTION
+            soma_mat_exists, dendrite_mat_exists,  = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = 'Section';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma' in mats, 'TestCell[0].dendrites[0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertTrue(dendrite_mat_exists)
+
+            dend_emission_start, dend_emission_end,  = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(dend_emission_start, 0)
+            self.assertGreater(dend_emission_end, dend_emission_start)
+
+            # --------------- Section level objects ------------------- #
+            soma_object_exists, dendrite_object_exists = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Section';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "objs = bpy.data.objects;"
+                "return_value = ('TestCell[0].soma' in objs, 'TestCell[0].dendrites[0]' in objs);"
+            )
+
+            self.assertTrue(soma_object_exists)
+            self.assertTrue(dendrite_object_exists)
+
+            # Import animation - animate WHOLE CELL
+            soma_mat_exists, dendrite_mat_exists,  = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = 'Cell';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma' in mats, 'TestCell[0].dendrites[0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertFalse(dendrite_mat_exists)
+
+            soma_emission_start, soma_emission_end,  = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].soma'].emit;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].soma'].emit;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(soma_emission_start, 0)
+            self.assertGreater(soma_emission_end, soma_emission_start)
+
+            # Import animation - animate EACH SECTION
+            soma_mat_exists, dendrite_mat_exists,  = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = 'Section';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma' in mats, 'TestCell[0].dendrites[0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertTrue(dendrite_mat_exists)
+
+            dend_emission_start, dend_emission_end,  = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(dend_emission_start, 0)
+            self.assertGreater(dend_emission_end, dend_emission_start)
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
 
 if __name__ == '__main__':

@@ -46,7 +46,7 @@ class BlenderSection(Section):
         """
         Splits a section into smaller chained sub-sections if the arc length of the points
         exceeds the specified length. This is used to temporarily split the sections for
-        physics simulations.
+        confining dendrites between layers.
 
         :param max_length: maximum allowed section length in um
         :return: None
@@ -72,27 +72,38 @@ class BlenderSection(Section):
         old_radii = np.array(self.radii)
 
         # Split the coords and radii
-        split_length = new_length
-        split_idxs = []
+        split_length = 0
+        split_coords = []
+        split_radii = []
 
-        for pi in range(len(old_radii)):
-            if arc_lengths[pi] >= split_length:
-                split_idxs.append(pi)
-                split_length += new_length
+        point_i = 0
+        for split_sec_i, split_sec in enumerate(self.split_sections):
+            split_length += new_length
+            split_sec_coords = []
+            split_sec_radii = []
 
-                if len(split_idxs) == num_sections-1:
-                    break
+            exact_length_match = False
 
-        split_coords = np.split(old_coords, split_idxs)
-        split_radii = np.split(old_radii, split_idxs)
+            while arc_lengths[point_i] <= split_length:
+                split_sec_coords.append(old_coords[point_i])
+                split_sec_radii.append(old_radii[point_i])
 
-        # Assign them to the split sections
-        for i, sec in enumerate(self.split_sections):
-            sec.coords = split_coords[i].reshape(-1)
-            sec.radii = split_radii[i]
-            sec.point_count = len(sec.radii)
+                exact_length_match = abs(arc_lengths[point_i] - split_length) < 0.001
+                point_i += 1
 
-            sec.name = self.name + "["+str(i)+"]"
+            # If reached the end of the sub-section, but the last sub-section point is not
+            # at the exact end of the sub-section, then create a virtual point, which
+            # is at the midpoint between the previous and next points in the sections
+            if not exact_length_match:
+                split_sec_coords.append((old_coords[point_i-1] + old_coords[point_i]) / 2.0)
+                split_sec_radii.append((old_radii[point_i-1] + old_radii[point_i]) / 2.0)
+
+
+
+            split_sec.coords = np.array(split_sec_coords)
+            split_sec.radii = np.array(split_sec_radii)
+            split_sec.point_count = len(split_sec.radii)
+            split_sec.name = self.name + "["+str(split_sec_i)+"]"
 
         # Total number of points should be preserved
         assert self.point_count == sum(len(sec.radii) for sec in self.split_sections)

@@ -33,9 +33,6 @@ class CellObjectView(ObjectViewAbstract):
                                           origin_type="center",
                                           container_material=material)
 
-            # Lock scaling the parent (rotations and translations are allowed)
-            container.get_object().lock_scale = [True] * 3
-
             # Animate section activity
             self.animate_section_material(
                 root,

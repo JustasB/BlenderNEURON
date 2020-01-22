@@ -9,11 +9,6 @@ class NeuronSection(Section):
 
         self.update_coords_and_radii(blender_section)
 
-        # TODO: Update Topology
-        # parent_seg = nrn_section.parentseg()
-        # self.parent_connection_loc = parent_seg.x if parent_seg is not None else None
-        # self.connection_end = nrn_section.orientation()
-
         if self.group.recording_granularity == '3D Segment':
             self.segments_3D = [NeuronSegment3D(self, i) for i in range(1, self.point_count)]
         else:

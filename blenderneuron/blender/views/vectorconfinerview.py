@@ -12,6 +12,8 @@ class VectorConfinerView(SectionObjectView):
     def __init__(self, group):
         super(VectorConfinerView, self).__init__(group)
 
+        self.closed_ends = False
+
     @property
     def max_bend_angle(self):
         return self.group.ui_group.layer_confiner_settings.max_bend_angle
@@ -21,6 +23,8 @@ class VectorConfinerView(SectionObjectView):
         return self.group.ui_group.layer_confiner_settings.max_section_length
 
     def show(self):
+        import pydevd
+        pydevd.settrace('192.168.0.15', port=4200)
 
         # This will create section objects using the new split sections
         for root in self.group.roots.values():
@@ -36,6 +40,7 @@ class VectorConfinerView(SectionObjectView):
         else:
             origin_type = "first"
 
+        print('Creating container', root.name)
         self.create_section_container(root,
                                       include_children=False,
                                       origin_type=origin_type,

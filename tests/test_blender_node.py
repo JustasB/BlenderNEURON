@@ -15,6 +15,8 @@ class TestBlenderNode(BlenderTestCase):
         with Blender(), CommNode("Control-Blender") as bcn:
             self.assertEqual(bcn.client.ping(), 1)
 
+            bcn.client.end_code_coverage()
+
     def test_can_connect_to_neuron(self):
         # Start Blender with a running node
         with NEURON(), CommNode("Control-NEURON") as ncn, \
@@ -23,6 +25,11 @@ class TestBlenderNode(BlenderTestCase):
             # See if Blender is able to connect to the NEURON process node
             result = bcn.client.run_command("return_value = str(bpy.types.Object.BlenderNEURON_node.client)")
             self.assertIn("Proxy", result)
+
+
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
     def test_add_remove_group_and_cells(self):
         with NEURON(), CommNode("Control-NEURON") as ncn, \
@@ -110,6 +117,9 @@ class TestBlenderNode(BlenderTestCase):
                     "return_value = all(cell.selected for cell in group.root_entries)"
                 ))
 
+                bcn.client.end_code_coverage()
+                ncn.client.end_code_coverage()
+
     def test_group_select_all_none_invert(self):
         with NEURON(), CommNode("Control-NEURON") as ncn, \
              Blender(), CommNode("Control-Blender") as bcn:
@@ -150,6 +160,9 @@ class TestBlenderNode(BlenderTestCase):
                     "bpy.ops.blenderneuron.invert_cell_selection();"
                     "return_value = group.root_entries[0].selected"
                 ))
+
+                bcn.client.end_code_coverage()
+                ncn.client.end_code_coverage()
 
     def test_simulator_settings_exchange(self):
 
@@ -202,7 +215,10 @@ class TestBlenderNode(BlenderTestCase):
                 "return_value = params.time_step"
             ), places=3)
 
-    def test_simulator_run_plot(self):
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
+    def test_simulator_run(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
              Blender(), CommNode("Control-Blender") as bcn:
@@ -212,9 +228,8 @@ class TestBlenderNode(BlenderTestCase):
                                    's1.insert("pas");'
                                    's1.insert("hh");')
 
-            # Open the v plot window and run the sim
+            # Run the sim
             bcn.client.run_command(
-                "bpy.ops.blenderneuron.show_voltage_plot();"
                 "bpy.ops.blenderneuron.init_and_run_neuron()"
             )
 
@@ -223,8 +238,8 @@ class TestBlenderNode(BlenderTestCase):
                                    ncn.client.run_command('return_value=h.t'),
                                    places=1)
 
-            # Check that the plot was created
-            self.assertEqual(1, ncn.client.run_command('return_value=len(h.Graph)'))
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
 if __name__ == '__main__':
     unittest.main()

@@ -71,6 +71,7 @@ class TestCommNode(BlenderTestCase):
         cm.stop_server()
 
     def test_Blender_first(self):
+
         with CommNode("Blender") as cm1:
             with CommNode("NEURON") as cm2:
                 self.assertEqual(cm1.client.ping(), 1)

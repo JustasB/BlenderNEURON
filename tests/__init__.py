@@ -3,6 +3,8 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 
+from blenderneuron.commnode import CommNode
+
 test_hoc_file = 'tests/TestCell.hoc'
 
 class BlenderNEURONProcess:
@@ -42,6 +44,19 @@ class Blender(BlenderNEURONProcess):
 
     # Start blender without audio support
     cmd_args = "-noaudio"
+
+    def __enter__(self):
+        self.process.start()
+
+        waited = 0
+        while waited < 10:
+            with CommNode("Control-Blender") as bcn:
+                if bcn.client is not None and bcn.client.ping() == 1:
+                    break
+                else:
+                    sleep(0.5)
+
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if not self.keep:

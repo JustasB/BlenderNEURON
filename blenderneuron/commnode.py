@@ -83,7 +83,6 @@ class CommNode(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.client.end_code_coverage()
         self.stop_server()
 
     def load_config(self):
@@ -323,13 +322,17 @@ class CommNode(object):
 
     def sm_end_code_coverage(self):
         try:
+            print('Getting Coverage info', self.server_end)
             from blenderneuron import COV
         except:
+            print('Failed to get COV', self.server_end)
             # Dont try to save coverage info if not in coverage
             return
 
         COV.stop()
         COV.save()
+
+        print('SAVED Coverage info', self.server_end)
 
     def _get_command_lambda(self, command_string):
         """
