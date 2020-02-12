@@ -22,9 +22,6 @@ class CurveContainer:
         self.linked = False
         self.material_indices = []
 
-        self.joint_names = []
-        self.tip_name = None
-
         # Quickly find the spline of a given section
         self.name2spline_index = {}
         self.spline_index2section = {}
@@ -111,13 +108,6 @@ class CurveContainer:
             # object
             if object_name in bl_objects:
                 bl_objects.remove(ob)
-
-        # joints
-        for name in self.joint_names:
-            bl_objects.remove(bl_objects[name])
-
-        if self.tip_name is not None:
-            bl_objects.remove(bl_objects[self.tip_name])
 
     @property
     def origin(self):
@@ -400,9 +390,6 @@ class CurveContainer:
 
         link(self.get_object())
 
-        for name in self.joint_names:
-            link(bl_objects[name])
-
         self.linked = True
 
     def unlink(self):
@@ -418,56 +405,6 @@ class CurveContainer:
         except RuntimeError:
             pass  # ignore if already unlinked
 
-        for name in self.joint_names:
-            try:
-                unlink_from_scene(bl_objects[name])
-            except RuntimeError:
-                pass
-
-
         self.linked = False
-
-
-    def add_tip(self, tip_template, empty_obj):
-        ob = self.get_object()
-
-        if ob.type != 'MESH':
-            raise Exception('Cannot add tip joint to non-mesh container: ' + self.name)
-
-        # Tip is the last coordinate of the section
-        tip_loc = ob.data.vertices[-2 if self.closed_ends else -1].co
-        tip_loc = self.to_global(np.array(tip_loc))
-
-        # Create a dummy tip mesh so the force acts on the tips as well
-        tip_object = bpy.data.objects[tip_template].copy()
-        tip_object.location = tip_loc
-
-        # Make the tip a child of the leaf section
-        tip_object.parent = ob
-        tip_object.matrix_parent_inverse = ob.matrix_world.inverted()
-
-        # Link and keep a reference to the tip (for cleanup)
-        bpy.context.scene.objects.link(tip_object)
-        self.tip_name = tip_object.name
-
-        self.create_joint_between(ob, tip_object, tip_loc, empty_obj)
-
-    def create_joint_with(self, child, empty_obj):
-        self.create_joint_between(self.get_object(), child.get_object(), child.origin, empty_obj)
-
-    def create_joint_between(self, parent_object, child_object, joint_location, empty):
-        empty.location = joint_location
-
-        # Create parent-child relationship between the parent section and the empty
-        empty.parent = parent_object
-        empty.matrix_parent_inverse = parent_object.matrix_world.inverted()
-
-        # Set the joint params
-        constraint = empty.rigid_body_constraint
-
-        constraint.object1 = parent_object # parent
-        constraint.object2 = child_object
-
-        self.joint_names.append(empty.name)
 
 

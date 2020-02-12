@@ -46,11 +46,12 @@ class SectionObjectView(ObjectViewAbstract):
             self.set_childrens_parent(root)
 
             # Lock scaling the parent (rotations and translations are allowed)
-            self.containers[root.name].get_object().lock_scale = [True] * 3
+            container_name = root.split_sections[0].name if root.was_split else root.name
+            self.containers[container_name].get_object().lock_scale = [True] * 3
 
     def set_childrens_parent(self, parent_sec, recursive=True):
         # If the parent was split, the split sections need to be chained together first
-        # Then the split section that is closest to the child will be the child's container's parent
+        # Then, the split section that is closest to the child will be the child's container's parent
         if parent_sec.was_split:
 
             # Parent chain the split sections together

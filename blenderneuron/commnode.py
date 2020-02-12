@@ -140,10 +140,8 @@ class CommNode(object):
 
         # Synchronous execution
         self.server.register_function(self.sm_run_command, 'run_command')
-        self.server.register_function(self.sm_run_method, 'run_method')
 
         # Asynchronous task execution queueing
-        self.server.register_function(self.sm_enqueue_method,  'enqueue_method')
         self.server.register_function(self.sm_enqueue_command, 'enqueue_command')
         self.server.register_function(self.sm_get_task_status, 'get_task_status')
         self.server.register_function(self.sm_get_task_error,  'get_task_error')
@@ -310,22 +308,13 @@ class CommNode(object):
         exec_lambda = self._get_command_lambda(command_string)
         return self._enqueue_lambda(exec_lambda)
 
-    def sm_run_method(self, method, args, kwargs):
-        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
-
-        return self._run_lambda(task_lambda)
-
-    def sm_enqueue_method(self, method, args, kwargs):
-        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
-
-        return self._enqueue_lambda(task_lambda)
-
     def sm_end_code_coverage(self):
         try:
             print('Getting Coverage info', self.server_end)
             from blenderneuron import COV
         except:
             print('Failed to get COV', self.server_end)
+
             # Dont try to save coverage info if not in coverage
             return
 
@@ -360,18 +349,6 @@ class CommNode(object):
             return globals().pop('return_value', None)
 
         return exec_lambda
-
-    def _get_method_lambda(self, method, *args, **kwargs):
-
-        # Retrieve the default values from method definition and pass them along if they're not set
-        method_arg_spec = inspect.getargspec(getattr(self, method))
-        default_args = dict(zip(method_arg_spec.args[-len(method_arg_spec.defaults):], method_arg_spec.defaults))
-        for arg in default_args:
-            if arg not in kwargs:
-                kwargs[arg] = default_args[arg]
-
-        task_lambda = lambda: getattr(self, method)(*args, **kwargs)
-        return task_lambda
 
     def _run_lambda(self, task_lambda):
         id = self._enqueue_lambda(task_lambda)

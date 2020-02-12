@@ -43,7 +43,7 @@ class Blender(BlenderNEURONProcess):
     executable = 'blender'
 
     # Start blender without audio support
-    cmd_args = "-noaudio"
+    cmd_args = "-noaudio -p 300 200 1024 600"
 
     def __enter__(self):
         self.process.start()

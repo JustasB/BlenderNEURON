@@ -286,9 +286,119 @@ class TestCellImportExport(BlenderTestCase):
             self.assertGreater(dend_emission_start, 0)
             self.assertGreater(dend_emission_end, dend_emission_start)
 
+
+            # Test group renaming logic
+            group_name = bcn.client.run_command(
+                "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[0];"
+                "group.name = 'TEST_GROUP';"
+                "return_value = group.name;"
+            )
+
+            self.assertEqual(group_name, 'TEST_GROUP')
+
+
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
 
+    def test_copy_group(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            # Load TestCell.hoc - create a group
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc1 = h.TestCell();')
+
+            # Load cell into first group
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Create 2nd cell
+            ncn.client.run_command('tc2 = h.TestCell();')
+
+            # Add second group, and shift 2nd cell up by 5 um
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.cell_group_add();"
+                "bpy.ops.blenderneuron.import_groups();"
+                "bpy.data.objects['TestCell[1].soma'].location[2] += 5;"
+            )
+
+            # Test group copying logic
+            group_int_granularity = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Section';"
+                "bpy.context.scene.BlenderNEURON.groups_index = 1;"
+                "group = bpy.data.scenes['Scene'].BlenderNEURON.groups[1];"
+                "group.copy_from_group = 'Group.000';"
+                "bpy.ops.blenderneuron.copy_from_group();"
+                "return_value = group.interaction_granularity;"
+            )
+
+            self.assertEqual(group_int_granularity, 'Section')
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
+    def test_save_groups(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            # Load TestCell.hoc - create a group
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc1 = h.TestCell();')
+
+            # Load cell into first group
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Create 2nd cell
+            ncn.client.run_command('tc2 = h.TestCell();')
+
+            # Add second group, and shift 2nd cell up by 5 um
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.cell_group_add();"
+                "bpy.ops.blenderneuron.import_groups();"
+                "bpy.data.objects['TestCell[1].soma'].location[2] += 5;"
+            )
+
+            file1 = 'test_group1.json'
+            file2 = 'test_group2.json'
+
+            try:
+
+                # Test group saving
+                bcn.client.run_command(
+                    "groups = bpy.types.Object.BlenderNEURON_node.groups;"
+                    "groups['Group.000'].to_file('" + file1 + "');"
+                    "groups['Group.001'].to_file('" + file2 + "');"
+                )
+
+                # Read the saved files
+                import json
+                with open(file1) as f1, open(file2) as f2:
+                    json1 = json.load(f1)
+                    json2 = json.load(f2)
+
+
+                # check that correct cells were saved
+                self.assertEqual(json1['roots'][0]['name'], 'TestCell[0].soma')
+                self.assertEqual(json2['roots'][0]['name'], 'TestCell[1].soma')
+
+
+                # Check that the z-location was saved correctly
+                self.assertEqual(json1['roots'][0]['coords'][-1], 0)
+
+                # 2nd cell should be shifted up by 5um
+                self.assertEqual(json2['roots'][0]['coords'][-1], 5)
+
+            finally:
+                os.remove(file1)
+                os.remove(file2)
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
 if __name__ == '__main__':
     unittest.main()

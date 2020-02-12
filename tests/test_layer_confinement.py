@@ -48,14 +48,14 @@ class TestLayerConfinement(BlenderTestCase):
             # Run confiner with split sections
             x, y, z = bcn.client.run_command(
                 "confiner = bpy.context.scene.BlenderNEURON.groups[0].layer_confiner_settings;"
-                "confiner.max_section_length = 25;"
+                "confiner.max_section_length = 5;"
                 "bpy.ops.blenderneuron.confine_between_layers();"
-                "return_value = list(bpy.data.objects['TestCell[0].dendrites[13]'].rotation_euler);"
+                "return_value = list(bpy.data.objects['TestCell[0].dendrites[18][0]'].rotation_euler);"
             )
 
-            self.assertAlmostEqual(x * degs, -5, 2)
-            self.assertAlmostEqual(y * degs, -0.04, 2)
-            self.assertAlmostEqual(z * degs, -0.88, 2)
+            self.assertAlmostEqual(x * degs, 16.9, 1)
+            self.assertAlmostEqual(y * degs, 12.9, 1)
+            self.assertAlmostEqual(z * degs, 16.9, 1)
 
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()

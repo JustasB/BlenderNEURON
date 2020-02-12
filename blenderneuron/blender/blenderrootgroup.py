@@ -273,7 +273,7 @@ class BlenderRootGroup(RootGroup):
 
         dir = os.path.dirname(file_name)
 
-        if not os.path.exists(dir):
+        if dir != '' and not os.path.exists(dir):
             os.makedirs(dir)
 
         with open(file_name, 'w') as f:

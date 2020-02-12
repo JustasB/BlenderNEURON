@@ -23,9 +23,6 @@ class VectorConfinerView(SectionObjectView):
         return self.group.ui_group.layer_confiner_settings.max_section_length
 
     def show(self):
-        import pydevd
-        pydevd.settrace('192.168.0.15', port=4200)
-
         # This will create section objects using the new split sections
         for root in self.group.roots.values():
             self.create_container_for_each_section(root)
@@ -40,7 +37,6 @@ class VectorConfinerView(SectionObjectView):
         else:
             origin_type = "first"
 
-        print('Creating container', root.name)
         self.create_section_container(root,
                                       include_children=False,
                                       origin_type=origin_type,
@@ -66,8 +62,10 @@ class VectorConfinerView(SectionObjectView):
         random.seed(settings.seed)
 
         for root in self.group.roots.values():
+            container = root.name if not root.was_split else root.split_sections[0].name
+
             self.confine_curve(
-                self.containers[root.name].object,
+                self.containers[container].object,
                 settings.start_mesh,
                 settings.end_mesh,
                 settings.moveable_sections_pattern,
@@ -101,9 +99,6 @@ class VectorConfinerView(SectionObjectView):
             # Normal vector from closest point on start to end mesh
             vec_start2end = (closest_on_end - closest_on_start).normalized()
 
-            # Section steepness within the two layers
-            steepness_now = abs(90 - acos(min(max(vec_sec_dir.dot(vec_start2end), -1), 1)) * 180 / pi)
-
             # Normal vector from closest on start mesh to section tip
             vec_start2tip = (tip_loc - closest_on_start).normalized()
 
@@ -122,54 +117,6 @@ class VectorConfinerView(SectionObjectView):
 
             # Target is a random location along the closest start-end point vector
             align_target = closest_on_start + vec_start2end * height * height_fraction
-
-
-            # # Confinement test
-            # layer_height = height * (height_high - height_low)
-            # start_pt = closest_on_start + vec_start2end * height * height_low
-            # end_pt = closest_on_start + vec_start2end * height * height_high
-            #
-            # dist_to_start = (tip_loc - start_pt).length
-            # dist_to_end = (tip_loc - end_pt).length
-            #
-            # # Quick radius based approximation
-            # if dist_to_start > layer_height or dist_to_end > layer_height:
-            #     is_confined = False
-            #
-            # # More accurate test
-            # else:
-            #     is_confined = (layer_height * layer_height) > \
-            #                   (dist_to_start * dist_to_start + dist_to_end * dist_to_end)
-            #
-            #
-            # obj["is_confined"] = int(is_confined)
-            # obj["layer_height"] = layer_height
-            # obj["dist_to_start"] = dist_to_start
-            # obj["dist_to_end"] = dist_to_end
-            #
-            # if not is_confined:
-            #     if dist_to_end < dist_to_start:
-            #         align_target = end_pt
-            #     else:
-            #         align_target = start_pt
-            #
-            # # If confined, check steepness
-            # else:
-            #
-            #     # Section direction vector assuming pointing at target
-            #     vec_align_target = (align_target - sec_start_loc).normalized()
-            #
-            #     # # Steepness of the align target
-            #     # steepness_target = abs(90 - acos(min(max(vec_align_target.dot(vec_start2end), -1), 1)) * 180 / pi)
-            #
-            #     # Limit steepness increases
-            #     # When steepness is not controlled, child sections can exceed layer limits
-            #     # requiring sharp turns to stay confined
-            #     # limiting steepness, limits this problem.
-            #     # This is usually a problem for sections that are already steep (e.g. close to the soma)
-            #     # if steepness_target > steepness_now and steepness_target > 45:
-            #     #     return
-
 
             # With each iteration, the target approaches a stable limit
             self.align_object_towards(obj, align_target, max_angle / iters)

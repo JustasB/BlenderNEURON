@@ -32,14 +32,18 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
 ENV COVERAGE_PROCESS_START=.coveragerc
 
 #Expose port 5920 to view display using VNC Viewer
-RUN apt-get install -y x11vnc xvfb
+RUN apt-get update
+RUN apt-get install -y x11vnc xvfb openbox menu
 EXPOSE 5920
 ENV DISPLAY=:20
 
 # Link the addon and enable it in Blender
 ENTRYPOINT ln -s /BlenderNEURON/blenderneuron /blender/2.79/scripts/addons/blenderneuron && \
     blender/blender --python enable_addon.py --background -noaudio && \
+    openbox-session && \
+    x11vnc -nopw -create -rfbport 5920 -forever && \
     /bin/bash
+
 
 #Xvfb :20 -screen 0 1366x768x16 & x11vnc -passwd TestVNC -display :20 -N -forever
 

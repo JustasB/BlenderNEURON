@@ -1,5 +1,4 @@
 from blenderneuron.section import Section
-from blenderneuron.blender.blendersegment3d import BlenderSegment3D
 import numpy as np
 import math
 import numpy as np
@@ -33,12 +32,6 @@ class BlenderSection(Section):
 
         self.segments_3D = []
 
-        if "segments_3D" in nrn_section_dict:
-            for i, nrn_seg_3D in enumerate(nrn_section_dict["segments_3D"]):
-                seg = BlenderSegment3D(self, i+1)
-                seg.from_dict(nrn_seg_3D)
-                self.segments_3D.append(seg)
-
         if "activity" in nrn_section_dict:
             self.activity.from_dict(nrn_section_dict["activity"])
 
@@ -53,7 +46,7 @@ class BlenderSection(Section):
         """
         arc_lengths = self.arc_lengths()
         total_length = arc_lengths[-1]
-        num_sections = math.ceil(total_length / max_length)
+        num_sections = int(math.ceil(total_length / max_length))
         is_too_long = num_sections > 1
 
         if not is_too_long:
@@ -73,17 +66,22 @@ class BlenderSection(Section):
 
         # Split the coords and radii
         split_length = 0
-        split_coords = []
-        split_radii = []
-
         point_i = 0
+
         for split_sec_i, split_sec in enumerate(self.split_sections):
             split_length += new_length
             split_sec_coords = []
             split_sec_radii = []
 
+            # Start a 2nd+ split section with the most recent point
+            if split_sec_i > 0:
+                prev_sec = self.split_sections[split_sec_i-1]
+                split_sec_coords.append(prev_sec.coords[-1])
+                split_sec_radii.append(prev_sec.radii[-1])
+
             exact_length_match = False
 
+            # Add 3d points to the split until reached the end of the split
             while arc_lengths[point_i] <= split_length:
                 split_sec_coords.append(old_coords[point_i])
                 split_sec_radii.append(old_radii[point_i])
@@ -91,22 +89,30 @@ class BlenderSection(Section):
                 exact_length_match = abs(arc_lengths[point_i] - split_length) < 0.001
                 point_i += 1
 
-            # If reached the end of the sub-section, but the last sub-section point is not
+                if point_i == len(arc_lengths):
+                    break
+
+            # If reached the end of the sub-section, but the last real sub-section point is not
             # at the exact end of the sub-section, then create a virtual point, which
-            # is at the midpoint between the previous and next points in the sections
+            # lies at the exact end of the sub-section
             if not exact_length_match:
-                split_sec_coords.append((old_coords[point_i-1] + old_coords[point_i]) / 2.0)
-                split_sec_radii.append((old_radii[point_i-1] + old_radii[point_i]) / 2.0)
+                virtual_arc_length_delta = split_length - arc_lengths[point_i-1]
+                pt_segment_arc_length_delta = arc_lengths[point_i] - arc_lengths[point_i - 1]
 
+                pt_segment_vector = old_coords[point_i] - old_coords[point_i-1]
+                fraction_along = virtual_arc_length_delta / pt_segment_arc_length_delta
+                virtual_coord = old_coords[point_i-1] + pt_segment_vector * fraction_along
 
+                pt_segment_radius_delta = old_radii[point_i] - old_radii[point_i-1]
+                virtual_radius = old_radii[point_i-1] + pt_segment_radius_delta * fraction_along
+
+                split_sec_coords.append(virtual_coord)
+                split_sec_radii.append(virtual_radius)
 
             split_sec.coords = np.array(split_sec_coords)
             split_sec.radii = np.array(split_sec_radii)
             split_sec.point_count = len(split_sec.radii)
             split_sec.name = self.name + "["+str(split_sec_i)+"]"
-
-        # Total number of points should be preserved
-        assert self.point_count == sum(len(sec.radii) for sec in self.split_sections)
 
         return self.split_sections
 
@@ -114,15 +120,27 @@ class BlenderSection(Section):
         if not self.was_split:
             return
 
-        # Reassemble the coords and radii
-        coords = np.concatenate([sec.coords for sec in self.split_sections])
-        radii = np.concatenate([sec.radii for sec in self.split_sections])
+        # Reassemble the coords and radii, skipping identical consecutive points
+        prev_coord, prev_radius = None, None
+        coords, radii = [], []
+        for split_i, split_sec in self.split_sections:
+            for coord_i, coord in split_sec.coords:
+                radius = split_sec.radii[coord_i]
 
-        self.coords = coords.reshape(-1)
-        self.radii = radii.reshape(-1)
+                # Skip if identical to previous point
+                if np.all(coord == prev_coord) and radius == prev_radius:
+                    continue
 
-        # This should not change
-        assert self.point_count == len(self.radii)
+                else:
+                    coords.append(coord)
+                    radii.append(radius)
+
+                prev_coord = coord
+                prev_radius = radius
+
+        self.coords = np.array(coords).reshape(-1)
+        self.radii = np.array(radii).reshape(-1)
+        self.point_count = len(self.radii)
 
     def arc_lengths(self):
         coords = np.array(self.coords).reshape(-1, 3)

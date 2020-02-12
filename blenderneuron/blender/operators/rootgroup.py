@@ -6,7 +6,6 @@ import numpy as np
 from blenderneuron.blender import BlenderNodeClass
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
-from blenderneuron.blender.views.commandview import CommandView
 from blenderneuron.blender.views.synapseformerview import SynapseFormerView
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 
@@ -271,14 +270,17 @@ class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
 
 
 
-class SaveGroupsToFileOperator(Operator, ExportHelper, CellGroupOperatorAbstract):
-    bl_idname = "blenderneuron.save_groups_to_file"
-    bl_label = "Save Group Data"
-    bl_description = "Save Changes to JSON file"
+class SaveActiveGroupToFileOperator(Operator, ExportHelper, CellGroupOperatorAbstract):
+    bl_idname = "blenderneuron.save_active_group_to_file"
+    bl_label = "Save Active Group"
+    bl_description = "Save Active Group to JSON file"
 
     @classmethod
     def poll(cls, context):
-        return BlenderNodeClass.imported_groups_exist(context)
+        groups = bpy.types.Object.BlenderNEURON_node.ui_properties.groups
+
+        return len(groups) > 0 and \
+               bpy.types.Object.BlenderNEURON_node.ui_properties.group.node_group.state == 'imported'
 
     # ExportHelper mixin class uses this
     filename_ext = ".json"
@@ -368,7 +370,7 @@ class FindSynapseLocationsOperator(Operator, CellGroupOperatorAbstract):
 class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.create_synapses"
     bl_label = "Create Synapses"
-    bl_description = "Creates NEURON synapses between cells in two BlenderNEURON groups"
+    bl_description = "Creates synapses in NEURON between cells in two BlenderNEURON groups"
 
     @classmethod
     def poll(cls, context):

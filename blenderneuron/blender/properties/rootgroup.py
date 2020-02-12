@@ -95,42 +95,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
                     "Set to value longer than longest section (e.g. 99999) to disable splitting"
     )
 
-    simulation_frames = IntProperty(
-        default=250,
-        name="Physics simulation frames",
-        description="The number of frames to use for physics simulation",
-    )
 
-    spring_stiffness = FloatProperty(
-        default=10,
-        min=0,
-        name="Joint Stiffness",
-        description="Joint stiffness coefficient"
-    )
-
-    spring_damping = FloatProperty(
-        default=0.5,
-        min=0,
-        max=1,
-        name="Joint Damping",
-        description="Joint damping coefficient"
-    )
-
-    physics_steps_per_sec = FloatProperty(
-        default=120,
-        min=1,
-        name="Physics Steps/sec",
-        description="The number of integration steps per second the physics solver should "
-                    "use for physics simulations"
-    )
-
-    physics_solver_iterations_per_step = FloatProperty(
-        default=10,
-        min=1,
-        name="Physics iterations per step",
-        description="The number of iterations the physics solver should use for "
-                    "each simulation step"
-    )
 
 
 class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
@@ -180,7 +145,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     max_syns_per_pt = IntProperty(
         default=4,
         name="Max Syns/Pt",
-        description="The maximum number of synapses that are allowed to be positioned at a given"
+        description="The maximum number of synapses that are allowed to be positioned at a given "
                     "section 3D point"
     )
 

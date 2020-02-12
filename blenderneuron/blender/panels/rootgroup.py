@@ -95,10 +95,13 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
         col.operator("blenderneuron.unselect_all_cells")
         col.operator("blenderneuron.invert_cell_selection")
 
+        self.layout.operator("blenderneuron.save_active_group_to_file", text="Save Group Cells to File",
+                             icon="FILESEL")
+
 
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'CUSTOM_PT_NEURON_Import'
-    bl_label = "Import / Export / Save"
+    bl_label = "Import / Export"
 
     @classmethod
     def poll(cls, context):
@@ -118,9 +121,6 @@ class ImportPanel(AbstractBlenderNEURONPanel, Panel):
 
         self.layout.operator("blenderneuron.export_groups", text="Export Cell Groups to NEURON",
                              icon="BACK")
-
-        self.layout.operator("blenderneuron.save_groups_to_file", text="Save Changes to NEURON .py file",
-                             icon="FILESEL")
 
 
 class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):

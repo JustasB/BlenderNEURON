@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, Blender, BlenderTestCase
+from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
 
 class TestCommNode(BlenderTestCase):
     def test_control_NEURON(self):
@@ -77,11 +77,57 @@ class TestCommNode(BlenderTestCase):
                 self.assertEqual(cm1.client.ping(), 1)
                 self.assertEqual(cm2.client.ping(), 1)
 
+    def test_queueing_commands(self):
+
+        with CommNode("Blender") as cm1:
+            with CommNode("NEURON") as cm2:
+
+                task1 = cm1.client.enqueue_command('a = 1')
+                task2 = cm1.client.enqueue_command('b = 0')
+                task3 = cm1.client.enqueue_command('c = a / b')
+                task4 = cm1.client.enqueue_command('d = "never happened"')
+
+                i = 0
+                while i < 1 and cm1.client.get_task_status(task4) == 'QUEUED':
+                    sleep(0.1)
+                    i += 0.1
+
+                self.assertEqual(cm1.client.get_task_status(task1), 'SUCCESS')
+                self.assertEqual(cm1.client.get_task_status(task2), 'SUCCESS')
+                self.assertEqual(cm1.client.get_task_status(task3), 'ERROR')
+                self.assertEqual(cm1.client.get_task_status(task4), 'ERROR')
+
+    def test_quitting_from_client(self):
+        with CommNode("Blender") as cm1:
+            with CommNode("NEURON") as cm2:
+                cm1.client.run_command('quit()')
+
     def test_NEURON_first(self):
         with CommNode("NEURON") as cm1:
             with CommNode("Blender") as cm2:
                 self.assertEqual(cm1.client.ping(), 1)
                 self.assertEqual(cm2.client.ping(), 1)
+
+    def test_error_handling(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            from xmlrpc.client import Fault
+
+            try:
+                bcn.client.run_command('1/0')
+            except Fault:
+                pass
+
+            try:
+                ncn.client.run_command('1/0')
+            except Fault:
+                pass
+
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
 
 if __name__ == '__main__':

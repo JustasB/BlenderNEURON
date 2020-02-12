@@ -1,4 +1,3 @@
-from blenderneuron.nrn.neuronsegment3d import NeuronSegment3D
 from blenderneuron.section import Section
 from neuron import h
 import numpy as np
@@ -8,11 +7,7 @@ class NeuronSection(Section):
     def from_updated_blender_root(self, blender_section):
 
         self.update_coords_and_radii(blender_section)
-
-        if self.group.recording_granularity == '3D Segment':
-            self.segments_3D = [NeuronSegment3D(self, i) for i in range(1, self.point_count)]
-        else:
-            self.segments_3D = []
+        self.segments_3D = []
 
         for i, blender_child in enumerate(blender_section["children"]):
             section = self.children[i]
@@ -48,10 +43,7 @@ class NeuronSection(Section):
         self.parent_connection_loc = parent_seg.x if parent_seg is not None else None
         self.connection_end = nrn_section.orientation()
 
-        if group.recording_granularity == '3D Segment':
-            self.segments_3D = [NeuronSegment3D(self, i) for i in range(1, self.point_count)]
-        else:
-            self.segments_3D = []
+        self.segments_3D = []
 
     def update_coords_and_radii(self, blender_section):
         self.nseg = blender_section["nseg"]

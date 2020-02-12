@@ -37,18 +37,14 @@ class Activity:
         if len(self.values) * len(self.times) == 0 or not numpy_available:
             return
 
-        try:
-            # Make a matrix where times and values are columns
-            formatted = np.vstack((self.times, self.values)).T
 
-            # Run simplification algorithm
-            simplified = rdp(formatted, epsilon).T
+        # Make a matrix where times and values are columns
+        formatted = np.vstack((self.times, self.values)).T
 
-            # Split the result matrix back to individual times and values columns
-            self.times, self.values = simplified[0:2]
-        except:
+        # Run simplification algorithm
+        simplified = rdp(formatted, epsilon).T
 
-            import pydevd
-            pydevd.settrace('192.168.0.100', port=4200)
-            raise
+        # Split the result matrix back to individual times and values columns
+        self.times, self.values = simplified[0:2]
+
 

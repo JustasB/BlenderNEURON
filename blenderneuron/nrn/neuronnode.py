@@ -196,7 +196,7 @@ class NeuronNode(CommNode):
         # 9 digits is the largest safe number that is accepted by pc.set_gid2node
         # In practice, this will be unique for each segment
         # And same on each machine and version of python (unlike hash())
-        gid = int(sha1(seg_address).hexdigest(), 16) % (10 ** 9)
+        gid = int(sha1(seg_address.encode('utf-8')).hexdigest(), 16) % (10 ** 9)
 
         return gid
 
