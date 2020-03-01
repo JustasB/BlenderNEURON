@@ -39,7 +39,9 @@ class CommNode(object):
         "Package": "Blender",
     }
 
-    def __init__(self, server_end, on_client_connected=None, on_server_setup=None):
+    def __init__(self, server_end, on_client_connected=None, on_server_setup=None, coverage=False):
+
+        self.coverage = coverage
 
         self.groups = OrderedDict()
         self.root_index = OrderedDict()
@@ -83,6 +85,9 @@ class CommNode(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.coverage:
+            self.client.end_code_coverage()
+
         self.stop_server()
 
     def load_config(self):

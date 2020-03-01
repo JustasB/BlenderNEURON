@@ -146,6 +146,7 @@ class NeuronNode(CommNode):
         return min(max(x_in, 0.001), 0.999)
 
     def rank_section_name(self, single_rank_name):
+
         if self.mpimap is not None:
             cell_name, section_name = self.section_rx.match(single_rank_name).groups()
 

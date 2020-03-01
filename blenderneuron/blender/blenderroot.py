@@ -123,13 +123,14 @@ class BlenderSection(Section):
         # Reassemble the coords and radii, skipping identical consecutive points
         prev_coord, prev_radius = None, None
         coords, radii = [], []
-        for split_i, split_sec in self.split_sections:
-            for coord_i, coord in split_sec.coords:
+        for split_i, split_sec in enumerate(self.split_sections):
+            for coord_i, coord in enumerate(np.reshape(split_sec.coords, (-1, 3))):
                 radius = split_sec.radii[coord_i]
 
                 # Skip if identical to previous point
-                if np.all(coord == prev_coord) and radius == prev_radius:
-                    continue
+                if prev_coord is not None and radius == prev_radius and \
+                    np.all(np.isclose(coord, prev_coord, rtol=0.001)):
+                        continue
 
                 else:
                     coords.append(coord)

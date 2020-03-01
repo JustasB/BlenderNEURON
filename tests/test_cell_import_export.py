@@ -400,5 +400,88 @@ class TestCellImportExport(BlenderTestCase):
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
 
+    def test_remove_cells_groups(self):
+
+        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
+                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+
+            # Load TestCell.hoc - create a group
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc1 = h.TestCell();')
+
+            # Load cell into first group
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Create 2nd cell
+            ncn.client.run_command('tc2 = h.TestCell();')
+
+            # Add second group, and shift 2nd cell up by 5 um
+            group_count = bcn.client.run_command(
+                "bpy.ops.blenderneuron.cell_group_add();"
+                "bpy.ops.blenderneuron.import_groups();"
+                "bpy.data.objects['TestCell[1].soma'].location[2] += 5;"
+                "return_value = len(bpy.context.scene.BlenderNEURON.groups);"
+            )
+
+            self.assertEqual(group_count, 2)
+
+            # Unselect 2nd cell from 2nd group and remove the empty group
+            group_count = bcn.client.run_command(
+                "bpy.context.scene.BlenderNEURON.groups[1].root_entries[1].selected = False;"
+                "bpy.ops.blenderneuron.cell_group_remove();"
+                "return_value = len(bpy.context.scene.BlenderNEURON.groups);"
+            )
+
+            self.assertEqual(group_count, 1)
+
+            # Remove the last group
+            group_count = bcn.client.run_command(
+                "bpy.ops.blenderneuron.cell_group_remove();"
+                "return_value = len(bpy.context.scene.BlenderNEURON.groups);"
+            )
+
+            self.assertEqual(group_count, 0)
+
+    def test_remove_cell_from_nrn(self):
+
+        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
+                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+
+            # Load TestCell.hoc - create a group
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc1 = h.TestCell();')
+
+            # Load cell into first group and show it
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+                "bpy.ops.blenderneuron.import_groups();"
+            )
+
+            # Create 2nd cell
+            ncn.client.run_command('tc2 = h.TestCell();')
+
+            # Delete the first cell from NRN
+            ncn.client.run_command('tc1 = None;'
+                                   'del tc1;')
+
+            # Add second group, check the number of ui cells
+            ui_cell_count = bcn.client.run_command(
+                "bpy.ops.blenderneuron.cell_group_add();"
+                "bpy.ops.blenderneuron.import_groups();"
+                "return_value = len(bpy.context.scene.BlenderNEURON.groups[0].root_entries);"
+            )
+
+            self.assertEqual(ui_cell_count, 1)
+
+            # Get the name of the visible cell of the second group
+            ui_cell_name = bcn.client.run_command(
+                "return_value = bpy.context.scene.BlenderNEURON.groups[1].root_entries[0].name;"
+            )
+
+            self.assertEqual(ui_cell_name, "TestCell[1].soma")
+
+
 if __name__ == '__main__':
     unittest.main()
