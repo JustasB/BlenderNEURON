@@ -45,6 +45,29 @@ class TestMPI(BlenderTestCase):
             self.assertEqual(ncn.client.run_command('return_value = bn_node.rank_section_name("TestCell[1].soma");'),
                              None)
 
+    def test_mpi_synset(self):
+        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
+                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+
+            # Load TestCell.hoc - create a cell name:mpi rank map
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc = h.TestCell();'
+                                   'from blenderneuron.neuronstart import BlenderNEURON as bn_node;'
+                                   'bn_node.update_section_index();')
+
+
+            # Provide MPI map - first cell on this rank, 2nd cell on another rank
+            ncn.client.run_command('pc = h.ParallelContext();'
+                                   'mpimap = {};'
+                                   'mpimap["TestCell[0]"] = { "name": "TestCell[0]", "rank": 0 };'            
+                                   'mpimap["TestCell[1]"] = { "name": "TestCell[1]", "rank": 1 };'
+                                   'bn_node.init_mpi(pc, mpimap);')
+
+            ncn.client.run_command('from json import load;'
+                                   'f = open("tests/test_synset.json");'
+                                   'bn_node.create_synapses(load(f));'
+                                   'f.close();')
+
 
 if __name__ == '__main__':
     unittest.main()

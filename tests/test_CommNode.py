@@ -97,6 +97,11 @@ class TestCommNode(BlenderTestCase):
                 self.assertEqual(cm1.client.get_task_status(task3), 'ERROR')
                 self.assertEqual(cm1.client.get_task_status(task4), 'ERROR')
 
+                # Should fail on non-existing task
+                self.assertEqual(cm1.client.get_task_status(9999), "DOES_NOT_EXIST")
+
+
+
     def test_quitting_from_client(self):
         with CommNode("Blender") as cm1:
             with CommNode("NEURON") as cm2:

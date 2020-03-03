@@ -310,6 +310,7 @@ class NeuronNode(CommNode):
             # Keep references to the synapse parts
             synapses.append((netcon, syn, neck, head, netcon_recip, syn_recip))
 
+
     def create_netcon_syn(self,
                           syn_class_name, syn_sec, syn_sec_x, syn_params,
                           source_sec, source_x, threshold, delay, weight,

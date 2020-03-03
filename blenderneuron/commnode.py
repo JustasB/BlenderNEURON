@@ -17,14 +17,14 @@ except:
 try:
     from xmlrpc.server import SimpleXMLRPCServer
     from xmlrpc.server import SimpleXMLRPCRequestHandler
-except:
-    from SimpleXMLRPCServer import SimpleXMLRPCServer
-    from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+except:                                                         # pragma: no cover
+    from SimpleXMLRPCServer import SimpleXMLRPCServer           # pragma: no cover
+    from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler   # pragma: no cover
 
 try:
     from socketserver import ThreadingMixIn
-except:
-    from SocketServer import ThreadingMixIn
+except:                                                         # pragma: no cover
+    from SocketServer import ThreadingMixIn                     # pragma: no cover
 
 from collections import OrderedDict
 
@@ -187,8 +187,8 @@ class CommNode(object):
                 own_server_client.stop()
                 self.server_thread.join()
                 self.server_thread = None
-            except:
-                pass
+            except:     # pragma: no cover
+                pass    # pragma: no cover
 
         if hasattr(self, "server"):
             self.server = None
@@ -252,7 +252,7 @@ class CommNode(object):
             client_address = f.read()
 
         if "http" not in client_address:
-            raise ValueError("Address in the client address file does not appear to be valid:" + client_address)
+            raise ValueError("Address in the client address file does not appear to be valid:" + client_address) # pragma: no cover
 
         return client_address
 
@@ -268,8 +268,8 @@ class CommNode(object):
             if os.path.exists(file_name):
                 try:
                     os.remove(file_name)
-                except OSError:
-                    pass
+                except OSError: # pragma: no cover
+                    pass        # pragma: no cover
 
         else:
             with open(file_name, "w") as f:
@@ -284,11 +284,11 @@ class CommNode(object):
         if debug == False:
             return
 
-        try:
-            print(value)
-        except:
-            tb = traceback.format_exc()
-            print(tb)
+        try:                             # pragma: no cover
+            print(value)                 # pragma: no cover
+        except:                          # pragma: no cover
+            tb = traceback.format_exc()  # pragma: no cover
+            print(tb)                    # pragma: no cover
 
     def sm_stop(self):
         """
@@ -317,16 +317,16 @@ class CommNode(object):
         try:
             print('Getting Coverage info', self.server_end)
             from blenderneuron import COV
-        except:
-            print('Failed to get COV', self.server_end)
+        except:                                         # pragma: no cover
+            print('Failed to get COV', self.server_end) # pragma: no cover
 
             # Dont try to save coverage info if not in coverage
-            return
+            return                                      # pragma: no cover
 
-        COV.stop()
-        COV.save()
+        COV.stop()                                      # pragma: no cover
+        COV.save()                                      # pragma: no cover
 
-        print('SAVED Coverage info', self.server_end)
+        print('SAVED Coverage info', self.server_end)   # pragma: no cover
 
     def _get_command_lambda(self, command_string):
         """

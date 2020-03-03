@@ -40,25 +40,9 @@ class CurveContainer:
     def curve(self):
         ob = self.get_object()
 
-        if ob.type == 'CURVE':
-            return ob.data
-
-        raise Exception("Attempting to access curve data of an object that is not a curve: " + self.name)
-
-    @property
-    def mesh(self):
-        ob = self.get_object()
-
-        if ob.type == 'MESH':
-            return ob.data
-
-        raise Exception("Attempting to access mesh data of an object that is not a mesh: " + self.name)
-
+        return ob.data
 
     def set_parent_object(self, parent_container):
-        if not self.linked or not parent_container.linked:
-            raise Exception("Cannot create parent-child relationship between Blender objects that have not "
-                            "been linked to the scene: " + self.name + "->" + parent_container.name )
 
         child = self.get_object()
         parent = parent_container.get_object()
@@ -74,40 +58,27 @@ class CurveContainer:
         self.unlink()
 
         bl_objects = bpy.data.objects
-
         ob = self.get_object()
+        object_name = ob.name
 
-        if ob is not None:
-            object_name = ob.name
+        # materials
+        for mat in ob.data.materials:
+            if mat is not None:
+                # remove material animation if any
+                if mat.animation_data is not None:
+                    bpy.data.actions.remove(mat.animation_data.action)
 
-            # materials
-            for mat in ob.data.materials:
-                if mat is not None:
-                    # remove material animation if any
-                    if mat.animation_data is not None:
-                        bpy.data.actions.remove(mat.animation_data.action)
+                # remove material node animation
+                if mat.node_tree is not None and mat.node_tree.animation_data is not None:
+                    bpy.data.actions.remove(mat.node_tree.animation_data.action)
 
-                    # remove material node animation
-                    if mat.node_tree is not None and mat.node_tree.animation_data is not None:
-                        bpy.data.actions.remove(mat.node_tree.animation_data.action)
-
-                    # remove material
-                    bpy.data.materials.remove(mat)
+                # remove material
+                bpy.data.materials.remove(mat)
 
 
 
-            # curve
-            if ob.type == 'CURVE':
-                bpy.data.curves.remove(ob.data)
-
-            # mesh
-            elif ob.type == 'MESH':
-                bpy.data.meshes.remove(ob.data)
-
-
-            # object
-            if object_name in bl_objects:
-                bl_objects.remove(ob)
+        # curve
+        bpy.data.curves.remove(ob.data)
 
     @property
     def origin(self):
@@ -115,7 +86,7 @@ class CurveContainer:
 
     @origin.setter
     def origin(self, value):
-        self.get_object().location = value
+        self.curve.location = value
 
     def diam0version(self, start, end):
         lengths = end - start
@@ -267,53 +238,44 @@ class CurveContainer:
 
         ob = self.get_object()
 
-        if ob is not None:
-            if ob.type == 'CURVE':
-                # Find the spline that corresponds to the section
-                spline_i = self.name2spline_index[root.name]
+        # Find the spline that corresponds to the section
+        spline_i = self.name2spline_index[root.name]
 
-                try:
-                    spline = self.curve.splines[spline_i]
+        try:
+            spline = self.curve.splines[spline_i]
 
-                except IndexError:
-                    print("Could not find spline with index " + str(spline_i) + " in " + self.name +
-                          ". This can happen if a spline is deleted in Edit Mode.")
-                    raise
+        except IndexError:
+            print("Could not find spline with index " + str(spline_i) + " in " + self.name +
+                  ". This can happen if a spline is deleted in Edit Mode.")
+            raise
 
-                point_source = spline.bezier_points
+        point_source = spline.bezier_points
 
-                del spline
+        del spline
 
-            elif ob.type == 'MESH':
-                point_source = ob.data.vertices
+        # Get the 3d points
+        num_coords = len(point_source)
 
-            else:
-                raise Exception("Unsupported container object type: " + ob.type)
+        coords = np.zeros(num_coords * 3)
+        point_source.foreach_get("co", coords)
 
-            # Get the 3d points
-            num_coords = len(point_source)
+        # Adjust coords for container origin and rotation
+        coords = self.to_global(coords)
 
-            coords = np.zeros(num_coords * 3)
-            point_source.foreach_get("co", coords)
+        if self.closed_ends:
+            # Discard the 0-radius end caps
+            coords = coords[3:-3]
 
-            # Adjust coords for container origin and rotation
-            coords = self.to_global(coords)
+        root.coords = coords.tolist()
 
-            if self.closed_ends:
-                # Discard the 0-radius end caps
-                coords = coords[3:-3]
+        # Get radii
+        radii = np.zeros(num_coords)
+        point_source.foreach_get("radius", radii)
+        root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
+        del radii
 
-            root.coords = coords.tolist()
-
-            # Get radii - if container is a bezier
-            if ob.type == 'CURVE':
-                radii = np.zeros(num_coords)
-                point_source.foreach_get("radius", radii)
-                root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
-                del radii
-
-            # Cleanup before recursion
-            del point_source, num_coords, coords
+        # Cleanup before recursion
+        del point_source, num_coords, coords
 
         if recursive:
             for child in root.children:
@@ -394,13 +356,10 @@ class CurveContainer:
 
     def unlink(self):
         unlink_from_scene = bpy.context.scene.objects.unlink
-        bl_objects = bpy.data.objects
 
         try:
             ob = self.get_object()
-
-            if ob is not None:
-                unlink_from_scene(ob)
+            unlink_from_scene(ob)
 
         except RuntimeError:
             pass  # ignore if already unlinked

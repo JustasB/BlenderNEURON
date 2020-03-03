@@ -15,8 +15,8 @@ class TestSynapseFormer(BlenderTestCase):
 
     def test_find_synapses(self):
 
-        with NEURON(), CommNode("Control-NEURON") as ncn, \
-             Blender(), CommNode("Control-Blender") as bcn:
+        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
+             Blender(), CommNode("Control-Blender", coverage=True) as bcn:
 
             # Load TestCell.hoc - create a group
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
@@ -125,11 +125,6 @@ class TestSynapseFormer(BlenderTestCase):
             )
 
             self.assertEqual(syn_set_name, 'TEST_NAME')
-
-            bcn.client.end_code_coverage()
-            ncn.client.end_code_coverage()
-
-
 
 
 if __name__ == '__main__':

@@ -150,8 +150,6 @@ class TestCellImportExport(BlenderTestCase):
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
 
-
-
     def test_object_levels(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
@@ -299,6 +297,37 @@ class TestCellImportExport(BlenderTestCase):
 
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
+
+    def test_ugly_render_curves(self):
+
+        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
+             Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+
+            # Load TestCell.hoc
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc = h.TestCell();')
+
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Non-smooth curves
+            bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Cell';"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].smooth_sections = False;"
+                "bpy.ops.blenderneuron.import_groups();"
+            )
+
+            # Non-smooth curves
+            bevel = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Cell';"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].as_lines = True;"
+                "bpy.ops.blenderneuron.import_groups();"
+                "return_value = bpy.data.curves['Group.000_bezier.001'].bevel_depth"
+            )
+
+            # Should have no bevel
+            self.assertEqual(bevel, 0)
 
     def test_copy_group(self):
 

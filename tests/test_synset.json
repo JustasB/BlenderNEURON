@@ -1,0 +1,1285 @@
+{
+  "name": "SynapseSet_001",
+  "entries": [
+    {
+      "neck_start": [
+        15.0,
+        -179.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": false,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[4]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        15.0,
+        -179.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[4]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        15.0,
+        -179.0,
+        3.5
+      ],
+      "head_end": [
+        15.0,
+        -179.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        105.0,
+        -104.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "",
+      "dest_x": 1.0,
+      "source_syn_params": "",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[19]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        105.0,
+        -104.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[19]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        105.0,
+        -104.0,
+        3.5
+      ],
+      "head_end": [
+        105.0,
+        -104.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        75.0,
+        -224.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[28]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        75.0,
+        -224.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[28]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        75.0,
+        -224.0,
+        3.5
+      ],
+      "head_end": [
+        75.0,
+        -224.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        120.0,
+        -89.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[21]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        120.0,
+        -89.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[22]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        120.0,
+        -89.0,
+        3.5
+      ],
+      "head_end": [
+        120.0,
+        -89.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        120.0,
+        -179.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[25]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        120.0,
+        -179.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[1]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        120.0,
+        -179.0,
+        3.5
+      ],
+      "head_end": [
+        120.0,
+        -179.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        105.0,
+        -164.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[14]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        105.0,
+        -164.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[1]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        105.0,
+        -164.0,
+        3.5
+      ],
+      "head_end": [
+        105.0,
+        -164.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        30.0,
+        -74.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[9]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        30.0,
+        -74.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[9]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        30.0,
+        -74.0,
+        3.5
+      ],
+      "head_end": [
+        30.0,
+        -74.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        105.0,
+        -134.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[17]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        105.0,
+        -134.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[19]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        105.0,
+        -134.0,
+        3.5
+      ],
+      "head_end": [
+        105.0,
+        -134.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        45.0,
+        -209.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[30]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        45.0,
+        -209.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[30]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        45.0,
+        -209.0,
+        3.5
+      ],
+      "head_end": [
+        45.0,
+        -209.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        0.0,
+        -104.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[10]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        0.0,
+        -104.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[10]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        0.0,
+        -104.0,
+        3.5
+      ],
+      "head_end": [
+        0.0,
+        -104.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        105.0,
+        -209.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[25]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        105.0,
+        -209.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[26]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        105.0,
+        -209.0,
+        3.5
+      ],
+      "head_end": [
+        105.0,
+        -209.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        165.0,
+        -104.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[24]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        165.0,
+        -104.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[24]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        165.0,
+        -104.0,
+        3.5
+      ],
+      "head_end": [
+        165.0,
+        -104.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        30.0,
+        -104.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[8]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        30.0,
+        -104.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[8]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        30.0,
+        -104.0,
+        3.5
+      ],
+      "head_end": [
+        30.0,
+        -104.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        120.0,
+        -149.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[16]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        120.0,
+        -149.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[16]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        120.0,
+        -149.0,
+        3.5
+      ],
+      "head_end": [
+        120.0,
+        -149.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        75.0,
+        -194.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[26]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        75.0,
+        -194.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[26]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        75.0,
+        -194.0,
+        3.5
+      ],
+      "head_end": [
+        75.0,
+        -194.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        150.0,
+        -179.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[0]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        150.0,
+        -179.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[0]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        150.0,
+        -179.0,
+        3.5
+      ],
+      "head_end": [
+        150.0,
+        -179.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        60.0,
+        -89.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[13]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        60.0,
+        -89.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[12]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        60.0,
+        -89.0,
+        3.5
+      ],
+      "head_end": [
+        60.0,
+        -89.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        15.0,
+        -224.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[29]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        15.0,
+        -224.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[29]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        15.0,
+        -224.0,
+        3.5
+      ],
+      "head_end": [
+        15.0,
+        -224.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        150.0,
+        -134.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[23]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        150.0,
+        -134.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[23]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        150.0,
+        -134.0,
+        3.5
+      ],
+      "head_end": [
+        150.0,
+        -134.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        60.0,
+        -149.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[7]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        60.0,
+        -149.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[7]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        60.0,
+        -149.0,
+        3.5
+      ],
+      "head_end": [
+        60.0,
+        -149.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        75.0,
+        -164.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[2]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        75.0,
+        -164.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[6]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        75.0,
+        -164.0,
+        3.5
+      ],
+      "head_end": [
+        75.0,
+        -164.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        30.0,
+        -194.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[30]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        30.0,
+        -194.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[30]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        30.0,
+        -194.0,
+        3.5
+      ],
+      "head_end": [
+        30.0,
+        -194.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        165.0,
+        -74.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[17]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        165.0,
+        -74.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[17]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        165.0,
+        -74.0,
+        3.5
+      ],
+      "head_end": [
+        165.0,
+        -74.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        45.0,
+        -164.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[3]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        45.0,
+        -164.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[5]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        45.0,
+        -164.0,
+        3.5
+      ],
+      "head_end": [
+        45.0,
+        -164.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        90.0,
+        -74.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[12]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        90.0,
+        -74.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[12]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        90.0,
+        -74.0,
+        3.5
+      ],
+      "head_end": [
+        90.0,
+        -74.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        60.0,
+        -59.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[13]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        60.0,
+        -59.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[13]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        60.0,
+        -59.0,
+        3.5
+      ],
+      "head_end": [
+        60.0,
+        -59.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        60.0,
+        -119.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 0.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 0.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 0,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[11]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        60.0,
+        -119.0,
+        3.5
+      ],
+      "source_seg_i": 0,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[11]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        60.0,
+        -119.0,
+        3.5
+      ],
+      "head_end": [
+        60.0,
+        -119.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        150.0,
+        -149.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[16]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        150.0,
+        -149.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[16]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        150.0,
+        -149.0,
+        3.5
+      ],
+      "head_end": [
+        150.0,
+        -149.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        120.0,
+        -59.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[21]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        120.0,
+        -59.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[21]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        120.0,
+        -59.0,
+        3.5
+      ],
+      "head_end": [
+        120.0,
+        -59.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        150.0,
+        -74.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[22]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        150.0,
+        -74.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[22]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        150.0,
+        -74.0,
+        3.5
+      ],
+      "head_end": [
+        150.0,
+        -74.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        15.0,
+        -149.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[5]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        15.0,
+        -149.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[5]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        15.0,
+        -149.0,
+        3.5
+      ],
+      "head_end": [
+        15.0,
+        -149.0,
+        4.5
+      ]
+    },
+    {
+      "neck_start": [
+        150.0,
+        -59.0,
+        0.5
+      ],
+      "neck_diameter": 0.20000000298023224,
+      "weight": 1.0,
+      "source_x": 1.0,
+      "create_spine": true,
+      "dest_syn_params": "{'g':1,'tau':10}",
+      "dest_x": 1.0,
+      "source_syn_params": "{'g':1,'tau':10}",
+      "dest_seg_i": 9,
+      "is_reciprocal": true,
+      "source_syn": "ExpSyn",
+      "dest_section": "TestCell[1].dendrites[18]",
+      "delay": 0.5,
+      "dest_syn": "ExpSyn",
+      "prefix": "Spine",
+      "head_start": [
+        150.0,
+        -59.0,
+        3.5
+      ],
+      "source_seg_i": 9,
+      "threshold": 0.0,
+      "source_section": "TestCell[0].dendrites[18]",
+      "head_diameter": 1.0,
+      "neck_end": [
+        150.0,
+        -59.0,
+        3.5
+      ],
+      "head_end": [
+        150.0,
+        -59.0,
+        4.5
+      ]
+    }
+  ]
+}
