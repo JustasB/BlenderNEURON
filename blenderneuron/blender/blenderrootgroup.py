@@ -209,7 +209,7 @@ class BlenderRootGroup(RootGroup):
 
         else:
             for root in self.node.root_index.values():
-                if not fnmatch(root.name.lower(), pattern):
+                if not fnmatch(root.name, pattern):
                     continue
 
                 if condition == 'All':
