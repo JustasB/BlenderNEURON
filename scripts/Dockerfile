@@ -1,5 +1,5 @@
-# Start with a compiled NEURON + Python 3.7
-FROM neuron:7.7
+# Start with a compiled NEURON + Python 3
+FROM jbirgio/neuron:7.7
 
 # Install Blender 2.79
 RUN apt-get install -y curl
