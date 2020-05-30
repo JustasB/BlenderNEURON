@@ -3,3 +3,5 @@ include:
   - _static
   - _images
   - _modules
+
+theme: jekyll-theme-cayman
