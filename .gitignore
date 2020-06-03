@@ -36,3 +36,6 @@ htmlcov/
 scripts/blenderneuron
 
 \.coverage\.*
+dist/
+
+build/

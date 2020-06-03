@@ -3,27 +3,31 @@ from setuptools import setup, find_packages
 with open('README.txt') as file:
     long_description = file.read()
 
+with open('releases/latest.txt') as file:
+    version = file.read()
+
 setup(name='blenderneuron',
-      version='2.0.0',
+      version=version,
       description='Interface for Blender <-> NEURON',
       long_description=long_description,
       author='Justas Birgiolas',
       author_email='justas@asu.edu',
-      url='http://BlenderNEURON.org',
+      url='https://BlenderNEURON.org',
       packages=find_packages(),
       platforms=["Linux", "Mac OS", "Windows"],
       keywords=["Blender", "NEURON", "neuroscience", "visualization", "neural networks", "neurons", "3D"],
       license="MIT",
       install_requires=[],
+      include_package_data=True,
+      package_data={'blenderneuron': ['*.json']},
       classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
-        "Natural Language :: English",
-        "Operating System :: MacOS",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python",
-        "Topic :: Scientific/Engineering :: Visualization",
-       ]
- )
+          "Intended Audience :: Science/Research",
+          "License :: OSI Approved :: MIT License",
+          "Natural Language :: English",
+          "Operating System :: MacOS",
+          "Operating System :: Microsoft :: Windows",
+          "Operating System :: POSIX :: Linux",
+          "Programming Language :: Python",
+          "Topic :: Scientific/Engineering :: Visualization",
+      ]
+)

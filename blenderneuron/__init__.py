@@ -96,8 +96,6 @@ if inside_blender:
         register_module_classes(blenderneuron.blender.panels.connection, unreg=True)
         register_module_classes(blenderneuron.blender.properties.connection, unreg=True)
 
-        blenderneuron.blender.connection.properties.unregister()
-
         register_module_classes(blenderneuron.blender.operators.rootgroup, unreg=True)
         register_module_classes(blenderneuron.blender.panels.rootgroup, unreg=True)
         register_module_classes(blenderneuron.blender.properties.rootgroup, unreg=True)

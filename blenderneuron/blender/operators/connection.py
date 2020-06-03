@@ -52,7 +52,8 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
             self.servicing = True
 
             try:
-                self.node.work_on_queue_tasks()
+                if self.node is not None:
+                    self.node.work_on_queue_tasks()
 
             finally:
                 self.servicing = False
@@ -87,7 +88,7 @@ class StopNeuronOperator(bpy.types.Operator, BlenderNodeClass):
     bl_description = "Stops the NEURON process, if any, that was launched from Blender"
 
     def execute(self, context):
-        raise NotImplementedError('NOT SUPPORTED')
+        # raise NotImplementedError('NOT SUPPORTED')
 
         try:
             bpy.ops.blenderneuron.remove_all_groups()
@@ -113,7 +114,7 @@ class LaunchNeuronOperator(bpy.types.Operator, BlenderNodeClass):
                      "launched separatelly if needed."
 
     def execute(self, context):
-        raise NotImplementedError('NOT SUPPORTED')
+        # raise NotImplementedError('NOT SUPPORTED')
 
         bpy.ops.blenderneuron.stop_neuron()
 
