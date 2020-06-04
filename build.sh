@@ -8,13 +8,15 @@ function install
     echo Type in the new version
     read version
 
-    file=releases/BlenderNEURON-addon-v$version.zip
+    file=releases/BlenderNEURON-v$version.zip
+    file_latest=releases/BlenderNEURON-latest.zip
 
     # Update version file
     echo $version > releases/latest.txt
 
     # Create addon zip
     zip -q -r $file blenderneuron -i '*.py' '*.json'
+    cp $file $file_latest
 
     # Create wheels and upload to pip
     rm -R dist/* || true
