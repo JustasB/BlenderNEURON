@@ -19,7 +19,7 @@ setup(name='blenderneuron',
       license="MIT",
       install_requires=[],
       include_package_data=True,
-      package_data={'blenderneuron': ['*.json']},
+      package_data={'blenderneuron': ['*.json', '*.hoc']},
       classifiers=[
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: MIT License",

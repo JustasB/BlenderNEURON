@@ -1,0 +1,2 @@
+// This is a dummy .HOC file that starts BlenderNEURON within NEURON
+nrnpython("from blenderneuron import neuronstart")

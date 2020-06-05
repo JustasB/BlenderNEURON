@@ -170,7 +170,7 @@ class NeuronNode(CommNode):
 
     def segment_gid(self, sec_name, seg_id, has_spine):
         """
-        One one gid can be associated with a segment. If more than one gid is assigned to a seg,
+        Only one gid can be associated with a segment. If more than one gid is assigned to a seg,
         only the last gid will send events to the post- synapse.
 
         However, if the segment index can be computed from section.x location, locations that

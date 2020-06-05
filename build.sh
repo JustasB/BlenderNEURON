@@ -15,7 +15,7 @@ function install
     echo $version > releases/latest.txt
 
     # Create addon zip
-    zip -q -r $file blenderneuron -i '*.py' '*.json'
+    zip -q -r $file blenderneuron -i '*.py' '*.json' '*.hoc'
     cp $file $file_latest
 
     # Create wheels and upload to pip

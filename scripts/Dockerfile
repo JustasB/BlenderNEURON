@@ -43,18 +43,12 @@ RUN echo 'openbox-session 2> /dev/null &' >> /root/.bashrc
 # Start container terminal in addon dir
 RUN echo 'cd /BlenderNEURON' >> /root/.bashrc
 
-# Link the addon and enable it in Blender
+# Link the addon and enable it in Blender, then start a VNC server
 ENTRYPOINT ln -s /BlenderNEURON/blenderneuron /blender/2.79/scripts/addons/blenderneuron && \
     blender/blender --python enable_addon.py --background -noaudio && \
     x11vnc -nopw -create -rfbport 5920 -forever & \
     /bin/bash
 
-
-
-#Xvfb :20 -screen 0 1366x768x16 & x11vnc -passwd TestVNC -display :20 -N -forever
-
-# Xvfb :20 -screen 0 1366x768x16 & x11vnc -passwd TestVNC -display :20 -N -forever && \
-# cd /BlenderNEURON && coverage run tests/test_coverage.py; rm -r htmlcov; coverage combine; coverage html; coverage report;
 
 
 
