@@ -3,7 +3,7 @@
 
 \.vscode/
 
-blender/
+/blender
 
 blenderneuron/__pycache__/
 
