@@ -5,7 +5,7 @@ cache:
 python:
   - "3.5"
 install:
-  - pip install neuron coverage
+  - pip install neuron coverage codecov
   - sudo apt-get install -y libglu1 libxi6 libxrender1
 script:
   - python scripts/install_blender.py
@@ -23,4 +23,4 @@ script:
   - $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
   - xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
 after_success:
-  - coverage
+  - codecov
