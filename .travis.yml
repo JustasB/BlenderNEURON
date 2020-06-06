@@ -13,10 +13,10 @@ script:
   - export PYTHONPATH=/JustasB/BlenderNEURON
   - export COVERAGE_PROCESS_START=.coveragerc
 
-  - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    /JustasB/BlenderNEURON/blender/2.79/python/bin/python3.5m get-pip.py && \
-    rm get-pip.py && \
-    /JustasB/BlenderNEURON/blender/2.79/python/bin/pip install coverage
+  - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+  - /JustasB/BlenderNEURON/blender/2.79/python/bin/python3.5m get-pip.py
+  - rm get-pip.py
+  - /JustasB/BlenderNEURON/blender/2.79/python/bin/pip install coverage
 
   - ln -s /JustasB/BlenderNEURON/blenderneuron /JustasB/BlenderNEURON/blender/2.79/scripts/addons/blenderneuron
   - /JustasB/BlenderNEURON/blender/blender --python scripts/enable_addon.py --background -noaudio

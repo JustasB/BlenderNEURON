@@ -17,6 +17,8 @@ if not skip_download:
 
     blender_dir = next(os.path.join(d, o) for o in os.listdir(d) if os.path.isdir(os.path.join(d,o)) and o.startswith('blender-'))
     os.renames(blender_dir,new_dir)
+
+    print('Blender installed in: ', os.path.abspath(new_dir))
 else:
     print('Blender folder found, skipped download')
 
