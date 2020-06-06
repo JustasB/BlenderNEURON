@@ -9,17 +9,18 @@ install:
   - sudo apt-get install -y libglu1 libxi6 libxrender1
 script:
   - python scripts/install_blender.py
-  - export PATH=$PATH:/JustasB/BlenderNEURON/blender/
-  - export PYTHONPATH=/JustasB/BlenderNEURON
+  - export REPO=/home/travis/build/JustasB/BlenderNEURON
+  - export PATH=$PATH:$REPO/blender/
+  - export PYTHONPATH=$REPO/
   - export COVERAGE_PROCESS_START=.coveragerc
 
   - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-  - /JustasB/BlenderNEURON/blender/2.79/python/bin/python3.5m get-pip.py
+  - $REPO/blender/2.79/python/bin/python3.5m get-pip.py
   - rm get-pip.py
-  - /JustasB/BlenderNEURON/blender/2.79/python/bin/pip install coverage
+  - $REPO/blender/2.79/python/bin/pip install coverage
 
-  - ln -s /JustasB/BlenderNEURON/blenderneuron /JustasB/BlenderNEURON/blender/2.79/scripts/addons/blenderneuron
-  - /JustasB/BlenderNEURON/blender/blender --python scripts/enable_addon.py --background -noaudio
+  - ln -s $REPO/blenderneuron $REPO/blender/2.79/scripts/addons/blenderneuron
+  - $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
   - xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
 after_success:
   - coverage
