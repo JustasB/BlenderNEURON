@@ -7,10 +7,12 @@ docker pull jbirgio/blenderneuron:latest
 # -v -> Links the [repo] folder to container's /BlenderNEURON folder
 # -p -> Exposes the default VNC port
 # --detach -> Runs the container in the background
+# -e RESOLUTION=1024x768 # Sets the VNC server resolution
 
 echo "Starting BlenderNEURON Docker container..."
 container_id=$(docker run \
     -it \
+    -e RESOLUTION=1024x768 \
     -v $(readlink -f ../):/BlenderNEURON \
     -p 5920:5920 \
     --detach \
