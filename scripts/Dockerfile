@@ -1,9 +1,5 @@
 # Start with a compiled NEURON + Python 3
-FROM jbirgio/neuron:7.7
-
-# Install Blender 2.79
-RUN apt-get install -y curl
-
+FROM jbirgio/neuron:7.8
 
 COPY *.py /
 COPY link_addon.sh /
