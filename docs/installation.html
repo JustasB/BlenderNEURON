@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Visualizing Using the GUI" href="gui.html" />
-    <link rel="prev" title="Required Software" href="requirements.html" /> 
+    <link rel="next" title="Getting Started" href="getting-started.html" />
+    <link rel="prev" title="Requirements" href="requirements.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -80,18 +80,14 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#hoc-gui-installation">HOC GUI Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#python-library-installation-optional">Python Library Installation (Optional)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#blender-addon-installation">Blender Addon Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#test-neuron-blender-connectivity">Test NEURON-Blender Connectivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-video">Installation Video</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building.html">Building BlenderNEURON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
             
@@ -143,7 +139,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/installation.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -158,66 +154,13 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>BlenderNEURON installation is a simple two part process which enables communication between NEURON and Blender.</p>
-<p>For Part 1, you can choose either the HOC (NEURON default) or Python versions. Both have identical functionality (HOC version has a wrapper that allows loading the library by opening a .hoc file).</p>
-<div class="section" id="hoc-gui-installation">
-<span id="hoc-install"></span><h2>HOC GUI Installation<a class="headerlink" href="#hoc-gui-installation" title="Permalink to this headline">¶</a></h2>
-<p>Install this part if you generally use NEURON HOC interface (NEURON default).</p>
-<p><strong>Part 1: HOC NEURON Client</strong></p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>If you haven’t already, install NEURON</li>
-<li><a class="reference external" href="https://github.com/JustasB/BlenderNEURON/releases">Download the latest HOC version</a> (e.g. blender_neuron_HOC_xxx.zip)</li>
-<li>Extract the zip file and open the BlenderNEURON.hoc file using NEURON. You should see the BlenderNEURON interface.</li>
-</ol>
-</div></blockquote>
-<img alt="_images/NEURON.JPG" src="_images/NEURON.JPG" />
+<div class="section" id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+<p>Follow the installation steps in the <a class="reference external" href="https://blenderneuron.org/download/">Download Page</a> or watch the install video below.</p>
 </div>
-<div class="section" id="python-library-installation-optional">
-<span id="python-install"></span><h2>Python Library Installation (Optional)<a class="headerlink" href="#python-library-installation-optional" title="Permalink to this headline">¶</a></h2>
-<p>Install this part if you generally use NEURON+Python interface. The library will work if you use the <code class="docutils literal notranslate"><span class="pre">-python</span></code> flag to launch NEURON or you have compiled NEURON Python module and can <cite>from neuron import h</cite> from Python console.</p>
-<p><strong>Part 1: Python NEURON Client</strong></p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>If you haven’t already, install NEURON</li>
-<li>Using the same Python environment as NEURON, use the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">blenderneuron</span></code> command to install the <a class="reference external" href="https://pypi.org/project/blenderneuron/">BlenderNEURON client library</a></li>
-<li>Start NEURON+Python, and type <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">blenderneuron.quick</span> <span class="pre">import</span> <span class="pre">bn</span></code> to load the BlenderNEURON interface</li>
-</ol>
-</div></blockquote>
-<img alt="_images/NEURON.JPG" src="_images/NEURON.JPG" />
-</div>
-<div class="section" id="blender-addon-installation">
-<span id="addon-install"></span><h2>Blender Addon Installation<a class="headerlink" href="#blender-addon-installation" title="Permalink to this headline">¶</a></h2>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The steps below assume that the Blender-bundled instance of Python is being used in Blender. If you’ve modified Blender to use a different version of Python, you will need to <a class="reference external" href="building.html">manually Cythonize the addon</a>.</p>
-</div>
-<dl class="docutils">
-<dt><strong>Part 2: Blender Addon Server</strong></dt>
-<dd><ol class="first last arabic simple">
-<li>If you haven’t already, install and open <a class="reference external" href="https://www.blender.org/download/">Blender</a> (Note: Use version 2.79. Support for 2.8+ is under development)</li>
-<li>Download the <a class="reference external" href="https://github.com/JustasB/BlenderNEURON/releases">BlenderNEURON addon</a>  (e.g.
-blender_neuron_addon_xxx.zip). Note: On MacOS, Safari browser may <a class="reference external" href="https://www.addictivetips.com/mac-os/stop-automatically-unzipping-files-in-safari/">automatically extract the zip file</a>, make sure you use the unextracted
-.zip file in the next step.</li>
-<li>In Blender, click File &gt; User Preferences &gt; Add-ons (tab) &gt; Install Add-on From File &gt; Point to the addon .zip file</li>
-<li>Tick the checkbox next to ‘Import-Export: NEURON Blender Interface’ to load the addon. Then click “Save User Settings”.</li>
-<li>If you see a NEURON tab on the left side of the screen, the addon has been loaded successfully.</li>
-</ol>
-</dd>
-</dl>
-<img alt="_images/addon-loaded.jpg" src="_images/addon-loaded.jpg" />
-</div>
-<div class="section" id="test-neuron-blender-connectivity">
-<h2>Test NEURON-Blender Connectivity<a class="headerlink" href="#test-neuron-blender-connectivity" title="Permalink to this headline">¶</a></h2>
-<p>Once you have the NEURON HOC/Python module and Blender Add-on activated, check whether NEURON can communicate with Blender with the following steps:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>From NEURON, at the bottom of the BlenderNEURON window, click “Test Connection” button</li>
-<li>If you have Blender running, with the add-on installed and loaded (checkbox checked), the connection status should say “Ready”. It means that NEURON can succesfully communicate with Blender.</li>
-</ol>
-</div></blockquote>
-<img alt="_images/connection-ready.jpg" src="_images/connection-ready.jpg" />
-</div>
+<div class="section" id="installation-video">
+<h2>Installation Video<a class="headerlink" href="#installation-video" title="Permalink to this headline">¶</a></h2>
+<iframe width="100%" height="415" src="https://www.youtube.com/embed/XBgnObCcxpk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
 </div>
 
 
@@ -228,10 +171,10 @@ blender_neuron_addon_xxx.zip). Note: On MacOS, Safari browser may <a class="refe
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="gui.html" class="btn btn-neutral float-right" title="Visualizing Using the GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="requirements.html" class="btn btn-neutral" title="Required Software" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="requirements.html" class="btn btn-neutral" title="Requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

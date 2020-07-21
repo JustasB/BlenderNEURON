@@ -1,0 +1,7 @@
+BlenderNEURON Classes for Blender Reference
+===========================================
+
+.. automodule:: blenderneuron.blender.blendernode
+   :members:
+   :undoc-members:
+

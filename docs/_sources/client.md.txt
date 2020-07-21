@@ -1,7 +1,7 @@
-Client Library API
+BlenderNEURON Class Reference
 =========================================
 
-.. automodule:: blenderneuron.client
+.. automodule:: blenderneuron
    :members:
    :undoc-members:
    :show-inheritance:

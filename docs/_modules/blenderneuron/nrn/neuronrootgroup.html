@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blenderneuron.nrn.neuronrootgroup &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>blenderneuron.nrn.neuronrootgroup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blenderneuron.nrn.neuronrootgroup</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">blenderneuron.nrn.neuronsection</span> <span class="k">import</span> <span class="n">NeuronSection</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.rootgroup</span> <span class="k">import</span> <span class="n">RootGroup</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.activity</span> <span class="k">import</span> <span class="n">Activity</span>
+<span class="kn">from</span> <span class="nn">neuron</span> <span class="k">import</span> <span class="n">h</span>
+
+
+<div class="viewcode-block" id="NeuronRootGroup"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup">[docs]</a><span class="k">class</span> <span class="nc">NeuronRootGroup</span><span class="p">(</span><span class="n">RootGroup</span><span class="p">):</span>
+<div class="viewcode-block" id="NeuronRootGroup.from_updated_blender_group"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group">[docs]</a>    <span class="k">def</span> <span class="nf">from_updated_blender_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_group</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_recording_params</span><span class="p">(</span><span class="n">blender_group</span><span class="p">)</span>
+
+        <span class="c1"># Update selected roots and their children</span>
+        <span class="k">for</span> <span class="n">blender_root</span> <span class="ow">in</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]:</span>
+            <span class="n">sec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">blender_root</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">sec_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">[</span><span class="n">sec_name</span><span class="p">]</span>
+                <span class="n">section</span><span class="o">.</span><span class="n">from_updated_blender_root</span><span class="p">(</span><span class="n">blender_root</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeuronRootGroup.from_skeletal_blender_group"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group">[docs]</a>    <span class="k">def</span> <span class="nf">from_skeletal_blender_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_group</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_recording_params</span><span class="p">(</span><span class="n">blender_group</span><span class="p">)</span>
+
+        <span class="c1"># Initialize selected roots and their children</span>
+        <span class="k">for</span> <span class="n">blender_root</span> <span class="ow">in</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]:</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="n">NeuronSection</span><span class="p">()</span>
+            <span class="n">section</span><span class="o">.</span><span class="n">from_skeletal_blender_root</span><span class="p">(</span><span class="n">blender_root</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">[</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span>
+
+        <span class="c1"># Clear previously recorded activity on h.run()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fih</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">FInitializeHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clear_activity</span><span class="p">)</span>
+
+        <span class="c1"># Setup to collect activity during h.run()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_collector</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NeuronRootGroup.save_recording_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params">[docs]</a>    <span class="k">def</span> <span class="nf">save_recording_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_group</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_activity</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;record_activity&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">record_variable</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;record_variable&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_granularity</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;recording_granularity&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_period</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;recording_period&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_time_start</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;recording_time_start&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_time_end</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;recording_time_end&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="NeuronRootGroup.create_collector"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector">[docs]</a>    <span class="k">def</span> <span class="nf">create_collector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Greates a pair of NetStim and NetCon which trigger an event to recursively collect the activity of the group</span>
+<span class="sd">        segments. This method does nothing if group.record_activity is False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">record_activity</span><span class="p">:</span>
+            <span class="n">collector_stim</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetStim</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_time_start</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_period</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mf">1e9</span>
+            <span class="n">collector_stim</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">collector_con</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span><span class="n">collector_stim</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">collector_con</span><span class="o">.</span><span class="n">record</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">collect</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">collector_stim</span> <span class="o">=</span> <span class="n">collector_stim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collector_con</span> <span class="o">=</span> <span class="n">collector_con</span></div>
+
+<div class="viewcode-block" id="NeuronRootGroup.collect"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect">[docs]</a>    <span class="k">def</span> <span class="nf">collect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Based on the group&#39;s color level, gathers the values of the group&#39;s collect_variable. This method is called</span>
+<span class="sd">        at regular times during the simulation. See :any:`create_cell_group()` for details.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">time</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">t</span>
+
+        <span class="k">if</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_time_start</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_time_end</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_time_end</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+
+        <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_granularity</span>
+
+        <span class="c1"># Recursively record from every segment of each section of each cell</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;3D Segment&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">root</span><span class="o">.</span><span class="n">collect_segments_recursive</span><span class="p">()</span>
+
+        <span class="c1"># Recursively record from the middle of each section of each cell</span>
+        <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;Section&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">root</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Record from the middle of somas of each cell</span>
+        <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;Cell&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">root</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Record from the somas of each cell and compute their mean</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">record_variable</span>
+
+            <span class="c1"># Compute the mean of group cell somas</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">root</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">variable</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

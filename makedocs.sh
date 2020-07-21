@@ -1,4 +1,4 @@
-touch docs/source/*.md
+touch docs/source/*.rst
 mv docs html
 cd html
 make html

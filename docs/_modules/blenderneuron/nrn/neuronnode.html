@@ -1,0 +1,582 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blenderneuron.nrn.neuronnode &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>blenderneuron.nrn.neuronnode</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blenderneuron.nrn.neuronnode</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">neuron</span> <span class="k">import</span> <span class="n">h</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.commnode</span> <span class="k">import</span> <span class="n">CommNode</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.nrn.neuronrootgroup</span> <span class="k">import</span> <span class="n">NeuronRootGroup</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">hashlib</span> <span class="k">import</span> <span class="n">sha1</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpclib</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpc.client</span> <span class="k">as</span> <span class="nn">xmlrpclib</span>
+
+
+<div class="viewcode-block" id="NeuronNode"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode">[docs]</a><span class="k">class</span> <span class="nc">NeuronNode</span><span class="p">(</span><span class="n">CommNode</span><span class="p">):</span>
+    <span class="c1"># Match Cell[n].section[y] pattern e.g. MC1[0].soma</span>
+    <span class="n">section_rx</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(.+?])\.?(.*)&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># &#39;set_name&#39;: [(netcon, syn, head, neck)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;stdrun.hoc&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_roots</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_sim_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_sim_params</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialize_groups</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_groups</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_synapses</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">server_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">server_end</span> <span class="o">=</span> <span class="s2">&quot;NEURON&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">NeuronNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">server_end</span><span class="p">,</span> <span class="n">on_server_setup</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NeuronNode.init_mpi"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">[docs]</a>    <span class="k">def</span> <span class="nf">init_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallel_ctx</span><span class="p">,</span> <span class="n">mpimap</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="o">=</span> <span class="n">parallel_ctx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="n">mpimap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span> <span class="o">=</span> <span class="n">parallel_ctx</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_gid</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="NeuronNode.get_roots"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_roots">[docs]</a>    <span class="k">def</span> <span class="nf">get_roots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">allroots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_section_index</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">)</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="NeuronNode.update_section_index"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_section_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_sec</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">allsec</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">():</span> <span class="n">sec</span> <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">all_sec</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="NeuronNode.initialize_groups"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">,</span> <span class="n">send_back</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_section_index</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">blender_group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+            <span class="n">nrn_group</span> <span class="o">=</span> <span class="n">NeuronRootGroup</span><span class="p">()</span>
+            <span class="n">nrn_group</span><span class="o">.</span><span class="n">from_skeletal_blender_group</span><span class="p">(</span><span class="n">blender_group</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nrn_group</span>
+
+        <span class="k">if</span> <span class="n">send_back</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_dicts</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NeuronNode.get_group_dicts"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_dicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">record_activity</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include_activity</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">record_activity</span><span class="p">,</span>
+                  <span class="n">include_root_children</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                  <span class="n">include_coords_and_radii</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="NeuronNode.update_groups"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.update_groups">[docs]</a>    <span class="k">def</span> <span class="nf">update_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">blender_group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">initialize_groups</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">,</span> <span class="n">send_back</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">nrn_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">nrn_group</span><span class="o">.</span><span class="n">from_updated_blender_group</span><span class="p">(</span><span class="n">blender_group</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeuronNode.set_sim_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_sim_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">tstop</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;tstop&quot;</span><span class="p">]</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">cvode</span><span class="o">.</span><span class="n">atol</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;atol&quot;</span><span class="p">])</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">celsius</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;celsius&quot;</span><span class="p">]</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">cvode_active</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;cvode&quot;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="NeuronNode.get_sim_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_sim_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;tstop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">tstop</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">dt</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;atol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">cvode</span><span class="o">.</span><span class="n">atol</span><span class="p">()</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;celsius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">celsius</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;cvode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">cvode_active</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="NeuronNode.clamp_section_x"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">clamp_section_x</span><span class="p">(</span><span class="n">x_in</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When placing synapses, avoid using 0 and 1 section locations, esp. if</span>
+<span class="sd">        extracellular potentials will be computed. See the warning comment in:</span>
+
+<span class="sd">        https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/</span>
+<span class="sd">            mechanisms/mech.html?highlight=i_membrane#mech-extracellular</span>
+
+<span class="sd">        :param x_in: 0-1 section location</span>
+<span class="sd">        :return: section location constrained to 0.001-0.999</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">),</span> <span class="mf">0.999</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeuronNode.rank_section_name"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name">[docs]</a>    <span class="k">def</span> <span class="nf">rank_section_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_rank_name</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cell_name</span><span class="p">,</span> <span class="n">section_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_rx</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">single_rank_name</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+
+            <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span>
+
+            <span class="c1"># If cell is not on this rank, return None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span> <span class="o">!=</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="c1"># Otherwise get its multi-rank section name</span>
+            <span class="n">mpi_cell_name</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">mpi_name</span> <span class="o">=</span> <span class="n">mpi_cell_name</span>
+
+            <span class="k">if</span> <span class="n">section_name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">mpi_name</span> <span class="o">+=</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">section_name</span>
+
+            <span class="k">return</span> <span class="n">mpi_name</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">single_rank_name</span></div>
+
+<div class="viewcode-block" id="NeuronNode.segment_gid"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.segment_gid">[docs]</a>    <span class="k">def</span> <span class="nf">segment_gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sec_name</span><span class="p">,</span> <span class="n">seg_id</span><span class="p">,</span> <span class="n">has_spine</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One one gid can be associated with a segment. If more than one gid is assigned to a seg,</span>
+<span class="sd">        only the last gid will send events to the post- synapse.</span>
+
+<span class="sd">        However, if the segment index can be computed from section.x location, locations that</span>
+<span class="sd">        refer to the same segment e.g. section(0.49) and section(0.51) when nseg=3, can be identified.</span>
+
+<span class="sd">        This method generates a unique gid for each segment based on the section name and segment</span>
+<span class="sd">        index. Where section(0) -&gt; seg_id=0 and section(1) -&gt; seg_id=nseg-1</span>
+
+<span class="sd">        If a spine was added, its assumed that the pre-syn location is at the head of the spine.</span>
+
+<span class="sd">        :param sec_name:</span>
+<span class="sd">        :param seg_id:</span>
+<span class="sd">        :param has_spine:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Generate a segment address e.g. MyCell[2].soma[1] from soma(0.5) with nseg=3</span>
+        <span class="n">seg_address</span> <span class="o">=</span> <span class="n">sec_name</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="n">seg_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">has_spine</span><span class="p">:</span>
+            <span class="n">seg_address</span> <span class="o">+=</span> <span class="s1">&#39;.spine_head&#39;</span>
+
+        <span class="c1"># Compute the SHA1 9-digit hash of the address</span>
+        <span class="c1"># 9 digits is the largest safe number that is accepted by pc.set_gid2node</span>
+        <span class="c1"># In practice, this will be unique for each segment</span>
+        <span class="c1"># And same on each machine and version of python (unlike hash())</span>
+        <span class="n">gid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sha1</span><span class="p">(</span><span class="n">seg_address</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="mi">16</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gid</span></div>
+
+
+
+<div class="viewcode-block" id="NeuronNode.create_synapses"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses">[docs]</a>    <span class="k">def</span> <span class="nf">create_synapses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syn_set</span><span class="p">):</span>
+
+        <span class="n">set_name</span> <span class="o">=</span> <span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">syn_entries</span> <span class="o">=</span> <span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;entries&#39;</span><span class="p">]</span>
+
+        <span class="n">synapses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span><span class="p">[</span><span class="n">set_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">syn_entries</span><span class="p">:</span>
+
+            <span class="n">rank_source_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_section&#39;</span><span class="p">])</span>
+            <span class="n">rank_dest_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_section&#39;</span><span class="p">])</span>
+
+            <span class="n">source_on_rank</span> <span class="o">=</span> <span class="n">rank_source_section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">dest_on_rank</span> <span class="o">=</span> <span class="n">rank_dest_section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">dest_on_rank</span><span class="p">:</span>
+                <span class="n">dest_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span><span class="p">[</span><span class="n">rank_dest_section</span><span class="p">]</span>
+                <span class="n">dest_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clamp_section_x</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_x&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dest_sec</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">dest_x</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">source_on_rank</span><span class="p">:</span>
+                <span class="n">source_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span><span class="p">[</span><span class="n">rank_source_section</span><span class="p">]</span>
+                <span class="n">source_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clamp_section_x</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_x&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">source_sec</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">source_x</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># At first, assume no spines</span>
+            <span class="n">neck</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Unless indicated otherwise</span>
+            <span class="k">if</span> <span class="n">source_on_rank</span> <span class="ow">and</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;create_spine&#39;</span><span class="p">]:</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">set_name</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;prefix&#39;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">synapses</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;]&quot;</span>
+
+                <span class="c1"># Create the spine head</span>
+                <span class="n">head</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;.head&quot;</span><span class="p">)</span>
+
+                <span class="c1"># basic passive params</span>
+                <span class="n">head</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Add the 3D coords</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_spine_pt3d</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;head_start&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;head_diameter&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_spine_pt3d</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;head_end&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;head_diameter&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Create the head (if there is enough room)</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;neck_start&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">neck</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix</span><span class="o">+</span><span class="s2">&quot;.neck&quot;</span><span class="p">)</span>
+                    <span class="n">neck</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_spine_pt3d</span><span class="p">(</span><span class="n">neck</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;neck_start&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;neck_diameter&#39;</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_spine_pt3d</span><span class="p">(</span><span class="n">neck</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;neck_end&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;neck_diameter&#39;</span><span class="p">])</span>
+
+                    <span class="c1"># Connect the spine together to the source section</span>
+                    <span class="n">neck</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source_sec</span><span class="p">(</span><span class="n">source_x</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">head</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">neck</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># If there is no neck, connect the head to section directly</span>
+                    <span class="n">head</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source_sec</span><span class="p">(</span><span class="n">source_x</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># Point process should now be placed on the spine head</span>
+                <span class="n">source_sec</span> <span class="o">=</span> <span class="n">head</span>
+                <span class="n">source_x</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+            <span class="n">source_gid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_gid</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_section&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_seg_i&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;create_spine&#39;</span><span class="p">])</span>
+
+            <span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_netcon_syn</span><span class="p">(</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_syn&#39;</span><span class="p">],</span>
+                <span class="n">dest_sec</span><span class="p">,</span>
+                <span class="n">dest_x</span><span class="p">,</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_syn_params&#39;</span><span class="p">],</span>
+                <span class="n">source_sec</span><span class="p">,</span>
+                <span class="n">source_x</span><span class="p">,</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">],</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;delay&#39;</span><span class="p">],</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
+                <span class="n">source_on_rank</span><span class="p">,</span> <span class="n">dest_on_rank</span><span class="p">,</span>
+                <span class="n">source_gid</span>
+            <span class="p">)</span>
+
+            <span class="c1"># If reciprocal, create a NetCon+Syn going in the opposite direction</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;is_reciprocal&#39;</span><span class="p">]:</span>
+
+                <span class="n">dest_gid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_gid</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_section&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_seg_i&#39;</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+
+                <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_netcon_syn</span><span class="p">(</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_syn&#39;</span><span class="p">],</span>
+                    <span class="n">source_sec</span><span class="p">,</span>
+                    <span class="n">source_x</span><span class="p">,</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_syn_params&#39;</span><span class="p">],</span>
+                    <span class="n">dest_sec</span><span class="p">,</span>
+                    <span class="n">dest_x</span><span class="p">,</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">],</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;delay&#39;</span><span class="p">],</span>
+                    <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">],</span>
+                    <span class="n">dest_on_rank</span><span class="p">,</span> <span class="n">source_on_rank</span><span class="p">,</span>
+                    <span class="n">dest_gid</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+            <span class="c1"># Keep references to the synapse parts</span>
+            <span class="n">synapses</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span><span class="p">,</span> <span class="n">neck</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="NeuronNode.create_netcon_syn"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn">[docs]</a>    <span class="k">def</span> <span class="nf">create_netcon_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">syn_class_name</span><span class="p">,</span> <span class="n">syn_sec</span><span class="p">,</span> <span class="n">syn_sec_x</span><span class="p">,</span> <span class="n">syn_params</span><span class="p">,</span>
+                          <span class="n">source_sec</span><span class="p">,</span> <span class="n">source_x</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">delay</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span>
+                          <span class="n">source_on_rank</span><span class="p">,</span> <span class="n">syn_on_rank</span><span class="p">,</span> <span class="n">source_gid</span><span class="p">):</span>
+
+        <span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">syn_on_rank</span><span class="p">:</span>
+            <span class="c1"># Create synapse point process</span>
+            <span class="c1"># e.g. syn = h.ExpSyn(dend(0.5))</span>
+            <span class="n">syn_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">syn_class_name</span><span class="p">)</span>
+            <span class="n">syn</span> <span class="o">=</span> <span class="n">syn_class</span><span class="p">(</span><span class="n">syn_sec</span><span class="p">(</span><span class="n">syn_sec_x</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">syn_params</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">syn_params</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">syn_params</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">syn_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">syn_params</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="c1"># If both source and syn on rank, no rank span -&gt; classic NetCon</span>
+        <span class="k">if</span> <span class="n">syn_on_rank</span> <span class="ow">and</span> <span class="n">source_on_rank</span><span class="p">:</span>
+            <span class="n">netcon</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span>
+                <span class="n">source_sec</span><span class="p">(</span><span class="n">source_x</span><span class="p">)</span><span class="o">.</span><span class="n">_ref_v</span><span class="p">,</span>
+                <span class="n">syn</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="p">,</span>
+                <span class="n">delay</span><span class="p">,</span>
+                <span class="n">weight</span><span class="p">,</span>
+                <span class="n">sec</span><span class="o">=</span><span class="n">source_sec</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Connection spans ranks</span>
+        <span class="k">elif</span> <span class="n">source_on_rank</span> <span class="ow">or</span> <span class="n">syn_on_rank</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source_on_rank</span><span class="p">:</span>
+
+                <span class="c1"># Assign a gid to a given segment only once</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">gid_exists</span><span class="p">(</span><span class="n">source_gid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assign_gid_to_source_seg</span><span class="p">(</span>
+                        <span class="n">source_sec</span><span class="p">,</span>
+                        <span class="n">source_x</span><span class="p">,</span>
+                        <span class="n">threshold</span><span class="p">,</span>
+                        <span class="n">source_gid</span>
+                    <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># syn_on_rank</span>
+                <span class="n">netcon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">gid_connect</span><span class="p">(</span><span class="n">source_gid</span><span class="p">,</span> <span class="n">syn</span><span class="p">)</span>
+                <span class="n">netcon</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span>
+                <span class="n">netcon</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span>
+
+        <span class="k">return</span> <span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span></div>
+
+<div class="viewcode-block" id="NeuronNode.assign_gid_to_source_seg"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg">[docs]</a>    <span class="k">def</span> <span class="nf">assign_gid_to_source_seg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre_sec</span><span class="p">,</span> <span class="n">pre_sec_x</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">gid</span><span class="p">):</span>
+        <span class="c1"># Assign the gid the current rank</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">set_gid2node</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span><span class="p">)</span>
+
+        <span class="c1"># Create the dummy connection from source segment</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span><span class="n">pre_sec</span><span class="p">(</span><span class="n">pre_sec_x</span><span class="p">)</span><span class="o">.</span><span class="n">_ref_v</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">pre_sec</span><span class="p">)</span>
+        <span class="n">nc</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+
+        <span class="c1"># Assign the gid to the source segment (through the dummy netcon)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">nc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeuronNode.add_spine_pt3d"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">add_spine_pt3d</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">diam</span><span class="p">):</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">pt3dadd</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">diam</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">sec</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Required Software" href="requirements.html" />
+    <link rel="next" title="Requirements" href="requirements.html" />
     <link rel="prev" title="BlenderNEURON Documentation" href="index.html" /> 
 
   
@@ -80,17 +80,17 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#projects-using-blenderneuron">Projects Using BlenderNEURON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developers">Developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sponsors">Sponsors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="requirements.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building.html">Building BlenderNEURON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
             
@@ -142,7 +142,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/introduction.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -157,45 +157,60 @@
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/logo.png" src="_images/logo.png" />
-<p>BlenderNEURON is a software tool that takes a NEURON simulator model and exports its 3D structure and membrane activity
-to Blender, an open-source high-performance 3D modeling tool. BlenderNEURON is easy to install and requires no model
-translation or modification.</p>
-<p>Once a model is in Blender, users can inspect or debug cell morphology and network connectivity, re-play, step through,
-or scrub through compartment membrane voltage over time, and render the model as beautiful images, videos, or animated
-GIFs.</p>
-<p>The tool is useful for debugging biophysically realistic neural models, easily creating visually impressive figures,
-and as a virtual laboratory for teaching neuroscience concepts. Most importantly, the tool works with a large body of
-existing NEURON models. The export can be performed via NEURON GUI or automated via Python commands.</p>
-<p><a class="reference external" href="https://neuroml.org">NeuroML</a> models can be visualized by converting them to NEURON with <a class="reference external" href="https://github.com/NeuroML/jNeuroML">j/pyNeuroML</a>. Support for other simulators can be added
-by passing section morphology and activity data to <a class="reference external" href="client.html">the client library</a>.</p>
-<p>The tool has been developed by <a class="reference external" href="https://iconlab.asu.edu/">researchers at Arizona State University</a> and has been used
-as part of the <a class="reference external" href="https://neuroml-db.org/">NeuroML-DB.org project</a>.</p>
+<p>BlenderNEURON is a software tool that enables to use Blender, an open-source high-performance 3D modeling tool to
+visualize and edit models built with NEURON simulator.</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>NEURON models can be in any format (HOC or Python)</li>
+<li>Cell/Network morphology inspection</li>
+<li>Membrane potential (or any other membrane variable) visualization over time</li>
+<li>Replay, step-through, scrubbing through simulation output</li>
+<li>Adjustable level of detail (supports single cell or large network models)</li>
+<li>Render as static images or video files</li>
+<li>Blender files can be uploaded and shared on <a class="reference external" href="https://Sketchfab.com">Sketchfab</a></li>
+<li>Python API to automate any task</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="projects-using-blenderneuron">
+<h2>Projects Using BlenderNEURON<a class="headerlink" href="#projects-using-blenderneuron" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://neuroml-db.org/">NeuroML-DB.org</a></li>
+<li><a class="reference external" href="http://olfactorybulb.org/">Biophysically Realistic Model of the Olfactory Bulb</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="developers">
+<h2>Developers<a class="headerlink" href="#developers" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://www.linkedin.com/in/justasbirgiolas">Justas Birgiolas Ph.D.</a></li>
+<li><a class="reference external" href="https://iconlab.asu.edu/">Arizona State University ICON Lab</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="sponsors">
+<h2>Sponsors<a class="headerlink" href="#sponsors" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>National Institutes of Health</li>
+<li><a class="reference external" href="https://IFCAR.org">Institute for Conscious Automaton Research</a></li>
+</ul>
+</div></blockquote>
 </div>
 <div class="section" id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/architecture.jpg" src="_images/architecture.jpg" />
 <p>The tool consists of two parts:</p>
 <ol class="arabic simple">
-<li>The Python/HOC library, which acts as a client</li>
-<li>The Blender addon, which acts as the server</li>
+<li>The Python library, which runs inside NEURON</li>
+<li>The Blender Addon, which runs inside Blender</li>
 </ol>
-<p>Users interact with the client library, which sends commands to the Blender addon, which then creates the meshes, materials, and animations in Blender. The user can then interact and modify the model in Blender.</p>
-</div>
-<div class="section" id="getting-started">
-<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>Follow these steps to display a NEURON model and its voltage potential propagation in Blender:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>Make sure you have the required software: working installations of <a class="reference external" href="https://neuron.yale.edu">NEURON</a> and <a class="reference external" href="https://www.blender.org/download/">Blender</a></li>
-<li>Install the <a class="reference external" href="installation.html#hoc-install">BlenderNEURON HOC GUI</a> or <a class="reference external" href="installation.html#python-install">Python library</a></li>
-<li>Install the <a class="reference external" href="installation.html#blender-addon-installation">Blender Addon</a></li>
-<li>Load your model in NEURON</li>
-<li>Load the <a class="reference external" href="gui.html">BlenderNEURON GUI</a> or <a class="reference external" href="python.html">Python module</a>, and use them to export the model to Blender.</li>
-</ol>
-</div></blockquote>
+<p>These two parts exchange information and allow importing/exporting models between NEURON and Blender.</p>
 </div>
 </div>
 
@@ -207,7 +222,7 @@ as part of the <a class="reference external" href="https://neuroml-db.org/">Neur
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="requirements.html" class="btn btn-neutral float-right" title="Required Software" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="BlenderNEURON Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

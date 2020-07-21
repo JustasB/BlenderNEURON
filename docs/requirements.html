@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Required Software &mdash; BlenderNEURON  documentation</title>
+  <title>Requirements &mdash; BlenderNEURON  documentation</title>
   
 
   
@@ -80,12 +80,10 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Required Software</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gui.html">Visualizing Using the GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="python.html">Visualizing Using Python Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="client.html">Client Library API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building.html">Building BlenderNEURON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
             
@@ -131,13 +129,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Required Software</li>
+      <li>Requirements</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/requirements.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/requirements.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -150,15 +148,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="required-software">
-<h1>Required Software<a class="headerlink" href="#required-software" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
 <p>BlenderNEURON has the following software requirements:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>OS: Windows (tested with 10), Mac OS (tested with Mac OS 10.12), or Linux (tested with Ubuntu 16.04)</li>
-<li>Working installation of <a class="reference external" href="https://neuron.yale.edu">NEURON</a> (tested with v7.5 standard HOC and compiled Python installations)</li>
-<li>Working installation of <a class="reference external" href="https://www.blender.org/download/">Blender</a> (tested with 2.7.9)</li>
-<li>To use the Python library: Either NEURON launched with the <cite>-python</cite> flag OR a working <a class="reference external" href="https://neuron.yale.edu/neuron/getstd">compiled NEURON+Python installation</a> (e.g. <cite>from neuron import h</cite> works from Python) (tested with Python 2.7 and 3.5)</li>
+<li>Operating System: Windows, Mac OS, or Linux</li>
+<li>Working installation of <a class="reference external" href="https://neuron.yale.edu">NEURON 7.6+ with Python</a>. For example, one of these works:</li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li>In Terminal: <code class="docutils literal notranslate"><span class="pre">nrngui</span> <span class="pre">-python</span></code></li>
+<li>In Python console: <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">neuron</span> <span class="pre">import</span> <span class="pre">h</span></code></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li>Working installation of <strong>Blender 2.79b</strong> (see links for your OS in <a class="reference external" href="https://blenderneuron.org/download/">Step 3 of Download Page</a></li>
 </ol>
 </div></blockquote>
 </div>

@@ -67,7 +67,7 @@ class NeuronRootGroup(RootGroup):
     def collect(self):
         """
         Based on the group's color level, gathers the values of the group's collect_variable. This method is called
-        at regular times during the simulation. See :any:`create_cell_group()` for details.
+        at regular times during the simulation.
 
         :return: None
         """

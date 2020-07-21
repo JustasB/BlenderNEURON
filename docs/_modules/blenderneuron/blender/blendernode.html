@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blenderneuron.blender.blendernode &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>blenderneuron.blender.blendernode</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blenderneuron.blender.blendernode</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">bpy</span>
+
+<span class="kn">from</span> <span class="nn">blenderneuron.blender.blenderroot</span> <span class="k">import</span> <span class="n">BlenderRoot</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.blender.blenderrootgroup</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.commnode</span> <span class="k">import</span> <span class="n">CommNode</span>
+
+
+<div class="viewcode-block" id="BlenderNode"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode">[docs]</a><span class="k">class</span> <span class="nc">BlenderNode</span><span class="p">(</span><span class="n">CommNode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BlenderNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Blender&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ui_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scenes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">BlenderNEURON</span>
+
+<div class="viewcode-block" id="BlenderNode.add_group"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.add_group">[docs]</a>    <span class="k">def</span> <span class="nf">add_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_groupless_roots</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_root_index</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_unique_group_name</span><span class="p">()</span>
+
+        <span class="n">group</span> <span class="o">=</span> <span class="n">BlenderRootGroup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Attach group to node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+
+        <span class="c1"># Add group to the UI list</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">add_to_UI</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">include_groupless_roots</span><span class="p">:</span>
+            <span class="n">group</span><span class="o">.</span><span class="n">add_groupless_roots</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">group</span></div>
+
+<div class="viewcode-block" id="BlenderNode.update_root_index"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.update_root_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_root_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Keep track which roots have been removed from NRN</span>
+        <span class="n">roots_to_delete</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_index</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Get the list of root sections from NEURON</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">root_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_roots</span><span class="p">()</span>
+
+            <span class="c1"># Update new or existing root entries</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">root_info</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">root_data</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">root_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+                <span class="n">existing_root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="c1"># Update existing root</span>
+                <span class="k">if</span> <span class="n">existing_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">existing_root</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">root_info</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
+                    <span class="n">existing_root</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">root_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+                    <span class="c1"># Don&#39;t remove roots that previously existed and are present</span>
+                    <span class="n">roots_to_delete</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="c1"># Add a new root</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_index</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">BlenderRoot</span><span class="p">(</span>
+                        <span class="n">root_info</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">],</span>
+                        <span class="n">root_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># Make sure it&#39;s listed as selectable in all groups</span>
+                    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="n">new_root</span><span class="o">.</span><span class="n">add_to_UI_group</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">ui_group</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ConnectionRefusedError</span><span class="p">:</span>
+            <span class="n">root_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># Delete removed roots</span>
+            <span class="k">for</span> <span class="n">name_to_delete</span> <span class="ow">in</span> <span class="n">roots_to_delete</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">root_index</span><span class="p">[</span><span class="n">name_to_delete</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNode.find_unique_group_name"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.find_unique_group_name">[docs]</a>    <span class="k">def</span> <span class="nf">find_unique_group_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i_name</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Group.&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_name</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+                <span class="n">i_name</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="BlenderNode.get_group_data_from_neuron"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_group_data_from_neuron">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_data_from_neuron</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_list</span><span class="p">):</span>
+
+        <span class="c1"># Convert blender groups to skeletal dicts (needed for XML rcp with NRN)</span>
+        <span class="c1"># These dicts contain basic information (e.g. no 3D data, activity)</span>
+        <span class="n">blender_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_dicts</span><span class="p">(</span><span class="n">group_list</span><span class="p">)</span>
+
+        <span class="c1"># Send a request to NRN for the selected groups</span>
+        <span class="n">compressed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">initialize_groups</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
+
+        <span class="c1"># Decompress the result</span>
+        <span class="n">nrn_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nrn_groups</span></div>
+
+<div class="viewcode-block" id="BlenderNode.import_groups_from_neuron"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.import_groups_from_neuron">[docs]</a>    <span class="k">def</span> <span class="nf">import_groups_from_neuron</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_list</span><span class="p">):</span>
+
+        <span class="n">nrn_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_data_from_neuron</span><span class="p">(</span><span class="n">group_list</span><span class="p">)</span>
+
+        <span class="c1"># Update each blender node group with the data received from NRN</span>
+        <span class="k">for</span> <span class="n">nrn_group</span> <span class="ow">in</span> <span class="n">nrn_groups</span><span class="p">:</span>
+            <span class="n">node_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">nrn_group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Importing group: &#39;</span> <span class="o">+</span> <span class="n">node_group</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; from NEURON...&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Remove any views of the cells</span>
+            <span class="k">if</span> <span class="n">node_group</span><span class="o">.</span><span class="n">view</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">node_group</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+                <span class="n">node_group</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Update blender node group with the data received from NRN</span>
+            <span class="n">node_group</span><span class="o">.</span><span class="n">from_full_NEURON_group</span><span class="p">(</span><span class="n">nrn_group</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BlenderNode.get_selected_groups"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_selected_groups">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">selected</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="BlenderNode.get_group_dicts"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_group_dicts">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_dicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">group_list</span><span class="p">]</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">synapse_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">synapse_sets</span>
+
+<div class="viewcode-block" id="BlenderNode.add_synapse_set"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.add_synapse_set">[docs]</a>    <span class="k">def</span> <span class="nf">add_synapse_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">new_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">i_name</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;SynapseSet.&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_name</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">i_name</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+        <span class="n">new_set</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">return</span> <span class="n">new_set</span></div>
+
+<div class="viewcode-block" id="BlenderNode.display_groups"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.display_groups">[docs]</a>    <span class="k">def</span> <span class="nf">display_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">selected</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Showing group &#39;</span> <span class="o">+</span> <span class="n">group</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; in Blender&#39;</span><span class="p">)</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group</span><span class="o">.</span><span class="n">remove_view</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BlenderNode.add_neon_effect"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.add_neon_effect">[docs]</a>    <span class="k">def</span> <span class="nf">add_neon_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds glare filter to the compositing node tree</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scene</span>
+        <span class="n">scene</span><span class="o">.</span><span class="n">use_nodes</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">links</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span><span class="o">.</span><span class="n">links</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span><span class="o">.</span><span class="n">nodes</span>
+
+        <span class="n">layers</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Render Layers&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeRLayers&#39;</span><span class="p">)</span>
+
+        <span class="n">glare</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeGlare&#39;</span><span class="p">)</span>
+
+        <span class="n">composite</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Composite&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">composite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">composite</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeComposite&#39;</span><span class="p">)</span>
+
+        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">glare</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">composite</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
+
+        <span class="n">glare</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="s1">&#39;MEDIUM&#39;</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">color_modulation</span> <span class="o">=</span> <span class="mf">0.2</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">streaks</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">fade</span> <span class="o">=</span> <span class="mf">0.75</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

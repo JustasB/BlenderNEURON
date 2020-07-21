@@ -39,3 +39,5 @@ scripts/blenderneuron
 dist/
 
 build/
+
+docs/source/\*.md

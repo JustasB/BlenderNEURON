@@ -1,0 +1,677 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blenderneuron.commnode &mdash; BlenderNEURON  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> BlenderNEURON
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BlenderNEURON</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>blenderneuron.commnode</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blenderneuron.commnode</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">zlib</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">Queue</span> <span class="k">as</span> <span class="nn">queue</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">queue</span>
+
+<span class="kn">import</span> <span class="nn">threading</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">tempfile</span><span class="o">,</span> <span class="nn">atexit</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">closing</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpclib</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xmlrpc.client</span> <span class="k">as</span> <span class="nn">xmlrpclib</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">xmlrpc.server</span> <span class="k">import</span> <span class="n">SimpleXMLRPCServer</span>
+    <span class="kn">from</span> <span class="nn">xmlrpc.server</span> <span class="k">import</span> <span class="n">SimpleXMLRPCRequestHandler</span>
+<span class="k">except</span><span class="p">:</span>                                                         <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">SimpleXMLRPCServer</span> <span class="k">import</span> <span class="n">SimpleXMLRPCServer</span>           <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">SimpleXMLRPCServer</span> <span class="k">import</span> <span class="n">SimpleXMLRPCRequestHandler</span>   <span class="c1"># pragma: no cover</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">socketserver</span> <span class="k">import</span> <span class="n">ThreadingMixIn</span>
+<span class="k">except</span><span class="p">:</span>                                                         <span class="c1"># pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">SocketServer</span> <span class="k">import</span> <span class="n">ThreadingMixIn</span>                     <span class="c1"># pragma: no cover</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CommNode"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode">[docs]</a><span class="k">class</span> <span class="nc">CommNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">server_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;NEURON&quot;</span><span class="p">:</span> <span class="s2">&quot;Blender&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Blender&quot;</span><span class="p">:</span> <span class="s2">&quot;NEURON&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Control-Blender&quot;</span><span class="p">:</span> <span class="s2">&quot;Blender&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Control-NEURON&quot;</span><span class="p">:</span> <span class="s2">&quot;NEURON&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Package&quot;</span><span class="p">:</span> <span class="s2">&quot;Blender&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_end</span><span class="p">,</span> <span class="n">on_client_connected</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">on_server_setup</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coverage</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coverage</span> <span class="o">=</span> <span class="n">coverage</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_index</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">server_end</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span> <span class="o">=</span> <span class="n">server_end</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_types</span><span class="p">[</span><span class="n">server_end</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unrecognized server_end: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">server_end</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. Should be one of: &quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_types</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_client_connected</span> <span class="o">=</span> <span class="n">on_client_connected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_server_setup</span> <span class="o">=</span> <span class="n">on_server_setup</span>
+
+        <span class="c1"># Try connecting to the other node (if it&#39;s running)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">try_setup_client</span><span class="p">()</span>
+
+        <span class="c1"># &#39;Control&#39; nodes are 1-directional (a node with a connected client, but no server of its own)</span>
+        <span class="k">if</span> <span class="s1">&#39;Control&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Create a server</span>
+        <span class="c1"># Package type does not result in server</span>
+        <span class="k">if</span> <span class="n">server_end</span> <span class="o">!=</span> <span class="s1">&#39;Package&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_server</span><span class="p">()</span>
+
+        <span class="c1"># If successfully connected, then instruct the other node to connect back</span>
+        <span class="c1"># and complete the 2nd half of the connection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">try_setup_client</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;server&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Two-way communication between </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> established&quot;</span>
+                                <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_end</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverage</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">end_code_coverage</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_server</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CommNode.load_config"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.load_config">[docs]</a>    <span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">package_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_dir</span><span class="p">,</span> <span class="s1">&#39;config.json&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CommNode.init_task_queue"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.init_task_queue">[docs]</a>    <span class="k">def</span> <span class="nf">init_task_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_next_id</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="CommNode.setup_server"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.setup_server">[docs]</a>    <span class="k">def</span> <span class="nf">setup_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">class</span> <span class="nc">ErrorHandler</span><span class="p">(</span><span class="n">SimpleXMLRPCRequestHandler</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">funcs</span><span class="p">[</span><span class="n">method</span><span class="p">](</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">traceback</span>
+                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                    <span class="k">raise</span>
+
+        <span class="k">class</span> <span class="nc">CommNodeServer</span><span class="p">(</span><span class="n">ThreadingMixIn</span><span class="p">,</span> <span class="n">SimpleXMLRPCServer</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            A helper class to create an XML-RCP server</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">daemon_threads</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">CommNodeServer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                    <span class="n">param</span><span class="p">,</span>
+                    <span class="n">requestHandler</span><span class="o">=</span><span class="n">ErrorHandler</span><span class="p">,</span>
+                    <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">logRequests</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_task_queue</span><span class="p">()</span>
+
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;default_port&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;default_ip&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_free_port</span><span class="p">()</span> <span class="k">if</span> <span class="n">port</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span> <span class="o">=</span> <span class="s1">&#39;http://&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_ip</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_port</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">CommNodeServer</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">server_ip</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_port</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_introspection_functions</span><span class="p">()</span>
+
+        <span class="c1"># Basic server functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_stop</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_ping</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">try_setup_client</span><span class="p">,</span> <span class="s1">&#39;try_setup_client&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Synchronous execution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_run_command</span><span class="p">,</span> <span class="s1">&#39;run_command&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Asynchronous task execution queueing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_enqueue_command</span><span class="p">,</span> <span class="s1">&#39;enqueue_command&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_status</span><span class="p">,</span> <span class="s1">&#39;get_task_status&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_error</span><span class="p">,</span>  <span class="s1">&#39;get_task_error&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_result</span><span class="p">,</span> <span class="s1">&#39;get_task_result&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Code coverage result saving</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_end_code_coverage</span><span class="p">,</span> <span class="s1">&#39;end_code_coverage&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Start the server in a separate thread - it will place tasks onto queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Perform the servicing of queued tasks in a separate thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service_queue_loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_thread_continue</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># When false, queue servicing thread will stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_server_setup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_server_setup</span><span class="p">()</span>
+
+        <span class="c1"># Communicate the address of the server to the client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_server_address_file</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Started &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span> <span class="o">+</span> <span class="s2">&quot; server at: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.stop_server"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.stop_server">[docs]</a>    <span class="k">def</span> <span class="nf">stop_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;service_thread&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_thread_continue</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_thread</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_task_queue</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;server_thread&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">own_server_client</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">ServerProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_address</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">own_server_client</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">server_thread</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">except</span><span class="p">:</span>     <span class="c1"># pragma: no cover</span>
+                <span class="k">pass</span>    <span class="c1"># pragma: no cover</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_ip</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_port</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_server_address_file</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CommNode.find_free_port"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.find_free_port">[docs]</a>    <span class="k">def</span> <span class="nf">find_free_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: A random available port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">))</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="CommNode.try_setup_client"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.try_setup_client">[docs]</a>    <span class="k">def</span> <span class="nf">try_setup_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">config_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;default_ip&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client_end</span><span class="p">]</span>
+            <span class="n">config_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;default_port&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">client_end</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">config_ip</span> <span class="o">!=</span> <span class="s2">&quot;127.0.0.1&quot;</span> <span class="ow">and</span> <span class="n">config_port</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">client_address</span> <span class="o">=</span> <span class="s1">&#39;http://&#39;</span> <span class="o">+</span> <span class="n">config_ip</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">config_port</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Try reading the client address file</span>
+                <span class="n">client_address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_client_address_file</span><span class="p">()</span>
+
+            <span class="c1"># Create XML-RCP client and attempt to connect to it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">ServerProxy</span><span class="p">(</span><span class="n">client_address</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+
+            <span class="c1"># If connection succeeded, save the address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span> <span class="o">=</span> <span class="n">client_address</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">warn</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Could not connect to &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_end</span> <span class="o">+</span> <span class="s2">&quot; server. Ensure &quot;</span><span class="o">+</span>
+                    <span class="p">(</span><span class="s2">&quot;Blender+BlenderNEURON addon&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span> <span class="o">==</span> <span class="s2">&quot;NEURON&quot;</span> <span class="k">else</span> <span class="s2">&quot;NEURON+BlenderNEURON package&quot;</span><span class="p">)</span><span class="o">+</span>
+                    <span class="s2">&quot; is running.&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_client_connected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_client_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.read_client_address_file"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.read_client_address_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_client_address_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read from a file in tmp folder that contains the address of the other node&#39;s XML-RCP server</span>
+<span class="sd">        :return: The address of the other end&#39;s XML-RCP server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">())</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end_address_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client_end</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Client address file not found:&quot;</span> <span class="o">+</span> <span class="n">file_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">client_address</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s2">&quot;http&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">client_address</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Address in the client address file does not appear to be valid:&quot;</span> <span class="o">+</span> <span class="n">client_address</span><span class="p">)</span> <span class="c1"># pragma: no cover</span>
+
+        <span class="k">return</span> <span class="n">client_address</span></div>
+
+<div class="viewcode-block" id="CommNode.save_server_address_file"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.save_server_address_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_server_address_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a file in tmp folder that contains the address of this node&#39;s XML-RCP server</span>
+<span class="sd">        :return: Nothing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end_address_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">)</span>
+
+        <span class="c1"># If the server address is blank (i.e. on cleanup), remove the file if it exists</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+                    <span class="k">pass</span>        <span class="c1"># pragma: no cover</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_address</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.get_end_address_file"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.get_end_address_file">[docs]</a>    <span class="k">def</span> <span class="nf">get_end_address_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">())</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s2">&quot;BlenderNEURON-&quot;</span> <span class="o">+</span> <span class="n">end</span> <span class="o">+</span> <span class="s2">&quot;.address&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_name</span></div>
+
+<div class="viewcode-block" id="CommNode.print_safe"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.print_safe">[docs]</a>    <span class="k">def</span> <span class="nf">print_safe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">debug</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>                             <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>                 <span class="c1"># pragma: no cover</span>
+        <span class="k">except</span><span class="p">:</span>                          <span class="c1"># pragma: no cover</span>
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>                    <span class="c1"># pragma: no cover</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_stop"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_stop">[docs]</a>    <span class="k">def</span> <span class="nf">sm_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method that, when called by a client of the node server, will stop the server</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">server_close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_ping"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_ping">[docs]</a>    <span class="k">def</span> <span class="nf">sm_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span> <span class="o">+</span> <span class="s2">&quot; server at &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_address</span> <span class="o">+</span> <span class="s2">&quot; ALIVE&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_run_command"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_run_command">[docs]</a>    <span class="k">def</span> <span class="nf">sm_run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="n">exec_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_command_lambda</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_lambda</span><span class="p">(</span><span class="n">exec_lambda</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_enqueue_command"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_enqueue_command">[docs]</a>    <span class="k">def</span> <span class="nf">sm_enqueue_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="n">exec_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_command_lambda</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enqueue_lambda</span><span class="p">(</span><span class="n">exec_lambda</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_end_code_coverage"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_end_code_coverage">[docs]</a>    <span class="k">def</span> <span class="nf">sm_end_code_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting Coverage info&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">)</span>
+            <span class="kn">from</span> <span class="nn">blenderneuron</span> <span class="k">import</span> <span class="n">COV</span>
+        <span class="k">except</span><span class="p">:</span>                                         <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Failed to get COV&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">)</span> <span class="c1"># pragma: no cover</span>
+
+            <span class="c1"># Dont try to save coverage info if not in coverage</span>
+            <span class="k">return</span>                                      <span class="c1"># pragma: no cover</span>
+
+        <span class="n">COV</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>                                      <span class="c1"># pragma: no cover</span>
+        <span class="n">COV</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                                      <span class="c1"># pragma: no cover</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SAVED Coverage info&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">)</span>   <span class="c1"># pragma: no cover</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_command_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute arbitrary python command within Blender&#39;s python process</span>
+<span class="sd">        :param command_string: A python expression. Set variable &#39;return_value&#39; to receive a response.</span>
+<span class="sd">           e.g. command_string = &quot;print(&#39;test&#39;)&quot; -&gt; will print &#39;test&#39; in Blender console</span>
+<span class="sd">           e.g. command_string = &quot;return_value = 1+3&quot; -&gt; will compute in Blender and return 4</span>
+<span class="sd">           e.g. command_string = &quot;import bpy; return_value = [i for i in bpy.data.objects]&quot; -&gt; will list all Blender objects</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">exec_lambda</span><span class="p">():</span>
+
+            <span class="n">end_imports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;imports&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">server_end</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">exec</span><span class="p">(</span><span class="n">end_imports</span> <span class="o">+</span> <span class="s2">&quot;; &quot;</span> <span class="o">+</span> <span class="n">command_string</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">SystemExit</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error while attempting to run the following command(s) within &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_end</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;------------ Command ------------&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">command_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">,</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---------------------------------&#39;</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+            <span class="k">return</span> <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;return_value&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">exec_lambda</span>
+
+    <span class="k">def</span> <span class="nf">_run_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_lambda</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enqueue_lambda</span><span class="p">(</span><span class="n">task_lambda</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_status</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;QUEUED&#39;</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_status</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_result</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_get_task_error</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_enqueue_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_lambda</span><span class="p">):</span>
+        <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_new_task_id</span><span class="p">()</span>
+
+        <span class="n">task</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;QUEUED&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lambda&quot;</span><span class="p">:</span> <span class="n">task_lambda</span><span class="p">,</span>
+            <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">task_id</span>
+
+    <span class="k">def</span> <span class="nf">_get_new_task_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_lock</span><span class="p">:</span>
+            <span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_next_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task_next_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">task_id</span>
+
+<div class="viewcode-block" id="CommNode.sm_get_task_status"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_get_task_status">[docs]</a>    <span class="k">def</span> <span class="nf">sm_get_task_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">task_id</span><span class="p">][</span><span class="s2">&quot;status&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="s2">&quot;DOES_NOT_EXIST&quot;</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_get_task_error"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_get_task_error">[docs]</a>    <span class="k">def</span> <span class="nf">sm_get_task_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">task_id</span><span class="p">][</span><span class="s2">&quot;error&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CommNode.sm_get_task_result"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.sm_get_task_result">[docs]</a>    <span class="k">def</span> <span class="nf">sm_get_task_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">task_id</span><span class="p">][</span><span class="s2">&quot;result&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CommNode.work_on_queue_tasks"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.work_on_queue_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">work_on_queue_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_error</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">q</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Tasks in queue. Getting next task...&quot;</span><span class="p">)</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue_error</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Running task...&quot;</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="p">[</span><span class="s2">&quot;lambda&quot;</span><span class="p">]()</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SUCCESS&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Previous task had an error. SKIPPING.&quot;</span><span class="p">)</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span>
+
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">queue_error</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="s2">&quot;SystemExit&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tb</span><span class="p">:</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tb</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="n">tb</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;SUCCESS&quot;</span>
+                    <span class="n">task</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="c1"># We want to allow the RCP server to send back a response before killing the process</span>
+                    <span class="k">def</span> <span class="nf">self_destruct</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;Exiting NEURON in 1s ... &quot;</span><span class="p">)</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+                        <span class="n">quit</span><span class="p">()</span>
+
+                    <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">self_destruct</span><span class="p">)</span>
+                    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="n">q</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_safe</span><span class="p">(</span><span class="s2">&quot;DONE&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.service_queue_loop"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.service_queue_loop">[docs]</a>    <span class="k">def</span> <span class="nf">service_queue_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_thread_continue</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">work_on_queue_tasks</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CommNode.compress"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.compress">[docs]</a>    <span class="k">def</span> <span class="nf">compress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">compressed</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">compressed</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">Binary</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">compressed</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">compressed</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">Binary</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">compressed</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">compressed</span></div>
+
+<div class="viewcode-block" id="CommNode.decompress"><a class="viewcode-back" href="../../blenderneuron.html#blenderneuron.commnode.CommNode.decompress">[docs]</a>    <span class="k">def</span> <span class="nf">decompress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compressed</span><span class="p">):</span>
+        <span class="n">uncompressed</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">compressed</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">uncompressed</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Justas Birgiolas.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

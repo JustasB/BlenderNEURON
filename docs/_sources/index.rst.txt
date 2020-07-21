@@ -11,11 +11,9 @@ Welcome to BlenderNEURON documentation. To get started, please follow the sectio
    introduction
    requirements
    installation
-   gui
-   python
+   getting-started
 
-   client
-   building
+   reference
 
 Indices and tables
 ==================

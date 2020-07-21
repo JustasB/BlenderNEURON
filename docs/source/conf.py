@@ -59,7 +59,12 @@ templates_path = ['files_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.md'
+source_suffix = '.rst'
+
+autodoc_mock_imports = [
+    'numpy', 'bpy', 'neuron', 'mathutils', 'blenderneuron.blender.panels', 'bpy_extras',
+    'blenderneuron.blender.properties'
+]
 
 # The master toctree document.
 master_doc = 'index'
