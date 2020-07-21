@@ -81,17 +81,40 @@ def register_module_classes(module, unreg=False):
     classes = [i[1] for i in get_classes(module)]
 
     for cls in classes:
+        if not cls.__module__.startswith('blenderneuron'):
+            continue
+
+        if 'operators' not in cls.__module__ and \
+            'panels' not in cls.__module__ and \
+            'properties' not in cls.__module__:
+            continue
+
         try:
             if unreg:
+
+                if debug:
+                    print('Trying to UN-REGISTER', cls)
+
                 bpy.utils.unregister_class(cls)
+
+                if debug:
+                    print('UN-REGISTERED', cls)
             else:
+                if debug:
+                    print('Trying to REGISTER', cls)
+
                 bpy.utils.register_class(cls)
 
                 if debug:
                     print('REGISTERED', cls)
         except:
-            if debug:
+            if debug and unreg:
+                print('Could not UN-register', cls)
+
+            if debug and not unreg:
                 print('Could not register', cls)
+
+
 
 
 def remove_prop_collection_item(collection, item):
