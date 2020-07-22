@@ -1,0 +1,125 @@
+//execute1("celltypes.element(\"TestCell\")")
+
+begintemplate TestCell
+public init, topol, basic_shape, subsets, geom, biophys, geom_nseg, biophys_inhomo
+public synlist, x, y, z, position, connect2target
+
+public soma, dendrites
+public all
+
+objref synlist
+
+proc init() {
+  topol()
+  subsets()
+  geom()
+  biophys()
+  geom_nseg()
+  synlist = new List()
+  synapses()
+  x = y = z = 0 // only change via position
+}
+
+create soma, dendrites[31]
+
+proc topol() { local i
+  connect dendrites(0), soma(1)
+  for i = 1, 4 connect dendrites[i](0), dendrites[i-1](1)
+  connect dendrites[5](0), dendrites[3](1)
+  connect dendrites[6](0), dendrites[2](1)
+  for i = 7, 9 connect dendrites[i](0), dendrites[i-1](1)
+  connect dendrites[10](0), dendrites[8](1)
+  connect dendrites[11](0), dendrites[7](1)
+  for i = 12, 13 connect dendrites[i](0), dendrites[11](1)
+  connect dendrites[14](0), dendrites[1](1)
+  for i = 15, 16 connect dendrites[i](0), dendrites[14](1)
+  connect dendrites[17](0), dendrites[15](1)
+  connect dendrites[18](0), dendrites[17](1)
+  connect dendrites[19](0), dendrites[15](1)
+  for i = 20, 21 connect dendrites[i](0), dendrites[i-1](1)
+  connect dendrites[22](0), dendrites[20](1)
+  connect dendrites[23](0), dendrites[15](1)
+  connect dendrites[24](0), dendrites[23](1)
+  connect dendrites[25](0), dendrites(1)
+  for i = 26, 27 connect dendrites[i](0), dendrites[25](1)
+  for i = 28, 29 connect dendrites[i](0), dendrites[i-1](1)
+  connect dendrites[30](0), dendrites[28](1)
+  basic_shape()
+}
+proc basic_shape() {
+  soma {pt3dclear() pt3dadd(150, -173, 0, 1) pt3dadd(150, -179, 0, 1)}
+  dendrites {pt3dclear() pt3dadd(150, -179, 0, 1) pt3dadd(120, -179, 0, 1)}
+  dendrites[1] {pt3dclear() pt3dadd(120, -179, 0, 1) pt3dadd(105, -164, 0, 1)}
+  dendrites[2] {pt3dclear() pt3dadd(105, -164, 0, 1) pt3dadd(75, -164, 0, 1)}
+  dendrites[3] {pt3dclear() pt3dadd(75, -164, 0, 1) pt3dadd(45, -164, 0, 1)}
+  dendrites[4] {pt3dclear() pt3dadd(45, -164, 0, 1) pt3dadd(15, -179, 0, 1)}
+  dendrites[5] {pt3dclear() pt3dadd(45, -164, 0, 1) pt3dadd(15, -149, 0, 1)}
+  dendrites[6] {pt3dclear() pt3dadd(75, -164, 0, 1) pt3dadd(60, -149, 0, 1)}
+  dendrites[7] {pt3dclear() pt3dadd(60, -149, 0, 1) pt3dadd(60, -119, 0, 1)}
+  dendrites[8] {pt3dclear() pt3dadd(60, -119, 0, 1) pt3dadd(30, -104, 0, 1)}
+  dendrites[9] {pt3dclear() pt3dadd(30, -104, 0, 1) pt3dadd(30, -74, 0, 1)}
+  dendrites[10] {pt3dclear() pt3dadd(30, -104, 0, 1) pt3dadd(0, -104, 0, 1)}
+  dendrites[11] {pt3dclear() pt3dadd(60, -119, 0, 1) pt3dadd(60, -89, 0, 1)}
+  dendrites[12] {pt3dclear() pt3dadd(60, -89, 0, 1) pt3dadd(90, -74, 0, 1)}
+  dendrites[13] {pt3dclear() pt3dadd(60, -89, 0, 1) pt3dadd(60, -59, 0, 1)}
+  dendrites[14] {pt3dclear() pt3dadd(105, -164, 0, 1) pt3dadd(120, -149, 0, 1)}
+  dendrites[15] {pt3dclear() pt3dadd(120, -149, 0, 1) pt3dadd(105, -134, 0, 1)}
+  dendrites[16] {pt3dclear() pt3dadd(120, -149, 0, 1) pt3dadd(150, -149, 0, 1)}
+  dendrites[17] {pt3dclear() pt3dadd(105, -134, 0, 1) pt3dadd(165, -74, 0, 1)}
+  dendrites[18] {pt3dclear() pt3dadd(165, -74, 0, 1) pt3dadd(150, -59, 0, 1)}
+  dendrites[19] {pt3dclear() pt3dadd(105, -134, 0, 1) pt3dadd(105, -104, 0, 1)}
+  dendrites[20] {pt3dclear() pt3dadd(105, -104, 0, 1) pt3dadd(120, -89, 0, 1)}
+  dendrites[21] {pt3dclear() pt3dadd(120, -89, 0, 1) pt3dadd(120, -59, 0, 1)}
+  dendrites[22] {pt3dclear() pt3dadd(120, -89, 0, 1) pt3dadd(150, -74, 0, 1)}
+  dendrites[23] {pt3dclear() pt3dadd(105, -134, 0, 1) pt3dadd(150, -134, 0, 1)}
+  dendrites[24] {pt3dclear() pt3dadd(150, -134, 0, 1) pt3dadd(165, -104, 0, 1)}
+  dendrites[25] {pt3dclear() pt3dadd(120, -179, 0, 1) pt3dadd(105, -209, 0, 1)}
+  dendrites[26] {pt3dclear() pt3dadd(105, -209, 0, 1) pt3dadd(75, -194, 0, 1)}
+  dendrites[27] {pt3dclear() pt3dadd(105, -209, 0, 1) pt3dadd(75, -224, 0, 1)}
+  dendrites[28] {pt3dclear() pt3dadd(75, -224, 0, 1) pt3dadd(45, -209, 0, 1)}
+  dendrites[29] {pt3dclear() pt3dadd(45, -209, 0, 1) pt3dadd(15, -224, 0, 1)}
+  dendrites[30] {pt3dclear() pt3dadd(45, -209, 0, 1) pt3dadd(30, -194, 0, 1)}
+}
+
+objref all
+proc subsets() { local i
+  objref all
+  all = new SectionList()
+    soma all.append()
+    for i=0, 30 dendrites[i] all.append()
+
+}
+proc geom() {
+}
+external lambda_f
+proc geom_nseg() {
+}
+proc biophys() {
+  forsec all {
+    Ra = 35.4
+    cm = 1
+    insert pas
+      g_pas = 0.001
+      e_pas = -70
+    insert hh
+      gnabar_hh = 0.12
+      gkbar_hh = 0.036
+      gl_hh = 0.0003
+      el_hh = -54.3
+  }
+}
+proc biophys_inhomo(){}
+proc position() { local i
+  soma for i = 0, n3d()-1 {
+    pt3dchange(i, $1-x+x3d(i), $2-y+y3d(i), $3-z+z3d(i), diam3d(i))
+  }
+  x = $1  y = $2  z = $3
+}
+obfunc connect2target() { localobj nc //$o1 target point process, optional $o2 returned NetCon
+  soma nc = new NetCon(&v(1), $o1)
+  nc.threshold = 10
+  if (numarg() == 2) { $o2 = nc } // for backward compatibility
+  return nc
+}
+proc synapses() {}
+endtemplate TestCell
