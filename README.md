@@ -14,7 +14,7 @@ The tool is integrated with NEURON to provide a simple user interface and a set 
 ![Blender GUI](images/Blender.jpg)
 
 ## Install Steps and Documentation
-Instructions for how to install and use BlenderNEURON can be found here: [BlenderNEURON Documentation](http://blenderneuron.org/docs)
+Instructions for how to install and use BlenderNEURON can be found here: [BlenderNEURON Documentation](https://docs.blenderneuron.org/)
 
 ## Example Cells and Activity
 
