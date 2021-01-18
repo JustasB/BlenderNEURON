@@ -1,20 +1,6 @@
-bl_info = {
-    "name": "BlenderNEURON",
-    "description": "A Blender GUI for NEURON simulator",
-    "author": "Justas Birgiolas",
-    "version": (2, 0),
-    "blender": (2, 79, 0),
-    "location": "3D View > Left Side > BlenderNEURON",
-    "wiki_url": "BlenderNEURON.org",
-    "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
-    "support": "COMMUNITY",
-    "category": "Import-Export",
-}
-
 from bpy.app.handlers import persistent
 
-import blenderneuron
-from blenderneuron.commnode import CommNode
+from ...commnode import CommNode
 
 from blenderneuron.blender.operators.connection import *
 from blenderneuron.blender.panels.connection import *

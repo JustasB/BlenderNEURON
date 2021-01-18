@@ -1,31 +1,3 @@
-# bl_info = {
-#     "name": "BlenderNEURON",
-#     "description": "A Blender GUI for NEURON simulator",
-#     "author": "Justas Birgiolas",
-#     "version": (3, 0),
-#     "blender": (2, 91, 0),
-#     "location": "3D View > Left Side > BlenderNEURON",
-#     "wiki_url": "BlenderNEURON.org",
-#     "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
-#     "support": "COMMUNITY",
-#     "category": "Import-Export",
-# }
-
-
-bl_info = {
-    "name": "Add-on Template",
-    "description": "elluuuuuuu",
-    "author": "p2or",
-    "version": (0, 0, 3),
-    "blender": (2, 91, 0),
-    "location": "3D View > Tools",
-    "warning": "", # used for warning icon and text in addons panel
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Development"
-}
-
-
 import bpy
 
 from bpy.props import (StringProperty,
@@ -150,13 +122,7 @@ class OBJECT_PT_CustomPanel(Panel):
     bl_idname = "OBJECT_PT_custom_panel"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Tools"
-    bl_context = "objectmode"
-
-
-    @classmethod
-    def poll(self,context):
-        return context.object is not None
+    bl_category = "BlenderNEURON"
 
     def draw(self, context):
         layout = self.layout
@@ -197,5 +163,3 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
     del bpy.types.Scene.my_tool
-
-__blender__ = dict(bl_info=bl_info, register=register, unregister=unregister)

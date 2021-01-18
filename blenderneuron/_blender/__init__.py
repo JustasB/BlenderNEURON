@@ -9,7 +9,8 @@ def get_blender_version():
     except:
         raise RuntimeError("Blender version could not be determined.")
 
-def make_blender_addon(root_module):
+def make_blender_addon():
+    import sys
     from . import patches, addon, controller
 
     version = get_blender_version()
@@ -17,10 +18,5 @@ def make_blender_addon(root_module):
         if name.startswith("patch_"):
             patch(version, addon, controller)
 
-    # Reload the addon module to allow for all kinds of importloader shennanigans
-    from . import addon
-
-    # Inject the information that Blender requires to recognize the root_module as a
-    # Blender addon, according to the magic __blender__ attr.
-    for k, v in addon.__blender__.items():
-        root_module[k] = v
+    # Explicitly return the object put into `sys.modules` as if executing `import addon`
+    return sys.modules[addon.__name__]
