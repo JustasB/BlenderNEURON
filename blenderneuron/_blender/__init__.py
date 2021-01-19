@@ -19,4 +19,4 @@ def make_blender_addon():
             patch(version, addon, controller)
 
     # Explicitly return the object put into `sys.modules` as if executing `import addon`
-    return sys.modules[addon.__name__]
+    return sys.modules[addon.__name__], sys.modules[controller.__name__]
