@@ -2,14 +2,36 @@ from math import sqrt, pi
 import bpy
 import numpy as np
 from .utils import create_many_copies
+import . as controller
+
+def _get_curve_template(name):
+    # TODO: When CellGroups are implemented the curve template should be provided by
+    # the CellGroup.
+    curve_template = bpy.data.curves.new(name + "_bezier", type='CURVE')
+    curve_template.dimensions = '3D'
+    curve_template.resolution_u = 2 # self.group.segment_subdivisions
+    curve_template.fill_mode = 'FULL'
+    curve_template.bevel_depth = 1.0 # 0.0 if self.group.as_lines else 1.0
+    curve_template.bevel_resolution = 1.0 # int((self.group.circular_subdivisions - 4) / 2.0)
+    curve_template.show_normal_face = False
+    curve_template.show_handles = False
+    return curve_template
 
 class CurveContainer:
 
-    def __init__(self, root, curve_template, smooth_sections, color, brightness,
-                 recursive=True, origin_type="center", closed_ends=True,
-                 container_material=None):
+    def __init__(
+        self,
+        cell,
+        curve_template,
+        smooth_sections,
+        color,
+        brightness,
+        recursive=True,
+        origin_type="center",
+        closed_ends=True,
+        container_material=None):
 
-        self.name = cell.name
+        self.name = controller.get_blender_name(cell)
         self.smooth_sections = smooth_sections
         self.closed_ends = closed_ends
         self.assigned_container_material = container_material
@@ -17,7 +39,8 @@ class CurveContainer:
         self.default_brightness = brightness
 
         # copy the curve template and make a new blender object out of it
-        bpy.data.objects.new(self.name, curve_template.copy())
+        curve_template = _get_curve_template(self.name)
+        bpy.data.objects.new(self.name, curve_template)
 
         self.linked = False
         self.material_indices = []
@@ -27,7 +50,8 @@ class CurveContainer:
         self.spline_index2section = {}
 
         # Recursively add section splines and corresponding materials to the container
-        self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
+        for root in cell.roots:
+            self.add_branch(root, recursive, in_top_level=True, origin_type=origin_type)
 
     def get_object(self):
         return bpy.data.objects.get(self.name)
@@ -281,7 +305,7 @@ class CurveContainer:
             for child in root.children:
                 self.update_group_section(child, recursive=True)
 
-    def add_section(self, root, recursive=True, in_top_level=True, origin_type="center"):
+    def add_branch(self, root, recursive=True, in_top_level=True, origin_type="center"):
         # Reshape the coords to be n X 3 array (for xyz)
         coords = np.array(root.coords)
         coords.shape = (-1, 3)
@@ -325,7 +349,7 @@ class CurveContainer:
         # Do same with the children
         if recursive:
             for child in root.children:
-                self.add_section(child, recursive=True, in_top_level=False)
+                self.add_branch(child, recursive=True, in_top_level=False)
 
     def set_origin(self, coords, type = "center"):
         if type == "center":
