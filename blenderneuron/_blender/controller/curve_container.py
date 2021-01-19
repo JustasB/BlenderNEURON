@@ -4,6 +4,16 @@ import numpy as np
 from .utils import create_many_copies
 import . as controller
 
+def _get_default_color(name):
+    name = name + '_color_ramp'
+
+    mat = bpy.data.materials.new(name)
+    mat.use_diffuse_ramp = True
+    mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
+    mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
+    return mat.diffuse_ramp.elements[0].color[0:3]
+
+
 def _get_curve_template(name):
     # TODO: When CellGroups are implemented the curve template should be provided by
     # the CellGroup.
