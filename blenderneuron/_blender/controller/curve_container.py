@@ -2,16 +2,17 @@ from math import sqrt, pi
 import bpy
 import numpy as np
 from .utils import create_many_copies
-import . as controller
+from .. import controller
 
 def _get_default_color(name):
-    name = name + '_color_ramp'
-
-    mat = bpy.data.materials.new(name)
-    mat.use_diffuse_ramp = True
-    mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
-    mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
-    return mat.diffuse_ramp.elements[0].color[0:3]
+    # Color ramps don't exist in 2.9 anymore
+    # name = name + '_color_ramp'
+    #
+    # mat = bpy.data.materials.new(name)
+    # mat.use_diffuse_ramp = True
+    # mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
+    # mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
+    return [1] * 4
 
 
 def _get_curve_template(name):
@@ -23,8 +24,9 @@ def _get_curve_template(name):
     curve_template.fill_mode = 'FULL'
     curve_template.bevel_depth = 1.0 # 0.0 if self.group.as_lines else 1.0
     curve_template.bevel_resolution = 1.0 # int((self.group.circular_subdivisions - 4) / 2.0)
-    curve_template.show_normal_face = False
-    curve_template.show_handles = False
+    # Not found in 2.91:
+    # curve_template.show_normal_face = False
+    # curve_template.show_handles = False
     return curve_template
 
 class CurveContainer:
@@ -50,7 +52,8 @@ class CurveContainer:
 
         # copy the curve template and make a new blender object out of it
         curve_template = _get_curve_template(self.name)
-        bpy.data.objects.new(self.name, curve_template)
+        obj = bpy.data.objects.new(self.name, curve_template)
+        print("new obj?", obj)
 
         self.linked = False
         self.material_indices = []
@@ -62,6 +65,8 @@ class CurveContainer:
         # Recursively add section splines and corresponding materials to the container
         for root in cell.roots:
             self.add_branch(root, recursive, in_top_level=True, origin_type=origin_type)
+
+        bpy.context.scene.collection.objects.link(obj)
 
     def get_object(self):
         return bpy.data.objects.get(self.name)
@@ -190,7 +195,8 @@ class CurveContainer:
         mat = bpy.data.materials.new(name)
 
         mat.diffuse_color = color
-        mat.emit = brightness
+        # Doesn't exist in Blender 2.9
+        # mat.emit = brightness
 
         # # Ambient and back lighting
         # mat.ambient = 0.85
@@ -215,7 +221,7 @@ class CurveContainer:
         cl_emit = nodes.new('ShaderNodeEmission')
         cl_emit.location = [-200, 0]
         cl_emit.inputs['Strength'].default_value = brightness
-        cl_emit.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
+        cl_emit.inputs['Color'].default_value = list(mat.diffuse_color)
 
         # cl_trans = nodes.new('ShaderNodeBsdfTransparent')
         # cl_trans.location = [-200, 100]
@@ -223,15 +229,16 @@ class CurveContainer:
 
         links.new(cl_emit.outputs['Emission'], cl_out.inputs['Surface'])
 
-        # Blender render nodes
-        br_out = nodes.new('ShaderNodeOutput')
-        br_out.location = [0, -200]
-        br_mat = nodes.new('ShaderNodeExtendedMaterial')
-        br_mat.location = [-200, -200]
-        br_mat.material = mat
-
-        links.new(br_mat.outputs['Color'], br_out.inputs['Color'])
-        links.new(br_mat.outputs['Alpha'], br_out.inputs['Alpha'])
+        # Not Blender 2.9
+        # # Blender render nodes
+        # br_out = nodes.new('ShaderNodeOutput')
+        # br_out.location = [0, -200]
+        # br_mat = nodes.new('ShaderNodeExtendedMaterial')
+        # br_mat.location = [-200, -200]
+        # br_mat.material = mat
+        #
+        # links.new(br_mat.outputs['Color'], br_out.inputs['Color'])
+        # links.new(br_mat.outputs['Alpha'], br_out.inputs['Alpha'])
 
         return mat
 
@@ -329,7 +336,7 @@ class CurveContainer:
         # If material is not provided, create one
         if self.assigned_container_material is None:
             material = CurveContainer.create_material(
-                root.name,
+                str(root),
                 self.default_color,
                 self.default_brightness
             )
@@ -350,7 +357,7 @@ class CurveContainer:
         # old splines are kept, Blender usually crashes. Here we retain the spline index,
         # which is preserved (if splines are not deleted in edit-mode).
         spline_index = len(self.curve.splines) - 1
-        self.name2spline_index[root.name] = spline_index
+        self.name2spline_index[str(root)] = spline_index
         self.spline_index2section[spline_index] = root
 
         # Cleanup before starting recursion
