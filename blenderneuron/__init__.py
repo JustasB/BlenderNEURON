@@ -146,11 +146,11 @@ class Cell:
         for root in roots:
             root.__dissolve__()
 
-def create_branch(coords):
+def create_branch(coords, radii):
     """
     Create a new :class:`.Branch`
     """
-    return Branch(coords)
+    return Branch(coords, radii)
 
 
 def create_cell(roots, register=inside_blender):
