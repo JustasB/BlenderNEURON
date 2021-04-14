@@ -93,11 +93,21 @@ class Branch:
             return self._coords
 
     @coords.setter
-    def set_coords(self):
+    def coords(self):
         if self._cell:
             raise NotImplementedError("Manipulating the Blender object state not supported yet.")
         else:
             self._coords = coords
+
+    @property
+    def radii(self):
+        """
+        A list of radii at the 3d points on this branch
+        """
+        if self._cell:
+            raise NotImplementedError("Reading Blender state not supported yet.")
+        else:
+            return self._radii
 
     def to_dict(self):
         d = dict(coords=self.coords)
