@@ -51,6 +51,8 @@ else:
 
     controller = Reporter()
 
+from . import animation
+
 class Branch:
     """
     A branch is a piece of uninterrupted unbranching cable used to construct
