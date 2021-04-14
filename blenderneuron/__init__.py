@@ -136,17 +136,11 @@ class Cell:
         """
         A list of 3d coordinates that describe this piece of cell morphology
         """
-        if self._cell:
-            raise NotImplementedError("Reading Blender state not supported yet.")
-        else:
-            return self._roots
+        return self._roots
 
     @roots.setter
-    def set_roots(self):
-        if self._cell:
-            raise NotImplementedError("Manipulating the Blender object state not supported yet.")
-        else:
-            self._roots = roots
+    def roots(self):
+        raise NotImplementedError("Manipulating the Blender object state not supported yet.")
 
     def __dissolve__(self):
         for root in roots:
