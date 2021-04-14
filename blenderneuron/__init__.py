@@ -56,7 +56,7 @@ class Branch:
     A branch is a piece of uninterrupted unbranching cable used to construct
     :class:`cells <.Cell>`.
     """
-    def __init__(self, coords, children=None, ref=None):
+    def __init__(self, coords, radii, children=None, ref=None):
         """
         Create a branch.
 
@@ -71,8 +71,16 @@ class Branch:
             children = []
         self._children = children
         self._coords = coords
+        self._radii = radii
         self._cell = None
         self._ref = ref
+
+    @property
+    def children(self):
+        """
+        The child branches of this branch.
+        """
+        return self._children
 
     @property
     def coords(self):
