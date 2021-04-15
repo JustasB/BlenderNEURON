@@ -1,10 +1,9 @@
-from . import encoders, frames
+from . import encoders, frames, properties
 
 class Animator:
-    def __init__(self, encoder, property, time_window):
+    def __init__(self, encoder, property):
         self._encoder = encoder
         self._property = property
-        self._time_window = time_window
 
     def animate(self, bn_obj, time_window, signal, time=None):
         key_frames = self._encoder.encode(signal, time)
