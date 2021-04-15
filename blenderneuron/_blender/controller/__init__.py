@@ -16,6 +16,7 @@ def register_cell(cell):
     id = register_object(cell)
     cell._id = id
     cc = _create_curve_container(cell)
+    cell.curve_container = cc
 
 def _create_curve_container(cell):
     name = get_blender_name(cell)
