@@ -321,21 +321,21 @@ class CurveContainer:
             for child in root.children:
                 self.update_group_section(child, recursive=True)
 
-    def add_branch(self, root, recursive=True, in_top_level=True, origin_type="center"):
+    def add_branch(self, branch, recursive=True, in_top_level=True, origin_type="center"):
         # Reshape the coords to be n X 3 array (for xyz)
-        coords = np.array(root.coords)
+        coords = np.array(branch.coords)
         coords.shape = (-1, 3)
 
         if in_top_level:
             self.set_origin(coords, origin_type)
 
         # Add section spline to the cell object
-        spline = self.add_spline(coords, root.radii, self.smooth_sections)
+        spline = self.add_spline(coords, branch.radii, self.smooth_sections)
 
         # If material is not provided, create one
         if self.assigned_container_material is None:
             material = CurveContainer.create_material(
-                str(root),
+                str(branch),
                 self.default_color,
                 self.default_brightness
             )
@@ -356,15 +356,15 @@ class CurveContainer:
         # old splines are kept, Blender usually crashes. Here we retain the spline index,
         # which is preserved (if splines are not deleted in edit-mode).
         spline_index = len(self.curve.splines) - 1
-        self.name2spline_index[str(root)] = spline_index
-        self.spline_index2section[spline_index] = root
+        self.name2spline_index[str(branch)] = spline_index
+        self.spline_index2section[spline_index] = branch
 
         # Cleanup before starting recursion
         del spline, material, mat_idx
 
         # Do same with the children
         if recursive:
-            for child in root.children:
+            for child in branch.children:
                 self.add_branch(child, recursive=True, in_top_level=False)
 
     def set_origin(self, coords, type = "center"):
