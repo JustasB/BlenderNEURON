@@ -74,6 +74,8 @@ class Branch:
         self._children = children
         self._coords = coords
         self._radii = radii
+        self._material = None
+        self._spline = None
         self._cell = None
         self._ref = ref
 
@@ -148,11 +150,11 @@ class Cell:
         for root in roots:
             root.__dissolve__()
 
-def create_branch(coords, radii):
+def create_branch(*args, **kwargs):
     """
-    Create a new :class:`.Branch`
+    Create a new :class:`.Branch`.
     """
-    return Branch(coords, radii)
+    return Branch(*args, **kwargs)
 
 
 def create_cell(roots, register=inside_blender):
