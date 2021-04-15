@@ -51,6 +51,7 @@ class CurveContainer:
         self.assigned_container_material = container_material
         self.default_color = color
         self.default_brightness = brightness
+        self._branches = []
 
         # copy the curve template and make a new blender object out of it
         curve_template = _get_curve_template(self.name)
@@ -323,6 +324,12 @@ class CurveContainer:
             for child in root.children:
                 self.update_group_section(child, recursive=True)
 
+    def _assign(self, branch, spline, material):
+        branch._spline = spline
+        branch._material = material
+        branch._id = len(self._branches)
+        self._branches.append(branch)
+
     def add_branch(self, branch, recursive=True, in_top_level=True, origin_type="center"):
         # Reshape the coords to be n X 3 array (for xyz)
         coords = np.array(branch.coords)
@@ -347,6 +354,7 @@ class CurveContainer:
             material = self.assigned_container_material
 
         mat_idx = self.add_material_to_object(material)
+        self._assign(branch, spline, material)
 
         # Assign the material to the new spline
         spline.material_index = mat_idx
