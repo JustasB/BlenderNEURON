@@ -10,9 +10,9 @@ class Encoder(abc.ABC):
 
 class NormEncoder(Encoder):
     def encode(self, signal, time=None):
-        signal = np.array(signal)
-        signal -= np.min(signal)
-        m = np.max(signal)
+        signal = np.array(signal, dtype=float)
+        signal -= min(signal)
+        m = max(signal)
         if m != 0:
             signal /= m
         return KeyFrames(signal, time)
