@@ -8,11 +8,21 @@ class Encoder(abc.ABC):
         pass
 
 
-class NormEncoder(Encoder):
+class Calibratable:
+    def __init__(self):
+        self._cmin = None
+        self._cmax = None
+
+    def calibrate(self, min, max):
+        self._cmin = min
+        self._cmax = max
+
+class NormEncoder(Encoder, Calibratable):
     def encode(self, signal, time=None):
         signal = np.array(signal, dtype=float)
-        signal -= min(signal)
-        m = max(signal)
+        # Normalize to calibration or to signal if not calibrated
+        signal -= min(signal) if self._cmin is None else self._cmin
+        m = max(signal) if self._cmax is None else self._cmax
         if m != 0:
             signal /= m
         return KeyFrames(signal, time)
