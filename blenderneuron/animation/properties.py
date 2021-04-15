@@ -1,4 +1,4 @@
-import abc
+import abc, numpy as np
 
 class Property(abc.ABC):
     def __init_subclass__(cls, data_path=None, **kwargs):
@@ -13,7 +13,7 @@ class Property(abc.ABC):
     def set(self, obj, value):
         pass
 
-class ColorProperty(abc.ABC, data_path="color"):
+class ColorProperty(Property, data_path="color"):
     def __init__(self):
         pass
 
