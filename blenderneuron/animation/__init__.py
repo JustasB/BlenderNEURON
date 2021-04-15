@@ -10,5 +10,14 @@ class Animator:
         for frame, value in key_frames.get_frames(time_window):
             self._property.keyframe_insert(bn_obj, frame, value)
 
+
 def create_window(*args, **kwargs):
     return frames.TimeWindow(*args, **kwargs)
+
+
+def create_animator(encoder=None, property=None, **kwargs):
+    if encoder is None:
+        encoder = encoders.NormEncoder()
+    if property is None:
+        property = properties.EmissionProperty()
+    return Animator(encoder, property, **kwargs)
