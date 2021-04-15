@@ -158,7 +158,7 @@ class CurveContainer:
         # relative to the object origin)
         coords = coords - self.origin
 
-        if self.closed_ends:
+        if self.closed_ends and len(coords) > 1:
             # Add closed, 0-diam caps (to avoid open-ended cylinders)
             cap1 = self.diam0version(coords[1], coords[0])
             cap2 = self.diam0version(coords[-2], coords[-1])
