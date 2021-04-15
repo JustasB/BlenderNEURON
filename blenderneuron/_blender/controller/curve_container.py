@@ -52,8 +52,7 @@ class CurveContainer:
 
         # copy the curve template and make a new blender object out of it
         curve_template = _get_curve_template(self.name)
-        obj = bpy.data.objects.new(self.name, curve_template)
-        print("new obj?", obj)
+        self._bn_obj = bpy.data.objects.new(self.name, curve_template)
 
         self.linked = False
         self.material_indices = []
@@ -66,7 +65,7 @@ class CurveContainer:
         for root in cell.roots:
             self.add_branch(root, recursive, in_top_level=True, origin_type=origin_type)
 
-        bpy.context.scene.collection.objects.link(obj)
+        bpy.context.scene.collection.objects.link(self._bn_obj)
 
     def get_object(self):
         return bpy.data.objects.get(self.name)
