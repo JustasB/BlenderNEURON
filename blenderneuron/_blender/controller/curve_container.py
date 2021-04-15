@@ -12,7 +12,9 @@ def _get_default_color(name):
     # mat.use_diffuse_ramp = True
     # mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
     # mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
-    return [1] * 4
+
+    return (0.013, 0.011, 0.163, 1)
+    # return (0.671, 0.760, 0.440, 1)
 
 
 def _get_curve_template(name):
