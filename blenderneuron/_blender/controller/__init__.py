@@ -22,6 +22,18 @@ def register_cell(cell):
     cell.position = _init_pos
     cell.rotation = _init_rot
 
+def get_rotation(obj):
+    return obj._bn_obj.rotation_euler
+
+def set_rotation(obj, rotation):
+    obj._bn_obj.rotation_euler = rotation
+
+def get_location(obj):
+    return obj._bn_obj.location
+
+def set_location(obj, location):
+    obj._bn_obj.location = location
+
 def _create_curve_container(cell):
     name = get_blender_name(cell)
     return CurveContainer(cell, _get_curve_template(name), True, _get_default_color(name), 1.0)

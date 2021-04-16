@@ -168,13 +168,13 @@ class Cell:
     @property
     def rotation(self):
         if hasattr(self, "curve_container"):
-            return self.curve_container._bn_obj.rotation_euler
+            return controller.get_rotation(self.curve_container)
         return self._rotation
 
     @rotation.setter
     def rotation(self, value):
         if hasattr(self, "curve_container"):
-            self.curve_container._bn_obj.rotation_euler = value
+            return controller.set_rotation(self.curve_container, value)
         self._rotation = value
 
     def __dissolve__(self):
