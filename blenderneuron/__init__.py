@@ -126,8 +126,14 @@ class Cell:
     A cell is the 3D representation of a collection of root :class:`Branches <.Branch>`,
     branching out into child Branches.
     """
-    def __init__(self, roots):
+    def __init__(self, roots, position=None, rotation=None):
+        if position is None:
+            position = np.array([0, 0, 0])
+        if rotation is None:
+            rotation = np.array([0, 0, 0])
         self._roots = roots
+        self._position = position
+        self._rotation = rotation
 
     def register(self):
         """
@@ -146,6 +152,30 @@ class Cell:
     @roots.setter
     def roots(self):
         raise NotImplementedError("Manipulating the Blender object state not supported yet.")
+
+    @property
+    def position(self):
+        if hasattr(self, "curve_container"):
+            return self.curve_container._bn_obj.location
+        return self._position
+
+    @position.setter
+    def position(self, value):
+        if hasattr(self, "curve_container"):
+            self.curve_container._bn_obj.location = value
+        self._rotation = value
+
+    @property
+    def rotation(self):
+        if hasattr(self, "curve_container"):
+            return self.curve_container._bn_obj.rotation_euler
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, value):
+        if hasattr(self, "curve_container"):
+            self.curve_container._bn_obj.rotation_euler = value
+        self._rotation = value
 
     def __dissolve__(self):
         for root in roots:

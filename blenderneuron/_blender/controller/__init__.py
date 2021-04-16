@@ -16,7 +16,11 @@ def register_cell(cell):
     id = register_object(cell)
     cell._id = id
     cc = _create_curve_container(cell)
+    _init_pos, _init_rot = cell.position, cell.rotation
     cell.curve_container = cc
+    # Trigger cell properties now that the curve container is available.
+    cell.position = _init_pos
+    cell.rotation = _init_rot
 
 def _create_curve_container(cell):
     name = get_blender_name(cell)
