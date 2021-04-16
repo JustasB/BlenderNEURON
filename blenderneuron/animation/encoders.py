@@ -17,6 +17,7 @@ class Calibratable:
         self._cmin = min
         self._cmax = max
 
+
 class NormEncoder(Encoder, Calibratable):
     def encode(self, signal, time=None):
         signal = np.array(signal, dtype=float)
@@ -30,6 +31,7 @@ class NormEncoder(Encoder, Calibratable):
 
 class RangeEncoder(NormEncoder):
     def __init__(self, min, max):
+        super().__init__()
         self._min = min
         self._max = max
 
