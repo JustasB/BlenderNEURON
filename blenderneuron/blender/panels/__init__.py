@@ -2,11 +2,11 @@ import bpy
 from blenderneuron.blender import BlenderNodeClass
 
 class AbstractBlenderNEURONPanel(BlenderNodeClass):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_context = "objectmode"
     bl_category = "BlenderNEURON"
     bl_label = ""
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_context = "objectmode"
 
     def draw(self, context):
         pass

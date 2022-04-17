@@ -3,7 +3,7 @@ bl_info = {
     "description": "A Blender GUI for NEURON simulator",
     "author": "Justas Birgiolas",
     "version": (2, 0),
-    "blender": (2, 79, 0),
+    "blender": (3, 1, 0),
     "location": "3D View > Left Side > BlenderNEURON",
     "wiki_url": "BlenderNEURON.org",
     "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
@@ -50,7 +50,7 @@ if inside_blender:
     @persistent
     def auto_start(scene):
         # Remove auto-execute command after starting
-        bpy.app.handlers.scene_update_post.remove(auto_start)
+        bpy.app.handlers.depsgraph_update_post.remove(auto_start)
 
         bpy.ops.blenderneuron.node_start()
 
@@ -79,7 +79,7 @@ if inside_blender:
         blenderneuron.blender.properties.connection.register()
 
         # This ensures the server starts on Blender load (self-removing)
-        bpy.app.handlers.scene_update_post.append(auto_start)
+        bpy.app.handlers.depsgraph_update_post.append(auto_start)
 
         # Reload the addon on file open
         bpy.app.handlers.load_post.append(on_blend_load)

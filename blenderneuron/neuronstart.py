@@ -2,4 +2,4 @@ from blenderneuron.nrn.neuronnode import NeuronNode
 
 BlenderNEURON = globals()["BlenderNEURON"] = NeuronNode()
 
-print('BlenderNEURON running in NEURON')
+print(f'BlenderNEURON running in NEURON and accessible by Blender with BlenderNEURON addon at: {BlenderNEURON.server_address}')
