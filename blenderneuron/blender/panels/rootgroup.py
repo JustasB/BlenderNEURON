@@ -14,6 +14,7 @@ from bpy.types import (Operator,
 
 
 class CellListWidget(AbstractBlenderNEURONPanel, UIList):
+    bl_idname = 'BLENDERNEURON_UL_CellListWidget'
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
@@ -33,6 +34,8 @@ class CellListWidget(AbstractBlenderNEURONPanel, UIList):
 
 
 class CellGroupListWidget(UIList):
+    bl_idname = 'BLENDERNEURON_UL_CellGroupListWidget'
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
         layout.prop(item, "name_editable", text="", emboss=False)
@@ -42,7 +45,7 @@ class CellGroupListWidget(UIList):
 
 
 class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_CellGroups'
+    bl_idname = 'BLENDERNEURON_PT_CellGroupsPanel'
     bl_label = "Cell Groups"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -71,7 +74,7 @@ class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_GroupCells'
+    bl_idname = 'BLENDERNEURON_PT_GroupCellsPanel'
     bl_label = "Cells in Group"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -100,7 +103,7 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_Import'
+    bl_idname = 'BLENDERNEURON_PT_ImportPanel'
     bl_label = "Import / Export"
 
     @classmethod
@@ -124,7 +127,7 @@ class ImportPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
+    bl_idname = 'BLENDERNEURON_PT_GroupSettingsPanel'
     bl_label = "Cell Group Options"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -257,7 +260,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_ConfineBetweenLayers'
+    bl_idname = 'BLENDERNEURON_PT_ConfineBetweenLayersPanel'
     bl_label = "Confine Between Layers"
 
     @classmethod
@@ -342,6 +345,8 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class SynapseSetListWidget(UIList):
+    bl_idname = 'BLENDERNEURON_UL_SynapseSetListWidget'
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "name_editable", text="", emboss=False)
 
@@ -350,7 +355,7 @@ class SynapseSetListWidget(UIList):
 
 
 class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_FormSynapses'
+    bl_idname = 'BLENDERNEURON_PT_FormSynapsesPanel'
     bl_label = "Form Synapses"
 
     @classmethod
@@ -446,7 +451,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
+    bl_idname = 'BLENDERNEURON_PT_SimulationSettingsPanel'
     bl_label = "NEURON"
 
     @classmethod
