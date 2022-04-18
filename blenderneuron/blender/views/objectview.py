@@ -248,7 +248,7 @@ class ObjectViewAbstract(ViewAbstract):
             node_color = mat.node_tree.nodes['Emission'].inputs['Color']
 
             # Color ramp eval function
-            color_value_at = group.color_ramp_material.diffuse_ramp.evaluate
+            color_value_at = group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.evaluate
 
             for i, frame in enumerate(frames):
                 # Get the color value from the ramp widget

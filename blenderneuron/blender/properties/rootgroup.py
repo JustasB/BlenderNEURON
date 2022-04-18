@@ -731,19 +731,19 @@ class BlenderNEURONProperties(PropertyGroup):
         self.property_unset("synapse_sets")
         self.property_unset("synapse_sets_index")
 
-    groups_index = IntProperty()
+    groups_index: IntProperty()
 
-    groups = CollectionProperty(
+    groups: CollectionProperty(
         type=RootGroupProperties
     )
 
-    simulator_settings = PointerProperty(
+    simulator_settings: PointerProperty(
         type=SimulatorSettings
     )
 
-    synapse_sets_index = IntProperty()
+    synapse_sets_index: IntProperty()
 
-    synapse_sets = CollectionProperty(
+    synapse_sets: CollectionProperty(
         type=SynapseConnectorProperties
     )
 

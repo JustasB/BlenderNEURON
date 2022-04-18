@@ -163,7 +163,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             box.enabled = not group.as_lines
             col = box.split(percentage=0.5)
             col.label('Init. Color:')
-            col.prop(group.node_group.color_ramp_material.diffuse_ramp.elements[0], "color", text='')
+            col.prop(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0], "color", text='')
 
             col = box.split(percentage=0.5)
             col.label('Init. Brightness:')
@@ -237,7 +237,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             if group.animate_color:
                 col.separator()
                 col = col.column()
-                col.template_color_ramp(group.node_group.color_ramp_material, "diffuse_ramp", expand=True)
+                col.template_color_ramp(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"], "color_ramp", expand=True)
                 col.separator()
 
             col.separator()

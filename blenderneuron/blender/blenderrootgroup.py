@@ -53,20 +53,22 @@ class BlenderRootGroup(RootGroup):
 
     @property
     def default_color(self):
-        return self.color_ramp_material.diffuse_ramp.elements[0].color[0:3]
+        return self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color[0:3]
 
     @default_color.setter
     def default_color(self, value):
-        self.color_ramp_material.diffuse_ramp.elements[0].color = value + [1]
+        self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = value + [1]
 
     def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'
 
         mat = bpy.data.materials.new(name)
-        mat.use_diffuse_ramp = True
-        mat.diffuse_ramp.elements[0].color = default_color + [1] # alpha
-        mat.diffuse_ramp.elements[-1].color = [1] * 4  # All white
+        mat.use_nodes = True
 
+        node = mat.node_tree.nodes.new('ShaderNodeValToRGB')
+
+        node.color_ramp.elements[0].color = default_color + [1] # alpha
+        node.color_ramp.elements[-1].color = [1] * 4  # All white
 
         return name
 
