@@ -44,7 +44,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def client_ip_get(self):
         return self.get_config_prop("default_ip|NEURON")
 
-    client_ip = bpy.props.StringProperty(
+    client_ip: bpy.props.StringProperty(
         name="IP Address",
         description="The IP address of the machine running NEURON. Use 127.0.0.1 when Blender and "
                     "NEURON are on the same machine",
@@ -59,7 +59,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def client_port_get(self):
         return self.get_config_prop("default_port|NEURON")
 
-    client_port = bpy.props.StringProperty(
+    client_port: bpy.props.StringProperty(
         name="Port",
         description="The port of the NEURON node server. Leave blank to auto-discover one (on local"
                     " machines only)",
@@ -74,7 +74,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def server_ip_get(self):
         return self.get_config_prop("default_ip|Blender")
 
-    server_ip = bpy.props.StringProperty(
+    server_ip: bpy.props.StringProperty(
         name="Blender IP",
         description="The IP address of the machine running Blender. Use 127.0.0.1 when Blender and "
                     "NEURON are on the same machine",
@@ -89,7 +89,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def server_port_get(self):
         return self.get_config_prop("default_port|Blender")
 
-    server_port = bpy.props.StringProperty(
+    server_port: bpy.props.StringProperty(
         name="Port",
         description="The port of the Blender node server. Leave blank to find a free one",
         get=server_port_get, set=server_port_set
@@ -103,7 +103,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def neuron_launch_command_get(self):
         return self.get_config_prop("NEURON_launch_command")
 
-    neuron_launch_command = bpy.props.StringProperty(
+    neuron_launch_command: bpy.props.StringProperty(
         name="NEURON command",
         description="The command that will be executed to launch NEURON+BlenderNEURON node",
         get=neuron_launch_command_get, set=neuron_launch_command_set
@@ -120,7 +120,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def on_neuron_last_command_updated(self, value):
         bpy.ops.blenderneuron.exec_neuron_command()
 
-    neuron_last_command = bpy.props.StringProperty(
+    neuron_last_command: bpy.props.StringProperty(
         name="Send command",
         description="A Python command (e.g. 'h.run()' or 'h.load_file(...)')that will be executed in "
                     "NEURON. Printed output can be seen in the Blender console window",
@@ -135,7 +135,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def frames_per_ms_get(self):
         return self.get_config_prop("Blender_frames_per_ms")
 
-    frames_per_ms = bpy.props.StringProperty(
+    frames_per_ms: bpy.props.StringProperty(
         name="Frames per ms",
         description="The number of Blender frames to represent one NEURON millisecond",
         get=frames_per_ms_get, set=frames_per_ms_set

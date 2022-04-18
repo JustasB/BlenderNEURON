@@ -19,37 +19,37 @@ from bpy.types import (Operator,
 
 
 class BlenderRootProperties(PropertyGroup, BlenderNodeClass):
-    name = StringProperty()
-    index = IntProperty()
+    name: StringProperty()
+    index: IntProperty()
 
     def on_selected_updated(self, context):
         new_group = self.node.ui_properties.group.node_group if self.selected else None
         self.node.root_index[self.name].add_to_group(new_group)
 
-    selected = BoolProperty(default=False, update=on_selected_updated)
+    selected: BoolProperty(default=False, update=on_selected_updated)
 
 
 class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
-    start_mesh = PointerProperty(
+    start_mesh: PointerProperty(
         type=Object,
         name="Start Layer",
         description="The mesh above which the pattern matching sections will be confined"
     )
 
-    end_mesh = PointerProperty(
+    end_mesh: PointerProperty(
         type=Object,
         name="End Layer",
         description="The second mesh under which the sections will be confined"
     )
 
-    moveable_sections_pattern = StringProperty(
+    moveable_sections_pattern: StringProperty(
         name="Section Pattern",
         default="*dend*",
         description="If the name of a section matches this pattern (* and ? wildcards allowed), "
                     "the section(s) will be confined between the selected layers"
     )
 
-    max_bend_angle = FloatProperty(
+    max_bend_angle: FloatProperty(
         default=15,
         min=0,
         max=180,
@@ -58,14 +58,14 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
                     " deviate from their original positions"
     )
 
-    seed = IntProperty(
+    seed: IntProperty(
         default=0,
         min=0,
         name="Random seed",
         description="Random seed for the aligner"
     )
 
-    height_min = FloatProperty(
+    height_min: FloatProperty(
         min=-3,
         default=0,
         max=3,
@@ -76,7 +76,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
                     "above the end layer"
     )
 
-    height_max = FloatProperty(
+    height_max: FloatProperty(
         min=-3,
         default=0.5,
         max=3,
@@ -87,7 +87,7 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
                     "above the end layer"
     )
 
-    max_section_length = FloatProperty(
+    max_section_length: FloatProperty(
         default=200,
         min=1,
         name="Maximum section length",
@@ -115,26 +115,26 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
 
         self.name = new_name
 
-    name_editable = StringProperty(get=get_name, set=set_name)
+    name_editable: StringProperty(get=get_name, set=set_name)
 
-    group_source = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
+    group_source: bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
                                           name="From Cell Group",
                                           description="Cells in this BlenderNEURON group will "
                                                     "be connected to cells in the other group")
 
-    group_dest = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
+    group_dest: bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
                                         name="To Cell Group",
                                         description="Cells in this groups will receive connections"
                                                   " from cells in the first group")
 
-    max_distance = FloatProperty(
+    max_distance: FloatProperty(
         default=5,
         min=0,
         name="Max Proximity Distance (um)",
         description="The maximum distance between segments that will be used to form synapses"
     )
 
-    use_radius = BoolProperty(
+    use_radius: BoolProperty(
         default=True,
         name="Use Radius",
         description="Whether 3D point radii should be utilized when searching for synapse "
@@ -142,66 +142,66 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "distances between 3D points without including diameters (slightly faster)"
     )
 
-    max_syns_per_pt = IntProperty(
+    max_syns_per_pt: IntProperty(
         default=4,
         name="Max Syns/Pt",
         description="The maximum number of synapses that are allowed to be positioned at a given "
                     "section 3D point"
     )
 
-    section_pattern_source = StringProperty(
+    section_pattern_source: StringProperty(
         default="*apic*",
         name="From Section Pattern",
         description="The section name pattern to use when selecting source cell sections. "
                     "Use ? and * wildcards to match one or more characters respectively"
     )
 
-    section_pattern_dest = StringProperty(
+    section_pattern_dest: StringProperty(
         default="*dend*",
         name="To section pattern",
         description="The section name pattern to use when selecting destination cell sections. "
                     "Use ? and * wildcards to match one or more characters respectively"
     )
 
-    synapse_name_dest = StringProperty(
+    synapse_name_dest: StringProperty(
         default="ExpSyn",
         name="Synapse Class Name",
         description="The name of NEURON synaptic mechanism that will be "
                     "placed on the destination cell"
     )
 
-    synapse_params_dest = StringProperty(
+    synapse_params_dest: StringProperty(
         default="{'g':1,'tau':10}",
         name="Parameters",
         description="Optional synapse mechanism parameters as a Python dictionary e.g. {'g':1,'tau':10}"
     )
 
-    is_reciprocal = BoolProperty(
+    is_reciprocal: BoolProperty(
         default=False,
         name="Is Reciprocal",
         description="Whether the synapses should be reciprocal (from->to->from) or uni-directional (from->to)"
     )
 
-    synapse_name_source = StringProperty(
+    synapse_name_source: StringProperty(
         default="ExpSyn",
         name="Reciprocal Synapse Class Name",
         description="The name of NEURON synaptic mechanism that will be placed on the "
                     "source cell (when reciprocal)"
     )
 
-    synapse_params_source = StringProperty(
+    synapse_params_source: StringProperty(
         default="{'g':1,'tau':10}",
         name="Parameters",
         description="Optional reciprocal synapse mechanism parameters as a Python dictionary e.g. {'g':1,'tau':10}"
     )
 
-    create_spines = BoolProperty(
+    create_spines: BoolProperty(
         default=True,
         name="Create Spines",
         description="Whether a spine (neck+head) should be created from source to destination sections"
     )
 
-    spine_neck_diameter = FloatProperty(
+    spine_neck_diameter: FloatProperty(
         default=0.2,
         min=0,
         name="Neck Diam (um)",
@@ -210,27 +210,27 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "the head diameter, the spine neck is omitted"
     )
 
-    spine_head_diameter = FloatProperty(
+    spine_head_diameter: FloatProperty(
         default=1,
         min=0,
         name="Head Diam (um)",
         description="Diameter of spine heads (um). Length is same as diameter (e.g. spherical)"
     )
 
-    spine_name_prefix = StringProperty(
+    spine_name_prefix: StringProperty(
         default="Spine",
         name="Prefix",
         description="The prefix used in names of spine sections. E.g. 'Spine' becomes Spine[0...N].neck/.head"
     )
 
-    conduction_velocity = FloatProperty(
+    conduction_velocity: FloatProperty(
         default=1,
         min=0,
         name="Conduction Velocity (m/s)",
         description="Conduction velocity to use when computing the synaptic delay"
     )
 
-    synaptic_delay = FloatProperty(
+    synaptic_delay: FloatProperty(
         default=0.5,
         min=0.001,
         name="Synaptic Delay (ms)",
@@ -238,14 +238,14 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
                     "onset of post-synaptic current (NetCon.delay)"
     )
 
-    initial_weight = FloatProperty(
+    initial_weight: FloatProperty(
         default=1,
         min=0,
         name="Initial Weight",
         description="The initial synaptic weight"
     )
 
-    threshold = FloatProperty(
+    threshold: FloatProperty(
         default=0,
         name="Firing Threshold (mV)",
         description="The threshold that the source cell segment membrane potential "
@@ -366,7 +366,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         # Update UI group name
         self.name = new_name
 
-    name_editable = StringProperty(get=get_name, set=set_name)
+    name_editable: StringProperty(get=get_name, set=set_name)
 
     @property
     def node_group(self):
@@ -383,25 +383,25 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
             setattr(self.node_group, prop, value)
         return set
 
-    index = IntProperty(get=get_prop("index"), set=set_prop("index"))
-    selected = BoolProperty(default=True, get=get_prop("selected"), set=set_prop("selected"))
+    index: IntProperty(get=get_prop("index"), set=set_prop("index"))
+    selected: BoolProperty(default=True, get=get_prop("selected"), set=set_prop("selected"))
 
-    root_entries = CollectionProperty(type=BlenderRootProperties)
-    root_entries_index = IntProperty()
+    root_entries: CollectionProperty(type=BlenderRootProperties)
+    root_entries_index: IntProperty()
 
-    copy_from_group = bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
+    copy_from_group: bpy.props.EnumProperty(items=BlenderNodeClass.get_group_list,
                                           name="Copy Cell Group",
                                           description="Group options will be copied to "
                                                       "the current group from the selected group")
 
-    record_activity = BoolProperty(
+    record_activity: BoolProperty(
         default=True,
         get=get_prop("record_activity"),
         set=set_prop("record_activity"),
         description="Imports the recorded values from the selected variable (based on granularity) "
                     "and shows it as variation in Blender segment brightness")
 
-    recording_time_start = FloatProperty(
+    recording_time_start: FloatProperty(
         default=0,
         min=0,
         get=get_prop("recording_time_start"),
@@ -409,7 +409,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         description="The simulation time at which to start recording (ms)"
     )
 
-    recording_time_end = FloatProperty(
+    recording_time_end: FloatProperty(
         default=0,
         min=0,
         get=get_prop("recording_time_end"),
@@ -418,14 +418,14 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     "0 will record until the end of simulation"
     )
 
-    import_synapses = BoolProperty(
+    import_synapses: BoolProperty(
         default=True,
         get=get_prop("import_synapses"),
         set=set_prop("import_synapses"),
         description="Imports synaptic connections and visually represents them in Blender"
     )
 
-    recording_period = FloatProperty(
+    recording_period: FloatProperty(
         default=1.0,
         min=0.0,
         get=get_prop("recording_period"),
@@ -433,7 +433,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         description="How often to collect the recording variable during simulation (ms)"
     )
 
-    record_variable = StringProperty(
+    record_variable: StringProperty(
         default="v",
         get=get_prop("record_variable"),
         set=set_prop("record_variable"),
@@ -441,21 +441,21 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     " (e.g. 'v' of soma(0.5).v) and use to animate segments in Blender"
     )
 
-    animate_brightness = BoolProperty(
+    animate_brightness: BoolProperty(
         default=True,
         get=get_prop("animate_brightness"),
         set=set_prop("animate_brightness"),
         description="Whether to translate recorded variable (e.g. Vm) values to brightness"
     )
 
-    animate_color = BoolProperty(
+    animate_color: BoolProperty(
         default=True,
         get=get_prop("animate_color"),
         set=set_prop("animate_color"),
         description="Whether to translate recorded variable (e.g. Vm) values to color"
     )
 
-    animation_range_low = FloatProperty(
+    animation_range_low: FloatProperty(
         default=-85,
         get=get_prop("animation_range_low"),
         set=set_prop("animation_range_low"),
@@ -464,7 +464,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     "color ramp above"
     )
 
-    animation_range_high = FloatProperty(
+    animation_range_high: FloatProperty(
         default=20,
         get=get_prop("animation_range_high"),
         set=set_prop("animation_range_high"),
@@ -473,7 +473,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     "color ramp above"
     )
 
-    simplification_epsilon = FloatProperty(
+    simplification_epsilon: FloatProperty(
         default=0.1,
         min=0,
         get=get_prop("simplification_epsilon"),
@@ -484,7 +484,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     " only completely co-linear activity points (e.g. lossless)"
     )
 
-    frames_per_ms = FloatProperty(
+    frames_per_ms: FloatProperty(
         default=1,
         min=0,
         get=get_prop("frames_per_ms"),
@@ -516,7 +516,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     ('Group', 'Cell Group', 'Coarsest. Reports the mean value across all selected cell somas (root segments)', 3),
     ('3D Segment', '3D Segment', 'Finest. Reports values between each cell section 3D point', 0),    
     '''
-    recording_granularity = bpy.props.EnumProperty(
+    recording_granularity: bpy.props.EnumProperty(
         items=[
             ('Cell', 'Soma', 'Reports the value at each selected cell soma (root)', 2),
             ('Section', 'Section', 'Reports values at each selected cell section', 1),
@@ -533,7 +533,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     ('Group', 'Cell Group', 'Coarsest. The group of selected cells is represented as '
                             'one object in Blender', 3),
     '''
-    interaction_granularity = bpy.props.EnumProperty(
+    interaction_granularity: bpy.props.EnumProperty(
         items=[
            ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
             ('Section', 'Section', 'Finest. Each cell section is represented as a Blender object', 1),
@@ -548,17 +548,17 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_gran_prop("interaction_granularity")
     )
 
-    layer_confiner_settings = PointerProperty(
+    layer_confiner_settings: PointerProperty(
         type=LayerConfinerProperties
     )
 
-    default_brightness = FloatProperty(
+    default_brightness: FloatProperty(
         get=get_prop("default_brightness"),
         set=set_prop("default_brightness"),
         description='The initial brightness of all sections in the group'
     )
 
-    smooth_sections = BoolProperty(
+    smooth_sections: BoolProperty(
         default=True,
         description="Whether to render sections as smooth bezier curves, instead of straight lines. "
                     "True results in more visually appealing morphology, but requires more polygons",
@@ -567,7 +567,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     )
 
 
-    spherize_soma_if_DeqL = BoolProperty(
+    spherize_soma_if_DeqL: BoolProperty(
         default=True,
         description="Whether to display a soma section with diameter ~= length as a sphere in Blender",
         get=get_prop("spherize_soma_if_DeqL"),
@@ -575,7 +575,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     )
 
 
-    as_lines = BoolProperty(
+    as_lines: BoolProperty(
         default=False,
         description="Whether to display sections as line segments (no radius). This is fast, but does not show "
                     "up in rendered images",
@@ -583,7 +583,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         set=set_prop("as_lines")
     )
 
-    segment_subdivisions = IntProperty(
+    segment_subdivisions: IntProperty(
         min=1,
         max=10,
         description="Number of linear subdivisions to use when displaying a 3D point segment. Higher results in "
@@ -593,7 +593,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     )
 
 
-    circular_subdivisions = IntProperty(
+    circular_subdivisions: IntProperty(
         min=4,
         max=12,
         description="Number of sides to use when creating circular section cross-sections. "
@@ -607,8 +607,8 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         self.interaction_granularity = source_group.interaction_granularity
 
         self.as_lines = source_group.as_lines
-        self.node_group.color_ramp_material.diffuse_ramp.elements[0].color = \
-            source_group.node_group.color_ramp_material.diffuse_ramp.elements[0].color
+        self.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = \
+            source_group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color
         self.default_brightness = source_group.default_brightness
         self.smooth_sections = source_group.smooth_sections
         self.segment_subdivisions = source_group.segment_subdivisions
@@ -659,18 +659,18 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
         self.temperature = params["celsius"]
         self.integration_method = str(int(float(params["cvode"])))
 
-    neuron_t = FloatProperty(
+    neuron_t: FloatProperty(
         description="The current simulation time (e.g. h.t) in ms"
     )
 
-    neuron_tstop = FloatProperty(
+    neuron_tstop: FloatProperty(
         min = 0,
         default = 100,
         description="The simulation stop time (e.g. h.tstop) in ms",
         update=to_neuron
     )
 
-    time_step = FloatProperty(
+    time_step: FloatProperty(
         default=0.25,
         min = 0,
         precision=3,
@@ -678,7 +678,7 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
         update=to_neuron
     )
 
-    abs_tolerance = FloatProperty(
+    abs_tolerance: FloatProperty(
         default=0.001,
         min=0,
         precision=5,
@@ -686,13 +686,13 @@ class SimulatorSettings(BlenderNodeClass, PropertyGroup):
         update=to_neuron
     )
 
-    temperature = FloatProperty(
+    temperature: FloatProperty(
         default=6.3,
         description="The simulation temperature in degrees Celsius",
         update=to_neuron
     )
 
-    integration_method = bpy.props.EnumProperty(
+    integration_method: bpy.props.EnumProperty(
         items=[
             ('0', 'Fixed Step', 'Each simulation step is constant size'),
             ('1', 'Variable Step (CVODE)', 'Each simulation step is variable depending '
