@@ -490,7 +490,7 @@ class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             col.prop(settings, "abs_tolerance", text="Absolute tolerance")
 
         col.separator()
-        col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="POSE_DATA")
+        col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="ARMATURE_DATA")
         col.separator()
         col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
         col.separator()
