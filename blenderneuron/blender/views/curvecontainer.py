@@ -156,7 +156,7 @@ class CurveContainer:
         mat = bpy.data.materials.new(name)
 
         mat.diffuse_color = color
-        mat.emit = brightness
+        # mat.emit = brightness
 
         # # Ambient and back lighting
         # mat.ambient = 0.85
@@ -181,7 +181,7 @@ class CurveContainer:
         cl_emit = nodes.new('ShaderNodeEmission')
         cl_emit.location = [-200, 0]
         cl_emit.inputs['Strength'].default_value = brightness
-        cl_emit.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
+        cl_emit.inputs['Color'].default_value = mat.diffuse_color
 
         # cl_trans = nodes.new('ShaderNodeBsdfTransparent')
         # cl_trans.location = [-200, 100]

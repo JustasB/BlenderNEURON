@@ -234,8 +234,8 @@ class ObjectViewAbstract(ViewAbstract):
             emit_strength = mat.node_tree.nodes['Emission'].inputs['Strength']
 
             for i, frame in enumerate(frames):
-                # Set the material emit and Cycles emit node intensity
-                emit_strength.default_value = mat.emit = intensity[i] * max_brightness
+                # Set the Cycles emit node intensity
+                emit_strength.default_value = intensity[i] * max_brightness
 
                 # Set the material and node emit keyframes
                 mat.keyframe_insert(data_path="emit", frame=frame)
@@ -254,7 +254,7 @@ class ObjectViewAbstract(ViewAbstract):
 
                 # Set the material emit and Cycles emit node intensity
                 node_color.default_value = frame_color4
-                mat.diffuse_color = frame_color4[0:3]  # ignore alpha
+                mat.diffuse_color = frame_color4
 
                 # Set the material and node color keyframes
                 mat.keyframe_insert(data_path="diffuse_color", frame=frame)

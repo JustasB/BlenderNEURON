@@ -49,15 +49,15 @@ class BlenderRootGroup(RootGroup):
         self.root_filter = '*'
 
         # Default: Pale yellowish green
-        self.color_ramp_material_name = self.create_color_ramp_material([0.14, 0.67, 0.02])
+        self.color_ramp_material_name = self.create_color_ramp_material([0.14, 0.67, 0.02, 1.0])
 
     @property
     def default_color(self):
-        return self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color[0:3]
+        return self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color
 
     @default_color.setter
     def default_color(self, value):
-        self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = value + [1]
+        self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = value
 
     def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'
@@ -67,7 +67,7 @@ class BlenderRootGroup(RootGroup):
 
         node = mat.node_tree.nodes.new('ShaderNodeValToRGB')
 
-        node.color_ramp.elements[0].color = default_color + [1] # alpha
+        node.color_ramp.elements[0].color = default_color
         node.color_ramp.elements[-1].color = [1] * 4  # All white
 
         return name

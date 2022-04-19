@@ -63,7 +63,7 @@ class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
 
         row = self.layout.row()
 
-        row.template_list("CellGroupListWidget", "",
+        row.template_list("BLENDERNEURON_UL_CellGroupListWidget", "",
                           scene.BlenderNEURON, "groups",
                           scene.BlenderNEURON, "groups_index",
                           rows=3)
@@ -88,7 +88,7 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
         self.layout.operator("blenderneuron.get_cell_list_from_neuron", text="Refresh NEURON Cell List",
                              icon="FILE_REFRESH")
 
-        self.layout.template_list("CellListWidget", "",
+        self.layout.template_list("BLENDERNEURON_UL_CellListWidget", "",
                                   group, "root_entries",
                                   group, "root_entries_index",
                                   rows=5)
