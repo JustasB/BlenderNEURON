@@ -289,11 +289,11 @@ class SynapseFormerView(CellObjectView):
             bez_pts[1].co = pair.dest.loc
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.context.scene.objects.link(bez)
+        bpy.context.collection.objects.link(bez)
         bpy.context.scene.update()
 
-        bez.select = True
-        bpy.context.scene.objects.active = bez
+        bez.select_set(state=True)
+        bpy.context.view_layer.objects.active = bez
 
         # Set handles to make splines straight
         bpy.ops.object.mode_set(mode='EDIT')

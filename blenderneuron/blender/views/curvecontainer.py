@@ -175,16 +175,6 @@ class CurveContainer:
 
         links.new(cl_emit.outputs['Emission'], cl_out.inputs['Surface'])
 
-        # # Blender render nodes
-        # br_out = nodes.new('ShaderNodeOutput')
-        # br_out.location = [0, -200]
-        # br_mat = nodes.new('ShaderNodeExtendedMaterial')
-        # br_mat.location = [-200, -200]
-        # br_mat.material = mat
-
-        # links.new(br_mat.outputs['Color'], br_out.inputs['Color'])
-        # links.new(br_mat.outputs['Alpha'], br_out.inputs['Alpha'])
-
         return mat
 
     def add_material_to_object(self, material):

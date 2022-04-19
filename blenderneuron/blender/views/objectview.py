@@ -237,8 +237,7 @@ class ObjectViewAbstract(ViewAbstract):
                 # Set the Cycles emit node intensity
                 emit_strength.default_value = intensity[i] * max_brightness
 
-                # Set the material and node emit keyframes
-                mat.keyframe_insert(data_path="emit", frame=frame)
+                # Set the node emit keyframe
                 emit_strength.keyframe_insert(data_path="default_value", frame=frame)
 
         if group.animate_color:
@@ -252,9 +251,8 @@ class ObjectViewAbstract(ViewAbstract):
                 # Get the color value from the ramp widget
                 frame_color4 = color_value_at(intensity[i])
 
-                # Set the material emit and Cycles emit node intensity
-                node_color.default_value = frame_color4
-                mat.diffuse_color = frame_color4
+                # Set the material color and Cycles node color
+                node_color.default_value = mat.diffuse_color = frame_color4
 
                 # Set the material and node color keyframes
                 mat.keyframe_insert(data_path="diffuse_color", frame=frame)

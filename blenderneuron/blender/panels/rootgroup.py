@@ -18,7 +18,7 @@ class CellListWidget(AbstractBlenderNEURONPanel, UIList):
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
-        layout.label(item.name)
+        layout.label(text=item.name)
 
         value = self.filter_name
 
@@ -148,90 +148,86 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col = self.layout
         col.label(text="Interaction Settings:")
         col = self.layout.box()
-        col.label('Interact with Each:')
+        col.label(text='Interact with Each:')
         col.row().prop(group, "interaction_granularity", text="Interact", expand=True)
 
         col = self.layout
         col.label(text="Section Display Settings:")
         box = col.box().column()
         row = box.split(factor=0.5)
-        row.label("Sections as Lines")
+        row.label(text="Sections as Lines")
         row.prop(group, "as_lines", text='')
 
         if not group.as_lines:
             box = box.column()
             box.enabled = not group.as_lines
             col = box.split(factor=0.5)
-            col.label('Init. Color:')
+            col.label(text='Init. Color:')
             col.prop(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0], "color", text='')
 
             col = box.split(factor=0.5)
-            col.label('Init. Brightness:')
+            col.label(text='Init. Brightness:')
             col.prop(group, "default_brightness", text='')
 
             col = box.split(factor=0.5)
-            col.label('Smooth Curves:')
+            col.label(text='Smooth Curves:')
             col.prop(group, "smooth_sections", text='')
 
             col = box.split(factor=0.5)
             col.enabled = group.smooth_sections
-            col.label('Subdivisions:')
+            col.label(text='Subdivisions:')
             col.prop(group, "segment_subdivisions", text='')
 
             col = box.split(factor=0.5)
-            col.label('N-gon Sides:')
+            col.label(text='N-gon Sides:')
             col.prop(group, "circular_subdivisions", text='')
-
-            # col = box.split(factor=0.5)
-            # col.label('Spherical Somas:')
-            # col.prop(group, "spherize_soma_if_DeqL", text='')
 
         col = self.layout
         col.separator()
         col.label(text="Recording Settings:")
         col = self.layout.box().column()
         row = col.split(factor=0.5)
-        row.label("Record Activity")
+        row.label(text="Record Activity")
         row.prop(group, "record_activity", text='')
 
         if group.record_activity:
             col = col.column()
             col.enabled = group.record_activity
-            col.label('Record from Each:')
+            col.label(text='Record from Each:')
             col.row().prop(group, "recording_granularity", expand=True)
             col.separator()
 
             row = col.split(factor=0.5)
-            row.label('Start Recording:')
+            row.label(text='Start Recording:')
             row.prop(group, "recording_time_start", text="")
 
             row = col.split(factor=0.5)
-            row.label('Stop Recording:')
+            row.label(text='Stop Recording:')
             row.prop(group, "recording_time_end", text="")
 
             row = col.split(factor=0.5)
-            row.label('Record:')
+            row.label(text='Record:')
             row.prop(group, "record_variable", text="")
 
             row = col.split(factor=0.5)
-            row.label('Sampling Period:')
+            row.label(text='Sampling Period:')
             row.prop(group, "recording_period", text="")
 
             row = col.split(factor=0.5)
-            row.label('Frames per Millisecond:')
+            row.label(text='Frames per Millisecond:')
             row.prop(group, "frames_per_ms", text="")
 
             row = col.split(factor=0.5)
-            row.label('Simplification Tolerance:')
+            row.label(text='Simplification Tolerance:')
             row.prop(group, "simplification_epsilon", text="")
 
 
             row = col.split(factor=0.5)
-            row.label('Animate Brightness:')
+            row.label(text='Animate Brightness:')
             row.prop(group, "animate_brightness", text="")
 
             row = col.split(factor=0.5)
-            row.label('Animate Color:')
+            row.label(text='Animate Color:')
             row.prop(group, "animate_color", text="")
 
             if group.animate_color:
@@ -242,26 +238,18 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
             col.separator()
             row = col.split(factor=0.50)
-            row.label('Variable Low:')
-            row.label('High:')
+            row.label(text='Variable Low:')
+            row.label(text='High:')
             row = col.split(factor=0.50)
             row.prop(group, "animation_range_low", text="")
             row.prop(group, "animation_range_high", text="")
 
 
 
-        # col = self.layout
-        # col.separator()
-        # col.label(text="Connectivity Settings:")
-        # col = self.layout.box()
-        # row = col.split(factor=0.5)
-        # row.label("Import Synapses")
-        # row.prop(group, "import_synapses", text='')
-
-
 class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
     bl_idname = 'BLENDERNEURON_PT_ConfineBetweenLayersPanel'
     bl_label = "Confine Between Layers"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -277,14 +265,14 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
         split.prop(settings, "start_mesh", text="")
 
         if settings.start_mesh is not None and settings.start_mesh.type != 'MESH':
-            self.layout.label("Start layer must be a 'MESH' object", icon='ERROR')
+            self.layout.label(text="Start layer must be a 'MESH' object", icon='ERROR')
 
         split = self.layout.split(factor=0.33)
         split.label(text="End Layer:")
         split.prop(settings, "end_mesh", text="")
 
         if settings.end_mesh is not None and settings.end_mesh.type != 'MESH':
-            self.layout.label("End layer must be a 'MESH' object", icon='ERROR')
+            self.layout.label(text="End layer must be a 'MESH' object", icon='ERROR')
 
         split = self.layout.split(factor=0.33)
         split.label(text="Name Contains:")
@@ -441,8 +429,8 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         layout.separator()
 
         if settings.group_source == settings.group_dest:
-            layout.label("Source and Destination groups must be different. ", icon='ERROR')
-            layout.label("Use 'Cell Groups' section to create a new group.")
+            layout.label(text="Source and Destination groups must be different. ", icon='ERROR')
+            layout.label(text="Use 'Cell Groups' section to create a new group.")
 
         layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEW_ZOOM')
         layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
