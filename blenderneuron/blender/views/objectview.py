@@ -48,8 +48,6 @@ class ObjectViewAbstract(ViewAbstract):
         curve_template.fill_mode = 'FULL'
         curve_template.bevel_depth = 0.0 if self.group.as_lines else 1.0
         curve_template.bevel_resolution = int((self.group.circular_subdivisions - 4) / 2.0)
-        curve_template.show_normal_face = False
-        curve_template.show_handles = False
 
         self.curve_template_name = curve_template.name
 
@@ -58,29 +56,29 @@ class ObjectViewAbstract(ViewAbstract):
         return bpy.data.curves.get(self.curve_template_name)
 
     def on_first_link(self):
-        # Set viewport params
-        for area in bpy.data.screens["Default"].areas:
-            if area.type == 'VIEW_3D':
-                for space in area.spaces:
-                    if space.type == 'VIEW_3D':
-                        # Set grid size - One cell 100 um
-                        space.grid_scale = 100.0
+        # for window in bpy.context.window_manager.windows:
+        #     for area in window.screen.areas:
+        #         if area.type == 'VIEW_3D':
+        #             for space in area.spaces:
+        #                 if space.type == 'VIEW_3D': 
+        #                     # Set grid size - One cell 100 um
+        #                     # space.grid_scale = 100.0
 
-                        # Set viewport clipping distance
-                        space.clip_end = 99999
+        #                     # Set viewport clipping distance
+        #                     # space.clip_end = 99999
 
-                        # Disable relationship lines
-                        space.show_relationship_lines = False
+        #                     # Disable relationship lines
+        #                     # space.show_relationship_lines = False
 
         # Add a sun lamp - at 500,500,500 um
         sun_exists = False
-        for lamp in bpy.data.lamps:
-            if lamp.type == 'SUN':
+        for light in bpy.data.lights:
+            if light.type == 'SUN':
                 sun_exists = True
                 break
 
         if not sun_exists:
-            bpy.ops.object.lamp_add(type="SUN", location=[500] * 3)
+            bpy.ops.object.light_add(type="SUN", location=[500] * 3)
 
         # Set camera clip distance
         for camera in bpy.data.cameras:

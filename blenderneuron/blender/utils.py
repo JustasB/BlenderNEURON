@@ -125,20 +125,21 @@ def get_operator_context_override(selected_object = None):
     override = {}
 
     try:
-        for area in bpy.data.screens["Default"].areas:
-            if area.type == 'VIEW_3D':
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        override['area'] = area
-                        override['region'] = region
-                        raise StopIteration()
+        for window in bpy.context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == 'VIEW_3D':
+                    for region in area.regions:
+                        if region.type == 'WINDOW':
+                            override['window'] = window
+                            override['screen'] = window.screen
+                            override['area'] = area
+                            override['region'] = region
+                            raise StopIteration()
 
     except StopIteration:
         pass
 
-    override["window"]        = bpy.context.window_manager.windows[0]
     override["scene"]         = bpy.data.scenes['Scene']
-    override["screen"]        = bpy.data.screens["Default"]
 
     override["edit_object"] = None
     override["gpencil_data"] = None
