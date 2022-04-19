@@ -110,7 +110,7 @@ class ObjectViewAbstract(ViewAbstract):
             if pattern is None or \
                     (not pattern_inverse and fnmatch(container.name, pattern)) or \
                     (pattern_inverse and not fnmatch(container.name, pattern)):
-                container.get_object().select = select
+                container.get_object().select_set(state=select)
 
     def zoom_to_containers(self):
 
@@ -180,8 +180,8 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers()
 
         # Convert the selected container curves to mesh
-        active_ob = next(o for o in bpy.context.scene.objects if o.select)
-        bpy.context.scene.objects.active = active_ob
+        active_ob = next(o for o in bpy.context.collection.objects if o.select_get())
+        bpy.context.view_layer.objects.active = active_ob
         
         #context = get_operator_context_override(selected_object=active_ob)
         bpy.ops.object.convert(target='MESH', keep_original=False)
@@ -190,7 +190,7 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers()
 
         # Convert the selected container meshes to curves
-        bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
         bpy.ops.object.convert(target='CURVE', keep_original=False)
 
     def animate_activity(self, activity, material_name):
