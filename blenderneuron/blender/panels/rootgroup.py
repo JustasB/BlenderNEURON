@@ -363,7 +363,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
         row = self.layout.row()
 
-        row.template_list("SynapseSetListWidget", "",
+        row.template_list("BLENDERNEURON_UL_SynapseSetListWidget", "",
                           context.scene.BlenderNEURON, "synapse_sets",
                           context.scene.BlenderNEURON, "synapse_sets_index",
                           rows=4)
