@@ -81,11 +81,11 @@ class VectorConfinerView(SectionObjectView):
         height_fraction = height_low + (height_high - height_low) * random.random()
 
         # Section proximal location in global coords
-        sec_start_loc = obj.matrix_world * obj.data.splines[0].bezier_points[0].co
+        sec_start_loc = obj.matrix_world @ obj.data.splines[0].bezier_points[0].co
 
         for i in range(iters):
             # Section distal location in global coords
-            tip_loc = obj.matrix_world * obj.data.splines[0].bezier_points[-1].co
+            tip_loc = obj.matrix_world @ obj.data.splines[0].bezier_points[-1].co
 
             # Section direction vector
             vec_sec_dir = (tip_loc - sec_start_loc).normalized()
@@ -123,11 +123,11 @@ class VectorConfinerView(SectionObjectView):
 
     @staticmethod
     def closest_point_on_object(global_pt, mesh_obj):
-        local_pt = mesh_obj.matrix_world.inverted() * global_pt
+        local_pt = mesh_obj.matrix_world.inverted() @ global_pt
 
         _, mesh_pt, _, _ = mesh_obj.closest_point_on_mesh(local_pt)
 
-        mesh_pt_global = mesh_obj.matrix_world * mesh_pt
+        mesh_pt_global = mesh_obj.matrix_world @ mesh_pt
 
         dist = (global_pt - mesh_pt_global).length
 
@@ -140,7 +140,7 @@ class VectorConfinerView(SectionObjectView):
         ob_mw = ob.matrix_world
         end = ob.data.splines[0].bezier_points[-1].co
         start = ob.data.splines[0].bezier_points[0].co
-        desired = ob_mw.inverted() * pt_global
+        desired = ob_mw.inverted() @ pt_global
         v_start = end - start
         v_des = desired - start
         q = v_start.rotation_difference(v_des).to_euler()
