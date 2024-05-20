@@ -472,7 +472,7 @@ class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col.prop(settings, "integration_method")
 
         if settings.integration_method == '0':
-            col.prop(settings, "time_step", "Time Step (ms)")
+            col.prop(settings, "time_step", text="Time Step (ms)")
 
         if settings.integration_method == '1':
             col.prop(settings, "abs_tolerance", text="Absolute tolerance")
