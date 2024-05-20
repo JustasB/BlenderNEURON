@@ -434,7 +434,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
         layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEW_ZOOM')
         layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
-        layout.operator('blenderneuron.save_synapseset', text='Save Synapse Set to .py File', icon='EXPORT')
+        layout.operator('blenderneuron.save_synapseset', text='Save Synapse Set to JSON File', icon='EXPORT')
 
 
 
