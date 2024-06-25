@@ -4,7 +4,7 @@ bl_info = {
     "author": "Justas Birgiolas",
     "version": (2, 0),
     "blender": (3, 1, 0),
-    "location": "3D View > Left Side > BlenderNEURON",
+    "location": "3D View > Right Sidebar > BlenderNEURON",
     "wiki_url": "BlenderNEURON.org",
     "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
     "support": "COMMUNITY",
