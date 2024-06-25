@@ -148,13 +148,13 @@ class VectorConfinerView(SectionObjectView):
         # Clamp rotation angles
         q = Euler(list(map(lambda angle: min(max(angle, -max_angle), max_angle), q))).to_quaternion()
 
-        ob.matrix_basis = ob.matrix_basis.copy() * q.to_matrix().to_4x4()
+        ob.matrix_basis = ob.matrix_basis.copy() @ q.to_matrix().to_4x4()
 
         # Update matrices
         if ob.parent is None:
             ob.matrix_world = ob.matrix_basis
         else:
-            ob.matrix_world = ob.parent.matrix_world * ob.matrix_parent_inverse * ob.matrix_basis
+            ob.matrix_world = ob.parent.matrix_world @ ob.matrix_parent_inverse @ ob.matrix_basis
 
 
     @staticmethod
