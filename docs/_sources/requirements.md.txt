@@ -9,7 +9,7 @@ BlenderNEURON has the following software requirements:
   -  In Terminal: ``nrngui -python`` 
   - In Python console: ``from neuron import h``
 
- 3. Working installation of **Blender 2.79b** (see links for your OS in `Step 3 of Download Page <https://blenderneuron.org/download/>`_
+ 3. Working installation of **Blender 3.1-3.5** (see links for your OS in `Step 3 of Download Page <https://blenderneuron.org/download/>`_
 
 
 
