@@ -47,7 +47,7 @@ jobs:
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
       - run:
           command: |
-            python -c "from tests import Blender; with Blender(): pass"
+            python -c "from tests import check_blender_can_run as t; t()"
       - run:
           command: |
             xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
