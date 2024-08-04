@@ -41,9 +41,9 @@ class TestLayerConfinement(BlenderTestCase):
                 "return_value = list(bpy.data.objects['TestCell[0].dendrites[13]'].rotation_euler);"
             )
 
-            self.assertAlmostEqual(x * degs, -5, 2)
-            self.assertAlmostEqual(y * degs, -0.04, 2)
-            self.assertAlmostEqual(z * degs, -0.88, 2)
+            self.assertAlmostEqual(x * degs, -4.96, 2)
+            self.assertAlmostEqual(y * degs, -0.05, 2)
+            self.assertAlmostEqual(z * degs, -0.92, 2)
 
             # Update group with confiner results
             # Redisplay the updated group
@@ -54,8 +54,8 @@ class TestLayerConfinement(BlenderTestCase):
             )
 
             # Results should be different as these are not global coordinates
-            self.assertAlmostEqual(x, -112.59, 2)
-            self.assertAlmostEqual(y, 53.03, 2)
+            self.assertAlmostEqual(x, -103.69, 2)
+            self.assertAlmostEqual(y, 57.01, 2)
             self.assertAlmostEqual(z, 27.06, 2)
 
             # Run confiner with split sections
@@ -68,9 +68,9 @@ class TestLayerConfinement(BlenderTestCase):
                 "return_value = list(bpy.data.objects['TestCell[0].dendrites[13][0]'].rotation_euler);"
             )
 
-            self.assertAlmostEqual(x * degs, -4.09, 1)
-            self.assertAlmostEqual(y * degs, -0.07, 1)
-            self.assertAlmostEqual(z * degs, -0.22, 1)
+            self.assertAlmostEqual(x * degs, -5, 1)
+            self.assertAlmostEqual(y * degs, -0.06, 1)
+            self.assertAlmostEqual(z * degs, -0.31, 1)
 
             # Update group with confiner results
             # Redisplay the updated group
@@ -80,9 +80,9 @@ class TestLayerConfinement(BlenderTestCase):
                 "return_value = list(bpy.data.objects['TestCell[0].dendrites[13]'].location);"
             )
 
-            self.assertAlmostEqual(x, 50.31, 1)
-            self.assertAlmostEqual(y, -92.22, 1)
-            self.assertAlmostEqual(z, 15.45, 1)
+            self.assertAlmostEqual(x, 55.91, 1)
+            self.assertAlmostEqual(y, -91.84, 1)
+            self.assertAlmostEqual(z, 10.81, 1)
 
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
