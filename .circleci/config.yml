@@ -42,6 +42,7 @@ jobs:
             $REPO/blender/3.5/python/bin/python3.10 -m pip install coverage
             ln -s $REPO/blenderneuron $REPO/blender/3.5/scripts/addons/blenderneuron
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
+            xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
