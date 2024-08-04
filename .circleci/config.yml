@@ -40,7 +40,7 @@ jobs:
       - run:
           command: |
             export REPO=$(pwd)
-            export PATH=$PATH:$REPO/blender
+            export PATH=$PATH:$REPO/blender/
             export PYTHONPATH=$REPO/
             $REPO/blender/3.5/python/bin/python3.10 -m pip install coverage
             ln -s $REPO/blenderneuron $REPO/blender/3.5/scripts/addons/blenderneuron
