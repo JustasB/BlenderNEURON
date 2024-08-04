@@ -28,6 +28,10 @@ jobs:
       # Checkout the code as the first step.
       - checkout
       - run:
+          command: |
+            pwd
+            ls -lah
+      - run:
           command: pip install neuron coverage codecov
       - run:
           command: sudo apt update && sudo apt-get install -y libglu1-mesa libxi6 libxrender1
