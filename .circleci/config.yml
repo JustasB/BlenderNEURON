@@ -44,7 +44,6 @@ jobs:
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
       - run:
           command: |
-            export COVERAGE_PROCESS_START=.coveragerc
             xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
       - codecov/upload:
           file: .coverage
