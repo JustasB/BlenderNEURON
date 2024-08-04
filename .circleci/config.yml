@@ -45,11 +45,7 @@ jobs:
             $REPO/blender/3.5/python/bin/python3.10 -m pip install coverage
             ln -s $REPO/blenderneuron $REPO/blender/3.5/scripts/addons/blenderneuron
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
-      - run:
-          command: |
             python -c "from tests import check_blender_can_run as t; t()"
-      - run:
-          command: |
             xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
       - codecov/upload:
           file: .coverage
