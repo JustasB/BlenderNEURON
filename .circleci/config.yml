@@ -30,7 +30,7 @@ jobs:
       - run:
           command: pip install neuron coverage codecov
       - run:
-          command: sudo apt-get install -y libglu1-mesa libxi6 libxrender1
+          command: sudo apt update && sudo apt-get install -y libglu1-mesa libxi6 libxrender1
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
