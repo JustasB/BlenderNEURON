@@ -31,7 +31,7 @@ jobs:
       - run:
           command: pip install neuron coverage codecov
       - run:
-          command: \
+          command: |
             sudo apt update 
             sudo apt-get install -y libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0
             sudo apt -y upgrade
