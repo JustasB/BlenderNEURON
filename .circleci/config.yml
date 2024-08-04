@@ -28,15 +28,20 @@ jobs:
       # Checkout the code as the first step.
       - checkout
       - run:
-          command: |
-            pwd
-            ls -lah
-      - run:
           command: pip install neuron coverage codecov
       - run:
-          command: sudo apt update && sudo apt-get install -y libglu1-mesa libxi6 libxrender1
+          command: sudo apt update && sudo apt-get install -y libglu1-mesa libxi6 libxrender1 xvfb
       - run:
           command: python scripts/install_blender.py
+      - run:
+          command: |
+            export REPO=$(pwd)
+            export PATH=$PATH:$REPO/blender/
+            export PYTHONPATH=$REPO/
+            export COVERAGE_PROCESS_START=.coveragerc
+            $REPO/blender/3.5/python/bin/python3.10 -m pip install coverage
+            ln -s $REPO/blenderneuron $REPO/blender/3.5/scripts/addons/blenderneuron
+            $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
