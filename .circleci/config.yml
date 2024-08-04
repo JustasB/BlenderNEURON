@@ -31,6 +31,8 @@ jobs:
           command: pip install neuron coverage codecov
       - run:
           command: sudo apt update && sudo apt-get install -y libglu1-mesa libxi6 libxrender1
+      - run:
+          command: python scripts/install_blender.py
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
