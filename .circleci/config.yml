@@ -10,6 +10,7 @@ version: 2.1
 orbs:
   # See the Python orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@2.1.1
+  codecov: codecov/codecov@3.2.2
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
@@ -38,11 +39,15 @@ jobs:
             export REPO=$(pwd)
             export PATH=$PATH:$REPO/blender/
             export PYTHONPATH=$REPO/
-            export COVERAGE_PROCESS_START=.coveragerc
             $REPO/blender/3.5/python/bin/python3.10 -m pip install coverage
             ln -s $REPO/blenderneuron $REPO/blender/3.5/scripts/addons/blenderneuron
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
+      - run:
+          command: |
+            export COVERAGE_PROCESS_START=.coveragerc
             xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
+      - codecov/upload:
+          file: .coverage
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
