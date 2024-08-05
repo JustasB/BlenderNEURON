@@ -6,8 +6,8 @@ Tests are run automatically using a Circle CI pipeline
 
 Tests can also be run locally on your device to test functions when updating. Below are the requirements for that.
 
-# Running locally
-## Requirements:
+## Running locally
+### Requirements:
 - Python 3.7
 - Blender in PATH ('Blender' command should work)
     - Instructions by OS: https://docs.blender.org/manual/en/latest/advanced/command_line/index.html
@@ -17,7 +17,7 @@ Tests can also be run locally on your device to test functions when updating. Be
 - Blender installed with BlenderNEURON add-on
 - coverage installed
 
-## Instructions:
+### Instructions:
 - download repository
 in terminal
 - `cd BlenderNEURON`
