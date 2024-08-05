@@ -1,10 +1,10 @@
 Under Construction...
 
 # Unit Test Files
-This folder contains unit tests
-Tests are run automatically using a Circle CI pipeline
+This folder contains unit tests.  
+Tests are run automatically using a Circle CI pipeline.
 
-Tests can also be run locally on your device to test functions when updating. Below are the requirements for that.
+Tests can also be run locally on your device to test functions when updating add-on. Below are the requirements for that.
 
 ## Running locally
 ### Requirements:
@@ -18,11 +18,12 @@ Tests can also be run locally on your device to test functions when updating. Be
 - coverage installed
 
 ### Instructions:
-- download repository
-in terminal
+- Download repository
+- In terminal:
 - `cd BlenderNEURON`
 - `sh test.sh`  
-This script also checks code coverage
+
+This script also checks code coverage.  
 During test execution you should see movement within the Blender window. Printed messages
 are normal. At the end there should be coverage table, and above it it should say
 `Ran N tests in YY.ZZs`. An `OK` indicates all unit tests ran successfully.
