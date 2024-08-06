@@ -1,4 +1,51 @@
 Getting Started 
 =========================================
 
-Under Construction
+Under Construction..
+
+Below are text and video tutorials for BlenderNEURON
+
+See `Installation <installation.html>` for help on steps 2-4
+
+***********************
+Editing & Saving Cells
+***********************
+
+The following video walks through the steps of how to edit and save cells in Blender.
+
+.. raw:: HTML
+
+    (link pending)
+
+**Text Guide**
+
+1. Load your model in NEURON and start BlenderNEURON
+ - sample of code to run in terminal:
+  .. code-block:: python
+
+     python
+     from neuron import h, gui
+     h.load_file('path/to/SampleCell.hoc')
+     cell1 = h.SampleCell()
+     from blenderneuron import neuronstart
+2. Load Blender with the BlenderNEURON add-on
+ - BlenderNEURON tab should be visible in sidebar (image pending)
+
+*************
+Visualization
+*************
+
+The following video walks through the steps of how to visualize cell morphology in Blender and create a video of propagating action potentials.
+
+.. raw:: HTML
+
+    <iframe width="100%" height="415" src="https://www.youtube.com/embed/rgc794sDPYk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+**Text Guide**
+
+1. ...
+
+***************
+Adding Synapses
+***************
+...
