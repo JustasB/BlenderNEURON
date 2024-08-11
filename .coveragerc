@@ -12,7 +12,8 @@ omit =
     blenderneuron/blender/utils.py
 
 [report]
-fail_under = 93 # minimum coverage % required to pass CI build
+# minimum coverage % required to pass CI build
+fail_under = 93
 
 # Regexes for lines to exclude from consideration
 exclude_lines =
