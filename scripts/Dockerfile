@@ -1,17 +1,24 @@
 # Start with a compiled NEURON + Python 3
-FROM jbirgio/neuron:7.8
+FROM ubuntu:20.04
 
 COPY *.py /
 COPY link_addon.sh /
 COPY start_vnc.sh /
 
-RUN echo Getting Blender && \
-    python install_blender.py
-
-RUN rm blender.tar.bz2
-
 # Install Blender dependencies
-RUN apt-get install -y libglu1 libxi6 libxrender1
+# RUN apt-get update && apt-get install -y libglu1 libxi6 libxrender1
+RUN apt-get update && apt-get install -y curl libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0
+RUN apt-get upgrade -y
+RUN curl -L -o miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py37_23.1.0-1-Linux-x86_64.sh
+SHELL ["bash", "-c"]
+RUN chmod +x miniconda.sh && ./miniconda.sh -b -p $HOME/miniconda && source $HOME/miniconda/bin/activate && conda init --all
+ENV PATH=$PATH:/root/miniconda/bin/
+
+RUN echo Getting Blender && \
+    python install_blender.py && \
+    rm blender.tar.xz
+
+
 
 # Add blender to path
 ENV PATH=$PATH:/blender/
@@ -20,14 +27,10 @@ ENV PATH=$PATH:/blender/
 ENV PYTHONPATH=/BlenderNEURON
 
 # Code coverage and debugging packages for NEURON python
-RUN pip install pydevd coverage
+RUN pip install pydevd-pycharm coverage neuron pydevd-pycharm
 
-# Install pip and some packages for Blender python
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    /blender/2.79/python/bin/python3.5m get-pip.py && \
-    rm get-pip.py && \
-    /blender/2.79/python/bin/pip install coverage pydevd
-
+# Install packages for Blender python
+RUN /blender/3.5/python/bin/python3.10 -m pip install coverage pydevd-pycharm
 ENV COVERAGE_PROCESS_START=.coveragerc
 
 #Expose port 5920 to view display using VNC Viewer
