@@ -1,6 +1,5 @@
 # .coveragerc to control coverage.py
 [run]
-fail_under = 93
 branch = True
 parallel = True
 source = blenderneuron
@@ -13,6 +12,8 @@ omit =
     blenderneuron/blender/utils.py
 
 [report]
+fail_under = 93 # minimum coverage % required to pass CI build
+
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Have to re-enable the standard pragma
