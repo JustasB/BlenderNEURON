@@ -1,11 +1,8 @@
 Installation
 =========================================
 
-*****
-Steps
-*****
-
-Follow the installation steps in the `Download Page <https://blenderneuron.org/download/>`_ or watch the install video below.
+Follow the installation steps or watch the installation video below.
+Download link found on `Download Page <https://blenderneuron.org/download/>`_.
 
 ******************
 Installation Video
@@ -14,3 +11,23 @@ Installation Video
 .. raw:: HTML
 
     <iframe width="100%" height="415" src="https://www.youtube.com/embed/XBgnObCcxpk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+*****
+Steps
+*****
+
+Ensure that `Requirements <requirements.html>`_ are met.
+
+ 1. Download the BlenderNEURON ZIP file from `Download Page <https://blenderneuron.org/download/>`_
+ 2. Extract the BlenderNEURON ZIP file into your model’s directory
+ 3. Start BlenderNEURON for NEURON
+  - Load your model in NEURON
+  - In NEURON Python run 'from blenderneuron import neuronstart'
+  - BlenderNEURON should be running within NEURON
+ 4. Start BlenderNEURON for Blender:
+  - Install Blender 2.79: Linux | Mac | Windows
+  - Open Blender 2.79. Then File > User Preferences > Add-ons > Install Add-on From File
+  - Point to the ZIP file
+  - Check the box next to ‘Import-Export: BlenderNEURON’
+  - Click Save User Settings
+  - BlenderNEURON tab should be visible on the left side of Blender

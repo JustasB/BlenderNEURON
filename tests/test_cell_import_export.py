@@ -192,9 +192,9 @@ class TestCellImportExport(BlenderTestCase):
             soma_emission_start, soma_emission_end,  = bcn.client.run_command(
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
-                "start_emit = mats['TestCell[0].soma'].emit;"
+                "start_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "bpy.context.scene.frame_set(5);"
-                "end_emit = mats['TestCell[0].soma'].emit;"
+                "end_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
 
@@ -216,9 +216,9 @@ class TestCellImportExport(BlenderTestCase):
             dend_emission_start, dend_emission_end,  = bcn.client.run_command(
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
-                "start_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "start_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "bpy.context.scene.frame_set(5);"
-                "end_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "end_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
 
@@ -251,9 +251,9 @@ class TestCellImportExport(BlenderTestCase):
             soma_emission_start, soma_emission_end,  = bcn.client.run_command(
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
-                "start_emit = mats['TestCell[0].soma'].emit;"
+                "start_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "bpy.context.scene.frame_set(5);"
-                "end_emit = mats['TestCell[0].soma'].emit;"
+                "end_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
 
@@ -275,9 +275,9 @@ class TestCellImportExport(BlenderTestCase):
             dend_emission_start, dend_emission_end,  = bcn.client.run_command(
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
-                "start_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "start_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "bpy.context.scene.frame_set(5);"
-                "end_emit = mats['TestCell[0].dendrites[0]'].emit;"
+                "end_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
 

@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-concurrency = multiprocessing
+parallel = True
 source = blenderneuron
 command_line = tests/test_coverage.py
 omit =

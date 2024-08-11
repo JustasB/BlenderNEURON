@@ -1,8 +1,6 @@
 #!/bin/bash
-# Uses the pre-build image with NEURON and Blender 2.79
-echo "Getting latest BlenderNEURON docker image (needs to happen only once)..."
-docker pull jbirgio/blenderneuron:latest
-
+set -e
+./build.sh
 
 # -v -> Links the [repo] folder to container's /BlenderNEURON folder
 # -p -> Exposes the default VNC port
@@ -16,7 +14,7 @@ container_id=$(docker run \
     -v $(readlink -f ../):/BlenderNEURON \
     -p 5920:5920 \
     --detach \
-    jbirgio/blenderneuron:latest)
+    blenderneuron:latest)
 
 # Wait until the container has started and setup the VNC server
 echo "Starting VNC client..."
@@ -26,6 +24,7 @@ while ! nc -z localhost 5920; do
 done
 
 echo "VNC connected"
+sleep 5
 echo " -- -- -- -- -- -- -- Quick Start Guide -- -- -- -- -- -- -- -- -- -- -- -- --"
 echo "The basic steps are:"
 echo " 1) Start NEURON"
@@ -62,7 +61,7 @@ echo " -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
 
 # Assumes Ubuntu, where vinagre VNC client is pre-installed
 # Change the line below to use your own VNC client
-vinagre --vnc-scale :5920
+vinagre --vnc-scale 0.0.0.0:5920
 
 echo "Stopping BlenderNEURON container"
 docker stop -t 0 $container_id
