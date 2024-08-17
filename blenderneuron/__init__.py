@@ -2,7 +2,7 @@ bl_info = {
     "name": "BlenderNEURON",
     "description": "A Blender GUI for NEURON simulator",
     "author": "Justas Birgiolas",
-    "version": (2, 0),
+    "version": (2, 1, 0),
     "blender": (3, 1, 0),
     "location": "3D View > Right Sidebar > BlenderNEURON",
     "wiki_url": "BlenderNEURON.org",
