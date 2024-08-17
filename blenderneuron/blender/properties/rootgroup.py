@@ -70,9 +70,9 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         default=0,
         max=3,
         name="Layer height min fraction",
-        description="The fraction of distance between the two layers where the confinement"
-                    "bfegins. 0: as close to the starting layer. 1: as close to the end layer. Negative"
-                    "values will start confinement below the starting layer. >1 values will end the confinement"
+        description="The fraction of distance between the two layers where the confinement "
+                    "begins. 0: as close to the starting layer. 1: as close to the end layer. Negative "
+                    "values will start confinement below the starting layer. >1 values will end the confinement "
                     "above the end layer"
     )
 
@@ -81,9 +81,9 @@ class LayerConfinerProperties(PropertyGroup, BlenderNodeClass):
         default=0.5,
         max=3,
         name="Layer height max fraction",
-        description="The fraction of distance between the two layers where the confinement"
-                    "stops. 0: as close to the starting layer. 1: as close to the end layer. Negative"
-                    "values will start confinement below the starting layer. >1 values will end the confinement"
+        description="The fraction of distance between the two layers where the confinement "
+                    "stops. 0: as close to the starting layer. 1: as close to the end layer. Negative "
+                    "values will start confinement below the starting layer. >1 values will end the confinement "
                     "above the end layer"
     )
 
