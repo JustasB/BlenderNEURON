@@ -478,7 +478,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         min=0,
         get=get_prop("simplification_epsilon"),
         set=set_prop("simplification_epsilon"),
-        description="Co-linearity deviations of this amount will be"
+        description="Collinearity deviations of this amount will be"
                     " simplified to the nearest line segment. Units are same as the"
                     " units of the recording variable (e.g. mV for 'v'). 0 will remove"
                     " only completely co-linear activity points (e.g. lossless)"
