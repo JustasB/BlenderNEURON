@@ -36,7 +36,7 @@ Importing Cells
  
  .. figure:: files_static/sidebar.png
      :alt: Sidebar
-     :width: 820
+     :width: 800
 
 5. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
 
@@ -45,6 +45,7 @@ Editing and Saving Cells
 ************************
 Under Construction...
 
+1. For help Navigating Blender Controls: ...
 3. To export changes to NEURON after editing cell morphology/position in Blender:
  - Press 'Update Groups with View Changes' under 'Import / Export'
  - Then Press 'Export Cell Groups to NEURON' under 'Import / Export'
@@ -54,7 +55,7 @@ Adding Cells to Groups
 **********************
 
 1. Expand 'Cell Groups' and 'Cells in Group'
-2. Add groups with the '+' on the right of the group names
+2. Add groups with the '+' to the right of the group names
 3. Check off cells under 'Cells in Group' to add them to the currently selected group
  - A cell can only be in one group at a time
 
@@ -70,17 +71,32 @@ Coloring Groups
 ******************************
 Visualizing Cell Model Voltage
 ******************************
-...
+1. Have your model with activity loaded in NEURON
+2. Select Cell Group to animate under 'Cell Groups'
+3. Expand 'Cell Group Options'
+4. Check off 'Record Activity'
+ - Activity will be recorded next time the cells are imported
+5. Choose Recording Settings
+ - Set start and stop recordings to capture activity in your simulation
+ - Select variable to record (v/voltage by default)
+ - Select 'Sampling Period'; how many milliseconds between samples collected of the variable
+ - Select 'Frames per Milliseconds', the number of frames of animation will be taken up by each millisecond of NEURON activity
+ - Set colors to correspond with the variable low and high values
+6. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
+7. Scrub the timeline on the bottom to see animation
+
 ****************************
 Adding Synapses by Proximity
 ****************************
 
-1. Load a model with at least 2 cells
+1. Have at least 2 cells instantiated in NEURON
 2. Add cells that will form synapses to different groups
 3. Expand 'Form Synapses'
- - This section will appear when you have at least two cell groups
+ - This section will appear when you have at least two groups
 4. Select groups for the 'Source' (presynaptic) and 'Destination' (postsynaptic) cells.
  - Must be different groups
+5. Select synaptic mechanism next to 'Synapse'
+ - ...
 
 ******************************
 Confining Cells between Layers
