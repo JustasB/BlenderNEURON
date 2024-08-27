@@ -1,6 +1,6 @@
 Getting Started 
 =========================================
-
+Under Construction...
 Below are text guides for BlenderNEURON
 
 Video tutorials are available on the `Tutorials Page <https://blenderneuron.org/tutorials/>`_.
@@ -33,7 +33,7 @@ Importing Cells
 
 3. Start Blender with BlenderNEURON add-on
 4. Navigate to the BlenderNEURON tab in the sidebar
- 
+ - Press 'N' to toggle sidebar 
  .. figure:: files_static/sidebar.png
      :alt: Sidebar
      :width: 800
@@ -45,7 +45,11 @@ Editing and Saving Cells
 ************************
 Under Construction...
 
-1. For help Navigating Blender Controls: ...
+1. With cells imported, left click on a cell in the 3D view to select (like other Blender objects)
+ - For help with navigating Blender: `Blender Fundamentals Videos <https://www.youtube.com/watch?v=MF1qEhBSfq4&list=PLa1F2ddGya_-UvuAqHAksYnB0qL9yWDO6&pp=iAQB>`_ or `Blender Manual <https://docs.blender.org/manual/en/3.5/editors/3dview/navigate/navigation.html>`_
+2. To select and rotate individual sections:
+ - under 'Cell Group Options', select 'Interact with Each:' 'Section'
+ - Import cells again
 3. To export changes to NEURON after editing cell morphology/position in Blender:
  - Press 'Update Groups with View Changes' under 'Import / Export'
  - Then Press 'Export Cell Groups to NEURON' under 'Import / Export'
@@ -72,7 +76,7 @@ Coloring Groups
 Visualizing Cell Model Voltage
 ******************************
 1. Have your model with activity loaded in NEURON
-2. Select Cell Group to animate under 'Cell Groups'
+2. Select Cell Group to animate
 3. Expand 'Cell Group Options'
 4. Check off 'Record Activity'
  - Activity will be recorded next time the cells are imported
@@ -93,17 +97,28 @@ Adding Synapses by Proximity
 2. Add cells that will form synapses to different groups
 3. Expand 'Form Synapses'
  - This section will appear when you have at least two groups
-4. Select groups for the 'Source' (presynaptic) and 'Destination' (postsynaptic) cells.
+4. Select groups for the 'Source' (presynaptic) and 'Destination' (postsynaptic) cells
  - Must be different groups
-5. Select synaptic mechanism next to 'Synapse'
- - ...
+5. Select synaptic mechanism next to 'Synapse', if you have additional mechanisms loaded in NEURON
+ - By default, NEURON lets you use 'ExpSyn' mechanism
+ - For help on compiling mod files to add mechanisms: `Mod Files <https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&sid=2c672c89ff0c1c17a90f35d3c44696d0>`_
+6. Select sections that will form synapses next to 'Sections:'
+ - Surround characters with asterisks (\*example\*) to include all sections with those characters in the name
+7. Press 'Find Synapse Locations' to display locations
+8. Create the synapses in NEURON by pressing 'Create Synapses'
+9. Or save synapses to a JSON file by pressing 'Save Synapse Set to JSON File'
 
 ******************************
 Confining Cells between Layers
 ******************************
 
-1. Import at least two cells
+1. Import at least one cell
 2. Import or create mesh object(s) to confine the cells between
 3. Expand 'Confine Between Layers'
- - Section will appear once at least two cells are imported
-...
+ - Section will appear once at least one cells is imported
+4. Select objects for the confinement 'Start Layer' and 'End Layer'
+5. Next to 'Name Contains:', select sections that will be confined
+ - Surround characters with asterisks to confine all sections with those characters
+6. To confine the sections between the layers, press 'Confine'
+7. Save changes in Blender by pressing 'Update Groups with Confinement Results'
+8. Save confinement results to NEURON by pressing 'Export Cell Groups to NEURON' under 'Import / Export'
