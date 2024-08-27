@@ -32,7 +32,7 @@ Importing Cells
  - press 'N' to toggle sidebar
  .. figure:: files_static/sidebar.png
      :alt: Sidebar
-     :width: 800
+     :width: 600
 
 6. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
  .. figure:: files_static/importcells.png
