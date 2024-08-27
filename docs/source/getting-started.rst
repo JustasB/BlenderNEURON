@@ -19,40 +19,48 @@ Importing Cells
      from neuron import h, gui
      h.load_file('path/to/SampleCell.hoc')
      cell1 = h.SampleCell()
-     cell2 = h.SampleCell()
-     cell2.position(0, 200, 0)
+ - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to follow along
 
 2. In NEURON GUI, open Graph > Shape Plot, to ensure cell is loaded correctly
  .. figure:: files_static/shapeplot.png
      :alt: Shape Plot
-     :width: 400
-3. Start BlenderNEURON with:
- ::
+     :width: 300
+3. Start BlenderNEURON in NEURON/Python by running:
+ .. code-block:: python
 
-     from blenderneuron import neuronstart
+    from blenderneuron import neuronstart
 
-3. Start Blender with BlenderNEURON add-on
-4. Navigate to the BlenderNEURON tab in the sidebar
- - Press 'N' to toggle sidebar 
+4. Start Blender with the BlenderNEURON add-on
+5. Navigate to the BlenderNEURON tab in the sidebar
+ - press 'N' to toggle sidebar
  .. figure:: files_static/sidebar.png
      :alt: Sidebar
      :width: 800
 
-5. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
+6. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
+ .. figure:: files_static/importcells.png
+     :alt: Import Cells
+     :width: 200
 
 ************************
 Editing and Saving Cells
 ************************
 Under Construction...
 
-1. With cells imported, left click on a cell in the 3D view to select (like other Blender objects)
+1. With cells imported, left click a cell in the 3d view to select it (like other Blender objects)
  - For help with navigating Blender: `Blender Fundamentals Videos <https://www.youtube.com/watch?v=MF1qEhBSfq4&list=PLa1F2ddGya_-UvuAqHAksYnB0qL9yWDO6&pp=iAQB>`_ or `Blender Manual <https://docs.blender.org/manual/en/3.5/editors/3dview/navigate/navigation.html>`_
+ - g to move
+ - r to rotate
+ - s to scale
 2. To select and rotate individual sections:
  - under 'Cell Group Options', select 'Interact with Each:' 'Section'
+ .. figure:: files_static/bysection.png
+     :alt: Import by Section
+     :width: 200
  - Import cells again
 3. To export changes to NEURON after editing cell morphology/position in Blender:
  - Press 'Update Groups with View Changes' under 'Import / Export'
- - Then Press 'Export Cell Groups to NEURON' under 'Import / Export'
+ - Then press 'Export Cell Groups to NEURON' under 'Import / Export'
 
 **********************
 Adding Cells to Groups
@@ -63,9 +71,9 @@ Adding Cells to Groups
 3. Check off cells under 'Cells in Group' to add them to the currently selected group
  - A cell can only be in one group at a time
 
-***************
-Coloring Groups
-***************
+********************
+Changing Cell Colors
+********************
 
 1. Select the Cell Group you would like to change display settings for
 2. Expand 'Cell Group Options'
@@ -85,7 +93,7 @@ Visualizing Cell Model Voltage
  - Select variable to record (v/voltage by default)
  - Select 'Sampling Period'; how many milliseconds between samples collected of the variable
  - Select 'Frames per Milliseconds', the number of frames of animation will be taken up by each millisecond of NEURON activity
- - Set colors to correspond with the variable low and high values
+ - Set colors to correspond with the variable low and high values to include your simulation activity
 6. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
 7. Scrub the timeline on the bottom to see animation
 
