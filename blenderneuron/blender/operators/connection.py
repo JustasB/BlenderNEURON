@@ -42,7 +42,7 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
         # Performing task servicing during modal operator calls is the recommended way to asynchronously update scenes
         self.node.service_thread_continue = False
         wm = context.window_manager
-        self.modal_timer = wm.event_timer_add(self.modal_timer_period, context.window)
+        self.modal_timer = wm.event_timer_add(self.modal_timer_period, window=context.window)
         wm.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 

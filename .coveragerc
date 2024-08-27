@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-concurrency = multiprocessing
+parallel = True
 source = blenderneuron
 command_line = tests/test_coverage.py
 omit =
@@ -12,6 +12,9 @@ omit =
     blenderneuron/blender/utils.py
 
 [report]
+# minimum coverage % required to pass CI build
+fail_under = 93
+
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Have to re-enable the standard pragma

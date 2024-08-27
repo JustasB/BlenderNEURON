@@ -14,10 +14,11 @@ from bpy.types import (Operator,
 
 
 class CellListWidget(AbstractBlenderNEURONPanel, UIList):
+    bl_idname = 'BLENDERNEURON_UL_CellListWidget'
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
-        layout.label(item.name)
+        layout.label(text=item.name)
 
         value = self.filter_name
 
@@ -33,6 +34,8 @@ class CellListWidget(AbstractBlenderNEURONPanel, UIList):
 
 
 class CellGroupListWidget(UIList):
+    bl_idname = 'BLENDERNEURON_UL_CellGroupListWidget'
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "selected", text="")
         layout.prop(item, "name_editable", text="", emboss=False)
@@ -42,7 +45,7 @@ class CellGroupListWidget(UIList):
 
 
 class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_CellGroups'
+    bl_idname = 'BLENDERNEURON_PT_CellGroupsPanel'
     bl_label = "Cell Groups"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -60,18 +63,18 @@ class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
 
         row = self.layout.row()
 
-        row.template_list("CellGroupListWidget", "",
+        row.template_list("BLENDERNEURON_UL_CellGroupListWidget", "",
                           scene.BlenderNEURON, "groups",
                           scene.BlenderNEURON, "groups_index",
                           rows=3)
 
         col = row.column(align=True)
-        col.operator("blenderneuron.cell_group_add", icon='ZOOMIN', text="")
-        col.operator("blenderneuron.cell_group_remove", icon='ZOOMOUT', text="")
+        col.operator("blenderneuron.cell_group_add", icon='ZOOM_IN', text="")
+        col.operator("blenderneuron.cell_group_remove", icon='ZOOM_OUT', text="")
 
 
 class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_GroupCells'
+    bl_idname = 'BLENDERNEURON_PT_GroupCellsPanel'
     bl_label = "Cells in Group"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -85,22 +88,22 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
         self.layout.operator("blenderneuron.get_cell_list_from_neuron", text="Refresh NEURON Cell List",
                              icon="FILE_REFRESH")
 
-        self.layout.template_list("CellListWidget", "",
+        self.layout.template_list("BLENDERNEURON_UL_CellListWidget", "",
                                   group, "root_entries",
                                   group, "root_entries_index",
                                   rows=5)
 
-        col = self.layout.split(0.33)
+        col = self.layout.split(factor=0.33)
         col.operator("blenderneuron.select_all_cells")
         col.operator("blenderneuron.unselect_all_cells")
         col.operator("blenderneuron.invert_cell_selection")
 
         self.layout.operator("blenderneuron.save_active_group_to_file", text="Save Group Cells to File",
-                             icon="FILESEL")
+                             icon="EXPORT")
 
 
 class ImportPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_Import'
+    bl_idname = 'BLENDERNEURON_PT_ImportPanel'
     bl_label = "Import / Export"
 
     @classmethod
@@ -124,7 +127,7 @@ class ImportPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_GroupSettings'
+    bl_idname = 'BLENDERNEURON_PT_GroupSettingsPanel'
     bl_label = "Cell Group Options"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -145,120 +148,108 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col = self.layout
         col.label(text="Interaction Settings:")
         col = self.layout.box()
-        col.label('Interact with Each:')
+        col.label(text='Interact with Each:')
         col.row().prop(group, "interaction_granularity", text="Interact", expand=True)
 
         col = self.layout
         col.label(text="Section Display Settings:")
         box = col.box().column()
-        row = box.split(percentage=0.5)
-        row.label("Sections as Lines")
+        row = box.split(factor=0.5)
+        row.label(text="Sections as Lines")
         row.prop(group, "as_lines", text='')
 
         if not group.as_lines:
             box = box.column()
             box.enabled = not group.as_lines
-            col = box.split(percentage=0.5)
-            col.label('Init. Color:')
-            col.prop(group.node_group.color_ramp_material.diffuse_ramp.elements[0], "color", text='')
+            col = box.split(factor=0.5)
+            col.label(text='Init. Color:')
+            col.prop(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0], "color", text='')
 
-            col = box.split(percentage=0.5)
-            col.label('Init. Brightness:')
+            col = box.split(factor=0.5)
+            col.label(text='Init. Brightness:')
             col.prop(group, "default_brightness", text='')
 
-            col = box.split(percentage=0.5)
-            col.label('Smooth Curves:')
+            col = box.split(factor=0.5)
+            col.label(text='Smooth Curves:')
             col.prop(group, "smooth_sections", text='')
 
-            col = box.split(percentage=0.5)
+            col = box.split(factor=0.5)
             col.enabled = group.smooth_sections
-            col.label('Subdivisions:')
+            col.label(text='Subdivisions:')
             col.prop(group, "segment_subdivisions", text='')
 
-            col = box.split(percentage=0.5)
-            col.label('N-gon Sides:')
+            col = box.split(factor=0.5)
+            col.label(text='N-gon Sides:')
             col.prop(group, "circular_subdivisions", text='')
-
-            # col = box.split(percentage=0.5)
-            # col.label('Spherical Somas:')
-            # col.prop(group, "spherize_soma_if_DeqL", text='')
 
         col = self.layout
         col.separator()
         col.label(text="Recording Settings:")
         col = self.layout.box().column()
-        row = col.split(percentage=0.5)
-        row.label("Record Activity")
+        row = col.split(factor=0.5)
+        row.label(text="Record Activity")
         row.prop(group, "record_activity", text='')
 
         if group.record_activity:
             col = col.column()
             col.enabled = group.record_activity
-            col.label('Record from Each:')
+            col.label(text='Record from Each:')
             col.row().prop(group, "recording_granularity", expand=True)
             col.separator()
 
-            row = col.split(percentage=0.5)
-            row.label('Start Recording:')
+            row = col.split(factor=0.5)
+            row.label(text='Start Recording:')
             row.prop(group, "recording_time_start", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Stop Recording:')
+            row = col.split(factor=0.5)
+            row.label(text='Stop Recording:')
             row.prop(group, "recording_time_end", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Record:')
+            row = col.split(factor=0.5)
+            row.label(text='Record:')
             row.prop(group, "record_variable", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Sampling Period:')
+            row = col.split(factor=0.5)
+            row.label(text='Sampling Period:')
             row.prop(group, "recording_period", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Frames per Millisecond:')
+            row = col.split(factor=0.5)
+            row.label(text='Frames per Millisecond:')
             row.prop(group, "frames_per_ms", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Simplification Tolerance:')
+            row = col.split(factor=0.5)
+            row.label(text='Simplification Tolerance:')
             row.prop(group, "simplification_epsilon", text="")
 
 
-            row = col.split(percentage=0.5)
-            row.label('Animate Brightness:')
+            row = col.split(factor=0.5)
+            row.label(text='Animate Brightness:')
             row.prop(group, "animate_brightness", text="")
 
-            row = col.split(percentage=0.5)
-            row.label('Animate Color:')
+            row = col.split(factor=0.5)
+            row.label(text='Animate Color:')
             row.prop(group, "animate_color", text="")
 
             if group.animate_color:
                 col.separator()
                 col = col.column()
-                col.template_color_ramp(group.node_group.color_ramp_material, "diffuse_ramp", expand=True)
+                col.template_color_ramp(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"], "color_ramp", expand=True)
                 col.separator()
 
             col.separator()
-            row = col.split(percentage=0.50)
-            row.label('Variable Low:')
-            row.label('High:')
-            row = col.split(percentage=0.50)
+            row = col.split(factor=0.50)
+            row.label(text='Variable Low:')
+            row.label(text='High:')
+            row = col.split(factor=0.50)
             row.prop(group, "animation_range_low", text="")
             row.prop(group, "animation_range_high", text="")
 
 
 
-        # col = self.layout
-        # col.separator()
-        # col.label(text="Connectivity Settings:")
-        # col = self.layout.box()
-        # row = col.split(percentage=0.5)
-        # row.label("Import Synapses")
-        # row.prop(group, "import_synapses", text='')
-
-
 class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_ConfineBetweenLayers'
+    bl_idname = 'BLENDERNEURON_PT_ConfineBetweenLayersPanel'
     bl_label = "Confine Between Layers"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -269,61 +260,61 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
 
         settings = context.scene.BlenderNEURON.group.layer_confiner_settings
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Start Layer:")
         split.prop(settings, "start_mesh", text="")
 
         if settings.start_mesh is not None and settings.start_mesh.type != 'MESH':
-            self.layout.label("Start layer must be a 'MESH' object", icon='ERROR')
+            self.layout.label(text="Start layer must be a 'MESH' object", icon='ERROR')
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="End Layer:")
         split.prop(settings, "end_mesh", text="")
 
         if settings.end_mesh is not None and settings.end_mesh.type != 'MESH':
-            self.layout.label("End layer must be a 'MESH' object", icon='ERROR')
+            self.layout.label(text="End layer must be a 'MESH' object", icon='ERROR')
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Name Contains:")
 
         row = split.row(align=True)
         row.prop(settings, "moveable_sections_pattern", text="")
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Random Seed:")
         split.prop(settings, "seed", text="")
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Min Height:")
         split.prop(settings, "height_min", text="", slider=True)
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Max Height:")
         split.prop(settings, "height_max", text="", slider=True)
 
         self.layout.separator()
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Max Angle:")
         split.prop(settings, "max_bend_angle", text="", slider=True)
 
         self.layout.separator()
 
-        split = self.layout.split(percentage=0.33)
+        split = self.layout.split(factor=0.33)
         split.label(text="Max Length:")
         split.prop(settings, "max_section_length", text="")
 
         self.layout.separator()
 
-        # split = self.layout.split(percentage=0.33)
+        # split = self.layout.split(factor=0.33)
         # split.label(text="Sim Frames:")
         # split.prop(settings, "simulation_frames", text="")
         #
-        # split = self.layout.split(percentage=0.33)
+        # split = self.layout.split(factor=0.33)
         # split.label(text="Steps/sec:")
         # split.prop(settings, "physics_steps_per_sec", text="")
         #
-        # split = self.layout.split(percentage=0.33)
+        # split = self.layout.split(factor=0.33)
         # split.label(text="Iterations/step:")
         # split.prop(settings, "physics_solver_iterations_per_step", text="")
         #
@@ -342,6 +333,8 @@ class ConfineBetweenLayersPanel(AbstractBlenderNEURONPanel, Panel):
 
 
 class SynapseSetListWidget(UIList):
+    bl_idname = 'BLENDERNEURON_UL_SynapseSetListWidget'
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "name_editable", text="", emboss=False)
 
@@ -350,7 +343,7 @@ class SynapseSetListWidget(UIList):
 
 
 class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_FormSynapses'
+    bl_idname = 'BLENDERNEURON_PT_FormSynapsesPanel'
     bl_label = "Form Synapses"
 
     @classmethod
@@ -370,14 +363,14 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
         row = self.layout.row()
 
-        row.template_list("SynapseSetListWidget", "",
+        row.template_list("BLENDERNEURON_UL_SynapseSetListWidget", "",
                           context.scene.BlenderNEURON, "synapse_sets",
                           context.scene.BlenderNEURON, "synapse_sets_index",
                           rows=4)
 
         col = row.column(align=True)
-        col.operator("blenderneuron.synapse_set_add", icon='ZOOMIN', text="")
-        col.operator("blenderneuron.synapse_set_remove", icon='ZOOMOUT', text="")
+        col.operator("blenderneuron.synapse_set_add", icon='ZOOM_IN', text="")
+        col.operator("blenderneuron.synapse_set_remove", icon='ZOOM_OUT', text="")
 
         settings = self.get_synapse_set(context)
 
@@ -392,7 +385,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         layout.prop(settings, "group_source", text="Group")
         layout.prop(settings, "section_pattern_source", text="Sections")
 
-        split = layout.split(percentage=0.33)
+        split = layout.split(factor=0.33)
         split.label(text="Is Reciprocal:")
         split.prop(settings, "is_reciprocal", text="")
 
@@ -400,7 +393,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
             layout.prop(settings, "synapse_name_source", text="Synapse")
             layout.prop(settings, "synapse_params_source")
 
-        split = layout.split(percentage=0.33)
+        split = layout.split(factor=0.33)
         split.label(text="Create Spines:")
         split.prop(settings, "create_spines", text="")
 
@@ -418,7 +411,7 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         layout.prop(settings, "synapse_params_dest")
 
         layout = self.layout
-        split = layout.split(percentage=0.33)
+        split = layout.split(factor=0.33)
         split.label(text="Use Radii:")
         split.prop(settings, "use_radius", text="")
 
@@ -436,17 +429,17 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
         layout.separator()
 
         if settings.group_source == settings.group_dest:
-            layout.label("Source and Destination groups must be different. ", icon='ERROR')
-            layout.label("Use 'Cell Groups' section to create a new group.")
+            layout.label(text="Source and Destination groups must be different. ", icon='ERROR')
+            layout.label(text="Use 'Cell Groups' section to create a new group.")
 
-        layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEWZOOM')
+        layout.operator('blenderneuron.find_synapse_locations', text='Find Synapse Locations', icon='VIEW_ZOOM')
         layout.operator('blenderneuron.create_synapses', text='Create Synapses', icon='CONSTRAINT')
-        layout.operator('blenderneuron.save_synapseset', text='Save Synapse Set to .py File', icon='FILESEL')
+        layout.operator('blenderneuron.save_synapseset', text='Save Synapse Set to JSON File', icon='EXPORT')
 
 
 
 class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
-    bl_idname = 'CUSTOM_PT_NEURON_SimulationSettings'
+    bl_idname = 'BLENDERNEURON_PT_SimulationSettingsPanel'
     bl_label = "NEURON"
 
     @classmethod
@@ -479,13 +472,13 @@ class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         col.prop(settings, "integration_method")
 
         if settings.integration_method == '0':
-            col.prop(settings, "time_step", "Time Step (ms)")
+            col.prop(settings, "time_step", text="Time Step (ms)")
 
         if settings.integration_method == '1':
             col.prop(settings, "abs_tolerance", text="Absolute tolerance")
 
         col.separator()
-        col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="POSE_DATA")
+        col.operator("blenderneuron.init_and_run_neuron", text="Init & Run", icon="ARMATURE_DATA")
         col.separator()
         col.prop(context.scene.BlenderNEURON_properties, "neuron_last_command")
         col.separator()

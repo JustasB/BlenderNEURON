@@ -96,3 +96,7 @@ class BlenderTestCase(TestCase):
 
         if error:
             raise error
+
+def check_blender_can_run():
+    with Blender():
+        pass

@@ -4,7 +4,8 @@ from blenderneuron.blender.panels import AbstractBlenderNEURONPanel
 from blenderneuron.blender.utils import blender_launched_neuron_running
 
 
-class blenderneuron_nodes_panel(AbstractBlenderNEURONPanel, bpy.types.Panel):
+class NodesPanel(AbstractBlenderNEURONPanel, bpy.types.Panel):
+    bl_idname = 'BLENDERNEURON_PT_NodesPanel'
     bl_label = "Node Status"
 
     def draw(self, context):

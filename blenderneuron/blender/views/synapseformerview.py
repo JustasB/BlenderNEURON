@@ -289,11 +289,11 @@ class SynapseFormerView(CellObjectView):
             bez_pts[1].co = pair.dest.loc
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.context.scene.objects.link(bez)
-        bpy.context.scene.update()
+        bpy.context.collection.objects.link(bez)
+        bpy.context.view_layer.update()
 
-        bez.select = True
-        bpy.context.scene.objects.active = bez
+        bez.select_set(state=True)
+        bpy.context.view_layer.objects.active = bez
 
         # Set handles to make splines straight
         bpy.ops.object.mode_set(mode='EDIT')
@@ -312,8 +312,6 @@ class SynapseFormerView(CellObjectView):
         curve.resolution_u = 0
         curve.fill_mode = 'FULL'
         curve.bevel_depth = 0.0
-        curve.show_normal_face = False
-        curve.show_handles = False
 
         return curve
 
@@ -357,7 +355,7 @@ class SynapseFormerView(CellObjectView):
                     tot_length = arc_lengths[-1]
 
                     for pt_id, pt in enumerate(spline.bezier_points):
-                        loc = (mw * pt.co).copy().freeze()
+                        loc = (mw @ pt.co).copy().freeze()
 
                         # Compute section fraction along i.e. NEURON sec(x)
                         x = arc_lengths[pt_id] / tot_length
@@ -413,7 +411,7 @@ class SynapseFormerView(CellObjectView):
 
                         # Convert to global coordinates
                         # Freeze it so it can be stored in a dict
-                        pt_glob = (mw * pt1.co.copy()).freeze()
+                        pt_glob = (mw @ pt1.co.copy()).freeze()
 
                         # Find points in the other group that are within the search
                         # distance of current point

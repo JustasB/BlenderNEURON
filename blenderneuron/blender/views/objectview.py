@@ -48,8 +48,6 @@ class ObjectViewAbstract(ViewAbstract):
         curve_template.fill_mode = 'FULL'
         curve_template.bevel_depth = 0.0 if self.group.as_lines else 1.0
         curve_template.bevel_resolution = int((self.group.circular_subdivisions - 4) / 2.0)
-        curve_template.show_normal_face = False
-        curve_template.show_handles = False
 
         self.curve_template_name = curve_template.name
 
@@ -58,29 +56,29 @@ class ObjectViewAbstract(ViewAbstract):
         return bpy.data.curves.get(self.curve_template_name)
 
     def on_first_link(self):
-        # Set viewport params
-        for area in bpy.data.screens["Default"].areas:
-            if area.type == 'VIEW_3D':
-                for space in area.spaces:
-                    if space.type == 'VIEW_3D':
-                        # Set grid size - One cell 100 um
-                        space.grid_scale = 100.0
+        # for window in bpy.context.window_manager.windows:
+        #     for area in window.screen.areas:
+        #         if area.type == 'VIEW_3D':
+        #             for space in area.spaces:
+        #                 if space.type == 'VIEW_3D': 
+        #                     # Set grid size - One cell 100 um
+        #                     # space.grid_scale = 100.0
 
-                        # Set viewport clipping distance
-                        space.clip_end = 99999
+        #                     # Set viewport clipping distance
+        #                     # space.clip_end = 99999
 
-                        # Disable relationship lines
-                        space.show_relationship_lines = False
+        #                     # Disable relationship lines
+        #                     # space.show_relationship_lines = False
 
         # Add a sun lamp - at 500,500,500 um
         sun_exists = False
-        for lamp in bpy.data.lamps:
-            if lamp.type == 'SUN':
+        for light in bpy.data.lights:
+            if light.type == 'SUN':
                 sun_exists = True
                 break
 
         if not sun_exists:
-            bpy.ops.object.lamp_add(type="SUN", location=[500] * 3)
+            bpy.ops.object.light_add(type="SUN", location=[500] * 3)
 
         # Set camera clip distance
         for camera in bpy.data.cameras:
@@ -112,7 +110,7 @@ class ObjectViewAbstract(ViewAbstract):
             if pattern is None or \
                     (not pattern_inverse and fnmatch(container.name, pattern)) or \
                     (pattern_inverse and not fnmatch(container.name, pattern)):
-                container.get_object().select = select
+                container.get_object().select_set(state=select)
 
     def zoom_to_containers(self):
 
@@ -182,8 +180,8 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers()
 
         # Convert the selected container curves to mesh
-        active_ob = next(o for o in bpy.context.scene.objects if o.select)
-        bpy.context.scene.objects.active = active_ob
+        active_ob = next(o for o in bpy.context.collection.objects if o.select_get())
+        bpy.context.view_layer.objects.active = active_ob
         
         #context = get_operator_context_override(selected_object=active_ob)
         bpy.ops.object.convert(target='MESH', keep_original=False)
@@ -192,7 +190,7 @@ class ObjectViewAbstract(ViewAbstract):
         self.select_containers()
 
         # Convert the selected container meshes to curves
-        bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
         bpy.ops.object.convert(target='CURVE', keep_original=False)
 
     def animate_activity(self, activity, material_name):
@@ -236,11 +234,10 @@ class ObjectViewAbstract(ViewAbstract):
             emit_strength = mat.node_tree.nodes['Emission'].inputs['Strength']
 
             for i, frame in enumerate(frames):
-                # Set the material emit and Cycles emit node intensity
-                emit_strength.default_value = mat.emit = intensity[i] * max_brightness
+                # Set the Cycles emit node intensity
+                emit_strength.default_value = intensity[i] * max_brightness
 
-                # Set the material and node emit keyframes
-                mat.keyframe_insert(data_path="emit", frame=frame)
+                # Set the node emit keyframe
                 emit_strength.keyframe_insert(data_path="default_value", frame=frame)
 
         if group.animate_color:
@@ -248,15 +245,14 @@ class ObjectViewAbstract(ViewAbstract):
             node_color = mat.node_tree.nodes['Emission'].inputs['Color']
 
             # Color ramp eval function
-            color_value_at = group.color_ramp_material.diffuse_ramp.evaluate
+            color_value_at = group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.evaluate
 
             for i, frame in enumerate(frames):
                 # Get the color value from the ramp widget
                 frame_color4 = color_value_at(intensity[i])
 
-                # Set the material emit and Cycles emit node intensity
-                node_color.default_value = frame_color4
-                mat.diffuse_color = frame_color4[0:3]  # ignore alpha
+                # Set the material color and Cycles node color
+                node_color.default_value = mat.diffuse_color = frame_color4
 
                 # Set the material and node color keyframes
                 mat.keyframe_insert(data_path="diffuse_color", frame=frame)

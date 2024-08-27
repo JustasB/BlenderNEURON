@@ -156,18 +156,8 @@ class CurveContainer:
         mat = bpy.data.materials.new(name)
 
         mat.diffuse_color = color
-        mat.emit = brightness
 
-        # # Ambient and back lighting
-        # mat.ambient = 0.85
-        # mat.translucency = 0.85
-        #
-        # # Raytraced reflections
-        # mat.raytrace_mirror.use = True
-        # mat.raytrace_mirror.reflect_factor = 0.1
-        # mat.raytrace_mirror.fresnel = 2.0
-
-        # Add Blender render and Cycles nodes
+        # Add Cycles nodes
         mat.use_nodes = True
 
         nodes = mat.node_tree.nodes
@@ -181,23 +171,9 @@ class CurveContainer:
         cl_emit = nodes.new('ShaderNodeEmission')
         cl_emit.location = [-200, 0]
         cl_emit.inputs['Strength'].default_value = brightness
-        cl_emit.inputs['Color'].default_value = list(mat.diffuse_color) + [1]
-
-        # cl_trans = nodes.new('ShaderNodeBsdfTransparent')
-        # cl_trans.location = [-200, 100]
-        # links.new(cl_trans.outputs['BSDF'], cl_out.inputs['Surface'])
+        cl_emit.inputs['Color'].default_value = mat.diffuse_color
 
         links.new(cl_emit.outputs['Emission'], cl_out.inputs['Surface'])
-
-        # Blender render nodes
-        br_out = nodes.new('ShaderNodeOutput')
-        br_out.location = [0, -200]
-        br_mat = nodes.new('ShaderNodeExtendedMaterial')
-        br_mat.location = [-200, -200]
-        br_mat.material = mat
-
-        links.new(br_mat.outputs['Color'], br_out.inputs['Color'])
-        links.new(br_mat.outputs['Alpha'], br_out.inputs['Alpha'])
 
         return mat
 
@@ -347,19 +323,13 @@ class CurveContainer:
             self.get_object().location = coords[0]
 
     def link(self):
-        link = bpy.context.scene.objects.link
-        bl_objects = bpy.data.objects
-
-        link(self.get_object())
+        bpy.context.collection.objects.link(self.get_object())
 
         self.linked = True
 
     def unlink(self):
-        unlink_from_scene = bpy.context.scene.objects.unlink
-
         try:
-            ob = self.get_object()
-            unlink_from_scene(ob)
+            bpy.context.collection.objects.unlink(self.get_object())
 
         except RuntimeError:
             pass  # ignore if already unlinked
