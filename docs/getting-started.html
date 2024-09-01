@@ -1,218 +1,363 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Getting Started &mdash; BlenderNEURON  documentation</title>
-  
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="BlenderNEURON Class Reference" href="reference.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> BlenderNEURON
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            BlenderNEURON
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#importing-cells">Importing Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#editing-and-saving-cells">Editing and Saving Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-cells-to-groups">Adding Cells to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-cell-colors">Changing Cell Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualizing-cell-model-voltage">Visualizing Cell Model Voltage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-synapses-by-proximity">Creating Synapses by Proximity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#confining-cells-between-layers">Confining Cells between Layers</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">BlenderNEURON</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Getting Started</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/getting-started.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>The following video walks through the steps of how to visualize cell morphology in Blender and create a video of propagating action potentials.</p>
-<iframe width="100%" height="415" src="https://www.youtube.com/embed/rgc794sDPYk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
+<p>Below are text guides for BlenderNEURON</p>
+<p>Video tutorials are available on the <a class="reference external" href="https://blenderneuron.org/tutorials/">Tutorials Page</a>.</p>
+<p>Have you installed BlenderNEURON? See <a class="reference external" href="installation.html">Installation</a> for help on installing BlenderNEURON in Blender and NEURON.</p>
+<section id="importing-cells">
+<h2>Importing Cells<a class="headerlink" href="#importing-cells" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Load your model in NEURON and start BlenderNEURON</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>sample of code to run in terminal:</p></li>
+</ul>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span>
+<span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">gui</span>
+<span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;path/to/SampleCell.hoc&#39;</span><span class="p">)</span>
+<span class="n">cell1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SampleCell</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ul class="simple">
+<li><p>You can download <a class="reference external" href="https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc">SampleCell.hoc</a> to test BlenderNEURON with</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>In the NEURON GUI, open Graph &gt; Shape Plot, to ensure the model is loaded correctly</p></li>
+<li><p>Start BlenderNEURON in NEURON/Python by running:</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">blenderneuron</span> <span class="kn">import</span> <span class="n">neuronstart</span>
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>Start Blender with the BlenderNEURON add-on</p></li>
+<li><p>Navigate to the BlenderNEURON tab in the sidebar</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>press ‘N’ to toggle sidebar</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/sidebar.png"><img alt="Sidebar" src="_images/sidebar.png" style="width: 600px;" /></a>
+</figure>
+</div></blockquote>
+<ol class="arabic simple" start="6">
+<li><p>Import cells with ‘Import Cell Groups to Blender’ under ‘Import / Export’</p></li>
+</ol>
+<blockquote>
+<div><figure class="align-default">
+<a class="reference internal image-reference" href="_images/importcells.png"><img alt="Import Cells" src="_images/importcells.png" style="width: 200px;" /></a>
+</figure>
+</div></blockquote>
+</section>
+<section id="editing-and-saving-cells">
+<h2>Editing and Saving Cells<a class="headerlink" href="#editing-and-saving-cells" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>With the cells imported, left click a cell in the 3d view to select it (like other Blender objects)</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>For help with navigating Blender: <a class="reference external" href="https://www.youtube.com/watch?v=MF1qEhBSfq4&amp;list=PLa1F2ddGya_-UvuAqHAksYnB0qL9yWDO6&amp;pp=iAQB">Blender Fundamentals Videos</a> or <a class="reference external" href="https://docs.blender.org/manual/en/3.5/editors/3dview/navigate/navigation.html">Blender Manual</a></p></li>
+<li><p>‘G’ to move</p></li>
+<li><p>‘R’ to rotate</p></li>
+<li><p>‘S’ to scale</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>To select and rotate individual sections:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Under ‘Cell Group Options’, select ‘Interact with Each:’ ‘Section’</p></li>
+<li><p>Import cells again</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>To export changes to NEURON after editing cell morphology/position in Blender:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Click ‘Update Groups with View Changes’ under ‘Import / Export’</p></li>
+<li><p>Then click ‘Export Cell Groups to NEURON’ under ‘Import / Export’</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="adding-cells-to-groups">
+<h2>Adding Cells to Groups<a class="headerlink" href="#adding-cells-to-groups" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Expand ‘Cell Groups’ and ‘Cells in Group’</p></li>
+<li><p>Add groups with the ‘+’ to the right of the group names</p></li>
+<li><p>Check off cells under ‘Cells in Group’ to add them to the currently selected group</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>A cell can only be in one group at a time</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/cellgroups.png"><img alt="Adding Cells to Groups" src="_images/cellgroups.png" style="width: 200px;" /></a>
+</figure>
+</div></blockquote>
+</section>
+<section id="changing-cell-colors">
+<h2>Changing Cell Colors<a class="headerlink" href="#changing-cell-colors" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Select the Cell Group you would like to change display settings for</p></li>
+<li><p>Expand ‘Cell Group Options’</p></li>
+<li><p>Next to ‘Init. Color’, select a color on the color wheel</p></li>
+</ol>
+<blockquote>
+<div><figure class="align-default">
+<a class="reference internal image-reference" href="_images/initialcolor.png"><img alt="Select Group Color" src="_images/initialcolor.png" style="width: 150px;" /></a>
+</figure>
+</div></blockquote>
+<ul class="simple">
+<li><p>The cells will be in that color the next time the cell group is imported</p></li>
+</ul>
+</section>
+<section id="visualizing-cell-model-voltage">
+<h2>Visualizing Cell Model Voltage<a class="headerlink" href="#visualizing-cell-model-voltage" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Have your model with activity loaded in NEURON</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>To check activity in NEURON GUI, go to ‘Graph’ &gt; ‘Voltage Axis’ and ‘Tools &gt; Run Control’ and select ‘Init &amp; Run’</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Select Cell Group to animate</p></li>
+<li><p>Expand ‘Cell Group Options’</p></li>
+<li><p>Check off ‘Record Activity’</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Activity will be recorded next time the cells are imported</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="5">
+<li><p>Choose Recording Settings</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Set start and stop recording times (in ms): what time range in the NEURON simulation to record</p></li>
+<li><p>Select ‘Sampling Period’: how many milliseconds between samples collected of the voltage</p></li>
+<li><p>Select ‘Frames per Milliseconds’, how many frames of animation will represent each millisecond of NEURON activity</p></li>
+<li><p>Set colors to correspond with the variable low and high values on the color scale</p></li>
+<li><p>Set variable low and high values to encompass the activity in your model</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="6">
+<li><p>Import cells with ‘Import Cell Groups to Blender’ under ‘Import / Export’</p></li>
+<li><p>Scrub the timeline on the bottom to see animation</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Change in voltage should be visible as change in color and/or brightness (to preview change in brightness, press ‘Z’ &gt; ‘Material Preview’)</p></li>
+<li><p>Frame number = NEURON simulation time (ms) X ‘Frames per Millisecond’</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/timeline.png"><img alt="Timeline" src="_images/timeline.png" style="width: 600px;" /></a>
+</figure>
+</div></blockquote>
+</section>
+<section id="creating-synapses-by-proximity">
+<h2>Creating Synapses by Proximity<a class="headerlink" href="#creating-synapses-by-proximity" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Make sure to have at least 2 cells instantiated in NEURON</p></li>
+<li><p>Add cells that will form synapses to different groups</p></li>
+<li><p>Expand ‘Form Synapses’</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>This section will appear when you have at least two groups</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>Select groups for the ‘Source’ (presynaptic) and ‘Destination’ (postsynaptic) cells</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Must be different groups</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="5">
+<li><p>Select which sections will form synapses next to ‘Sections:’</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Surround characters with asterisks (*example*) to include all sections with those characters in the name</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="6">
+<li><p>Select synaptic mechanism next to ‘Synapse’, if you have additional mechanisms loaded in NEURON</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>By default, NEURON lets you use ‘ExpSyn’ mechanism</p></li>
+<li><p>For help on compiling mod files to add mechanisms: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&amp;sid=2c672c89ff0c1c17a90f35d3c44696d0">Mod Files</a></p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="7">
+<li><p>Press ‘Find Synapse Locations’</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Synapse locations will be shown in orange</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/synapsepreview.png"><img alt="Synapse Preview" src="_images/synapsepreview.png" style="width: 300px;" /></a>
+</figure>
+</div></blockquote>
+<ol class="arabic simple" start="8">
+<li><p>Create the synapses in NEURON by pressing ‘Create Synapses’</p></li>
+</ol>
+</section>
+<section id="confining-cells-between-layers">
+<h2>Confining Cells between Layers<a class="headerlink" href="#confining-cells-between-layers" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Import cells with ‘Import Cell Groups to Blender’</p></li>
+<li><p>Import or create mesh object(s) to confine the cells between</p></li>
+<li><p>Expand ‘Confine Between Layers’</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Section will appear once at least 1 cell is imported</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>Select objects for the confinement ‘Start Layer’ and ‘End Layer’</p></li>
+<li><p>Next to ‘Name Contains:’, select sections that will be confined</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>Surround characters with asterisks (*dend*) to confine all sections with those characters</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="6">
+<li><p>Press ‘Confine’ to confine the sections between the layers</p></li>
+<li><p>Save changes in Blender by pressing ‘Update Groups with Confinement Results’</p></li>
+<li><p>Save confinement results to NEURON by pressing ‘Export Cell Groups to NEURON’ under ‘Import / Export’</p></li>
+</ol>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="reference.html" class="btn btn-neutral float-right" title="BlenderNEURON Class Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reference.html" class="btn btn-neutral float-right" title="BlenderNEURON Class Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Justas Birgiolas.
-
-    </p>
+    <p>&#169; Copyright 2024.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

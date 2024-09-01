@@ -32,6 +32,7 @@ Developers
 *********************
 
  - `Justas Birgiolas Ph.D. <https://www.linkedin.com/in/justasbirgiolas>`_
+ - `Alistair Peet <https://github.com/alistairpt/>`_
  - `Arizona State University ICON Lab <https://iconlab.asu.edu/>`_
 
 ********

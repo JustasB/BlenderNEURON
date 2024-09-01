@@ -1,83 +1,50 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Classes for NEURON &mdash; BlenderNEURON  documentation</title>
-  
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Classes for Blender" href="blenderneuron.blender.html" />
     <link rel="prev" title="Abstract Classes" href="blenderneuron.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> BlenderNEURON
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            BlenderNEURON
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
@@ -85,368 +52,319 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="blenderneuron.html">Abstract Classes</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Classes for NEURON</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Classes for NEURON</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode"><code class="docutils literal notranslate"><span class="pre">NeuronNode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d"><code class="docutils literal notranslate"><span class="pre">NeuronNode.add_spine_pt3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg"><code class="docutils literal notranslate"><span class="pre">NeuronNode.assign_gid_to_source_seg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x"><code class="docutils literal notranslate"><span class="pre">NeuronNode.clamp_section_x()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn"><code class="docutils literal notranslate"><span class="pre">NeuronNode.create_netcon_syn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses"><code class="docutils literal notranslate"><span class="pre">NeuronNode.create_synapses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_group_dicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_roots"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_roots()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_sim_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi"><code class="docutils literal notranslate"><span class="pre">NeuronNode.init_mpi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups"><code class="docutils literal notranslate"><span class="pre">NeuronNode.initialize_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name"><code class="docutils literal notranslate"><span class="pre">NeuronNode.rank_section_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.section_rx"><code class="docutils literal notranslate"><span class="pre">NeuronNode.section_rx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.segment_gid"><code class="docutils literal notranslate"><span class="pre">NeuronNode.segment_gid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params"><code class="docutils literal notranslate"><span class="pre">NeuronNode.set_sim_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_groups"><code class="docutils literal notranslate"><span class="pre">NeuronNode.update_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index"><code class="docutils literal notranslate"><span class="pre">NeuronNode.update_section_index()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.collect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.create_collector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.from_skeletal_blender_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.from_updated_blender_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.save_recording_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection"><code class="docutils literal notranslate"><span class="pre">NeuronSection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect"><code class="docutils literal notranslate"><span class="pre">NeuronSection.collect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive"><code class="docutils literal notranslate"><span class="pre">NeuronSection.collect_segments_recursive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section"><code class="docutils literal notranslate"><span class="pre">NeuronSection.from_nrn_section()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root"><code class="docutils literal notranslate"><span class="pre">NeuronSection.from_skeletal_blender_root()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root"><code class="docutils literal notranslate"><span class="pre">NeuronSection.from_updated_blender_root()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii"><code class="docutils literal notranslate"><span class="pre">NeuronSection.get_coords_and_radii()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii"><code class="docutils literal notranslate"><span class="pre">NeuronSection.update_coords_and_radii()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="blenderneuron.blender.html">Classes for Blender</a></li>
 </ul>
 </li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">BlenderNEURON</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="reference.html">BlenderNEURON Class Reference</a> &raquo;</li>
-        
-      <li>Classes for NEURON</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="reference.html">BlenderNEURON Class Reference</a></li>
+      <li class="breadcrumb-item active">Classes for NEURON</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/blenderneuron.nrn.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-blenderneuron.nrn.neuronnode">
-<span id="classes-for-neuron"></span><h1>Classes for NEURON<a class="headerlink" href="#module-blenderneuron.nrn.neuronnode" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode">
-<em class="property">class </em><code class="descclassname">blenderneuron.nrn.neuronnode.</code><code class="descname">NeuronNode</code><span class="sig-paren">(</span><em>server_end=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="staticmethod">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d">
-<em class="property">static </em><code class="descname">add_spine_pt3d</code><span class="sig-paren">(</span><em>sec</em>, <em>xyz</em>, <em>diam</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.add_spine_pt3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="module-blenderneuron.nrn.neuronnode">
+<span id="classes-for-neuron"></span><h1>Classes for NEURON<a class="headerlink" href="#module-blenderneuron.nrn.neuronnode" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blenderneuron.nrn.neuronnode.</span></span><span class="sig-name descname"><span class="pre">NeuronNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_spine_pt3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diam</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.add_spine_pt3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.add_spine_pt3d" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg">
-<code class="descname">assign_gid_to_source_seg</code><span class="sig-paren">(</span><em>pre_sec</em>, <em>pre_sec_x</em>, <em>threshold</em>, <em>gid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.assign_gid_to_source_seg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg">
+<span class="sig-name descname"><span class="pre">assign_gid_to_source_seg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pre_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_sec_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.assign_gid_to_source_seg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.assign_gid_to_source_seg" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="staticmethod">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x">
-<em class="property">static </em><code class="descname">clamp_section_x</code><span class="sig-paren">(</span><em>x_in</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.clamp_section_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clamp_section_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.clamp_section_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x" title="Permalink to this definition"></a></dt>
 <dd><p>When placing synapses, avoid using 0 and 1 section locations, esp. if
 extracellular potentials will be computed. See the warning comment in:</p>
-<dl class="docutils">
-<dt><a class="reference external" href="https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/">https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/</a></dt>
-<dd>mechanisms/mech.html?highlight=i_membrane#mech-extracellular</dd>
+<dl class="simple">
+<dt><a class="reference external" href="https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/">https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/</a></dt><dd><p>mechanisms/mech.html?highlight=i_membrane#mech-extracellular</p>
+</dd>
 </dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x_in</strong> – 0-1 section location</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">section location constrained to 0.001-0.999</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x_in</strong> – 0-1 section location</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>section location constrained to 0.001-0.999</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn">
-<code class="descname">create_netcon_syn</code><span class="sig-paren">(</span><em>syn_class_name</em>, <em>syn_sec</em>, <em>syn_sec_x</em>, <em>syn_params</em>, <em>source_sec</em>, <em>source_x</em>, <em>threshold</em>, <em>delay</em>, <em>weight</em>, <em>source_on_rank</em>, <em>syn_on_rank</em>, <em>source_gid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.create_netcon_syn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn">
+<span class="sig-name descname"><span class="pre">create_netcon_syn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">syn_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn_sec_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_on_rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn_on_rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_gid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.create_netcon_syn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.create_synapses">
-<code class="descname">create_synapses</code><span class="sig-paren">(</span><em>syn_set</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.create_synapses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.create_synapses">
+<span class="sig-name descname"><span class="pre">create_synapses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">syn_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.create_synapses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">
-<code class="descname">get_group_dicts</code><span class="sig-paren">(</span><em>compressed=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_group_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">
+<span class="sig-name descname"><span class="pre">get_group_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compressed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_group_dicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.get_roots">
-<code class="descname">get_roots</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_roots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_roots" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.get_roots">
+<span class="sig-name descname"><span class="pre">get_roots</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_roots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_roots" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params">
-<code class="descname">get_sim_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_sim_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params">
+<span class="sig-name descname"><span class="pre">get_sim_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_sim_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">
-<code class="descname">init_mpi</code><span class="sig-paren">(</span><em>parallel_ctx</em>, <em>mpimap</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.init_mpi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">
+<span class="sig-name descname"><span class="pre">init_mpi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallel_ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpimap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.init_mpi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups">
-<code class="descname">initialize_groups</code><span class="sig-paren">(</span><em>blender_groups</em>, <em>send_back=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.initialize_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups">
+<span class="sig-name descname"><span class="pre">initialize_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_back</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.initialize_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name">
-<code class="descname">rank_section_name</code><span class="sig-paren">(</span><em>single_rank_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.rank_section_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name">
+<span class="sig-name descname"><span class="pre">rank_section_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_rank_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.rank_section_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.section_rx">
-<code class="descname">section_rx</code><em class="property"> = &lt;_sre.SRE_Pattern object&gt;</em><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.section_rx" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.section_rx">
+<span class="sig-name descname"><span class="pre">section_rx</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile('(.+?])\\.?(.*)')</span></em><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.section_rx" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.segment_gid">
-<code class="descname">segment_gid</code><span class="sig-paren">(</span><em>sec_name</em>, <em>seg_id</em>, <em>has_spine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.segment_gid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.segment_gid" title="Permalink to this definition">¶</a></dt>
-<dd><p>One one gid can be associated with a segment. If more than one gid is assigned to a seg,
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.segment_gid">
+<span class="sig-name descname"><span class="pre">segment_gid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_spine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.segment_gid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.segment_gid" title="Permalink to this definition"></a></dt>
+<dd><p>Only one gid can be associated with a segment. If more than one gid is assigned to a seg,
 only the last gid will send events to the post- synapse.</p>
 <p>However, if the segment index can be computed from section.x location, locations that
 refer to the same segment e.g. section(0.49) and section(0.51) when nseg=3, can be identified.</p>
 <p>This method generates a unique gid for each segment based on the section name and segment
 index. Where section(0) -&gt; seg_id=0 and section(1) -&gt; seg_id=nseg-1</p>
 <p>If a spine was added, its assumed that the pre-syn location is at the head of the spine.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sec_name</strong> – </li>
-<li><strong>seg_id</strong> – </li>
-<li><strong>has_spine</strong> – </li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sec_name</strong> – </p></li>
+<li><p><strong>seg_id</strong> – </p></li>
+<li><p><strong>has_spine</strong> – </p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params">
-<code class="descname">set_sim_params</code><span class="sig-paren">(</span><em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.set_sim_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params">
+<span class="sig-name descname"><span class="pre">set_sim_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.set_sim_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.update_groups">
-<code class="descname">update_groups</code><span class="sig-paren">(</span><em>blender_groups</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.update_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_groups" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.update_groups">
+<span class="sig-name descname"><span class="pre">update_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.update_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_groups" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronnode.NeuronNode.update_section_index">
-<code class="descname">update_section_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.update_section_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.update_section_index">
+<span class="sig-name descname"><span class="pre">update_section_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.update_section_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-blenderneuron.nrn.neuronrootgroup"></span><dl class="class">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup">
-<em class="property">class </em><code class="descclassname">blenderneuron.nrn.neuronrootgroup.</code><code class="descname">NeuronRootGroup</code><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect">
-<code class="descname">collect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.collect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-blenderneuron.nrn.neuronrootgroup"></span><dl class="py class">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blenderneuron.nrn.neuronrootgroup.</span></span><span class="sig-name descname"><span class="pre">NeuronRootGroup</span></span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect">
+<span class="sig-name descname"><span class="pre">collect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.collect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect" title="Permalink to this definition"></a></dt>
 <dd><p>Based on the group’s color level, gathers the values of the group’s collect_variable. This method is called
-at regular times during the simulation. See <code class="xref any docutils literal notranslate"><span class="pre">create_cell_group()</span></code> for details.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
+at regular times during the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector">
-<code class="descname">create_collector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.create_collector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector">
+<span class="sig-name descname"><span class="pre">create_collector</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.create_collector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector" title="Permalink to this definition"></a></dt>
 <dd><p>Greates a pair of NetStim and NetCon which trigger an event to recursively collect the activity of the group
 segments. This method does nothing if group.record_activity is False</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group">
-<code class="descname">from_skeletal_blender_group</code><span class="sig-paren">(</span><em>blender_group</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.from_skeletal_blender_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group">
+<span class="sig-name descname"><span class="pre">from_skeletal_blender_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.from_skeletal_blender_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group">
-<code class="descname">from_updated_blender_group</code><span class="sig-paren">(</span><em>blender_group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.from_updated_blender_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group">
+<span class="sig-name descname"><span class="pre">from_updated_blender_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.from_updated_blender_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params">
-<code class="descname">save_recording_params</code><span class="sig-paren">(</span><em>blender_group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.save_recording_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params">
+<span class="sig-name descname"><span class="pre">save_recording_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.save_recording_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-blenderneuron.nrn.neuronsection"></span><dl class="class">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection">
-<em class="property">class </em><code class="descclassname">blenderneuron.nrn.neuronsection.</code><code class="descname">NeuronSection</code><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.collect">
-<code class="descname">collect</code><span class="sig-paren">(</span><em>recursive=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.collect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-blenderneuron.nrn.neuronsection"></span><dl class="py class">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blenderneuron.nrn.neuronsection.</span></span><span class="sig-name descname"><span class="pre">NeuronSection</span></span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.collect">
+<span class="sig-name descname"><span class="pre">collect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.collect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect" title="Permalink to this definition"></a></dt>
 <dd><p>Recursively collects the section midpoint values of a group’s collect_variable (e.g. ‘v’)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>recursive</strong> – Whether to collect child section values (otherwise stop at root/soma)</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>recursive</strong> – Whether to collect child section values (otherwise stop at root/soma)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive">
-<code class="descname">collect_segments_recursive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.collect_segments_recursive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive">
+<span class="sig-name descname"><span class="pre">collect_segments_recursive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.collect_segments_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive" title="Permalink to this definition"></a></dt>
 <dd><p>Recursively collects the values of segments of a root section. Segments are given sequential 0-based
 names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th
 dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON’s xyz3d() function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">
-<code class="descname">from_nrn_section</code><span class="sig-paren">(</span><em>nrn_section</em>, <em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_nrn_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">
+<span class="sig-name descname"><span class="pre">from_nrn_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrn_section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_nrn_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root">
-<code class="descname">from_skeletal_blender_root</code><span class="sig-paren">(</span><em>source_section</em>, <em>group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_skeletal_blender_root"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root">
+<span class="sig-name descname"><span class="pre">from_skeletal_blender_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_skeletal_blender_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root">
-<code class="descname">from_updated_blender_root</code><span class="sig-paren">(</span><em>blender_section</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_updated_blender_root"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root">
+<span class="sig-name descname"><span class="pre">from_updated_blender_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_section</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_updated_blender_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii">
-<code class="descname">get_coords_and_radii</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.get_coords_and_radii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii">
+<span class="sig-name descname"><span class="pre">get_coords_and_radii</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.get_coords_and_radii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii">
-<code class="descname">update_coords_and_radii</code><span class="sig-paren">(</span><em>blender_section</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.update_coords_and_radii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii">
+<span class="sig-name descname"><span class="pre">update_coords_and_radii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_section</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.update_coords_and_radii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="blenderneuron.blender.html" class="btn btn-neutral float-right" title="Classes for Blender" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="blenderneuron.html" class="btn btn-neutral" title="Abstract Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="blenderneuron.html" class="btn btn-neutral float-left" title="Abstract Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="blenderneuron.blender.html" class="btn btn-neutral float-right" title="Classes for Blender" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Justas Birgiolas.
-
-    </p>
+    <p>&#169; Copyright 2024.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
