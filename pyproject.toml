@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blenderneuron"
+version = "2.1.0"
+description = "Interface for Blender <-> NEURON"
+readme = "README.txt"
+authors = [
+    { name = "Justas Birgiolas", email = "justas@asu.edu" },
+    { name = "Alistair Peet", email = "no@email.com" },
+]
+license = { text = "MIT" }
+keywords = ["Blender", "NEURON", "neuroscience", "visualization", "neural networks", "neurons", "3D"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+requires-python = ">=3.7"
+dependencies = []
+
+[project.urls]
+homepage = "https://BlenderNEURON.org"
+
+[tool.setuptools]
+packages = { find = { include = ["blenderneuron"] } }
+include-package-data = true
+
+[tool.setuptools.package-data]
+blenderneuron = ["*.json", "*.hoc"]

@@ -1,18 +1,24 @@
+#!/bin/bash
 set -e
+# This will .zip files with the latest version of source files (.py, .hoc, .json)
+# build pip wheels, and attempt to upload them to pypi (cancelable)
+# Requires build and twine, install them with `pip install build twine`
 
-function install
-{
-    version=$(cat releases/latest.txt)
 
-    echo Current version is: $version
-    echo Type in the new version
-    read version
+function update_version_in_pyproject {
+    version=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
+    echo "Current version is: $version"
+    echo "Type in the new version"
+    read new_version
 
-    file=releases/BlenderNEURON-v$version.zip
+    # Update the version in pyproject.toml
+    sed -i "s/version = \"$version\"/version = \"$new_version\"/" pyproject.toml
+
+    # Display the updated version
+    echo "Updated version to: $new_version"
+
+    file=releases/BlenderNEURON-v$new_version.zip
     file_latest=releases/BlenderNEURON-latest.zip
-
-    # Update version file
-    echo $version > releases/latest.txt
 
     # Create addon zip
     zip -q -r $file blenderneuron -i '*.py' '*.json' '*.hoc'
@@ -21,22 +27,21 @@ function install
     # Create wheels and upload to pip
     rm -R dist/* || true
 
-    /home/justas/anaconda2/envs/pb35/bin/python setup.py sdist bdist_wheel
-    /home/justas/anaconda2/envs/p27/bin/python setup.py sdist bdist_wheel
+    python -m build
 
-    echo 'Built Addon .zip file:' $file
+    echo "Built Addon .zip file:" $file
 
-    echo Getting ready to upload to pypi
-    /home/justas/anaconda2/envs/p27/bin/python -m twine upload dist/*
-
+    echo "Getting ready to upload to PyPI. Username=`__token__` and password=`pypi-[pypi token here]`"
+    twine upload dist/*
 }
 
 while true; do
-    read -p "This will build and upload to pip. Continue?" yn
+    read -p "This will build and upload to PyPI. Continue? [y/n]: " yn
     case $yn in
-        [Yy]* ) install; break;;
+        [Yy]* ) update_version_in_pyproject; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
 done
+
 

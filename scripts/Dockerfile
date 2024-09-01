@@ -27,7 +27,7 @@ ENV PATH=$PATH:/blender/
 ENV PYTHONPATH=/BlenderNEURON
 
 # Code coverage and debugging packages for NEURON python
-RUN pip install pydevd-pycharm coverage neuron pydevd-pycharm sphinx sphinx_rtd_theme
+RUN pip install pydevd-pycharm coverage neuron pydevd-pycharm sphinx sphinx_rtd_theme build twine
 
 # Install packages for Blender python
 RUN /blender/3.5/python/bin/python3.10 -m pip install coverage pydevd-pycharm
