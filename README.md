@@ -2,7 +2,7 @@
 
 A Python package and an addon that takes a NEURON simulator model and exports its 3D structure and membrane activity to Blender. The export can be peformed via NEURON GUI or via Python commands.
 
-[![Build Status](https://travis-ci.org/JustasB/BlenderNEURON.svg?branch=master)](https://travis-ci.org/JustasB/BlenderNEURON) [![codecov](https://codecov.io/gh/JustasB/BlenderNEURON/branch/master/graph/badge.svg)](https://codecov.io/gh/JustasB/BlenderNEURON) [![PyPI version](https://badge.fury.io/py/blenderneuron.svg)](https://badge.fury.io/py/blenderneuron)
+[![Build Status](https://dl.circleci.com/status-badge/img/gh/JustasB/BlenderNEURON/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/JustasB/BlenderNEURON/tree/master) [![codecov](https://codecov.io/gh/JustasB/BlenderNEURON/branch/master/graph/badge.svg)](https://codecov.io/gh/JustasB/BlenderNEURON) [![PyPI version](https://badge.fury.io/py/blenderneuron.svg)](https://badge.fury.io/py/blenderneuron)
 
 ## NEURON GUI
 
