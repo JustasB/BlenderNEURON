@@ -12,28 +12,60 @@ class BlenderSection(Section):
         self.was_split = False
         self.split_sections = []
 
-
     def from_full_NEURON_section_dict(self, nrn_section_dict):
-        self.name = nrn_section_dict["name"]
+        """
+        Iteratively initializes the BlenderSection instances from NEURON section dictionaries,
+        maintaining the original structure.
 
-        self.nseg = nrn_section_dict["nseg"]
-        self.point_count = nrn_section_dict["point_count"]
-        self.coords = nrn_section_dict["coords"]
-        self.radii = nrn_section_dict["radii"]
-        self.parent_connection_loc = nrn_section_dict["parent_connection_loc"]
-        self.connection_end = nrn_section_dict["connection_end"]
+        :param nrn_section_dict: The dictionary containing NEURON section data.
+        :return: None
+        """
 
-        # Parse the children
-        self.children = []
-        for nrn_child in nrn_section_dict["children"]:
-            child = BlenderSection()
-            child.from_full_NEURON_section_dict(nrn_child)
-            self.children.append(child)
+        # Initialize a stack with tuples: (current_node, current_dict, state)
+        # state can be 'pre' or 'post' to represent pre-processing and post-processing
+        stack = [(self, nrn_section_dict, 'pre')]
 
-        self.segments_3D = []
+        while stack:
+            current_node, current_dict, state = stack.pop()
 
-        if "activity" in nrn_section_dict:
-            self.activity.from_dict(nrn_section_dict["activity"])
+            if state == 'pre':
+                # Pre-processing: set attributes from the dictionary
+                current_node.name = current_dict["name"]
+                current_node.nseg = current_dict["nseg"]
+                current_node.point_count = current_dict["point_count"]
+                current_node.coords = current_dict["coords"]
+                current_node.radii = current_dict["radii"]
+                current_node.parent_connection_loc = current_dict["parent_connection_loc"]
+                current_node.connection_end = current_dict["connection_end"]
+
+                # Initialize the children list
+                current_node.children = []
+
+                # Push post-processing onto the stack
+                stack.append((current_node, current_dict, 'post'))
+
+                # Process children by adding them to the stack in 'pre' state
+                # Reverse the children to maintain the original order
+                for nrn_child_dict in reversed(current_dict["children"]):
+                    child = BlenderSection()
+                    # Instead of appending to children here, we'll do it in post-processing
+                    # Store parent reference in child for later use
+                    child._parent_node = current_node
+                    # Push child onto the stack for pre-processing
+                    stack.append((child, nrn_child_dict, 'pre'))
+            elif state == 'post':
+                # Post-processing: after children have been processed
+                current_node.segments_3D = []
+
+                if "activity" in current_dict:
+                    current_node.activity.from_dict(current_dict["activity"])
+
+                # If the current node has a parent, append it to the parent's children list
+                if hasattr(current_node, '_parent_node'):
+                    parent_node = current_node._parent_node
+                    parent_node.children.append(current_node)
+                    # Clean up temporary attributes
+                    del current_node._parent_node
 
     def make_split_sections(self, max_length):
         """
@@ -166,13 +198,30 @@ class BlenderSection(Section):
         return np.min(dists)
 
     def remove_split_sections(self, recursive=True):
-        if self.was_split:
-            self.split_sections = []
-            self.was_split = False
+        """
+        Iteratively removes split sections starting from the current section.
 
+        :param recursive: Whether to process child sections recursively.
+        :return: None
+        """
         if recursive:
-            for child_sec in self.children:
-                child_sec.remove_split_sections(recursive=True)
+            # Initialize a stack with the current section
+            stack = [self]
+            while stack:
+                current_sec = stack.pop()
+                if current_sec.was_split:
+                    current_sec.split_sections = []
+                    current_sec.was_split = False
+                # Add child sections to the stack to process them iteratively
+                if current_sec.children:
+                    # Reverse the children to maintain traversal order
+                    stack.extend(reversed(current_sec.children))
+        else:
+            # Only process the current section
+            if self.was_split:
+                self.split_sections = []
+                self.was_split = False
+
 
 class BlenderRoot(BlenderSection):
 

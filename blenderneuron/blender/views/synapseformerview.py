@@ -47,13 +47,13 @@ class SynapseFormerView(CellObjectView):
 
     def show(self):
 
-        self.dest_group.show(CellObjectView, closed_ends=False)
+        self.dest_group.show(CellObjectView, closed_ends=False) # already-iterative
 
         super(SynapseFormerView, self).show()
 
     def remove(self):
         if self.dest_group.view is not None:
-            self.dest_group.view.remove()
+            self.dest_group.view.remove() # already-iterative
 
         super(SynapseFormerView, self).remove()
 
@@ -63,9 +63,9 @@ class SynapseFormerView(CellObjectView):
             if syn_container is not None:
                 curve_name = syn_container.data.name
 
-                bpy.data.objects.remove(syn_container)
+                bpy.data.objects.remove(syn_container) # already-iterative
 
-                bpy.data.curves.remove(bpy.data.curves[curve_name])
+                bpy.data.curves.remove(bpy.data.curves[curve_name]) # already-iterative
 
     def save_synapses(
             self,
@@ -139,7 +139,7 @@ class SynapseFormerView(CellObjectView):
             threshold
         )
 
-        self.group.node.client.create_synapses(syn_dict)
+        self.group.node.client.create_synapses(syn_dict) # already-iterative
 
     def create_synapse_entry_dict(
             self,

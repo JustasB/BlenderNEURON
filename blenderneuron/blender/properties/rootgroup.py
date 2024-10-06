@@ -279,7 +279,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
 
         source_group.show(SynapseFormerView, dest_group)
 
-        pairs = source_group.view.get_synapse_locations(
+        pairs = source_group.view.get_synapse_locations(  # already-iterative
             self.max_distance,
             self.use_radius,
             self.max_syns_per_pt,
@@ -295,7 +295,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         if type(from_group.view) is not SynapseFormerView:
             raise Exception('Synapses need to be found before they can be created in NEURON')
 
-        from_group.view.create_synapses(
+        from_group.view.create_synapses( # already-iterative
             self.name,
             self.synapse_name_dest,
             self.synapse_params_dest,
@@ -318,7 +318,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
         if type(from_group.view) is not SynapseFormerView:
             raise Exception('Synapses need to be found before they can be saved')
 
-        from_group.view.save_synapses(
+        from_group.view.save_synapses( # already-iterative
             file_name,
             self.name,
             self.synapse_name_dest,

@@ -1,4 +1,7 @@
+import ast
 import zlib
+
+from blenderneuron.utils import deserialize, serialize
 
 try:
     import Queue as queue
@@ -455,17 +458,23 @@ class CommNode(object):
                 time.sleep(0.1)
 
     def compress(self, obj):
-        compressed = str(obj)
+        # print('X'*100, 'pre-str', obj)
+        # compressed = iterative_str(obj)
+        compressed = serialize(obj)
+
+        # print('X' * 100, 'post-iterative_str', obj)
 
         try:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed, 2))
+            compressed = xmlrpclib.Binary(zlib.compress(compressed, 2)) # already-iterative
         except:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed.encode('utf8'), 2))
+            compressed = xmlrpclib.Binary(zlib.compress(compressed.encode('utf8'), 2)) # already-iterative
 
         return compressed
 
     def decompress(self, compressed):
-        uncompressed = eval(zlib.decompress(compressed.data).decode('utf-8'))
+        uncompressed = deserialize(zlib.decompress(compressed.data).decode('utf-8')) # already-iterative
+
+        # print('X'*100, uncompressed)
 
         return uncompressed
 

@@ -90,12 +90,12 @@ class NeuronRootGroup(RootGroup):
         # Recursively record from the middle of each section of each cell
         elif level == 'Section':
             for root in self.roots.values():
-                root.collect(recursive=True)
+                root.collect(recursive=True) # already-iterative
 
         # Record from the middle of somas of each cell
         elif level == 'Cell':
             for root in self.roots.values():
-                root.collect(recursive=False)
+                root.collect(recursive=False) # already-iterative
 
         # Record from the somas of each cell and compute their mean
         else:

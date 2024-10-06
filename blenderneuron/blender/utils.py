@@ -232,21 +232,45 @@ def line_dists(points, start, end):
 
 
 def rdp(M, epsilon=0):
+    """
+    Line simplification algorithm using the Ramer-Douglas-Peucker algorithm.
+    This is the iterative version to avoid recursion.
+
+    :param M: Array of points [[x1, y1], [x2, y2], ...]
+    :param epsilon: Tolerance value for simplification
+    :return: Simplified array of points
+    """
     M = np.array(M)
-    start, end = M[0], M[-1]
-    dists = line_dists(M, start, end)
+    stack = [(0, len(M) - 1)]
+    indices = [0, len(M) - 1]
 
-    index = np.argmax(dists)
-    dmax = dists[index]
+    while stack:
+        start_idx, end_idx = stack.pop()
+        start = M[start_idx]
+        end = M[end_idx]
 
-    if dmax > epsilon:
-        result1 = rdp(M[:index + 1], epsilon)
-        result2 = rdp(M[index:], epsilon)
+        if end_idx - start_idx <= 1:
+            continue
 
-        result = np.vstack((result1[:-1], result2))
-    else:
-        result = np.array([start, end])
+        segment = M[start_idx + 1:end_idx]
+        if len(segment) == 0:
+            continue
 
+        dists = line_dists(segment, start, end)
+        index = np.argmax(dists)
+        dmax = dists[index]
+
+        if dmax > epsilon:
+            # Index of the point with the maximum distance in the original array
+            actual_index = index + start_idx + 1
+            indices.append(actual_index)
+            # Add the two new segments to the stack
+            stack.append((start_idx, actual_index))
+            stack.append((actual_index, end_idx))
+
+    # Sort the indices and construct the result
+    indices.sort()
+    result = M[indices]
     return result
 
 # End line simplification
@@ -261,3 +285,4 @@ def make_safe_filename(s):
             return "_"
 
     return "".join(safe_char(c) for c in s).rstrip("_")
+

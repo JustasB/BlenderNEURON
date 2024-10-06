@@ -32,19 +32,38 @@ class VectorConfinerView(SectionObjectView):
         self.parent_containers()
 
     def create_container_for_each_section(self, root, recursive=True, is_top_level=True):
-        if is_top_level:
-            origin_type = "center"
-        else:
-            origin_type = "first"
+        """
+        Iteratively creates a container for each section starting from the root section.
 
-        self.create_section_container(root,
-                                      include_children=False,
-                                      origin_type=origin_type,
-                                      split_longer_than=self.max_section_length)
+        :param root: The root section to start creating containers from.
+        :param recursive: Whether to process child sections recursively.
+        :param is_top_level: Indicates if the root is the top-level section.
+        :return: None
+        """
 
-        if recursive:
-            for child in root.children:
-                self.create_container_for_each_section(child, recursive=True, is_top_level=False)
+        # Initialize the stack with the root node and its is_top_level status
+        stack = [(root, is_top_level)]
+
+        while stack:
+            current_node, current_is_top_level = stack.pop()
+
+            if current_is_top_level:
+                origin_type = "center"
+            else:
+                origin_type = "first"
+
+            self.create_section_container(
+                current_node,
+                include_children=False,
+                origin_type=origin_type,
+                split_longer_than=self.max_section_length
+            )
+
+            if recursive:
+                # Add child sections to the stack to process them iteratively
+                # Reverse the children to maintain traversal order
+                for child in reversed(current_node.children):
+                    stack.append((child, False))
 
     def remove(self):
         super(VectorConfinerView, self).remove()
@@ -53,7 +72,7 @@ class VectorConfinerView(SectionObjectView):
 
     def remove_split_sections(self):
         for root in self.group.roots.values():
-            root.remove_split_sections(recursive=True)
+            root.remove_split_sections(recursive=True) # already-iterative
 
     @abstractmethod
     def confine(self):
@@ -156,14 +175,37 @@ class VectorConfinerView(SectionObjectView):
         else:
             ob.matrix_world = ob.parent.matrix_world @ ob.matrix_parent_inverse @ ob.matrix_basis
 
-
     @staticmethod
     def confine_curve(curve_obj, mesh, outer_mesh, name_pattern, height_range, max_angle):
+        """
+        Confines the curve objects between the specified meshes, iteratively traversing child curves.
+
+        :param curve_obj: The curve object to start confinement from.
+        :param mesh: The inner mesh to confine to.
+        :param outer_mesh: The outer mesh to confine to.
+        :param name_pattern: The name pattern to match curve objects.
+        :param height_range: A tuple specifying the min and max height range.
+        :param max_angle: The maximum angle allowed for confinement.
+        :return: None
+        """
         self = VectorConfinerView
 
-        if name_pattern is None or fnmatch(curve_obj.name, name_pattern):
-            self.confine_between_meshes(curve_obj, mesh, outer_mesh, height_range[0], height_range[1], max_angle)
+        # Use a stack to iteratively traverse the curve objects
+        stack = [curve_obj]
 
-        if len(curve_obj.children) > 0:
-            for child in curve_obj.children:
-                self.confine_curve(child, mesh, outer_mesh, name_pattern, height_range, max_angle)
+        while stack:
+            current_curve = stack.pop()
+            # Check if the current curve matches the name pattern or if no pattern is provided
+            if name_pattern is None or fnmatch(current_curve.name, name_pattern):
+                # Confine the current curve between the meshes
+                self.confine_between_meshes(
+                    current_curve, mesh, outer_mesh,
+                    height_range[0], height_range[1], max_angle
+                )
+
+            # If the current curve has children, add them to the stack for processing
+            if len(current_curve.children) > 0:
+                # Reverse the children to maintain traversal order
+                stack.extend(reversed(current_curve.children))
+
+
