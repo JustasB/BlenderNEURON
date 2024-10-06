@@ -328,6 +328,7 @@ class CommNode(object):
 
         COV.stop()                                      # pragma: no cover
         COV.save()                                      # pragma: no cover
+        time.sleep(1)                                   # pragma: no cover
 
         print('SAVED Coverage info', self.server_end)   # pragma: no cover
 
