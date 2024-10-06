@@ -102,16 +102,45 @@ class BlenderRootGroup(RootGroup):
         self.state = 'imported'
 
     def set_activity_times(self, root, times):
-        root.activity.times = times
+        """
+        Iteratively sets the activity times for each node starting from the root node.
 
-        for child in root.children:
-            self.set_activity_times(child, times)
+        :param root: The root node whose activity times need to be set.
+        :param times: The times to set for the activity.
+        :return: None
+        """
+        # Initialize a stack with the root node
+        stack = [root]
+
+        while stack:
+            node = stack.pop()
+            # Set the activity times for the current node
+            node.activity.times = times
+
+            # Add child nodes to the stack to process them iteratively
+            if node.children:
+                # Reverse the children to maintain traversal order
+                stack.extend(reversed(node.children))
 
     def simplify_activity(self, root):
-        root.activity.simplify(self.simplification_epsilon)
+        """
+        Iteratively simplifies the activity of each node starting from the root node.
 
-        for child in root.children:
-            self.simplify_activity(child)
+        :param root: The root node whose activity needs to be simplified.
+        :return: None
+        """
+        # Initialize a stack with the root node
+        stack = [root]
+
+        while stack:
+            node = stack.pop()
+            # Simplify the activity of the current node
+            node.activity.simplify(self.simplification_epsilon)
+
+            # Add child nodes to the stack to process them iteratively
+            if node.children:
+                # Reverse the children to maintain traversal order
+                stack.extend(reversed(node.children))
 
     def import_group(self):
         self.node.import_groups_from_neuron([self])
@@ -142,7 +171,7 @@ class BlenderRootGroup(RootGroup):
 
         # Show the new view
         self.view = view_class(self, *args, **kwargs)
-        self.view.show()
+        self.view.show()  # already-iterative
 
         return self.view
 
@@ -174,7 +203,7 @@ class BlenderRootGroup(RootGroup):
 
     def remove(self):
         if self.view is not None:
-            self.view.remove()
+            self.view.remove() # already-iterative
 
         # Remove the group roots from the group before deleting group
         self.select_roots('None')
@@ -189,7 +218,7 @@ class BlenderRootGroup(RootGroup):
         ramp_mat = self.color_ramp_material
 
         if ramp_mat is not None:
-            bpy.data.materials.remove(ramp_mat)
+            bpy.data.materials.remove(ramp_mat) # already-iterative
 
     def remove_from_UI(self):
         remove_prop_collection_item(self.node.ui_properties.groups, self.ui_group)

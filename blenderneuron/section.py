@@ -24,55 +24,66 @@ class Section:
     def __str__(self):
         return self.name
 
-    def to_dict(self,
-                include_activity=True,
-                include_children=True,
-                include_coords_and_radii=True):
+    def to_dict(self, include_activity=True, include_children=True, include_coords_and_radii=True):
+        # Helper function to build a dict for a given node
+        def build_node_dict(node):
+            node_dict = {
+                "name": node.name,
+                "parent_connection_loc": node.parent_connection_loc,
+                "connection_end": node.connection_end,
+            }
 
-        result = {
-            "name": self.name,
-            "parent_connection_loc": self.parent_connection_loc,
-            "connection_end": self.connection_end,
-        }
+            if include_activity:
+                node_dict["activity"] = node.activity.to_dict()
+                node_dict["segments_3D"] = [seg.to_dict() for seg in node.segments_3D]
 
-        if include_activity:
-            result.update({
-                "activity": self.activity.to_dict(),
-                "segments_3D": [ seg.to_dict() for seg in self.segments_3D ]
-            })
+            if include_coords_and_radii:
+                node_dict["nseg"] = node.nseg
+                node_dict["point_count"] = node.point_count
+                node_dict["coords"] = node.coords if isinstance(node.coords, list) else node.coords.tolist()
+                node_dict["radii"] = node.radii if isinstance(node.radii, list) else node.radii.tolist()
+
+            return node_dict
+
+        # Initial result for the current node
+        result = build_node_dict(self)
 
         if include_children:
-            result.update({
-                "children": [
-                    child.to_dict(
-                        include_activity,
-                        include_children,
-                        include_coords_and_radii
-                    )
-                    for child in self.children
-                ]
-            })
+            result["children"] = []
+            stack = [(self, result["children"])]  # Stack holds (node, parent_children_list)
 
-        if include_coords_and_radii:
-            result.update({
-                "nseg": self.nseg,
-                "point_count": self.point_count,
-                "coords": self.coords if type(self.coords) == list else self.coords.tolist(),
-                "radii": self.radii if type(self.radii) == list else self.radii.tolist(),
-            })
+            while stack:
+                current_node, current_children_list = stack.pop()
+                for child in current_node.children:
+                    child_dict = build_node_dict(child)
+                    current_children_list.append(child_dict)
+                    stack.append((child, child_dict.setdefault("children", [])))
 
         return result
 
     def clear_3d_segment_activity(self):
+        # Clear the activity of the 3D segments in the current object
         for seg in self.segments_3D:
             seg.activity.clear()
 
-        for child in self.children:
-            child.clear_3d_segment_activity()
+        # Use a stack to iteratively clear the 3D segment activity of the children
+        stack = list(self.children)
+        while stack:
+            current = stack.pop()
+
+            # Clear the activity of the 3D segments of the current child
+            for seg in current.segments_3D:
+                seg.activity.clear()
+
+            # Add the current child's children to the stack for further processing
+            stack.extend(current.children)
 
     def clear_activity(self, recursive):
         self.activity.clear()
 
         if recursive:
-            for child in self.children:
-                child.clear_activity(recursive=True)
+            stack = list(self.children)
+            while stack:
+                current = stack.pop()
+                current.activity.clear()
+                stack.extend(current.children)

@@ -3,7 +3,6 @@
 branch = True
 parallel = True
 source = blenderneuron
-command_line = tests/test_coverage.py
 omit =
     blenderneuron/blender/panels/*
     blenderneuron/blender/operators/*

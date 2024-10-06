@@ -66,19 +66,19 @@ class CurveContainer:
             if mat is not None:
                 # remove material animation if any
                 if mat.animation_data is not None:
-                    bpy.data.actions.remove(mat.animation_data.action)
+                    bpy.data.actions.remove(mat.animation_data.action) # already-iterative
 
                 # remove material node animation
                 if mat.node_tree is not None and mat.node_tree.animation_data is not None:
-                    bpy.data.actions.remove(mat.node_tree.animation_data.action)
+                    bpy.data.actions.remove(mat.node_tree.animation_data.action) # already-iterative
 
                 # remove material
-                bpy.data.materials.remove(mat)
+                bpy.data.materials.remove(mat) # already-iterative
 
 
 
         # curve
-        bpy.data.curves.remove(ob.data)
+        bpy.data.curves.remove(ob.data) # already-iterative
 
     @property
     def origin(self):
@@ -211,97 +211,127 @@ class CurveContainer:
         return global_coords
 
     def update_group_section(self, root, recursive=True):
+        """
+        Iteratively updates the group sections starting from the root section. If recursive is True, it updates all child
+        sections as well.
 
-        ob = self.get_object()
+        :param root: The root section to start updating from.
+        :param recursive: Whether to process child sections recursively.
+        :return: None
+        """
 
-        # Find the spline that corresponds to the section
-        spline_i = self.name2spline_index[root.name]
+        # Initialize a stack with the root section
+        stack = [root]
 
-        try:
-            spline = self.curve.splines[spline_i]
+        while stack:
+            current_root = stack.pop()
 
-        except IndexError:
-            print("Could not find spline with index " + str(spline_i) + " in " + self.name +
-                  ". This can happen if a spline is deleted in Edit Mode.")
-            raise
+            ob = self.get_object()
 
-        point_source = spline.bezier_points
+            # Find the spline that corresponds to the section
+            spline_i = self.name2spline_index[current_root.name]
 
-        del spline
+            try:
+                spline = self.curve.splines[spline_i]
 
-        # Get the 3d points
-        num_coords = len(point_source)
+            except IndexError:
+                print("Could not find spline with index " + str(spline_i) + " in " + self.name +
+                      ". This can happen if a spline is deleted in Edit Mode.")
+                raise
 
-        coords = np.zeros(num_coords * 3)
-        point_source.foreach_get("co", coords)
+            point_source = spline.bezier_points
 
-        # Adjust coords for container origin and rotation
-        coords = self.to_global(coords)
+            del spline
 
-        if self.closed_ends:
-            # Discard the 0-radius end caps
-            coords = coords[3:-3]
+            # Get the 3d points
+            num_coords = len(point_source)
 
-        root.coords = coords.tolist()
+            coords = np.zeros(num_coords * 3)
+            point_source.foreach_get("co", coords)
 
-        # Get radii
-        radii = np.zeros(num_coords)
-        point_source.foreach_get("radius", radii)
-        root.radii  = (radii[1:-1] if self.closed_ends else radii).tolist()
-        del radii
+            # Adjust coords for container origin and rotation
+            coords = self.to_global(coords)
 
-        # Cleanup before recursion
-        del point_source, num_coords, coords
+            if self.closed_ends:
+                # Discard the 0-radius end caps
+                coords = coords[3:-3]
 
-        if recursive:
-            for child in root.children:
-                self.update_group_section(child, recursive=True)
+            current_root.coords = coords.tolist()
+
+            # Get radii
+            radii = np.zeros(num_coords)
+            point_source.foreach_get("radius", radii)
+            current_root.radii = (radii[1:-1] if self.closed_ends else radii).tolist()
+            del radii
+
+            # Cleanup before processing next section
+            del point_source, num_coords, coords
+
+            if recursive:
+                # Add child sections to the stack to process them iteratively
+                stack.extend(reversed(current_root.children))
 
     def add_section(self, root, recursive=True, in_top_level=True, origin_type="center"):
-        # Reshape the coords to be n X 3 array (for xyz)
-        coords = np.array(root.coords)
-        coords.shape = (-1, 3)
+        """
+        Iteratively adds sections to the cell object starting from the root section.
 
-        if in_top_level:
-            self.set_origin(coords, origin_type)
+        :param root: The root section to start adding from.
+        :param recursive: Whether to process child sections recursively.
+        :param in_top_level: Indicates if the root is the top-level section.
+        :param origin_type: The origin type to use when setting the origin.
+        :return: None
+        """
 
-        # Add section spline to the cell object
-        spline = self.add_spline(coords, root.radii, self.smooth_sections)
+        # Initialize the stack with the root node and its in_top_level status
+        stack = [(root, in_top_level)]
 
-        # If material is not provided, create one
-        if self.assigned_container_material is None:
-            material = CurveContainer.create_material(
-                root.name,
-                self.default_color,
-                self.default_brightness
-            )
+        while stack:
+            current_node, current_in_top_level = stack.pop()
 
-        # If material is provided, assign it to the spline
-        else:
-            material = self.assigned_container_material
+            # Reshape the coords to be n X 3 array (for xyz)
+            coords = np.array(current_node.coords)
+            coords.shape = (-1, 3)
 
-        mat_idx = self.add_material_to_object(material)
+            if current_in_top_level:
+                self.set_origin(coords, origin_type)
 
-        # Assign the material to the new spline
-        spline.material_index = mat_idx
+            # Add section spline to the cell object
+            spline = self.add_spline(coords, current_node.radii, self.smooth_sections)
 
+            # If material is not provided, create one
+            if self.assigned_container_material is None:
+                material = CurveContainer.create_material(
+                    current_node.name,
+                    self.default_color,
+                    self.default_brightness
+                )
+            # If material is provided, assign it to the spline
+            else:
+                material = self.assigned_container_material
 
-        # Save spline index for later lookup
-        # Note: In Blender, using edit-mode on a curve object, results in creation of
-        # new spline instances when returning to object-mode. If references to the
-        # old splines are kept, Blender usually crashes. Here we retain the spline index,
-        # which is preserved (if splines are not deleted in edit-mode).
-        spline_index = len(self.curve.splines) - 1
-        self.name2spline_index[root.name] = spline_index
-        self.spline_index2section[spline_index] = root
+            mat_idx = self.add_material_to_object(material)
 
-        # Cleanup before starting recursion
-        del spline, material, mat_idx
+            # Assign the material to the new spline
+            spline.material_index = mat_idx
 
-        # Do same with the children
-        if recursive:
-            for child in root.children:
-                self.add_section(child, recursive=True, in_top_level=False)
+            # Save spline index for later lookup
+            # Note: In Blender, using edit-mode on a curve object, results in creation of
+            # new spline instances when returning to object-mode. If references to the
+            # old splines are kept, Blender usually crashes. Here we retain the spline index,
+            # which is preserved (if splines are not deleted in edit-mode).
+            spline_index = len(self.curve.splines) - 1
+            self.name2spline_index[current_node.name] = spline_index
+            self.spline_index2section[spline_index] = current_node
+
+            # Cleanup before starting recursion
+            del spline, material, mat_idx
+
+            # Do same with the children
+            if recursive:
+                # Add child sections to the stack to process them iteratively
+                # Reverse the children to maintain traversal order
+                for child in reversed(current_node.children):
+                    stack.append((child, False))
 
     def set_origin(self, coords, type = "center"):
         if type == "center":
@@ -323,13 +353,13 @@ class CurveContainer:
             self.get_object().location = coords[0]
 
     def link(self):
-        bpy.context.collection.objects.link(self.get_object())
+        bpy.context.collection.objects.link(self.get_object()) # already-iterative
 
         self.linked = True
 
     def unlink(self):
         try:
-            bpy.context.collection.objects.unlink(self.get_object())
+            bpy.context.collection.objects.unlink(self.get_object()) # already-iterative
 
         except RuntimeError:
             pass  # ignore if already unlinked

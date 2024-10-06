@@ -70,13 +70,13 @@ if inside_blender:
         register_module_classes(blenderneuron.blender.panels.rootgroup)
         register_module_classes(blenderneuron.blender.properties.rootgroup)
 
-        blenderneuron.blender.properties.rootgroup.register()
+        blenderneuron.blender.properties.rootgroup.register() # already-iterative
 
         register_module_classes(blenderneuron.blender.operators.connection)
         register_module_classes(blenderneuron.blender.panels.connection)
         register_module_classes(blenderneuron.blender.properties.connection)
 
-        blenderneuron.blender.properties.connection.register()
+        blenderneuron.blender.properties.connection.register() # already-iterative
 
         # This ensures the server starts on Blender load (self-removing)
         bpy.app.handlers.depsgraph_update_post.append(auto_start)
@@ -100,7 +100,7 @@ if inside_blender:
         register_module_classes(blenderneuron.blender.panels.rootgroup, unreg=True)
         register_module_classes(blenderneuron.blender.properties.rootgroup, unreg=True)
 
-        blenderneuron.blender.properties.rootgroup.unregister()
+        blenderneuron.blender.properties.rootgroup.unregister() # already-iterative
 
 
 

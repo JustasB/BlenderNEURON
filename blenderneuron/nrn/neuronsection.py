@@ -5,15 +5,23 @@ import numpy as np
 class NeuronSection(Section):
 
     def from_updated_blender_root(self, blender_section):
+        """
+        Update the coordinates and radii from the updated blender_section, iteratively for all child sections.
 
-        self.update_coords_and_radii(blender_section)
-        self.segments_3D = []
+        :param blender_section: The updated blender section data
+        :return: None
+        """
 
-        for i, blender_child in enumerate(blender_section["children"]):
-            section = self.children[i]
+        stack = [(self, blender_section)]
+        while stack:
+            node, b_section = stack.pop()
+            node.update_coords_and_radii(b_section)
+            node.segments_3D = []
 
-            section.from_updated_blender_root(blender_child)
-
+            for i, blender_child in enumerate(b_section["children"]):
+                section = node.children[i]
+                # Add child section and its corresponding blender_child to the stack
+                stack.append((section, blender_child))
 
     def from_skeletal_blender_root(self, source_section, group):
         try:
@@ -24,26 +32,39 @@ class NeuronSection(Section):
         except KeyError:
             raise Exception("Could not find section: " + sec_name + " loaded in NEURON")
 
-
-
     def from_nrn_section(self, nrn_section, group):
-        self.group = group
-        self.nrn_section = nrn_section
+        """
+        Iteratively initializes the NeuronSection instances from NEURON sections, maintaining the original structure.
 
-        self.name = nrn_section.name()
+        :param nrn_section: The NEURON section to initialize from
+        :param group: The group to which the sections belong
+        :return: None
+        """
 
-        for nrn_child_sec in nrn_section.children():
-            child = NeuronSection()
-            child.from_nrn_section(nrn_child_sec, group)
-            self.children.append(child)
+        stack = [(self, nrn_section, False)]
+        while stack:
+            node, nrn_sec, visited = stack.pop()
+            if visited:
+                # Code to run after processing all children
+                node.get_coords_and_radii()
 
-        self.get_coords_and_radii()
+                parent_seg = nrn_sec.parentseg()
+                node.parent_connection_loc = parent_seg.x if parent_seg is not None else None
+                node.connection_end = nrn_sec.orientation()
 
-        parent_seg = nrn_section.parentseg()
-        self.parent_connection_loc = parent_seg.x if parent_seg is not None else None
-        self.connection_end = nrn_section.orientation()
+                node.segments_3D = []
+            else:
+                # Initial processing of the node
+                node.group = group
+                node.nrn_section = nrn_sec
+                node.name = nrn_sec.name()
 
-        self.segments_3D = []
+                # Mark the node as visited and process children
+                stack.append((node, nrn_sec, True))
+                for nrn_child_sec in nrn_sec.children():
+                    child = NeuronSection()
+                    node.children.append(child)
+                    stack.append((child, nrn_child_sec, False))
 
     def update_coords_and_radii(self, blender_section):
         self.nseg = blender_section["nseg"]
@@ -108,11 +129,13 @@ class NeuronSection(Section):
         :return: None
         """
 
-        for seg in self.segments_3D:
-            seg.collect(self.group.record_variable)
-
-        for child in self.children():
-            child.collect_segments_recursive()
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            for seg in node.segments_3D:
+                seg.collect(node.group.record_variable)
+            # Add children to stack in reverse order to maintain traversal order
+            stack.extend(reversed(list(node.children())))
 
     def collect(self, recursive=True):
         """
@@ -122,9 +145,11 @@ class NeuronSection(Section):
         :return: None
         """
 
-        value = getattr(self.nrn_section(0.5), self.group.record_variable)
-        self.activity.values.append(value)
-
-        if recursive:
-            for child in self.children:
-                child.collect(recursive=True)
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            value = getattr(node.nrn_section(0.5), node.group.record_variable)
+            node.activity.values.append(value)
+            if recursive:
+                # Add children to stack in reverse order to maintain traversal order
+                stack.extend(reversed(node.children))

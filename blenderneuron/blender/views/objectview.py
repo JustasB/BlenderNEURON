@@ -142,7 +142,7 @@ class ObjectViewAbstract(ViewAbstract):
 
         # Remove curve template
         try:
-            bpy.data.curves.remove(self.curve_template)
+            bpy.data.curves.remove(self.curve_template) # already-iterative
         except TypeError:
             pass
 
@@ -283,8 +283,22 @@ class ObjectViewAbstract(ViewAbstract):
         return result
 
     def animate_section_material(self, root, recursive=True):
-        self.animate_activity(root.activity, root.name)
+        """
+        Animates the section materials starting from the root section. If recursive is True, it iteratively animates
+        all child sections as well.
 
+        :param root: The root section to start animation from
+        :param recursive: Whether to process child sections recursively
+        :return: None
+        """
         if recursive:
-            for child in root.children:
-                self.animate_section_material(child, True)
+            # Use a stack to iteratively traverse the section hierarchy
+            stack = [root]
+            while stack:
+                node = stack.pop()
+                self.animate_activity(node.activity, node.name)
+                # Add child sections to the stack to process them iteratively
+                stack.extend(reversed(node.children))
+        else:
+            # Only animate the root section
+            self.animate_activity(root.activity, root.name)

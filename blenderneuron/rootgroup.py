@@ -30,7 +30,7 @@ class RootGroup:
 
         # Cell and section level activity
         for root in self.roots.values():
-            root.clear_activity(recursive=True)
+            root.clear_activity(recursive=True) # already-iterative
 
         # Segment level
         for root in self.roots.values():
@@ -50,7 +50,10 @@ class RootGroup:
         """
         result = {
             "name": self.name,
-            "roots": [root.to_dict(include_activity, include_root_children, include_coords_and_radii) for root in self.roots.values()],
+            "roots": [
+                root.to_dict(include_activity, include_root_children, include_coords_and_radii) # already-iterative
+                for root in self.roots.values()
+            ],
             "import_synapses": self.import_synapses,
             "interaction_granularity": self.interaction_granularity,
             "record_activity": self.record_activity,
@@ -63,7 +66,7 @@ class RootGroup:
 
         if include_activity:
             result.update({
-                "activity": self.activity.to_dict(),
+                "activity": self.activity.to_dict(), # already-iterative
             })
 
         return result
