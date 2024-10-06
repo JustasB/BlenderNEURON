@@ -7,7 +7,7 @@ cov.start()
 
 
 # Load the specific test case
-# test_suite = unittest.defaultTestLoader.loadTestsFromName('tests.test_blender_node.TestBlenderNode.test_add_remove_group_and_cells')
+# test_suite = unittest.defaultTestLoader.loadTestsFromName('tests.test_serializer.TestSerialization')
 
 # Discover and run tests in "test" dir
 test_suite = unittest.TestLoader().discover(start_dir="tests")
