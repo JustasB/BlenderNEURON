@@ -123,8 +123,8 @@ class ObjectViewAbstract(ViewAbstract):
             # Before Blender 4, context override could be passed into the operator
             bpy.ops.view3d.view_selected(context, use_all_regions=False)
         else:
-            with bpy.context.temp_override(**context):
-                bpy.ops.view3d.view_selected(use_all_regions=False)
+            with bpy.context.temp_override(**context): # pragma: no cover
+                bpy.ops.view3d.view_selected(use_all_regions=False) # pragma: no cover
 
         # Unselect containers
         self.select_containers(False)
