@@ -8,6 +8,8 @@ import subprocess
 import bpy
 import numpy as np
 
+COLOR_RAMP_NAME = "ColorRamp" if bpy.app.version[0] < 4 else "Color Ramp"
+
 def launch_neuron(command):
     command = shlex.split(command)
     globals()["BlenderNEURON_neuron"] = subprocess.Popen(command)

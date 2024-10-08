@@ -1,7 +1,7 @@
 import threading
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from blenderneuron.blender.utils import get_operator_context_override, rdp
+from blenderneuron.blender.utils import get_operator_context_override, rdp, COLOR_RAMP_NAME
 from fnmatch import fnmatch
 import bpy
 import numpy as np
@@ -119,7 +119,12 @@ class ObjectViewAbstract(ViewAbstract):
 
         # Zoom to selected
         context = get_operator_context_override()
-        bpy.ops.view3d.view_selected(context, use_all_regions=False)
+        if bpy.app.version[0] < 4:
+            # Before Blender 4, context override could be passed into the operator
+            bpy.ops.view3d.view_selected(context, use_all_regions=False)
+        else:
+            with bpy.context.temp_override(**context):
+                bpy.ops.view3d.view_selected(use_all_regions=False)
 
         # Unselect containers
         self.select_containers(False)
@@ -245,7 +250,7 @@ class ObjectViewAbstract(ViewAbstract):
             node_color = mat.node_tree.nodes['Emission'].inputs['Color']
 
             # Color ramp eval function
-            color_value_at = group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.evaluate
+            color_value_at = group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.evaluate
 
             for i, frame in enumerate(frames):
                 # Get the color value from the ramp widget

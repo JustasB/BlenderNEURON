@@ -1,5 +1,6 @@
 import bpy, random, numpy
 
+from blenderneuron import COLOR_RAMP_NAME
 from blenderneuron.blender.views.synapseformerview import SynapseFormerView
 from blenderneuron.blender import BlenderNodeClass
 
@@ -607,8 +608,8 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         self.interaction_granularity = source_group.interaction_granularity
 
         self.as_lines = source_group.as_lines
-        self.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = \
-            source_group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color
+        self.node_group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.elements[0].color = \
+            source_group.node_group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.elements[0].color
         self.default_brightness = source_group.default_brightness
         self.smooth_sections = source_group.smooth_sections
         self.segment_subdivisions = source_group.segment_subdivisions
