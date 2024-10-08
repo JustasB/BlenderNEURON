@@ -1,7 +1,7 @@
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.jsonview import JsonView
-from blenderneuron.blender.utils import remove_prop_collection_item
+from blenderneuron.blender.utils import remove_prop_collection_item, COLOR_RAMP_NAME
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
@@ -53,11 +53,11 @@ class BlenderRootGroup(RootGroup):
 
     @property
     def default_color(self):
-        return self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color
+        return self.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.elements[0].color
 
     @default_color.setter
     def default_color(self, value):
-        self.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0].color = value
+        self.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.elements[0].color = value
 
     def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'

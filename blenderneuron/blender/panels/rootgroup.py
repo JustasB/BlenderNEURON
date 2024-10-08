@@ -1,4 +1,6 @@
 import bpy, random
+
+from blenderneuron import COLOR_RAMP_NAME
 from blenderneuron.blender.panels import AbstractBlenderNEURONPanel
 
 from bpy.props import (IntProperty,
@@ -163,7 +165,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             box.enabled = not group.as_lines
             col = box.split(factor=0.5)
             col.label(text='Init. Color:')
-            col.prop(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"].color_ramp.elements[0], "color", text='')
+            col.prop(group.node_group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.elements[0], "color", text='')
 
             col = box.split(factor=0.5)
             col.label(text='Init. Brightness:')
@@ -233,7 +235,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             if group.animate_color:
                 col.separator()
                 col = col.column()
-                col.template_color_ramp(group.node_group.color_ramp_material.node_tree.nodes["ColorRamp"], "color_ramp", expand=True)
+                col.template_color_ramp(group.node_group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME], "color_ramp", expand=True)
                 col.separator()
 
             col.separator()

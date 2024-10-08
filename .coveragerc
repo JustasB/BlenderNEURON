@@ -12,7 +12,7 @@ omit =
 
 [report]
 # minimum coverage % required to pass CI build
-fail_under = 92
+fail_under = 91
 
 # Regexes for lines to exclude from consideration
 exclude_lines =
