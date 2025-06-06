@@ -157,11 +157,30 @@ def deserialize(input_str):
                     current.append(obj)
             current = obj
             expecting_key = False
+            if kind == 'lparen':
+                # Mark that this list should be converted to a tuple on close
+                stack.append(('tuple', obj))
 
         elif kind == 'rbrace' or kind == 'rbracket' or kind == 'rparen':
-            if not stack:
-                break
-            current, key, expecting_key = stack.pop()
+            finished = current
+            if stack and stack[-1][0] == 'tuple' and stack[-1][1] is finished:
+                # Closing a tuple; convert the accumulated list
+                stack.pop()  # remove tuple marker
+                finished = tuple(finished)
+                if not stack:
+                    current = finished
+                    break
+                parent, key, expecting_key = stack.pop()
+                if isinstance(parent, dict):
+                    parent[key] = finished
+                    key = None
+                elif isinstance(parent, list):
+                    parent[-1] = finished
+                current = parent
+            else:
+                if not stack:
+                    break
+                current, key, expecting_key = stack.pop()
 
         elif kind == 'colon':
             expecting_key = False

@@ -19,6 +19,12 @@ class TestSerialization(unittest.TestCase):
         expected = "(1, 2, 3)"
         self.assertEqual(result, expected)
 
+    def test_deserialize_tuple(self):
+        data = "(1, 2, 3)"
+        result = deserialize(data)
+        expected = (1, 2, 3)
+        self.assertEqual(result, expected)
+
     def test_serialize_unsupported_type(self):
         # Test for line 52: raise TypeError(f"Unsupported type: {type(obj)}")
         class Unsupported:
