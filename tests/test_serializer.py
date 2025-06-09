@@ -19,6 +19,29 @@ class TestSerialization(unittest.TestCase):
         expected = "(1, 2, 3)"
         self.assertEqual(result, expected)
 
+    def test_deserialize_tuple(self):
+        data = "(1, 2, 3)"
+        result = deserialize(data)
+        expected = (1, 2, 3)
+        self.assertEqual(result, expected)
+
+    def test_deserialize_empty_tuple(self):
+        data = "()"
+        result = deserialize(data)
+        self.assertEqual(result, ())
+
+    def test_deserialize_nested_tuple(self):
+        data = "[1, (2, 3), {'a': (4, 5)}]"
+        result = deserialize(data)
+        expected = [1, (2, 3), {'a': (4, 5)}]
+        self.assertEqual(result, expected)
+
+    def test_deserialize_tuple_of_tuples(self):
+        data = "((1, 2), (3, 4))"
+        result = deserialize(data)
+        expected = ((1, 2), (3, 4))
+        self.assertEqual(result, expected)
+
     def test_serialize_unsupported_type(self):
         # Test for line 52: raise TypeError(f"Unsupported type: {type(obj)}")
         class Unsupported:
