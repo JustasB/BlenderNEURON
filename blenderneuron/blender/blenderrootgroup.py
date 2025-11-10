@@ -116,6 +116,8 @@ class BlenderRootGroup(RootGroup):
             node = stack.pop()
             # Set the activity times for the current node
             node.activity.times = times
+            for act in node.segment_activity.values():
+                act.times = times
 
             # Add child nodes to the stack to process them iteratively
             if node.children:
@@ -136,6 +138,8 @@ class BlenderRootGroup(RootGroup):
             node = stack.pop()
             # Simplify the activity of the current node
             node.activity.simplify(self.simplification_epsilon)
+            for act in node.segment_activity.values():
+                act.simplify(self.simplification_epsilon)
 
             # Add child nodes to the stack to process them iteratively
             if node.children:

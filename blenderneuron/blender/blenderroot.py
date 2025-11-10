@@ -53,12 +53,18 @@ class BlenderSection(Section):
                     child._parent_node = current_node
                     # Push child onto the stack for pre-processing
                     stack.append((child, nrn_child_dict, 'pre'))
+
             elif state == 'post':
                 # Post-processing: after children have been processed
-                current_node.segments_3D = []
 
                 if "activity" in current_dict:
                     current_node.activity.from_dict(current_dict["activity"])
+
+                if "segment_activity" in current_dict:
+                    current_node.segment_activity = {
+                        int(k): Activity.from_dict(v)
+                        for k, v in current_dict["segment_activity"].items()
+                    }
 
                 # If the current node has a parent, append it to the parent's children list
                 if hasattr(current_node, '_parent_node'):
