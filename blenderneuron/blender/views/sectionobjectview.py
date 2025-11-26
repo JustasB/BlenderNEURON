@@ -5,7 +5,7 @@ from blenderneuron.blender.views.curvecontainer import CurveContainer
 class SectionObjectView(ObjectViewAbstract):
     def show(self):
 
-        if self.group.recording_granularity not in ["Section", "Cell"]:
+        if self.group.recording_granularity not in ["Section", "Cell", "3D Segment"]:
             raise NotImplementedError(self.group.recording_granularity)
 
         color = self.group.default_color

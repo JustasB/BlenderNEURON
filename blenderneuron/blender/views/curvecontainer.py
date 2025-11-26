@@ -6,7 +6,7 @@ from blenderneuron.blender.utils import create_many_copies
 class CurveContainer:
 
     def __init__(self, root, curve_template, smooth_sections, color, brightness,
-                 recursive=True, origin_type="center", closed_ends=True,
+                 recording_granularity, recursive=True, origin_type="center", closed_ends=True,
                  container_material=None):
 
         self.name = root.name
@@ -15,6 +15,7 @@ class CurveContainer:
         self.assigned_container_material = container_material
         self.default_color = color
         self.default_brightness = brightness
+        self.recording_granularity = recording_granularity
 
         # copy the curve template and make a new blender object out of it
         bpy.data.objects.new(self.name, curve_template.copy())
@@ -295,24 +296,51 @@ class CurveContainer:
             if current_in_top_level:
                 self.set_origin(coords, origin_type)
 
-            # Add section spline to the cell object
-            spline = self.add_spline(coords, current_node.radii, self.smooth_sections)
+            if self.recording_granularity in ('Cell', 'Section'):
+                # Add section spline to the cell object
+                spline = self.add_spline(coords, current_node.radii, self.smooth_sections)
 
-            # If material is not provided, create one
-            if self.assigned_container_material is None:
-                material = CurveContainer.create_material(
-                    current_node.name,
-                    self.default_color,
-                    self.default_brightness
-                )
-            # If material is provided, assign it to the spline
-            else:
-                material = self.assigned_container_material
+                if self.assigned_container_material is None:
+                    material = CurveContainer.create_material(
+                        current_node.name,
+                        self.default_color,
+                        self.default_brightness
+                    )
 
-            mat_idx = self.add_material_to_object(material)
+                # If material is provided, assign it to the spline
+                else:
+                    material = self.assigned_container_material
 
-            # Assign the material to the new spline
-            spline.material_index = mat_idx
+                mat_idx = self.add_material_to_object(material)
+
+                # Assign the material to the new spline
+                spline.material_index = mat_idx
+
+            else: # '3D Segment'-level recording granularity
+                # A "3D segment" is the interval between two consecutive 3D NEURON points
+                # Note this is different from section.nseg. Num 3D segments == section.n3d()-1
+                # To animate each segment's color, will make each segment into a spline in the curve
+                # since splines can be assigned materials, each spline will get its own material
+                segment_count = len(coords) - 1
+
+                for s in range(segment_count):
+                    # This will be a two consecutive point spline
+                    segment_coords = coords[s:s+2]
+                    segment_radii = current_node.radii[s:s+2]
+
+                    spline = self.add_spline(segment_coords, segment_radii, smooth=False)
+
+                    # Each segment will get its own material with [seg_idx]'based name
+                    material = CurveContainer.create_material(
+                        f"{current_node.name}[{s}]",
+                        self.default_color,
+                        self.default_brightness
+                    )
+
+                    mat_idx = self.add_material_to_object(material)
+
+                    # Assign the material to the new spline
+                    spline.material_index = mat_idx
 
             # Save spline index for later lookup
             # Note: In Blender, using edit-mode on a curve object, results in creation of

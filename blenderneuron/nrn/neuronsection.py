@@ -1,3 +1,4 @@
+from blenderneuron.activity import Activity
 from blenderneuron.section import Section
 from neuron import h
 import numpy as np
@@ -138,11 +139,6 @@ class NeuronSection(Section):
             # Number of 3D points that define the section
             npts = int(h.n3d(sec=nrn_sec))
 
-            # Skip degenerate sections
-            if npts < 2:
-                stack.extend(reversed(list(nrn_sec.children())))
-                continue
-
             # Collect per-3D segment activity
             for i in range(1, npts):
                 seg_index = i - 1
@@ -152,9 +148,6 @@ class NeuronSection(Section):
                 startL = h.arc3d(i - 1, sec=nrn_sec)
                 endL = h.arc3d(i, sec=nrn_sec)
 
-                if nrn_sec.L == 0:
-                    continue  # degenerate geometry
-
                 x_mid = (startL + endL) / (2.0 * nrn_sec.L)
                 x_mid = min(max(x_mid, 0.0), 1.0)  # clamp to [0,1]
                 value = getattr(nrn_sec(x_mid), record_var)
@@ -162,7 +155,7 @@ class NeuronSection(Section):
                 node.segment_activity[seg_index].values.append(value)
 
             # Traverse child sections
-            stack.extend(reversed(list(nrn_sec.children())))
+            stack.extend(reversed(node.children))
 
     def collect(self, recursive=True):
         """

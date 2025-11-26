@@ -43,6 +43,7 @@ class ObjectViewAbstract(ViewAbstract):
 
     def make_curve_template(self):
         curve_template = bpy.data.curves.new(self.group.name+"_bezier", type='CURVE')
+        curve_template.use_fake_user = True
         curve_template.dimensions = '3D'
         curve_template.resolution_u = self.group.segment_subdivisions
         curve_template.fill_mode = 'FULL'
@@ -147,6 +148,8 @@ class ObjectViewAbstract(ViewAbstract):
 
         # Remove curve template
         try:
+            if self.curve_template is not None:
+                self.curve_template.use_fake_user = False
             bpy.data.curves.remove(self.curve_template) # already-iterative
         except TypeError:
             pass
@@ -171,6 +174,7 @@ class ObjectViewAbstract(ViewAbstract):
                 self.group.smooth_sections,
                 self.group.default_color,
                 self.group.default_brightness,
+                self.group.recording_granularity,
                 include_children,
                 origin_type,
                 self.closed_ends,

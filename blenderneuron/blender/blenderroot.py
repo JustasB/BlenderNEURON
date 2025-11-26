@@ -1,3 +1,4 @@
+from blenderneuron.activity import Activity
 from blenderneuron.section import Section
 import numpy as np
 import math
@@ -62,7 +63,7 @@ class BlenderSection(Section):
 
                 if "segment_activity" in current_dict:
                     current_node.segment_activity = {
-                        int(k): Activity.from_dict(v)
+                        int(k): Activity().from_dict(v)
                         for k, v in current_dict["segment_activity"].items()
                     }
 

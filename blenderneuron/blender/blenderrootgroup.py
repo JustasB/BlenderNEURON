@@ -64,6 +64,7 @@ class BlenderRootGroup(RootGroup):
 
         mat = bpy.data.materials.new(name)
         mat.use_nodes = True
+        mat.use_fake_user = True
 
         node = mat.node_tree.nodes.new('ShaderNodeValToRGB')
 
@@ -222,6 +223,7 @@ class BlenderRootGroup(RootGroup):
         ramp_mat = self.color_ramp_material
 
         if ramp_mat is not None:
+            ramp_mat.use_fake_user = False
             bpy.data.materials.remove(ramp_mat) # already-iterative
 
     def remove_from_UI(self):

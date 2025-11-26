@@ -521,6 +521,7 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         items=[
             ('Cell', 'Soma', 'Reports the value at each selected cell soma (root)', 2),
             ('Section', 'Section', 'Reports values at each selected cell section', 1),
+            ('3D Segment', 'Segment', 'Reports values at each selected cell section segment', 0),
         ],
         name="Recording granularity",
         description="The granularity used to record from selected cells. Finest recording "
