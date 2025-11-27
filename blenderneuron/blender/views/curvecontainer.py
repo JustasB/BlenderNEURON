@@ -229,50 +229,67 @@ class CurveContainer:
         while stack:
             current_root = stack.pop()
 
-            ob = self.get_object()
+            if self.recording_granularity in ('Cell', 'Section'):
+                # Get 3d data from single section spline
+                section_coords, section_radii = self.get_spline_3d_data(current_root.name)
 
-            # Find the spline that corresponds to the section
-            spline_i = self.name2spline_index[current_root.name]
+            else: # '3D Segment'
+                # In segment granularity, each 3D segment has its own spline+material
+                # Need to extract and merge the coords+radii from the splines into a single list
+                section_coords = []
+                section_radii = []
+                for iseg in range(len(current_root.radii)-1):
+                    seg_coords, seg_radii = self.get_spline_3d_data(f"{current_root.name}[{iseg}]")
 
-            try:
-                spline = self.curve.splines[spline_i]
+                    # Each segment spline is a 2-consecutive-NRN-point spline
+                    # want to add each point only once when re-building merged coords
+                    section_coords.append(seg_coords[0:3])
+                    section_radii.append(seg_radii[0])
 
-            except IndexError:
-                print("Could not find spline with index " + str(spline_i) + " in " + self.name +
-                      ". This can happen if a spline is deleted in Edit Mode.")
-                raise
+                    # if last segment spline, add the last segment point
+                    if iseg == len(current_root.radii)-2:
+                        section_coords.append(seg_coords[3:6])
+                        section_radii.append(seg_radii[1])
 
-            point_source = spline.bezier_points
-
-            del spline
-
-            # Get the 3d points
-            num_coords = len(point_source)
-
-            coords = np.zeros(num_coords * 3)
-            point_source.foreach_get("co", coords)
-
-            # Adjust coords for container origin and rotation
-            coords = self.to_global(coords)
-
-            if self.closed_ends:
-                # Discard the 0-radius end caps
-                coords = coords[3:-3]
-
-            current_root.coords = coords.tolist()
-
-            # Get radii
-            radii = np.zeros(num_coords)
-            point_source.foreach_get("radius", radii)
-            current_root.radii = (radii[1:-1] if self.closed_ends else radii).tolist()
-            del radii
-
-            # Cleanup before processing next section
-            del point_source, num_coords, coords
+            current_root.coords = section_coords
+            current_root.radii = section_radii
 
             if recursive:
                 # Add child sections to the stack to process them iteratively
                 stack.extend(reversed(current_root.children))
+
+    def get_spline_3d_data(self, spline_name):
+
+        # Find the spline that corresponds to the section
+        spline_i = self.name2spline_index[spline_name]
+
+        try:
+            spline = self.curve.splines[spline_i]
+
+        except IndexError:
+            print("Could not find spline with index " + str(spline_i) + " in " + self.name +
+                  ". This can happen if a spline is deleted in Edit Mode.")
+            raise
+
+        # Get the 3d points
+        num_coords = len(spline.bezier_points)
+
+        coords = np.zeros(num_coords * 3)
+        spline.bezier_points.foreach_get("co", coords)
+
+        # Adjust coords for container origin and rotation
+        coords = self.to_global(coords)
+
+        if self.closed_ends:
+            # Discard the 0-radius end caps that were added to the spline
+            coords = coords[3:-3]
+
+        # Get radii
+        radii = np.zeros(num_coords)
+        spline.bezier_points.foreach_get("radius", radii)
+        radii = (radii[1:-1] if self.closed_ends else radii).tolist()
+
+        return coords.tolist(), radii
 
     def add_section(self, root, recursive=True, in_top_level=True, origin_type="center"):
         """
@@ -318,6 +335,15 @@ class CurveContainer:
                 # Assign the material to the new spline
                 spline.material_index = mat_idx
 
+                # Save spline index for later lookup
+                # Note: In Blender, using edit-mode on a curve object, results in creation of
+                # new spline instances when returning to object-mode. If references to the
+                # old splines are kept, Blender usually crashes. Here we retain the spline index,
+                # which is preserved (if splines are not deleted in edit-mode).
+                spline_index = len(self.curve.splines) - 1
+                self.name2spline_index[current_node.name] = spline_index
+                self.spline_index2section[spline_index] = current_node
+
             else: # '3D Segment'-level recording granularity
                 # A "3D segment" is the interval between two consecutive 3D NEURON points
                 # Note this is different from section.nseg. Num 3D segments == section.n3d()-1
@@ -344,14 +370,10 @@ class CurveContainer:
                     # Assign the material to the new spline
                     spline.material_index = mat_idx
 
-            # Save spline index for later lookup
-            # Note: In Blender, using edit-mode on a curve object, results in creation of
-            # new spline instances when returning to object-mode. If references to the
-            # old splines are kept, Blender usually crashes. Here we retain the spline index,
-            # which is preserved (if splines are not deleted in edit-mode).
-            spline_index = len(self.curve.splines) - 1
-            self.name2spline_index[current_node.name] = spline_index
-            self.spline_index2section[spline_index] = current_node
+                    # Save splines for later fast lookup
+                    spline_index = len(self.curve.splines) - 1
+                    self.name2spline_index[f"{current_node.name}[{s}]"] = spline_index
+                    self.spline_index2section[spline_index] = current_node
 
             # Cleanup before starting recursion
             del spline, material, mat_idx

@@ -51,7 +51,7 @@ class SectionObjectView(ObjectViewAbstract):
 
     def set_childrens_parent(self, parent_sec, recursive=True):
         """
-        Iteratively sets the parent-child relationships between containers based on the section hierarchy.
+        Iteratively sets the Blender parent-child relationships between containers based on the section hierarchy.
 
         :param parent_sec: The parent section whose children will have their parent containers set.
         :param recursive: Whether to process child sections recursively.

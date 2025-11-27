@@ -184,8 +184,8 @@ class BlenderRootGroup(RootGroup):
         if self.view is None:
             return
 
-        if not hasattr(self.view, "update_group"):
-            raise Exception(str(self.view.__class__) + ' does not implement update_group() method')
+        if not hasattr(self.view, "update_group_with_view_data"):
+            raise Exception(str(self.view.__class__) + ' does not implement update_group_with_view_data() method')
 
         self.view.update_group_with_view_data()
 
