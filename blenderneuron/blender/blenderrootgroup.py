@@ -156,7 +156,7 @@ class BlenderRootGroup(RootGroup):
             # Save any view changes
             # Except don't apply changes from an existing physics view
             if type(self.view) != VectorConfinerView:
-                self.from_view()
+                self.update_with_view_data()
 
             self.view.remove()
 
@@ -180,14 +180,14 @@ class BlenderRootGroup(RootGroup):
 
         return self.view
 
-    def from_view(self):
+    def update_with_view_data(self):
         if self.view is None:
             return
 
         if not hasattr(self.view, "update_group"):
             raise Exception(str(self.view.__class__) + ' does not implement update_group() method')
 
-        self.view.update_group()
+        self.view.update_group_with_view_data()
 
     def add_to_UI(self):
         i = len(self.node.groups.keys())-1
@@ -304,7 +304,7 @@ class BlenderRootGroup(RootGroup):
                     root.remove_from_group()
 
     def to_file(self, file_name):
-        self.from_view()
+        self.update_with_view_data()
 
         group_dict = JsonView(self).show()
 

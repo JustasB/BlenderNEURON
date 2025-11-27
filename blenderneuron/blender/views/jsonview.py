@@ -18,5 +18,5 @@ class JsonView(ViewAbstract):
 
         return group_dict
 
-    def update_group(self):
+    def update_group_with_view_data(self):
         pass

@@ -155,7 +155,7 @@ class BlenderSection(Section):
 
         return self.split_sections
 
-    def update_coords_from_split_sections(self):
+    def update_coords_from_split_section_views(self):
         if not self.was_split:
             return
 

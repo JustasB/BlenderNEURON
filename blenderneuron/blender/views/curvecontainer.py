@@ -211,14 +211,16 @@ class CurveContainer:
 
         return global_coords
 
-    def update_group_section(self, root, recursive=True):
+    def update_group_section_with_view_data(self, root, recursive=True):
         """
-        Iteratively updates the group sections starting from the root section. If recursive is True, it updates all child
-        sections as well.
+        Updates internal BlenderSection instances with 3D data from Blender curve objects
+        For example after the curves/points were moved/rotated in Blender
+        After this step, the modified morphology can be exported back to NEURON to update the sections in NEURON
 
-        :param root: The root section to start updating from.
-        :param recursive: Whether to process child sections recursively.
-        :return: None
+        :param root: The top-level BlenderSection instance of a cell
+        :param recursive: Whether to update BlenderRoot's child sections as well.
+
+        After this completes, Curve points+radii should match BlenderRoot points+radii
         """
 
         # Initialize a stack with the root section

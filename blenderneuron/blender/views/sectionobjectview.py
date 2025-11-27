@@ -28,7 +28,7 @@ class SectionObjectView(ObjectViewAbstract):
             # Animate section activity
             self.animate_section_material(
                 root,
-                recursive=self.group.recording_granularity == 'Section'
+                recursive=self.group.recording_granularity in ('Section', '3D Segment')
             )
 
         self.link_containers()
@@ -158,18 +158,18 @@ class SectionObjectView(ObjectViewAbstract):
                 for child in reversed(current_section.children):
                     stack.append((child, False))
 
-    def update_group(self):
+    def update_group_with_view_data(self):
         for root in self.group.roots.values():
-            self.update_each_container_section(root)
+            self.update_each_container_section_with_view_data(root)
 
-    def update_each_container_section(self, section):
+    def update_each_container_section_with_view_data(self, section):
         """
-        Iteratively updates each container section. If a section was split, it updates the split sections with the
+        Iteratively updates each container BlenderSection section with 3d data from Blender Curve objects.
+        If a section was split, it updates the split sections with the
         split container coordinates and then updates the original section's coordinates from the splits. Otherwise,
-        it updates the section directly. Processes all child sections iteratively.
+        it updates the section directly.
 
         :param section: The root section to start the update from
-        :return: None
         """
 
         stack = [section]
@@ -182,16 +182,16 @@ class SectionObjectView(ObjectViewAbstract):
                     container = self.containers.get(split_sec.name)
 
                     if container is not None:
-                        container.update_group_section(split_sec, recursive=False)
+                        container.update_group_section_with_view_data(split_sec, recursive=False)
 
                 # Update the coords of the unsplit section with the coords from the splits
-                current_section.update_coords_from_split_sections()
+                current_section.update_coords_from_split_section_views()
 
             else:
                 container = self.containers.get(current_section.name)
 
                 if container is not None:
-                    container.update_group_section(current_section, recursive=False)
+                    container.update_group_section_with_view_data(current_section, recursive=False)
 
             # Add child sections to the stack to process them iteratively
             stack.extend(current_section.children)
