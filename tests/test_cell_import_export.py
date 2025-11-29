@@ -85,6 +85,105 @@ class TestCellImportExport(BlenderTestCase):
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
 
+    def test_import_export_segment_level_color_cell(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            # Load TestCell.hoc - create a group
+            ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
+                                   'tc = h.TestCell();')
+
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Check that the cell was loaded
+            self.assertEqual("TestCell[0].soma", bcn.client.run_command(
+                "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
+                "return_value = group.root_entries[0].name"
+            ))
+
+            # Import the cell and check if created in correct location
+            x,y,z = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = '3D Segment';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
+            )
+
+            self.assertAlmostEqual(x, 150, 1)
+            self.assertAlmostEqual(y, -176, 1)
+            self.assertAlmostEqual(z, 0, 1)
+
+            # And cell bounding box dimensions are correct
+            dim_x,dim_y,dim_z = bcn.client.run_command(
+                "return_value = list(bpy.data.objects['TestCell[0].soma'].dimensions)"
+            )
+
+
+            self.assertAlmostEqual(dim_x, 165.45, 1)
+            self.assertAlmostEqual(dim_y, 165.80, 1)
+            self.assertAlmostEqual(dim_z, 1, 0)
+
+            # Shift the cell up by 100 um, and export to NRN
+            bcn.client.run_command(
+                "bpy.data.objects['TestCell[0].soma'].location = [150, -176, 100];"
+                "bpy.ops.blenderneuron.update_groups_with_view_data();"
+                "bpy.ops.blenderneuron.export_groups();"
+            )
+
+            # Test if coordinates in NRN changed by same amount
+            z_soma, z_dend1, z_dend2 = ncn.client.run_command(
+                'return_value = [h.z3d(0,sec=tc.soma), h.z3d(0,sec=tc.dendrites[-1]), h.z3d(0,sec=tc.dendrites[15])]'
+            )
+
+            self.assertEqual(z_soma, 100.0)
+            self.assertEqual(z_soma, z_dend1)
+            self.assertEqual(z_dend1, z_dend2)
+
+            # Re-import the cell and check if change persists
+            x,y,z = bcn.client.run_command(
+                "bpy.ops.blenderneuron.import_groups();"
+                "return_value = list(bpy.data.objects['TestCell[0].soma'].location)"
+            )
+
+            self.assertAlmostEqual(z, 100, 1)
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
+    def test_import_export_cell_without_nrn_xyz3d_points(self):
+
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+
+            # Create a nrn section without defining shape (default position, L, diam)
+            ncn.client.run_command('tc = h.Section(name="test_soma");')
+
+            bcn.client.run_command(
+                "bpy.ops.blenderneuron.get_cell_list_from_neuron();"
+            )
+
+            # Check that the cell was loaded
+            self.assertEqual("test_soma", bcn.client.run_command(
+                "group = bpy.data.scenes['Scene'].BlenderNEURON.groups['Group.000'];"
+                "return_value = group.root_entries[0].name"
+            ))
+
+            # Import the cell and check if created in correct location
+            x,y,z = bcn.client.run_command(
+                "bpy.ops.blenderneuron.import_groups();"
+                "return_value = list(bpy.data.objects['test_soma'].location)"
+            )
+
+            self.assertAlmostEqual(x, 50, 1)
+            self.assertAlmostEqual(y, 0, 1)
+            self.assertAlmostEqual(z, 0, 1)
+
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
+
     def test_import_remove_import_again(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
@@ -225,6 +324,30 @@ class TestCellImportExport(BlenderTestCase):
             self.assertGreater(dend_emission_start, 0)
             self.assertGreater(dend_emission_end, dend_emission_start)
 
+            # Import animation - animate EACH 3D SEGMENT
+            soma_mat_exists, dendrite_mat_exists,  = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = '3D Segment';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma[0]' in mats, 'TestCell[0].dendrites[0][0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertTrue(dendrite_mat_exists)
+
+            dend_emission_start, dend_emission_end,  = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(dend_emission_start, 0)
+            self.assertGreater(dend_emission_end, dend_emission_start)
+
             # --------------- Section level objects ------------------- #
             soma_object_exists, dendrite_object_exists = bcn.client.run_command(
                 "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Section';"
@@ -278,6 +401,30 @@ class TestCellImportExport(BlenderTestCase):
                 "start_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "bpy.context.scene.frame_set(5);"
                 "end_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
+                "return_value = (start_emit, end_emit);"
+            )
+
+            self.assertGreater(dend_emission_start, 0)
+            self.assertGreater(dend_emission_end, dend_emission_start)
+
+            # Import animation - animate EACH 3D Segment
+            soma_mat_exists, dendrite_mat_exists, = bcn.client.run_command(
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].record_activity = True;"
+                "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].recording_granularity = '3D Segment';"
+                "bpy.ops.blenderneuron.import_groups();"
+                "mats = bpy.data.materials;"
+                "return_value = ('TestCell[0].soma[0]' in mats, 'TestCell[0].dendrites[0][0]' in mats);"
+            )
+
+            self.assertTrue(soma_mat_exists)
+            self.assertTrue(dendrite_mat_exists)
+
+            dend_emission_start, dend_emission_end, = bcn.client.run_command(
+                "mats = bpy.data.materials;"
+                "bpy.context.scene.frame_set(0);"
+                "start_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
+                "bpy.context.scene.frame_set(5);"
+                "end_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
 

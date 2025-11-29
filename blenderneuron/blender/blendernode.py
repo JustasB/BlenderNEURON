@@ -157,37 +157,90 @@ class BlenderNode(CommNode):
             else:
                 group.remove_view()
 
-
     def add_neon_effect(self):
         """
-        Adds glare filter to the compositing node tree
-
-        :return:
+        Adds a neon-style glare effect for Cycles (via compositor)
+        and enables bloom for Eevee so the glow appears in both engines.
         """
+
         scene = bpy.context.scene
+
+        # ============================================================
+        # 1. ENABLE BLOOM IF USING EEVEE
+        # ============================================================
+        scene.eevee.use_bloom = True
+
+        # ============================================================
+        # 2. ENABLE COMPOSITOR NODES (Cycles bloom)
+        # ============================================================
         scene.use_nodes = True
+        nt = scene.node_tree
+        nodes = nt.nodes
+        links = nt.links
 
-        links = scene.node_tree.links
-        nodes = scene.node_tree.nodes
+        # ------------------------------------------------------------
+        # Get or create Render Layers node
+        # ------------------------------------------------------------
+        rl = nodes.get('Render Layers')
+        if rl is None:
+            rl = nodes.new('CompositorNodeRLayers')
+            rl.name = 'Render Layers'
 
-        layers = nodes.get('Render Layers')
+        # ------------------------------------------------------------
+        # Get or create Composite output node
+        # ------------------------------------------------------------
+        comp = nodes.get('Composite')
+        if comp is None:
+            comp = nodes.new('CompositorNodeComposite')
+            comp.name = 'Composite'
 
-        if layers is None:
-            layers = nodes.new('CompositorNodeRLayers')
+        # ------------------------------------------------------------
+        # Optional Viewer node for compositor preview
+        # ------------------------------------------------------------
+        viewer = nodes.get('Viewer')
+        if viewer is None:
+            viewer = nodes.new('CompositorNodeViewer')
+            viewer.name = 'Viewer'
+            viewer.use_alpha = False
 
-        glare = nodes.new('CompositorNodeGlare')
+        # ------------------------------------------------------------
+        # Get or create Glare node (no duplication)
+        # ------------------------------------------------------------
+        glare = None
+        for node in nodes:
+            if node.type == 'GLARE':
+                glare = node
+                break
 
-        composite = nodes.get('Composite')
+        if glare is None:
+            glare = nodes.new('CompositorNodeGlare')
+            glare.name = 'NeonGlare'
 
-        if composite is None:
-            composite = nodes.new('CompositorNodeComposite')
-
-        links.new(layers.outputs['Image'], glare.inputs['Image'])
-        links.new(glare.outputs['Image'], composite.inputs['Image'])
-
-        glare.quality = 'MEDIUM'
+        # ------------------------------------------------------------
+        # Configure glare for neon-style streak effect
+        # ------------------------------------------------------------
+        glare.glare_type = 'STREAKS'  # neon streak effect
+        glare.quality = 'HIGH'
         glare.iterations = 3
         glare.color_modulation = 0.2
         glare.threshold = 0.1
         glare.streaks = 7
         glare.fade = 0.75
+        glare.mix = 0  # 0 = effect only
+
+        # ------------------------------------------------------------
+        # Remove old links to Composite/Viewer to avoid stacking
+        # ------------------------------------------------------------
+        for link in list(links):
+            if link.to_node in {comp, viewer}:
+                links.remove(link)
+
+        # ------------------------------------------------------------
+        # Connect nodes cleanly:
+        # Render Layers → Glare → Composite + Viewer
+        # ------------------------------------------------------------
+        links.new(rl.outputs['Image'], glare.inputs['Image'])
+        links.new(glare.outputs['Image'], comp.inputs['Image'])
+        links.new(glare.outputs['Image'], viewer.inputs['Image'])
+
+

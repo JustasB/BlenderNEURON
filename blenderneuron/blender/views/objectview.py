@@ -321,7 +321,7 @@ class ObjectViewAbstract(ViewAbstract):
                 else: # '3D Segment'
                     for iseg in range(len(node.radii)-1):
                         self.animate_activity(
-                            activity=node.segment_activity[iseg],
+                            activity=node.segment_activity.get(iseg),
                             material_name=f"{node.name}[{iseg}]"
                         )
 
@@ -335,6 +335,6 @@ class ObjectViewAbstract(ViewAbstract):
             else:  # '3D Segment'
                 for iseg in range(len(root.radii) - 1):
                     self.animate_activity(
-                        activity=root.segment_activity[iseg],
+                        activity=root.segment_activity.get(iseg),
                         material_name=f"{root.name}[{iseg}]"
                     )
