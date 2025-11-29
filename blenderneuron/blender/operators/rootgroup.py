@@ -242,7 +242,7 @@ class UpdateGroupsWithViewDataOperator(Operator, CellGroupOperatorAbstract):
 
         for group in self.node.groups.values():
             if group.selected:
-                group.from_view()
+                group.update_with_view_data()
 
         return{'FINISHED'}
 

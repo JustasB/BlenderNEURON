@@ -1,6 +1,8 @@
+from blenderneuron.activity import Activity
 from blenderneuron.section import Section
 from neuron import h
 import numpy as np
+
 
 class NeuronSection(Section):
 
@@ -16,7 +18,6 @@ class NeuronSection(Section):
         while stack:
             node, b_section = stack.pop()
             node.update_coords_and_radii(b_section)
-            node.segments_3D = []
 
             for i, blender_child in enumerate(b_section["children"]):
                 section = node.children[i]
@@ -52,7 +53,6 @@ class NeuronSection(Section):
                 node.parent_connection_loc = parent_seg.x if parent_seg is not None else None
                 node.connection_end = nrn_sec.orientation()
 
-                node.segments_3D = []
             else:
                 # Initial processing of the node
                 node.group = group
@@ -130,12 +130,32 @@ class NeuronSection(Section):
         """
 
         stack = [self]
+
         while stack:
             node = stack.pop()
-            for seg in node.segments_3D:
-                seg.collect(node.group.record_variable)
-            # Add children to stack in reverse order to maintain traversal order
-            stack.extend(reversed(list(node.children())))
+            nrn_sec = node.nrn_section
+            record_var = node.group.record_variable
+
+            # Number of 3D points that define the section
+            npts = int(h.n3d(sec=nrn_sec))
+
+            # Collect per-3D segment activity
+            for i in range(1, npts):
+                seg_index = i - 1
+                if seg_index not in node.segment_activity:
+                    node.segment_activity[seg_index] = Activity()
+
+                startL = h.arc3d(i - 1, sec=nrn_sec)
+                endL = h.arc3d(i, sec=nrn_sec)
+
+                x_mid = (startL + endL) / (2.0 * nrn_sec.L)
+                x_mid = min(max(x_mid, 0.0), 1.0)  # clamp to [0,1]
+                value = getattr(nrn_sec(x_mid), record_var)
+
+                node.segment_activity[seg_index].values.append(value)
+
+            # Traverse child sections
+            stack.extend(reversed(node.children))
 
     def collect(self, recursive=True):
         """

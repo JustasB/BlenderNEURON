@@ -13,13 +13,13 @@ class Section:
         self.point_count = 0
         self.coords = []
         self.radii = []
-        self.segments_3D = []
 
         self.children = []
         self.parent_connection_loc = -1
         self.connection_end = -1
 
         self.activity = Activity()
+        self.segment_activity = {}   # {segment_index: Activity()}
 
     def __str__(self):
         return self.name
@@ -35,7 +35,9 @@ class Section:
 
             if include_activity:
                 node_dict["activity"] = node.activity.to_dict()
-                node_dict["segments_3D"] = [seg.to_dict() for seg in node.segments_3D]
+                node_dict["segment_activity"] = {
+                    str(i): act.to_dict() for i, act in node.segment_activity.items()
+                }
 
             if include_coords_and_radii:
                 node_dict["nseg"] = node.nseg
@@ -61,10 +63,9 @@ class Section:
 
         return result
 
-    def clear_3d_segment_activity(self):
+    def clear_segment_activity(self):
         # Clear the activity of the 3D segments in the current object
-        for seg in self.segments_3D:
-            seg.activity.clear()
+        self.segment_activity = {}
 
         # Use a stack to iteratively clear the 3D segment activity of the children
         stack = list(self.children)
@@ -72,8 +73,7 @@ class Section:
             current = stack.pop()
 
             # Clear the activity of the 3D segments of the current child
-            for seg in current.segments_3D:
-                seg.activity.clear()
+            current.segment_activity = {}
 
             # Add the current child's children to the stack for further processing
             stack.extend(current.children)

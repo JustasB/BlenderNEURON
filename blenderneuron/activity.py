@@ -32,6 +32,7 @@ class Activity:
 
     def from_dict(self, source):
         self.times, self.values = source["times"], source["values"]
+        return self
 
     def simplify(self, epsilon=0.0):
         if len(self.values) * len(self.times) == 0 or not numpy_available:

@@ -14,11 +14,11 @@ class ViewAbstract(object):
 
     @abstractmethod
     def show(self):
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
-    def update_group(self):
-        pass
+    def update_group_with_view_data(self):
+        raise NotImplementedError()
 
 
 class ObjectViewAbstract(ViewAbstract):
@@ -43,6 +43,7 @@ class ObjectViewAbstract(ViewAbstract):
 
     def make_curve_template(self):
         curve_template = bpy.data.curves.new(self.group.name+"_bezier", type='CURVE')
+        curve_template.use_fake_user = True
         curve_template.dimensions = '3D'
         curve_template.resolution_u = self.group.segment_subdivisions
         curve_template.fill_mode = 'FULL'
@@ -56,19 +57,10 @@ class ObjectViewAbstract(ViewAbstract):
         return bpy.data.curves.get(self.curve_template_name)
 
     def on_first_link(self):
-        # for window in bpy.context.window_manager.windows:
-        #     for area in window.screen.areas:
-        #         if area.type == 'VIEW_3D':
-        #             for space in area.spaces:
-        #                 if space.type == 'VIEW_3D': 
-        #                     # Set grid size - One cell 100 um
-        #                     # space.grid_scale = 100.0
-
-        #                     # Set viewport clipping distance
-        #                     # space.clip_end = 99999
-
-        #                     # Disable relationship lines
-        #                     # space.show_relationship_lines = False
+        # Set grid to 100um squares
+        # Extend camera clipping so large cells are visible
+        # Hide parent-child section relationship lines
+        ObjectViewAbstract.configure_viewport()
 
         # Add a sun lamp - at 500,500,500 um
         sun_exists = False
@@ -83,6 +75,24 @@ class ObjectViewAbstract(ViewAbstract):
         # Set camera clip distance
         for camera in bpy.data.cameras:
             camera.clip_end = 99999
+
+    @staticmethod
+    def configure_viewport():
+        for window in bpy.context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == 'VIEW_3D':
+                    for space in area.spaces:
+                        if space.type == 'VIEW_3D':
+                            # Grid size
+                            space.overlay.grid_scale = 100.0
+
+                            # Relationship lines
+                            space.overlay.show_relationship_lines = False
+
+                            # View clipping (SpaceView3D, NOT RegionView3D)
+                            space.clip_start = 0.01
+                            space.clip_end = 99999
+
 
     def link_containers(self):
 
@@ -147,6 +157,8 @@ class ObjectViewAbstract(ViewAbstract):
 
         # Remove curve template
         try:
+            if self.curve_template is not None:
+                self.curve_template.use_fake_user = False
             bpy.data.curves.remove(self.curve_template) # already-iterative
         except TypeError:
             pass
@@ -171,6 +183,7 @@ class ObjectViewAbstract(ViewAbstract):
                 self.group.smooth_sections,
                 self.group.default_color,
                 self.group.default_brightness,
+                self.group.recording_granularity,
                 include_children,
                 origin_type,
                 self.closed_ends,
@@ -301,9 +314,27 @@ class ObjectViewAbstract(ViewAbstract):
             stack = [root]
             while stack:
                 node = stack.pop()
-                self.animate_activity(node.activity, node.name)
+
+                if self.group.recording_granularity in  ('Cell','Section'):
+                    self.animate_activity(activity=node.activity, material_name=node.name)
+
+                else: # '3D Segment'
+                    for iseg in range(len(node.radii)-1):
+                        self.animate_activity(
+                            activity=node.segment_activity.get(iseg),
+                            material_name=f"{node.name}[{iseg}]"
+                        )
+
                 # Add child sections to the stack to process them iteratively
                 stack.extend(reversed(node.children))
         else:
-            # Only animate the root section
-            self.animate_activity(root.activity, root.name)
+            # Only animate the root section materials
+            if self.group.recording_granularity in ('Cell', 'Section'):
+                self.animate_activity(activity=root.activity, material_name=root.name)
+
+            else:  # '3D Segment'
+                for iseg in range(len(root.radii) - 1):
+                    self.animate_activity(
+                        activity=root.segment_activity.get(iseg),
+                        material_name=f"{root.name}[{iseg}]"
+                    )

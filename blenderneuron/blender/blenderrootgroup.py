@@ -64,6 +64,7 @@ class BlenderRootGroup(RootGroup):
 
         mat = bpy.data.materials.new(name)
         mat.use_nodes = True
+        mat.use_fake_user = True
 
         node = mat.node_tree.nodes.new('ShaderNodeValToRGB')
 
@@ -116,6 +117,8 @@ class BlenderRootGroup(RootGroup):
             node = stack.pop()
             # Set the activity times for the current node
             node.activity.times = times
+            for act in node.segment_activity.values():
+                act.times = times
 
             # Add child nodes to the stack to process them iteratively
             if node.children:
@@ -136,6 +139,8 @@ class BlenderRootGroup(RootGroup):
             node = stack.pop()
             # Simplify the activity of the current node
             node.activity.simplify(self.simplification_epsilon)
+            for act in node.segment_activity.values():
+                act.simplify(self.simplification_epsilon)
 
             # Add child nodes to the stack to process them iteratively
             if node.children:
@@ -151,7 +156,7 @@ class BlenderRootGroup(RootGroup):
             # Save any view changes
             # Except don't apply changes from an existing physics view
             if type(self.view) != VectorConfinerView:
-                self.from_view()
+                self.update_with_view_data()
 
             self.view.remove()
 
@@ -175,14 +180,14 @@ class BlenderRootGroup(RootGroup):
 
         return self.view
 
-    def from_view(self):
+    def update_with_view_data(self):
         if self.view is None:
             return
 
-        if not hasattr(self.view, "update_group"):
-            raise Exception(str(self.view.__class__) + ' does not implement update_group() method')
+        if not hasattr(self.view, "update_group_with_view_data"):
+            raise Exception(str(self.view.__class__) + ' does not implement update_group_with_view_data() method')
 
-        self.view.update_group()
+        self.view.update_group_with_view_data()
 
     def add_to_UI(self):
         i = len(self.node.groups.keys())-1
@@ -218,6 +223,7 @@ class BlenderRootGroup(RootGroup):
         ramp_mat = self.color_ramp_material
 
         if ramp_mat is not None:
+            ramp_mat.use_fake_user = False
             bpy.data.materials.remove(ramp_mat) # already-iterative
 
     def remove_from_UI(self):
@@ -298,7 +304,7 @@ class BlenderRootGroup(RootGroup):
                     root.remove_from_group()
 
     def to_file(self, file_name):
-        self.from_view()
+        self.update_with_view_data()
 
         group_dict = JsonView(self).show()
 

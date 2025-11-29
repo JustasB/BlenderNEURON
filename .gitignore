@@ -44,3 +44,4 @@ docs/source/\*.md
 blender.tar.xz
 /blender4/
 /x86_64
+.DS_Store

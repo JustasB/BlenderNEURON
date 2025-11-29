@@ -61,6 +61,8 @@ class SynapseFormerView(CellObjectView):
             syn_container = bpy.data.objects.get(self.synapse_container_name)
 
             if syn_container is not None:
+                syn_container.use_fake_user = False
+
                 curve_name = syn_container.data.name
 
                 bpy.data.objects.remove(syn_container) # already-iterative
@@ -279,6 +281,7 @@ class SynapseFormerView(CellObjectView):
 
         # Draw the pairs as line segments
         bez = bpy.data.objects.new("SynapsePreview", self.make_curve())
+        bez.use_fake_user = True
 
         for pair in syn_pairs:
             spline = bez.data.splines.new('BEZIER')

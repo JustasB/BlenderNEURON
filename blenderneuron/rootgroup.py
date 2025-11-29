@@ -34,7 +34,7 @@ class RootGroup:
 
         # Segment level
         for root in self.roots.values():
-            root.clear_3d_segment_activity()
+            root.clear_segment_activity()
 
 
     def to_dict(self,

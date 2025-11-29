@@ -10,7 +10,7 @@ class CellObjectView(ObjectViewAbstract):
         self.closed_ends = closed_ends
 
     def show(self):
-        if self.group.recording_granularity not in ["Section", "Cell"]:
+        if self.group.recording_granularity not in ["Section", "Cell", "3D Segment"]:
             raise NotImplementedError(self.group.recording_granularity)
 
         color = self.group.default_color
@@ -28,7 +28,7 @@ class CellObjectView(ObjectViewAbstract):
             else:
                 material = None
 
-            container = self.create_section_container(root,
+            self.create_section_container(root,
                                           include_children=True,
                                           origin_type="center",
                                           container_material=material)
@@ -36,15 +36,15 @@ class CellObjectView(ObjectViewAbstract):
             # Animate section activity
             self.animate_section_material(
                 root,
-                recursive=self.group.recording_granularity == 'Section'
+                recursive=self.group.recording_granularity in ('Section', '3D Segment')
             )
 
         self.link_containers()
 
 
-    def update_group(self):
+    def update_group_with_view_data(self):
         for root in self.group.roots.values():
             container = self.containers.get(root.name)
 
             if container is not None:
-                container.update_group_section(root, recursive=True)
+                container.update_group_section_with_view_data(root, recursive=True)
