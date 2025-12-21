@@ -99,6 +99,7 @@ Change Cell Colors
 Animate Cell Model Activity
 ****************************
 1. Have your model with activity loaded in NEURON
+
    - To check voltage activity in the NEURON GUI, go to 'Graph' > 'Voltage Axis' and 'Tools > Run Control' and select 'Init & Run'
 
 2. Select Cell Group to animate in 'Cell Groups'
@@ -107,9 +108,11 @@ Animate Cell Model Activity
    - Activity will be recorded next time the cells are imported
 
 5. Select granularity ('Record from Each:')
+
    - Record activity by cell (at each soma), section (at the midpoint of each section), or segment (at each segment). Finer granularity has better detail but requires more time and memory.
 
 6. Choose Recording Settings
+
    - Select 'Record' variable: NEURON section variable name to record/animate. 'v' by default for voltage (e.g 'v' of soma(0.5).v). (note: for variables other not voltage, make sure target variable exists in sections that will be recorded from)
    - Set 'Start Recording' and 'Stop Recording' times (in ms): what time range in the NEURON simulation to record
    - Select 'Sampling Period': how many milliseconds between samples collected of the recorded variable (e.g. voltage)
