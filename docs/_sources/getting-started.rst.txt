@@ -13,16 +13,15 @@ Import Cells
 
 1. Load your model in NEURON and start BlenderNEURON
 
- - sample of code to run in terminal:
+ - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
+
+ - sample of code to run in python:
 
   .. code-block:: python
 
-     python
      from neuron import h, gui
      h.load_file('path/to/SampleCell.hoc')
      cell1 = h.SampleCell()
-
- - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
 
 2. In the NEURON GUI, open Graph > Shape Plot, to ensure the model is loaded correctly
 3. Start BlenderNEURON in NEURON/Python by running:
@@ -105,6 +104,7 @@ Animate Cell Model Activity
 2. Select Cell Group to animate in 'Cell Groups'
 3. Expand 'Cell Group Options'
 4. Check off 'Record Activity'
+   
    - Activity will be recorded next time the cells are imported
 
 5. Select granularity ('Record from Each:')
@@ -123,8 +123,8 @@ Animate Cell Model Activity
 7. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
 8. Scrub the timeline on the bottom to see animation
 
- - Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press 'Z' > 'Material Preview')
- - Frame number = NEURON simulation time (ms) x 'Frames per Millisecond'
+   - Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press 'Z' > 'Material Preview')
+   - Frame number = NEURON simulation time (ms) x 'Frames per Millisecond'
 
  .. figure:: files_static/timeline.png
      :alt: Timeline
@@ -139,24 +139,24 @@ Create Synapses by Proximity
 2. Add cells that will form synapses to different groups
 3. Expand 'Form Synapses'
 
- - This section will appear when you have at least two groups
+   - This section will appear when you have at least two groups
 
 4. Select groups for the 'Source' (presynaptic) and 'Destination' (postsynaptic) cells
 
- - Must be different groups
+   - Must be different groups
 
 5. Select which sections will form synapses next to 'Sections:'
 
- - Surround characters with asterisks (\*example\*) to include all sections with those characters in the name
+   - Surround characters with asterisks (\*example\*) to include all sections with those characters in the name
 
 6. Select synaptic mechanism next to 'Synapse', if you have additional mechanisms loaded in NEURON
 
- - By default, NEURON lets you use 'ExpSyn' mechanism
- - For help on compiling mod files to add mechanisms: `Mod Files <https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&sid=2c672c89ff0c1c17a90f35d3c44696d0>`_
+   - By default, NEURON lets you use 'ExpSyn' mechanism
+   - For help on compiling mod files to add mechanisms: `Mod Files <https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&sid=2c672c89ff0c1c17a90f35d3c44696d0>`_
 
 7. Press 'Find Synapse Locations'
 
- - Synapse locations will be shown in orange
+   - Synapse locations will be shown in orange
 
  .. figure:: files_static/synapsepreview.png
      :alt: Synapse Preview
@@ -172,12 +172,12 @@ Confine Cells between Layers
 2. Import or create mesh object(s) to confine the cells between
 3. Expand 'Confine Between Layers'
 
- - Section will appear once at least 1 cell is imported
+   - This section will appear once at least 1 cell is imported
 
 4. Select objects for the confinement 'Start Layer' and 'End Layer'
 5. Next to 'Name Contains:', select sections that will be confined
 
- - Surround characters with asterisks (\*dend\*) to confine all sections with those characters
+   - Surround characters with asterisks (\*dend\*) to confine all sections with those characters
 
 6. Press 'Confine' to confine the sections between the layers
 7. Save changes in Blender by pressing 'Update Groups with Confinement Results'
