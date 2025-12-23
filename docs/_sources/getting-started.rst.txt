@@ -8,21 +8,20 @@ Video tutorials are available on the `Tutorials Page <https://blenderneuron.org/
 Have you installed BlenderNEURON? See `Installation <installation.html>`_ for help on installing BlenderNEURON in Blender and NEURON.
 
 ***************
-Importing Cells
+Import Cells
 ***************
 
 1. Load your model in NEURON and start BlenderNEURON
 
- - sample of code to run in terminal:
+ - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
+
+ - sample of code to run in python:
 
   .. code-block:: python
 
-     python
      from neuron import h, gui
      h.load_file('path/to/SampleCell.hoc')
      cell1 = h.SampleCell()
-
- - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
 
 2. In the NEURON GUI, open Graph > Shape Plot, to ensure the model is loaded correctly
 3. Start BlenderNEURON in NEURON/Python by running:
@@ -47,7 +46,7 @@ Importing Cells
      :width: 200
 
 ************************
-Editing and Saving Cells
+Edit and Save Cells
 ************************
 
 1. With the cells imported, left click a cell in the 3d view to select it (like other Blender objects)
@@ -68,7 +67,7 @@ Editing and Saving Cells
  - Then click 'Export Cell Groups to NEURON' under 'Import / Export'
 
 **********************
-Adding Cells to Groups
+Add Cells to Groups
 **********************
 
 1. Expand 'Cell Groups' and 'Cells in Group'
@@ -82,10 +81,10 @@ Adding Cells to Groups
      :width: 200
 
 ********************
-Changing Cell Colors
+Change Cell Colors
 ********************
 
-1. Select the Cell Group you would like to change display settings for
+1. Select Cell Group to change display settings for
 2. Expand 'Cell Group Options'
 3. Next to 'Init. Color', select a color on the color wheel
 
@@ -95,64 +94,69 @@ Changing Cell Colors
 
 - The cells will be in that color the next time the cell group is imported
 
-******************************
-Visualizing Cell Model Voltage
-******************************
-
+****************************
+Animate Cell Model Activity
+****************************
 1. Have your model with activity loaded in NEURON
 
- - To check activity in NEURON GUI, go to 'Graph' > 'Voltage Axis' and 'Tools > Run Control' and select 'Init & Run'
+   - To check voltage activity in the NEURON GUI, go to 'Graph' > 'Voltage Axis' and 'Tools > Run Control' and select 'Init & Run'
 
-2. Select Cell Group to animate
+2. Select Cell Group to animate in 'Cell Groups'
 3. Expand 'Cell Group Options'
 4. Check off 'Record Activity'
 
- - Activity will be recorded next time the cells are imported
+   - Activity will be recorded next time the cells are imported
 
-5. Choose Recording Settings
+5. Select granularity ('Record from Each:')
 
- - Set start and stop recording times (in ms): what time range in the NEURON simulation to record
- - Select 'Sampling Period': how many milliseconds between samples collected of the voltage
- - Select 'Frames per Milliseconds', how many frames of animation will represent each millisecond of NEURON activity
- - Set colors to correspond with the variable low and high values on the color scale
- - Set variable low and high values to encompass the activity in your model
+   - Record activity by cell (at each soma), section (at the midpoint of each section), or segment (at each segment). Finer granularity has better detail but requires more time and memory.
 
-6. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
-7. Scrub the timeline on the bottom to see animation
+6. Choose Recording Settings
 
- - Change in voltage should be visible as change in color and/or brightness (to preview change in brightness, press 'Z' > 'Material Preview')
- - Frame number = NEURON simulation time (ms) X 'Frames per Millisecond'
+   - Select 'Record' variable: NEURON section variable name to record/animate. 'v' by default for voltage (e.g 'v' of soma(0.5).v). (note: for variables other not voltage, make sure target variable exists in sections that will be recorded from)
+   - Set 'Start Recording' and 'Stop Recording' times (in ms): what time range in the NEURON simulation to record
+   - Select 'Sampling Period': how many milliseconds between samples collected of the recorded variable (e.g. voltage)
+   - Select 'Frames per Milliseconds': how many frames of animation will represent each millisecond of NEURON activity
+   - Set colors on the color scale to correspond with low and high values
+   - Set 'Variable Low' and 'High' values: set minimum and maximum values to cover the range of the recorded variable (e.g. voltage) in your model
+
+7. Import cells with 'Import Cell Groups to Blender' under 'Import / Export'
+8. Scrub the timeline on the bottom to see animation
+
+   - Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press 'Z' > 'Material Preview')
+   - Frame number = NEURON simulation time (ms) x 'Frames per Millisecond'
 
  .. figure:: files_static/timeline.png
      :alt: Timeline
      :width: 600
 
+
 ******************************
-Creating Synapses by Proximity
+Create Synapses by Proximity
 ******************************
 
 1. Make sure to have at least 2 cells instantiated in NEURON
 2. Add cells that will form synapses to different groups
 3. Expand 'Form Synapses'
 
- - This section will appear when you have at least two groups
+   - This section will appear when you have at least two groups
 
 4. Select groups for the 'Source' (presynaptic) and 'Destination' (postsynaptic) cells
 
- - Must be different groups
+   - Must be different groups
 
 5. Select which sections will form synapses next to 'Sections:'
 
- - Surround characters with asterisks (\*example\*) to include all sections with those characters in the name
+   - Surround characters with asterisks (\*example\*) to include all sections with those characters in the name
 
 6. Select synaptic mechanism next to 'Synapse', if you have additional mechanisms loaded in NEURON
 
- - By default, NEURON lets you use 'ExpSyn' mechanism
- - For help on compiling mod files to add mechanisms: `Mod Files <https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&sid=2c672c89ff0c1c17a90f35d3c44696d0>`_
+   - By default, NEURON lets you use 'ExpSyn' mechanism
+   - For help on compiling mod files to add mechanisms: `Mod Files <https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&sid=2c672c89ff0c1c17a90f35d3c44696d0>`_
 
 7. Press 'Find Synapse Locations'
 
- - Synapse locations will be shown in orange
+   - Synapse locations will be shown in orange
 
  .. figure:: files_static/synapsepreview.png
      :alt: Synapse Preview
@@ -161,19 +165,19 @@ Creating Synapses by Proximity
 8. Create the synapses in NEURON by pressing 'Create Synapses'
 
 ******************************
-Confining Cells between Layers
+Confine Cells between Layers
 ******************************
 
 1. Import cells with 'Import Cell Groups to Blender'
 2. Import or create mesh object(s) to confine the cells between
 3. Expand 'Confine Between Layers'
 
- - Section will appear once at least 1 cell is imported
+   - This section will appear once at least 1 cell is imported
 
 4. Select objects for the confinement 'Start Layer' and 'End Layer'
 5. Next to 'Name Contains:', select sections that will be confined
 
- - Surround characters with asterisks (\*dend\*) to confine all sections with those characters
+   - Surround characters with asterisks (\*dend\*) to confine all sections with those characters
 
 6. Press 'Confine' to confine the sections between the layers
 7. Save changes in Blender by pressing 'Update Groups with Confinement Results'

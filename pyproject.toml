@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "blenderneuron"
-version = "2.1.1"
+version = "2.1.2"
 description = "Interface for Blender <-> NEURON"
 readme = "README.txt"
 authors = [
@@ -30,7 +30,15 @@ dependencies = []
 homepage = "https://BlenderNEURON.org"
 
 [tool.setuptools]
-packages = { find = { include = ["blenderneuron"] } }
+packages = { find = { include = [
+    "blenderneuron",
+    "blenderneuron.nrn",
+    "blenderneuron.blender.views",
+    "blenderneuron.blender.properties",
+    "blenderneuron.blender.panels",
+    "blenderneuron.blender.operators",
+    "blenderneuron.blender",
+] } }
 include-package-data = true
 
 [tool.setuptools.package-data]
