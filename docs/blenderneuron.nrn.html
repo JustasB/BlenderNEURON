@@ -314,7 +314,19 @@ dendrite, 5th segment. Segment order is determined by the order in which they ap
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">
 <span class="sig-name descname"><span class="pre">from_nrn_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nrn_section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_nrn_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Iteratively initializes the NeuronSection instances from NEURON sections, maintaining the original structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nrn_section</strong> – The NEURON section to initialize from</p></li>
+<li><p><strong>group</strong> – The group to which the sections belong</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root">
@@ -324,7 +336,16 @@ dendrite, 5th segment. Segment order is determined by the order in which they ap
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root">
 <span class="sig-name descname"><span class="pre">from_updated_blender_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_section</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.from_updated_blender_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Update the coordinates and radii from the updated blender_section, iteratively for all child sections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>blender_section</strong> – The updated blender section data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii">
@@ -351,7 +372,7 @@ dendrite, 5th segment. Segment order is determined by the order in which they ap
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024.</p>
+    <p>&#169; Copyright 2025.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -234,40 +234,93 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">group</span><span class="o">.</span><span class="n">remove_view</span><span class="p">()</span></div>
 
-
 <div class="viewcode-block" id="BlenderNode.add_neon_effect"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.add_neon_effect">[docs]</a>    <span class="k">def</span> <span class="nf">add_neon_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds glare filter to the compositing node tree</span>
-
-<span class="sd">        :return:</span>
+<span class="sd">        Adds a neon-style glare effect for Cycles (via compositor)</span>
+<span class="sd">        and enables bloom for Eevee so the glow appears in both engines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">scene</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scene</span>
+
+        <span class="c1"># ============================================================</span>
+        <span class="c1"># 1. ENABLE BLOOM IF USING EEVEE</span>
+        <span class="c1"># ============================================================</span>
+        <span class="n">scene</span><span class="o">.</span><span class="n">eevee</span><span class="o">.</span><span class="n">use_bloom</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># ============================================================</span>
+        <span class="c1"># 2. ENABLE COMPOSITOR NODES (Cycles bloom)</span>
+        <span class="c1"># ============================================================</span>
         <span class="n">scene</span><span class="o">.</span><span class="n">use_nodes</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">nt</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">links</span>
 
-        <span class="n">links</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span><span class="o">.</span><span class="n">links</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Get or create Render Layers node</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">rl</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Render Layers&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rl</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeRLayers&#39;</span><span class="p">)</span>
+            <span class="n">rl</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Render Layers&#39;</span>
 
-        <span class="n">layers</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Render Layers&#39;</span><span class="p">)</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Get or create Composite output node</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Composite&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeComposite&#39;</span><span class="p">)</span>
+            <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Composite&#39;</span>
 
-        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">layers</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeRLayers&#39;</span><span class="p">)</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Optional Viewer node for compositor preview</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Viewer&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeViewer&#39;</span><span class="p">)</span>
+            <span class="n">viewer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Viewer&#39;</span>
+            <span class="n">viewer</span><span class="o">.</span><span class="n">use_alpha</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">glare</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeGlare&#39;</span><span class="p">)</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Get or create Glare node (no duplication)</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">glare</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;GLARE&#39;</span><span class="p">:</span>
+                <span class="n">glare</span> <span class="o">=</span> <span class="n">node</span>
+                <span class="k">break</span>
 
-        <span class="n">composite</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Composite&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">glare</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">glare</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeGlare&#39;</span><span class="p">)</span>
+            <span class="n">glare</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;NeonGlare&#39;</span>
 
-        <span class="k">if</span> <span class="n">composite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">composite</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeComposite&#39;</span><span class="p">)</span>
-
-        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">glare</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
-        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">composite</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
-
-        <span class="n">glare</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="s1">&#39;MEDIUM&#39;</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Configure glare for neon-style streak effect</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">glare_type</span> <span class="o">=</span> <span class="s1">&#39;STREAKS&#39;</span>  <span class="c1"># neon streak effect</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="s1">&#39;HIGH&#39;</span>
         <span class="n">glare</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="n">glare</span><span class="o">.</span><span class="n">color_modulation</span> <span class="o">=</span> <span class="mf">0.2</span>
         <span class="n">glare</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.1</span>
         <span class="n">glare</span><span class="o">.</span><span class="n">streaks</span> <span class="o">=</span> <span class="mi">7</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">fade</span> <span class="o">=</span> <span class="mf">0.75</span></div></div>
+        <span class="n">glare</span><span class="o">.</span><span class="n">fade</span> <span class="o">=</span> <span class="mf">0.75</span>
+        <span class="n">glare</span><span class="o">.</span><span class="n">mix</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 0 = effect only</span>
+
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Remove old links to Composite/Viewer to avoid stacking</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">links</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">to_node</span> <span class="ow">in</span> <span class="p">{</span><span class="n">comp</span><span class="p">,</span> <span class="n">viewer</span><span class="p">}:</span>
+                <span class="n">links</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="c1"># Connect nodes cleanly:</span>
+        <span class="c1"># Render Layers → Glare → Composite + Viewer</span>
+        <span class="c1"># ------------------------------------------------------------</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">rl</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">glare</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">comp</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">viewer</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span></div></div>
+
+
 </pre></div>
 
            </div>
@@ -277,7 +330,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018, Justas Birgiolas.</p>
+    <p>&#169; Copyright 2025.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

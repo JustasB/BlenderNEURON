@@ -1,81 +1,47 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>blenderneuron.nrn.neuronsection &mdash; BlenderNEURON  documentation</title>
-  
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
 
   
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="../../../index.html" class="icon icon-home"> BlenderNEURON
           
-
-          
+          <a href="../../../index.html" class="icon icon-home">
+            BlenderNEURON
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
@@ -84,83 +50,56 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">BlenderNEURON</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>blenderneuron.nrn.neuronsection</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">blenderneuron.nrn.neuronsection</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for blenderneuron.nrn.neuronsection</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">blenderneuron.section</span> <span class="k">import</span> <span class="n">Section</span>
-<span class="kn">from</span> <span class="nn">neuron</span> <span class="k">import</span> <span class="n">h</span>
+<span></span><span class="kn">from</span> <span class="nn">blenderneuron.activity</span> <span class="kn">import</span> <span class="n">Activity</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.section</span> <span class="kn">import</span> <span class="n">Section</span>
+<span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 
 <div class="viewcode-block" id="NeuronSection"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection">[docs]</a><span class="k">class</span> <span class="nc">NeuronSection</span><span class="p">(</span><span class="n">Section</span><span class="p">):</span>
 
 <div class="viewcode-block" id="NeuronSection.from_updated_blender_root"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root">[docs]</a>    <span class="k">def</span> <span class="nf">from_updated_blender_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_section</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the coordinates and radii from the updated blender_section, iteratively for all child sections.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_coords_and_radii</span><span class="p">(</span><span class="n">blender_section</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">segments_3D</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="sd">        :param blender_section: The updated blender section data</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">blender_child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blender_section</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]):</span>
-            <span class="n">section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_section</span><span class="p">)]</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">node</span><span class="p">,</span> <span class="n">b_section</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">update_coords_and_radii</span><span class="p">(</span><span class="n">b_section</span><span class="p">)</span>
 
-            <span class="n">section</span><span class="o">.</span><span class="n">from_updated_blender_root</span><span class="p">(</span><span class="n">blender_child</span><span class="p">)</span></div>
-
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">blender_child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">b_section</span><span class="p">[</span><span class="s2">&quot;children&quot;</span><span class="p">]):</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c1"># Add child section and its corresponding blender_child to the stack</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">section</span><span class="p">,</span> <span class="n">blender_child</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="NeuronSection.from_skeletal_blender_root"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root">[docs]</a>    <span class="k">def</span> <span class="nf">from_skeletal_blender_root</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_section</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -171,26 +110,38 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not find section: &quot;</span> <span class="o">+</span> <span class="n">sec_name</span> <span class="o">+</span> <span class="s2">&quot; loaded in NEURON&quot;</span><span class="p">)</span></div>
 
-
-
 <div class="viewcode-block" id="NeuronSection.from_nrn_section"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">[docs]</a>    <span class="k">def</span> <span class="nf">from_nrn_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrn_section</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nrn_section</span> <span class="o">=</span> <span class="n">nrn_section</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iteratively initializes the NeuronSection instances from NEURON sections, maintaining the original structure.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">nrn_section</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+<span class="sd">        :param nrn_section: The NEURON section to initialize from</span>
+<span class="sd">        :param group: The group to which the sections belong</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">nrn_child_sec</span> <span class="ow">in</span> <span class="n">nrn_section</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
-            <span class="n">child</span> <span class="o">=</span> <span class="n">NeuronSection</span><span class="p">()</span>
-            <span class="n">child</span><span class="o">.</span><span class="n">from_nrn_section</span><span class="p">(</span><span class="n">nrn_child_sec</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nrn_section</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">node</span><span class="p">,</span> <span class="n">nrn_sec</span><span class="p">,</span> <span class="n">visited</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">visited</span><span class="p">:</span>
+                <span class="c1"># Code to run after processing all children</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">get_coords_and_radii</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_coords_and_radii</span><span class="p">()</span>
+                <span class="n">parent_seg</span> <span class="o">=</span> <span class="n">nrn_sec</span><span class="o">.</span><span class="n">parentseg</span><span class="p">()</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">parent_connection_loc</span> <span class="o">=</span> <span class="n">parent_seg</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">parent_seg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">connection_end</span> <span class="o">=</span> <span class="n">nrn_sec</span><span class="o">.</span><span class="n">orientation</span><span class="p">()</span>
 
-        <span class="n">parent_seg</span> <span class="o">=</span> <span class="n">nrn_section</span><span class="o">.</span><span class="n">parentseg</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent_connection_loc</span> <span class="o">=</span> <span class="n">parent_seg</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">parent_seg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">connection_end</span> <span class="o">=</span> <span class="n">nrn_section</span><span class="o">.</span><span class="n">orientation</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Initial processing of the node</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">nrn_section</span> <span class="o">=</span> <span class="n">nrn_sec</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">nrn_sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">segments_3D</span> <span class="o">=</span> <span class="p">[]</span></div>
+                <span class="c1"># Mark the node as visited and process children</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node</span><span class="p">,</span> <span class="n">nrn_sec</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">nrn_child_sec</span> <span class="ow">in</span> <span class="n">nrn_sec</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+                    <span class="n">child</span> <span class="o">=</span> <span class="n">NeuronSection</span><span class="p">()</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                    <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">child</span><span class="p">,</span> <span class="n">nrn_child_sec</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="NeuronSection.update_coords_and_radii"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii">[docs]</a>    <span class="k">def</span> <span class="nf">update_coords_and_radii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_section</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="n">blender_section</span><span class="p">[</span><span class="s2">&quot;nseg&quot;</span><span class="p">]</span>
@@ -247,7 +198,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="n">radii</span></div>
 
 <div class="viewcode-block" id="NeuronSection.collect_segments_recursive"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.collect_segments_recursive">[docs]</a>    <span class="k">def</span> <span class="nf">collect_segments_recursive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively collects the values of segments of a root section. Segments are given sequential 0-based</span>
 <span class="sd">        names similar to NEURON cells and sections. For example, TestCell[0].dend[3][4] refers to first TestCell, 4th</span>
 <span class="sd">        dendrite, 5th segment. Segment order is determined by the order in which they appear in NEURON&#39;s xyz3d() function.</span>
@@ -255,78 +206,73 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments_3D</span><span class="p">:</span>
-            <span class="n">seg</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">record_variable</span><span class="p">)</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
-            <span class="n">child</span><span class="o">.</span><span class="n">collect_segments_recursive</span><span class="p">()</span></div>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">nrn_sec</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">nrn_section</span>
+            <span class="n">record_var</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">record_variable</span>
+
+            <span class="c1"># Number of 3D points that define the section</span>
+            <span class="n">npts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">n3d</span><span class="p">(</span><span class="n">sec</span><span class="o">=</span><span class="n">nrn_sec</span><span class="p">))</span>
+
+            <span class="c1"># Collect per-3D segment activity</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">npts</span><span class="p">):</span>
+                <span class="n">seg_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">seg_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">segment_activity</span><span class="p">:</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">segment_activity</span><span class="p">[</span><span class="n">seg_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Activity</span><span class="p">()</span>
+
+                <span class="n">startL</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">arc3d</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">nrn_sec</span><span class="p">)</span>
+                <span class="n">endL</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">arc3d</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">nrn_sec</span><span class="p">)</span>
+
+                <span class="n">x_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">startL</span> <span class="o">+</span> <span class="n">endL</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">nrn_sec</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+                <span class="n">x_mid</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x_mid</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># clamp to [0,1]</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">nrn_sec</span><span class="p">(</span><span class="n">x_mid</span><span class="p">),</span> <span class="n">record_var</span><span class="p">)</span>
+
+                <span class="n">node</span><span class="o">.</span><span class="n">segment_activity</span><span class="p">[</span><span class="n">seg_index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="c1"># Traverse child sections</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="NeuronSection.collect"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.collect">[docs]</a>    <span class="k">def</span> <span class="nf">collect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively collects the section midpoint values of a group&#39;s collect_variable (e.g. &#39;v&#39;)</span>
 
 <span class="sd">        :param recursive: Whether to collect child section values (otherwise stop at root/soma)</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrn_section</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">record_variable</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-                <span class="n">child</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">nrn_section</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">node</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">record_variable</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">activity</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+                <span class="c1"># Add children to stack in reverse order to maintain traversal order</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">))</span></div></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, Justas Birgiolas.
-
-    </p>
+    <p>&#169; Copyright 2025.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
-
-  
-
-  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
