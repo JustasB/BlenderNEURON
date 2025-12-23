@@ -50,13 +50,13 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#importing-cells">Importing Cells</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#editing-and-saving-cells">Editing and Saving Cells</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#adding-cells-to-groups">Adding Cells to Groups</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#changing-cell-colors">Changing Cell Colors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#visualizing-cell-model-voltage">Visualizing Cell Model Voltage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-synapses-by-proximity">Creating Synapses by Proximity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#confining-cells-between-layers">Confining Cells between Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-cells">Import Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-and-save-cells">Edit and Save Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-cells-to-groups">Add Cells to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#change-cell-colors">Change Cell Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#animate-cell-model-activity">Animate Cell Model Activity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-synapses-by-proximity">Create Synapses by Proximity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#confine-cells-between-layers">Confine Cells between Layers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
@@ -91,26 +91,23 @@
 <p>Below are text guides for BlenderNEURON</p>
 <p>Video tutorials are available on the <a class="reference external" href="https://blenderneuron.org/tutorials/">Tutorials Page</a>.</p>
 <p>Have you installed BlenderNEURON? See <a class="reference external" href="installation.html">Installation</a> for help on installing BlenderNEURON in Blender and NEURON.</p>
-<section id="importing-cells">
-<h2>Importing Cells<a class="headerlink" href="#importing-cells" title="Permalink to this heading"></a></h2>
+<section id="import-cells">
+<h2>Import Cells<a class="headerlink" href="#import-cells" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Load your model in NEURON and start BlenderNEURON</p></li>
 </ol>
 <blockquote>
 <div><ul class="simple">
-<li><p>sample of code to run in terminal:</p></li>
+<li><p>You can download <a class="reference external" href="https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc">SampleCell.hoc</a> to test BlenderNEURON with</p></li>
+<li><p>sample of code to run in python:</p></li>
 </ul>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span>
-<span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">gui</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">gui</span>
 <span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;path/to/SampleCell.hoc&#39;</span><span class="p">)</span>
 <span class="n">cell1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SampleCell</span><span class="p">()</span>
 </pre></div>
 </div>
 </div></blockquote>
-<ul class="simple">
-<li><p>You can download <a class="reference external" href="https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc">SampleCell.hoc</a> to test BlenderNEURON with</p></li>
-</ul>
 </div></blockquote>
 <ol class="arabic simple" start="2">
 <li><p>In the NEURON GUI, open Graph &gt; Shape Plot, to ensure the model is loaded correctly</p></li>
@@ -142,8 +139,8 @@
 </figure>
 </div></blockquote>
 </section>
-<section id="editing-and-saving-cells">
-<h2>Editing and Saving Cells<a class="headerlink" href="#editing-and-saving-cells" title="Permalink to this heading"></a></h2>
+<section id="edit-and-save-cells">
+<h2>Edit and Save Cells<a class="headerlink" href="#edit-and-save-cells" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>With the cells imported, left click a cell in the 3d view to select it (like other Blender objects)</p></li>
 </ol>
@@ -174,8 +171,8 @@
 </ul>
 </div></blockquote>
 </section>
-<section id="adding-cells-to-groups">
-<h2>Adding Cells to Groups<a class="headerlink" href="#adding-cells-to-groups" title="Permalink to this heading"></a></h2>
+<section id="add-cells-to-groups">
+<h2>Add Cells to Groups<a class="headerlink" href="#add-cells-to-groups" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Expand ‘Cell Groups’ and ‘Cells in Group’</p></li>
 <li><p>Add groups with the ‘+’ to the right of the group names</p></li>
@@ -190,10 +187,10 @@
 </figure>
 </div></blockquote>
 </section>
-<section id="changing-cell-colors">
-<h2>Changing Cell Colors<a class="headerlink" href="#changing-cell-colors" title="Permalink to this heading"></a></h2>
+<section id="change-cell-colors">
+<h2>Change Cell Colors<a class="headerlink" href="#change-cell-colors" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p>Select the Cell Group you would like to change display settings for</p></li>
+<li><p>Select Cell Group to change display settings for</p></li>
 <li><p>Expand ‘Cell Group Options’</p></li>
 <li><p>Next to ‘Init. Color’, select a color on the color wheel</p></li>
 </ol>
@@ -206,97 +203,84 @@
 <li><p>The cells will be in that color the next time the cell group is imported</p></li>
 </ul>
 </section>
-<section id="visualizing-cell-model-voltage">
-<h2>Visualizing Cell Model Voltage<a class="headerlink" href="#visualizing-cell-model-voltage" title="Permalink to this heading"></a></h2>
+<section id="animate-cell-model-activity">
+<h2>Animate Cell Model Activity<a class="headerlink" href="#animate-cell-model-activity" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p>Have your model with activity loaded in NEURON</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
-<li><p>To check activity in NEURON GUI, go to ‘Graph’ &gt; ‘Voltage Axis’ and ‘Tools &gt; Run Control’ and select ‘Init &amp; Run’</p></li>
+<li><p>Have your model with activity loaded in NEURON</p>
+<ul class="simple">
+<li><p>To check voltage activity in the NEURON GUI, go to ‘Graph’ &gt; ‘Voltage Axis’ and ‘Tools &gt; Run Control’ and select ‘Init &amp; Run’</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li><p>Select Cell Group to animate</p></li>
+</li>
+<li><p>Select Cell Group to animate in ‘Cell Groups’</p></li>
 <li><p>Expand ‘Cell Group Options’</p></li>
-<li><p>Check off ‘Record Activity’</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+<li><p>Check off ‘Record Activity’</p>
+<ul class="simple">
 <li><p>Activity will be recorded next time the cells are imported</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="5">
-<li><p>Choose Recording Settings</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
-<li><p>Set start and stop recording times (in ms): what time range in the NEURON simulation to record</p></li>
-<li><p>Select ‘Sampling Period’: how many milliseconds between samples collected of the voltage</p></li>
-<li><p>Select ‘Frames per Milliseconds’, how many frames of animation will represent each millisecond of NEURON activity</p></li>
-<li><p>Set colors to correspond with the variable low and high values on the color scale</p></li>
-<li><p>Set variable low and high values to encompass the activity in your model</p></li>
+</li>
+<li><p>Select granularity (‘Record from Each:’)</p>
+<ul class="simple">
+<li><p>Record activity by cell (at each soma), section (at the midpoint of each section), or segment (at each segment). Finer granularity has better detail but requires more time and memory.</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="6">
+</li>
+<li><p>Choose Recording Settings</p>
+<ul class="simple">
+<li><p>Select ‘Record’ variable: NEURON section variable name to record/animate. ‘v’ by default for voltage (e.g ‘v’ of soma(0.5).v). (note: for variables other not voltage, make sure target variable exists in sections that will be recorded from)</p></li>
+<li><p>Set ‘Start Recording’ and ‘Stop Recording’ times (in ms): what time range in the NEURON simulation to record</p></li>
+<li><p>Select ‘Sampling Period’: how many milliseconds between samples collected of the recorded variable (e.g. voltage)</p></li>
+<li><p>Select ‘Frames per Milliseconds’: how many frames of animation will represent each millisecond of NEURON activity</p></li>
+<li><p>Set colors on the color scale to correspond with low and high values</p></li>
+<li><p>Set ‘Variable Low’ and ‘High’ values: set minimum and maximum values to cover the range of the recorded variable (e.g. voltage) in your model</p></li>
+</ul>
+</li>
 <li><p>Import cells with ‘Import Cell Groups to Blender’ under ‘Import / Export’</p></li>
-<li><p>Scrub the timeline on the bottom to see animation</p></li>
+<li><p>Scrub the timeline on the bottom to see animation</p>
+<ul class="simple">
+<li><p>Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press ‘Z’ &gt; ‘Material Preview’)</p></li>
+<li><p>Frame number = NEURON simulation time (ms) x ‘Frames per Millisecond’</p></li>
+</ul>
+</li>
 </ol>
 <blockquote>
-<div><ul class="simple">
-<li><p>Change in voltage should be visible as change in color and/or brightness (to preview change in brightness, press ‘Z’ &gt; ‘Material Preview’)</p></li>
-<li><p>Frame number = NEURON simulation time (ms) X ‘Frames per Millisecond’</p></li>
-</ul>
-<figure class="align-default">
+<div><figure class="align-default">
 <a class="reference internal image-reference" href="_images/timeline.png"><img alt="Timeline" src="_images/timeline.png" style="width: 600px;" /></a>
 </figure>
 </div></blockquote>
 </section>
-<section id="creating-synapses-by-proximity">
-<h2>Creating Synapses by Proximity<a class="headerlink" href="#creating-synapses-by-proximity" title="Permalink to this heading"></a></h2>
+<section id="create-synapses-by-proximity">
+<h2>Create Synapses by Proximity<a class="headerlink" href="#create-synapses-by-proximity" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Make sure to have at least 2 cells instantiated in NEURON</p></li>
 <li><p>Add cells that will form synapses to different groups</p></li>
-<li><p>Expand ‘Form Synapses’</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+<li><p>Expand ‘Form Synapses’</p>
+<ul class="simple">
 <li><p>This section will appear when you have at least two groups</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="4">
-<li><p>Select groups for the ‘Source’ (presynaptic) and ‘Destination’ (postsynaptic) cells</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+</li>
+<li><p>Select groups for the ‘Source’ (presynaptic) and ‘Destination’ (postsynaptic) cells</p>
+<ul class="simple">
 <li><p>Must be different groups</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="5">
-<li><p>Select which sections will form synapses next to ‘Sections:’</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+</li>
+<li><p>Select which sections will form synapses next to ‘Sections:’</p>
+<ul class="simple">
 <li><p>Surround characters with asterisks (*example*) to include all sections with those characters in the name</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="6">
-<li><p>Select synaptic mechanism next to ‘Synapse’, if you have additional mechanisms loaded in NEURON</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+</li>
+<li><p>Select synaptic mechanism next to ‘Synapse’, if you have additional mechanisms loaded in NEURON</p>
+<ul class="simple">
 <li><p>By default, NEURON lets you use ‘ExpSyn’ mechanism</p></li>
 <li><p>For help on compiling mod files to add mechanisms: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?t=3263&amp;sid=2c672c89ff0c1c17a90f35d3c44696d0">Mod Files</a></p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="7">
-<li><p>Press ‘Find Synapse Locations’</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+</li>
+<li><p>Press ‘Find Synapse Locations’</p>
+<ul class="simple">
 <li><p>Synapse locations will be shown in orange</p></li>
 </ul>
-<figure class="align-default">
+</li>
+</ol>
+<blockquote>
+<div><figure class="align-default">
 <a class="reference internal image-reference" href="_images/synapsepreview.png"><img alt="Synapse Preview" src="_images/synapsepreview.png" style="width: 300px;" /></a>
 </figure>
 </div></blockquote>
@@ -304,28 +288,22 @@
 <li><p>Create the synapses in NEURON by pressing ‘Create Synapses’</p></li>
 </ol>
 </section>
-<section id="confining-cells-between-layers">
-<h2>Confining Cells between Layers<a class="headerlink" href="#confining-cells-between-layers" title="Permalink to this heading"></a></h2>
+<section id="confine-cells-between-layers">
+<h2>Confine Cells between Layers<a class="headerlink" href="#confine-cells-between-layers" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Import cells with ‘Import Cell Groups to Blender’</p></li>
 <li><p>Import or create mesh object(s) to confine the cells between</p></li>
-<li><p>Expand ‘Confine Between Layers’</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
-<li><p>Section will appear once at least 1 cell is imported</p></li>
+<li><p>Expand ‘Confine Between Layers’</p>
+<ul class="simple">
+<li><p>This section will appear once at least 1 cell is imported</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="4">
+</li>
 <li><p>Select objects for the confinement ‘Start Layer’ and ‘End Layer’</p></li>
-<li><p>Next to ‘Name Contains:’, select sections that will be confined</p></li>
-</ol>
-<blockquote>
-<div><ul class="simple">
+<li><p>Next to ‘Name Contains:’, select sections that will be confined</p>
+<ul class="simple">
 <li><p>Surround characters with asterisks (*dend*) to confine all sections with those characters</p></li>
 </ul>
-</div></blockquote>
-<ol class="arabic simple" start="6">
+</li>
 <li><p>Press ‘Confine’ to confine the sections between the layers</p></li>
 <li><p>Save changes in Blender by pressing ‘Update Groups with Confinement Results’</p></li>
 <li><p>Save confinement results to NEURON by pressing ‘Export Cell Groups to NEURON’ under ‘Import / Export’</p></li>
