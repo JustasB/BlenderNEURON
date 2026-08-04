@@ -3,7 +3,7 @@ import os, re
 skip_download = os.path.exists('./blender')
 
 if not skip_download:
-    latest_url = 'https://download.blender.org/release/Blender5.2/blender-5.2.0-linux-x64.tar.xz'
+    latest_url = 'https://mirror.clarkson.edu/blender/release/Blender5.2/blender-5.2.0-linux-x64.tar.xz'
 
     print('Downloading Blender', latest_url)
     import os
