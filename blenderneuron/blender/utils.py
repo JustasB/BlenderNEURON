@@ -82,6 +82,8 @@ def register_module_classes(module, unreg=False):
         return members
 
     classes = [i[1] for i in get_classes(module)]
+    if unreg:
+        classes.reverse()
 
     for cls in classes:
         if not cls.__module__.startswith('blenderneuron'):
@@ -110,12 +112,12 @@ def register_module_classes(module, unreg=False):
 
                 if debug:
                     print('REGISTERED', cls)
-        except:
-            if debug and unreg:
-                print('Could not UN-register', cls)
+        except Exception as exc:
+            if unreg:
+                print('Could not UN-register', cls, exc)
 
-            if debug and not unreg:
-                print('Could not register', cls)
+            if not unreg:
+                print('Could not register', cls, exc)
 
 
 
@@ -145,7 +147,8 @@ def get_operator_context_override(selected_object = None):
     override["scene"]         = bpy.data.scenes['Scene']
 
     override["edit_object"] = None
-    override["gpencil_data"] = None
+    if hasattr(bpy.context, "gpencil_data"):
+        override["gpencil_data"] = None
 
     if selected_object:
         override["object"]        = selected_object

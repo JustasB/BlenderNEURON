@@ -159,22 +159,37 @@ class BlenderNode(CommNode):
 
     def add_neon_effect(self):
         """
-        Adds a neon-style glare effect for Cycles (via compositor)
-        and enables bloom for Eevee so the glow appears in both engines.
+        Adds a neon-style glare effect via the compositor.
         """
 
         scene = bpy.context.scene
 
-        # ============================================================
-        # 1. ENABLE BLOOM IF USING EEVEE
-        # ============================================================
-        scene.eevee.use_bloom = True
+        # Eevee bloom was removed in newer Blender versions. Keep using it
+        # where it exists, and fall back to the compositor glare setup below.
+        eevee_settings = getattr(scene, "eevee", None)
+        if eevee_settings is not None and hasattr(eevee_settings, "use_bloom"):
+            eevee_settings.use_bloom = True
 
-        # ============================================================
-        # 2. ENABLE COMPOSITOR NODES (Cycles bloom)
-        # ============================================================
-        scene.use_nodes = True
-        nt = scene.node_tree
+        use_blender_5_compositor = bpy.app.version[0] >= 5
+
+        if use_blender_5_compositor:
+            nt = scene.compositing_node_group
+            if nt is None:
+                nt = bpy.data.node_groups.new("BlenderNEURON Neon Composite", "CompositorNodeTree")
+                scene.compositing_node_group = nt
+
+            for window in bpy.context.window_manager.windows:
+                for area in window.screen.areas:
+                    if area.type != 'VIEW_3D':
+                        continue
+
+                    space = area.spaces.active
+                    if hasattr(space, "shading") and hasattr(space.shading, "use_compositor"):
+                        space.shading.use_compositor = 'ALWAYS'
+        else:
+            scene.use_nodes = True
+            nt = scene.node_tree
+
         nodes = nt.nodes
         links = nt.links
 
@@ -191,17 +206,22 @@ class BlenderNode(CommNode):
         # ------------------------------------------------------------
         comp = nodes.get('Composite')
         if comp is None:
-            comp = nodes.new('CompositorNodeComposite')
+            comp = nodes.new('NodeGroupOutput' if use_blender_5_compositor else 'CompositorNodeComposite')
             comp.name = 'Composite'
+
+        if use_blender_5_compositor and 'Image' not in comp.inputs:
+            nt.interface.new_socket(name="Image", in_out='OUTPUT', socket_type='NodeSocketColor')
 
         # ------------------------------------------------------------
         # Optional Viewer node for compositor preview
         # ------------------------------------------------------------
-        viewer = nodes.get('Viewer')
-        if viewer is None:
-            viewer = nodes.new('CompositorNodeViewer')
-            viewer.name = 'Viewer'
-            viewer.use_alpha = False
+        viewer = None
+        if not use_blender_5_compositor:
+            viewer = nodes.get('Viewer')
+            if viewer is None:
+                viewer = nodes.new('CompositorNodeViewer')
+                viewer.name = 'Viewer'
+                viewer.use_alpha = False
 
         # ------------------------------------------------------------
         # Get or create Glare node (no duplication)
@@ -232,15 +252,20 @@ class BlenderNode(CommNode):
         # Remove old links to Composite/Viewer to avoid stacking
         # ------------------------------------------------------------
         for link in list(links):
-            if link.to_node in {comp, viewer}:
+            output_nodes = {comp}
+            if viewer is not None:
+                output_nodes.add(viewer)
+
+            if link.to_node in output_nodes:
                 links.remove(link)
 
         # ------------------------------------------------------------
         # Connect nodes cleanly:
-        # Render Layers → Glare → Composite + Viewer
+        # Render Layers -> Glare -> Composite (+ Viewer before Blender 5)
         # ------------------------------------------------------------
         links.new(rl.outputs['Image'], glare.inputs['Image'])
         links.new(glare.outputs['Image'], comp.inputs['Image'])
-        links.new(glare.outputs['Image'], viewer.inputs['Image'])
+        if viewer is not None:
+            links.new(glare.outputs['Image'], viewer.inputs['Image'])
 
 
