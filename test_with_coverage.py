@@ -28,6 +28,10 @@ except AssertionError:
 
 cov.save()
 
+# Report the coverage results
+cov.html_report(directory="htmlcov")
+cov.report()
+
 # Exit with appropriate status code
 if not result.wasSuccessful():
     exit(1)
