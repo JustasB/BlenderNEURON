@@ -5,6 +5,7 @@ import unittest
 import os, sys
 from multiprocessing import Process, Queue
 from time import sleep
+from textwrap import dedent
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
 from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
@@ -20,34 +21,36 @@ class TestRender(BlenderTestCase):
             # Adding 2nd time should not fail either
             bcn.client.run_command('bpy.ops.blenderneuron.add_neon_effect();')
 
-            result = bcn.client.run_command(
-                "scene = bpy.context.scene;"
-                "is_blender_5 = bpy.app.version[0] >= 5;"
-                "nt = scene.compositing_node_group if is_blender_5 else scene.node_tree;"
-                "nodes = nt.nodes;"
-                "links = nt.links;"
-                "glare_nodes = [node for node in nodes if node.type == 'GLARE'];"
-                "comp = nodes.get('Composite');"
-                "viewer = nodes.get('Viewer');"
-                "view_compositor_modes = [];"
-                "for window in bpy.context.window_manager.windows:\n"
-                "    for area in window.screen.areas:\n"
-                "        if area.type == 'VIEW_3D':\n"
-                "            space = area.spaces.active\n"
-                "            if hasattr(space, 'shading') and hasattr(space.shading, 'use_compositor'):\n"
-                "                view_compositor_modes.append(space.shading.use_compositor)\n"
-                "return_value = {"
-                "    'is_blender_5': is_blender_5,"
-                "    'has_tree': nt is not None,"
-                "    'glare_count': len(glare_nodes),"
-                "    'has_composite': comp is not None,"
-                "    'has_viewer': viewer is not None,"
-                "    'output_link_count': len([link for link in links if link.to_node == comp]),"
-                "    'view_compositor_modes': view_compositor_modes,"
-                "    'use_nodes': getattr(scene, 'use_nodes', None),"
-                "    'use_bloom': getattr(getattr(scene, 'eevee', None), 'use_bloom', None),"
-                "};"
-            )
+            result = bcn.client.run_command(dedent("""
+                scene = bpy.context.scene
+                is_blender_5 = bpy.app.version[0] >= 5
+                nt = scene.compositing_node_group if is_blender_5 else scene.node_tree
+                nodes = nt.nodes
+                links = nt.links
+                glare_nodes = [node for node in nodes if node.type == 'GLARE']
+                comp = nodes.get('Composite')
+                viewer = nodes.get('Viewer')
+                view_compositor_modes = []
+
+                for window in bpy.context.window_manager.windows:
+                    for area in window.screen.areas:
+                        if area.type == 'VIEW_3D':
+                            space = area.spaces.active
+                            if hasattr(space, 'shading') and hasattr(space.shading, 'use_compositor'):
+                                view_compositor_modes.append(space.shading.use_compositor)
+
+                return_value = {
+                    'is_blender_5': is_blender_5,
+                    'has_tree': nt is not None,
+                    'glare_count': len(glare_nodes),
+                    'has_composite': comp is not None,
+                    'has_viewer': viewer is not None,
+                    'output_link_count': len([link for link in links if link.to_node == comp]),
+                    'view_compositor_modes': view_compositor_modes,
+                    'use_nodes': getattr(scene, 'use_nodes', None),
+                    'use_bloom': getattr(getattr(scene, 'eevee', None), 'use_bloom', None),
+                }
+            """))
 
             self.assertTrue(result['has_tree'])
             self.assertEqual(1, result['glare_count'])
