@@ -94,6 +94,12 @@ def register_module_classes(module, unreg=False):
             'properties' not in cls.__module__:
             continue
 
+        if not issubclass(cls, (bpy.types.Operator,
+                                bpy.types.Panel,
+                                bpy.types.PropertyGroup,
+                                bpy.types.UIList)):
+            continue
+
         try:
             if unreg:
 
