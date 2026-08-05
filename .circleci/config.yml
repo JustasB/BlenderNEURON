@@ -42,9 +42,10 @@ jobs:
             export REPO=$(pwd)
             export PATH=$PATH:/home/circleci/project/blender
             export PYTHONPATH=$REPO/
+            export BLENDER_SYSTEM_SCRIPTS=$REPO/blender_scripts
             $REPO/blender/5.2/python/bin/python3.13 -m pip install coverage==7.12
-            mkdir -p $REPO/blender/5.2/scripts/addons
-            ln -sfn $REPO/blenderneuron $REPO/blender/5.2/scripts/addons/blenderneuron
+            mkdir -p $BLENDER_SYSTEM_SCRIPTS/addons
+            ln -sfn $REPO/blenderneuron $BLENDER_SYSTEM_SCRIPTS/addons/blenderneuron
             $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
             xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
       - codecov/upload
