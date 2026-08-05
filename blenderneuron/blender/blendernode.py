@@ -167,7 +167,7 @@ class BlenderNode(CommNode):
         # Eevee bloom was removed in newer Blender versions. Keep using it
         # where it exists, and fall back to the compositor glare setup below.
         eevee_settings = getattr(scene, "eevee", None)
-        if eevee_settings is not None and hasattr(eevee_settings, "use_bloom"):
+        if eevee_settings is not None and hasattr(eevee_settings, "use_bloom"): # pragma: no cover
             eevee_settings.use_bloom = True
 
         use_blender_5_compositor = bpy.app.version[0] >= 5
@@ -186,7 +186,7 @@ class BlenderNode(CommNode):
                     space = area.spaces.active
                     if hasattr(space, "shading") and hasattr(space.shading, "use_compositor"):
                         space.shading.use_compositor = 'ALWAYS'
-        else:
+        else: # pragma: no cover
             scene.use_nodes = True
             nt = scene.node_tree
 
@@ -216,7 +216,7 @@ class BlenderNode(CommNode):
         # Optional Viewer node for compositor preview
         # ------------------------------------------------------------
         viewer = None
-        if not use_blender_5_compositor:
+        if not use_blender_5_compositor: # pragma: no cover
             viewer = nodes.get('Viewer')
             if viewer is None:
                 viewer = nodes.new('CompositorNodeViewer')
@@ -237,7 +237,7 @@ class BlenderNode(CommNode):
             glare.name = 'NeonGlare'
 
         def set_node_setting(node, prop_name, prop_value, input_name=None, input_value=None):
-            if hasattr(node, prop_name):
+            if hasattr(node, prop_name): # pragma: no cover
                 setattr(node, prop_name, prop_value)
                 return
 
@@ -273,7 +273,7 @@ class BlenderNode(CommNode):
         # ------------------------------------------------------------
         links.new(rl.outputs['Image'], glare.inputs['Image'])
         links.new(glare.outputs['Image'], comp.inputs['Image'])
-        if viewer is not None:
+        if viewer is not None: # pragma: no cover
             links.new(glare.outputs['Image'], viewer.inputs['Image'])
 
 
