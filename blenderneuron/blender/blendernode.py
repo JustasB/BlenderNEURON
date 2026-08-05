@@ -236,17 +236,25 @@ class BlenderNode(CommNode):
             glare = nodes.new('CompositorNodeGlare')
             glare.name = 'NeonGlare'
 
+        def set_node_setting(node, prop_name, prop_value, input_name=None, input_value=None):
+            if hasattr(node, prop_name):
+                setattr(node, prop_name, prop_value)
+                return
+
+            if input_name is not None and input_name in node.inputs:
+                node.inputs[input_name].default_value = input_value if input_value is not None else prop_value
+
         # ------------------------------------------------------------
         # Configure glare for neon-style streak effect
         # ------------------------------------------------------------
-        glare.glare_type = 'STREAKS'  # neon streak effect
-        glare.quality = 'HIGH'
-        glare.iterations = 3
-        glare.color_modulation = 0.2
-        glare.threshold = 0.1
-        glare.streaks = 7
-        glare.fade = 0.75
-        glare.mix = 0  # 0 = effect only
+        set_node_setting(glare, 'glare_type', 'STREAKS', 'Type', 'Streaks')
+        set_node_setting(glare, 'quality', 'HIGH', 'Quality', 'High')
+        set_node_setting(glare, 'iterations', 3, 'Iterations')
+        set_node_setting(glare, 'color_modulation', 0.2, 'Color Modulation')
+        set_node_setting(glare, 'threshold', 0.1, 'Threshold')
+        set_node_setting(glare, 'streaks', 7, 'Streaks')
+        set_node_setting(glare, 'fade', 0.75, 'Fade')
+        set_node_setting(glare, 'mix', 0, 'Mix')
 
         # ------------------------------------------------------------
         # Remove old links to Composite/Viewer to avoid stacking
