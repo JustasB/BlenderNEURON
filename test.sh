@@ -12,4 +12,4 @@ python test_with_coverage.py
 coverage combine
 coverage xml
 coverage html
-coverage report
+coverage report -m
