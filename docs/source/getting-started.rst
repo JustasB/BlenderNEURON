@@ -19,7 +19,7 @@ Importing Cells
      from neuron import h, gui
      h.load_file('path/to/SampleCell.hoc')
      cell1 = h.SampleCell()
- - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/blender-3-plus-conversion/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
+ - You can download `SampleCell.hoc <https://github.com/JustasB/BlenderNEURON/blob/master/tutorials/SampleCell.hoc>`_ to test BlenderNEURON with
 
 2. In the NEURON GUI, open Graph > Shape Plot, to ensure the model is loaded correctly
 3. Start BlenderNEURON in NEURON/Python by running:
