@@ -755,4 +755,5 @@ def register():
 
 
 def unregister():
-    del bpy.types.Scene.BlenderNEURON
+    if hasattr(bpy.types.Scene, "BlenderNEURON"):
+        del bpy.types.Scene.BlenderNEURON

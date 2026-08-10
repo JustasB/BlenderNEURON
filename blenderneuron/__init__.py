@@ -2,8 +2,8 @@ bl_info = {
     "name": "BlenderNEURON",
     "description": "A Blender GUI for NEURON simulator",
     "author": "Justas Birgiolas, Alistair Peet",
-    "version": (2, 1, 0),
-    "blender": (3, 1, 0),
+    "version": (2, 1, 3),
+    "blender": (5, 2, 0),
     "location": "3D View > Right Sidebar > BlenderNEURON",
     "wiki_url": "BlenderNEURON.org",
     "tracker_url": "https://github.com/JustasB/BlenderNEURON/issues",
@@ -59,11 +59,6 @@ if inside_blender:
         bpy.ops.blenderneuron.node_start()
 
     def register():
-        try:
-            bpy.utils.register_module(__name__)
-        except:
-            pass
-
         sys.setrecursionlimit(1500)
 
         register_module_classes(blenderneuron.blender.operators.rootgroup)
@@ -87,24 +82,19 @@ if inside_blender:
     def unregister():
         bpy.ops.blenderneuron.node_stop()
 
-        try:
-            bpy.utils.unregister_module(__name__)
-        except:
-            pass
-
-        register_module_classes(blenderneuron.blender.operators.connection, unreg=True)
-        register_module_classes(blenderneuron.blender.panels.connection, unreg=True)
-        register_module_classes(blenderneuron.blender.properties.connection, unreg=True)
-
-        register_module_classes(blenderneuron.blender.operators.rootgroup, unreg=True)
-        register_module_classes(blenderneuron.blender.panels.rootgroup, unreg=True)
-        register_module_classes(blenderneuron.blender.properties.rootgroup, unreg=True)
-
+        blenderneuron.blender.properties.connection.unregister() # already-iterative
         blenderneuron.blender.properties.rootgroup.unregister() # already-iterative
+
+        register_module_classes(blenderneuron.blender.properties.connection, unreg=True)
+        register_module_classes(blenderneuron.blender.panels.connection, unreg=True)
+        register_module_classes(blenderneuron.blender.operators.connection, unreg=True)
+
+        register_module_classes(blenderneuron.blender.properties.rootgroup, unreg=True)
+        register_module_classes(blenderneuron.blender.panels.rootgroup, unreg=True)
+        register_module_classes(blenderneuron.blender.operators.rootgroup, unreg=True)
 
 
 
 # Only for testing from Blender Text Editor
 if __name__ == "__main__" and inside_blender:
     register()
-

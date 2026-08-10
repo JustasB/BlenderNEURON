@@ -13,7 +13,7 @@ except:
 
 class NeuronNode(CommNode):
     # Match Cell[n].section[y] pattern e.g. MC1[0].soma
-    section_rx = re.compile('(.+?])\.?(.*)')
+    section_rx = re.compile(r'(.+?])\.?(.*)')
 
     def __init__(self, server_end=None, *args, **kwargs):
         self.roots = None

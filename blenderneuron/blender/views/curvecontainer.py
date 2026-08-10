@@ -62,24 +62,28 @@ class CurveContainer:
         ob = self.get_object()
         object_name = ob.name
 
+        def remove_if_in_main(collection, item):
+            if item is not None and collection.get(item.name) == item:
+                collection.remove(item)
+
         # materials
         for mat in ob.data.materials:
             if mat is not None:
                 # remove material animation if any
                 if mat.animation_data is not None:
-                    bpy.data.actions.remove(mat.animation_data.action) # already-iterative
+                    remove_if_in_main(bpy.data.actions, mat.animation_data.action)
 
                 # remove material node animation
                 if mat.node_tree is not None and mat.node_tree.animation_data is not None:
-                    bpy.data.actions.remove(mat.node_tree.animation_data.action) # already-iterative
+                    remove_if_in_main(bpy.data.actions, mat.node_tree.animation_data.action)
 
                 # remove material
-                bpy.data.materials.remove(mat) # already-iterative
+                remove_if_in_main(bpy.data.materials, mat)
 
 
 
         # curve
-        bpy.data.curves.remove(ob.data) # already-iterative
+        remove_if_in_main(bpy.data.curves, ob.data)
 
     @property
     def origin(self):

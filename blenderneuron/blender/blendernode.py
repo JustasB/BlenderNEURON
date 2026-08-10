@@ -159,22 +159,37 @@ class BlenderNode(CommNode):
 
     def add_neon_effect(self):
         """
-        Adds a neon-style glare effect for Cycles (via compositor)
-        and enables bloom for Eevee so the glow appears in both engines.
+        Adds a neon-style glare effect via the compositor.
         """
 
         scene = bpy.context.scene
 
-        # ============================================================
-        # 1. ENABLE BLOOM IF USING EEVEE
-        # ============================================================
-        scene.eevee.use_bloom = True
+        # Eevee bloom was removed in newer Blender versions. Keep using it
+        # where it exists, and fall back to the compositor glare setup below.
+        eevee_settings = getattr(scene, "eevee", None)
+        if eevee_settings is not None and hasattr(eevee_settings, "use_bloom"): # pragma: no cover
+            eevee_settings.use_bloom = True
 
-        # ============================================================
-        # 2. ENABLE COMPOSITOR NODES (Cycles bloom)
-        # ============================================================
-        scene.use_nodes = True
-        nt = scene.node_tree
+        use_blender_5_compositor = bpy.app.version[0] >= 5
+
+        if use_blender_5_compositor:
+            nt = scene.compositing_node_group
+            if nt is None:
+                nt = bpy.data.node_groups.new("BlenderNEURON Neon Composite", "CompositorNodeTree")
+                scene.compositing_node_group = nt
+
+            for window in bpy.context.window_manager.windows:
+                for area in window.screen.areas:
+                    if area.type != 'VIEW_3D':
+                        continue
+
+                    space = area.spaces.active
+                    if hasattr(space, "shading") and hasattr(space.shading, "use_compositor"):
+                        space.shading.use_compositor = 'ALWAYS'
+        else: # pragma: no cover
+            scene.use_nodes = True
+            nt = scene.node_tree
+
         nodes = nt.nodes
         links = nt.links
 
@@ -191,17 +206,22 @@ class BlenderNode(CommNode):
         # ------------------------------------------------------------
         comp = nodes.get('Composite')
         if comp is None:
-            comp = nodes.new('CompositorNodeComposite')
+            comp = nodes.new('NodeGroupOutput' if use_blender_5_compositor else 'CompositorNodeComposite')
             comp.name = 'Composite'
+
+        if use_blender_5_compositor and 'Image' not in comp.inputs:
+            nt.interface.new_socket(name="Image", in_out='OUTPUT', socket_type='NodeSocketColor')
 
         # ------------------------------------------------------------
         # Optional Viewer node for compositor preview
         # ------------------------------------------------------------
-        viewer = nodes.get('Viewer')
-        if viewer is None:
-            viewer = nodes.new('CompositorNodeViewer')
-            viewer.name = 'Viewer'
-            viewer.use_alpha = False
+        viewer = None
+        if not use_blender_5_compositor: # pragma: no cover
+            viewer = nodes.get('Viewer')
+            if viewer is None:
+                viewer = nodes.new('CompositorNodeViewer')
+                viewer.name = 'Viewer'
+                viewer.use_alpha = False
 
         # ------------------------------------------------------------
         # Get or create Glare node (no duplication)
@@ -216,31 +236,44 @@ class BlenderNode(CommNode):
             glare = nodes.new('CompositorNodeGlare')
             glare.name = 'NeonGlare'
 
+        def set_node_setting(node, prop_name, prop_value, input_name=None, input_value=None):
+            if hasattr(node, prop_name): # pragma: no cover
+                setattr(node, prop_name, prop_value)
+                return
+
+            if input_name is not None and input_name in node.inputs:
+                node.inputs[input_name].default_value = input_value if input_value is not None else prop_value
+
         # ------------------------------------------------------------
         # Configure glare for neon-style streak effect
         # ------------------------------------------------------------
-        glare.glare_type = 'STREAKS'  # neon streak effect
-        glare.quality = 'HIGH'
-        glare.iterations = 3
-        glare.color_modulation = 0.2
-        glare.threshold = 0.1
-        glare.streaks = 7
-        glare.fade = 0.75
-        glare.mix = 0  # 0 = effect only
+        set_node_setting(glare, 'glare_type', 'STREAKS', 'Type', 'Streaks')
+        set_node_setting(glare, 'quality', 'HIGH', 'Quality', 'High')
+        set_node_setting(glare, 'iterations', 3, 'Iterations')
+        set_node_setting(glare, 'color_modulation', 0.2, 'Color Modulation')
+        set_node_setting(glare, 'threshold', 0.1, 'Threshold')
+        set_node_setting(glare, 'streaks', 7, 'Streaks')
+        set_node_setting(glare, 'fade', 0.75, 'Fade')
+        set_node_setting(glare, 'mix', 0, 'Mix')
 
         # ------------------------------------------------------------
         # Remove old links to Composite/Viewer to avoid stacking
         # ------------------------------------------------------------
         for link in list(links):
-            if link.to_node in {comp, viewer}:
+            output_nodes = {comp}
+            if viewer is not None:
+                output_nodes.add(viewer)
+
+            if link.to_node in output_nodes:
                 links.remove(link)
 
         # ------------------------------------------------------------
         # Connect nodes cleanly:
-        # Render Layers → Glare → Composite + Viewer
+        # Render Layers -> Glare -> Composite (+ Viewer before Blender 5)
         # ------------------------------------------------------------
         links.new(rl.outputs['Image'], glare.inputs['Image'])
         links.new(glare.outputs['Image'], comp.inputs['Image'])
-        links.new(glare.outputs['Image'], viewer.inputs['Image'])
+        if viewer is not None: # pragma: no cover
+            links.new(glare.outputs['Image'], viewer.inputs['Image'])
 
 

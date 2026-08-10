@@ -148,4 +148,5 @@ def register():
         bpy.props.PointerProperty(type=BlenderNEURONProperties)
 
 def unregister():
-    del bpy.types.Scene.BlenderNEURON_properties
+    if hasattr(bpy.types.Scene, "BlenderNEURON_properties"):
+        del bpy.types.Scene.BlenderNEURON_properties

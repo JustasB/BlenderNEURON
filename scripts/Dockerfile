@@ -30,7 +30,7 @@ ENV PYTHONPATH=/BlenderNEURON
 RUN pip install pydevd-pycharm coverage neuron pydevd-pycharm sphinx sphinx_rtd_theme build twine
 
 # Install packages for Blender python
-RUN /blender/3.5/python/bin/python3.10 -m pip install coverage==7.12 pydevd-pycharm
+RUN /blender/5.2/python/bin/python3.13 -m pip install coverage==7.12 pydevd-pycharm
 ENV COVERAGE_PROCESS_START=.coveragerc
 
 #Expose port 5920 to view display using VNC Viewer
