@@ -67,6 +67,19 @@ class CommNode(object):
 
         # 'Control' nodes are 1-directional (a node with a connected client, but no server of its own)
         if 'Control' in self.server_end:
+            # The integration-test control nodes can be created before the process
+            # that hosts their client.  Keep trying until that process publishes
+            # its address instead of permanently retaining a failed first attempt.
+            self.client_retry_stop = threading.Event()
+            self.client_connected = threading.Event()
+            if self.client is None:
+                self.client_retry_thread = threading.Thread(target=self.retry_setup_client)
+                self.client_retry_thread.daemon = True
+                self.client_retry_thread.start()
+                # A control node is normally consumed immediately after it is
+                # created.  Give a just-started peer time to publish its server
+                # address before exposing an unavailable client to the caller.
+                self.client_connected.wait(5)
             return
 
         # Create a server
@@ -88,6 +101,11 @@ class CommNode(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if hasattr(self, "client_retry_stop"):
+            self.client_retry_stop.set()
+        if hasattr(self, "client_retry_thread") and self.client_retry_thread.is_alive():
+            self.client_retry_thread.join()
+
         if self.coverage:
             self.client.end_code_coverage()
 
@@ -239,6 +257,14 @@ class CommNode(object):
 
         if self.client is not None and self.on_client_connected is not None:
             self.on_client_connected(self)
+
+        if self.client is not None and hasattr(self, "client_connected"):
+            self.client_connected.set()
+
+    def retry_setup_client(self):
+        while not self.client_retry_stop.is_set() and self.client is None:
+            self.try_setup_client(warn=False)
+            self.client_retry_stop.wait(0.1)
 
     def read_client_address_file(self):
         """

@@ -12,8 +12,8 @@ from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
 
 class TestMPI(BlenderTestCase):
     def test_mpi(self):
-        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
-                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+                Blender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a cell name:mpi rank map
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
@@ -46,8 +46,8 @@ class TestMPI(BlenderTestCase):
                              None)
 
     def test_mpi_synset(self):
-        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
-                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+                Blender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a cell name:mpi rank map
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'

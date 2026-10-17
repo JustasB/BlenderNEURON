@@ -45,3 +45,5 @@ blender.tar.xz
 /blender4/
 /x86_64
 .DS_Store
+AGENTS.md
+blender_scripts/addons/blenderneuron
