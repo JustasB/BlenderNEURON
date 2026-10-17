@@ -6,10 +6,59 @@ import os, sys
 from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
+from unittest.mock import Mock, patch
 from blenderneuron.commnode import CommNode
 from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
-
 class TestCommNode(BlenderTestCase):
+    def test_control_node_retries_until_client_is_available(self):
+        attempts = []
+
+        def try_setup_client(node, warn=True):
+            attempts.append(warn)
+            node.client = None
+            if len(attempts) == 2:
+                node.client = Mock()
+                node.client_connected.set()
+
+        with patch.object(CommNode, 'try_setup_client', try_setup_client):
+            with CommNode('Control-NEURON') as node:
+                self.assertIsNotNone(node.client)
+
+        self.assertEqual(attempts, [True, False])
+
+    def test_try_setup_client_notifies_control_node(self):
+        node = CommNode.__new__(CommNode)
+        node.config = {
+            'default_ip': {'Blender': '127.0.0.1'},
+            'default_port': {'Blender': ''},
+        }
+        node.client_end = 'Blender'
+        node.server_end = 'Control-NEURON'
+        node.on_client_connected = None
+        node.client_connected = Mock()
+        client = Mock()
+        client.ping.return_value = 1
+
+        with patch.object(node, 'read_client_address_file', return_value='http://test'), \
+                patch('blenderneuron.commnode.xmlrpclib.ServerProxy', return_value=client):
+            node.try_setup_client()
+
+        node.client_connected.set.assert_called_once_with()
+
+    def test_control_node_exit_stops_and_joins_retry_thread(self):
+        node = CommNode.__new__(CommNode)
+        node.client_retry_stop = Mock()
+        node.client_retry_thread = Mock()
+        node.client_retry_thread.is_alive.return_value = True
+        node.coverage = False
+        node.stop_server = Mock()
+
+        node.__exit__(None, None, None)
+
+        node.client_retry_stop.set.assert_called_once_with()
+        node.client_retry_thread.join.assert_called_once_with()
+        node.stop_server.assert_called_once_with()
+
     def test_control_NEURON(self):
         def test():
             from neuron import h
