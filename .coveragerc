@@ -3,6 +3,7 @@
 branch = True
 parallel = True
 concurrency = multiprocessing,thread
+sigterm = True
 source = blenderneuron
 omit =
     blenderneuron/blender/panels/*
