@@ -12,7 +12,8 @@ The `./run.sh` file supports Ubuntu/Linux and macOS.
 On macOS, it opens the built-in Screen Sharing VNC client.
 On Linux, it uses `vinagre` or `vncviewer` when available.
 The Docker image selects your host architecture automatically: `linux/amd64`
-uses Blender 5.2, while `linux/arm64` uses Ubuntu's native Blender package.
+uses Blender 5.2.3 (the same archive as CircleCI), while `linux/arm64` uses
+Ubuntu's native Blender package.
 Set `DOCKER_PLATFORM=linux/amd64` or `DOCKER_PLATFORM=linux/arm64` before
 `./run.sh` or `./build.sh` to select a specific image variant.
 The default VNC password is `blender`; set `VNC_PASSWORD=yourpass ./run.sh`
