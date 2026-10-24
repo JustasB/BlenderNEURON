@@ -110,6 +110,16 @@ class Blender(BlenderNEURONProcess):
     cmd_args = '-noaudio -p 300 200 1024 600'
 
 
+class BackgroundBlender(Blender):
+    """Fresh, main-thread Blender worker for tests without UI requirements."""
+    def __init__(self, keep=False, cmd_args=None, sleep=1):
+        super().__init__(keep=keep, cmd_args=cmd_args, sleep=sleep)
+        if os.environ.get('BLENDERNEURON_TEST_HEADLESS', '1') != '0':
+            self.cmd_args = ('--background --python-exit-code 1 ' +
+                             (cmd_args or '-noaudio') +
+                             ' --python tests/background_blender.py')
+
+
 class NEURON(BlenderNEURONProcess):
     executable = 'nrniv'
     server_end = 'NEURON'
@@ -161,3 +171,14 @@ class BlenderTestCase(TestCase):
 def check_blender_can_run():
     with Blender():
         pass
+
+
+def select_eevee_engine(render):
+    """Select a supported EEVEE identifier without assuming version cutoffs."""
+    for engine in ('BLENDER_EEVEE_NEXT', 'BLENDER_EEVEE'):
+        try:
+            render.engine = engine
+        except TypeError:  # Blender rejects unavailable enum identifiers.
+            continue
+        return engine
+    raise AssertionError('No supported EEVEE render engine is available')

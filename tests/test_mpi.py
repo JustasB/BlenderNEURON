@@ -12,7 +12,7 @@ from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
 from blenderneuron.nrn.neuronnode import NeuronNode
-from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
+from tests import test_hoc_file, BackgroundBlender as Blender, NEURON, BlenderTestCase
 
 
 class TestMPI(BlenderTestCase):

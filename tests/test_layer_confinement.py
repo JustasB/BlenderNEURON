@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, NEURON, Blender, BlenderTestCase
+from tests import test_hoc_file, NEURON, BackgroundBlender as Blender, BlenderTestCase
 from math import pi
 degs = 180/pi
 

@@ -2,7 +2,7 @@
 import unittest
 from textwrap import dedent
 from blenderneuron.commnode import CommNode
-from tests import Blender, BlenderTestCase
+from tests import BackgroundBlender as Blender, BlenderTestCase
 
 
 class TestSceneTiming(BlenderTestCase):

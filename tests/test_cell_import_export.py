@@ -7,7 +7,8 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, NEURON, Blender, BlenderTestCase
+from tests import test_hoc_file, NEURON, BackgroundBlender as Blender, BlenderTestCase
+from tests import Blender as GUIBlender
 
 class TestCellImportExport(BlenderTestCase):
 
@@ -559,7 +560,7 @@ return_value = True
     def test_save_groups(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
-             Blender(), CommNode("Control-Blender") as bcn:
+             GUIBlender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a group
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'

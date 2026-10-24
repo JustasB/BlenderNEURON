@@ -3,7 +3,7 @@ import unittest
 from textwrap import dedent
 from blenderneuron.datablocknames import entity_key, encode_name, name_limit
 from blenderneuron.commnode import CommNode
-from tests import Blender, NEURON, BlenderTestCase
+from tests import Blender, BackgroundBlender, NEURON, BlenderTestCase
 
 
 class TestNameEncoder(unittest.TestCase):
@@ -74,7 +74,7 @@ class TestDataBlockNames(BlenderTestCase):
             '''))
 
     def test_import_batch_preserves_identity_and_rollback(self):
-        with Blender(), CommNode('Control-Blender', coverage=True) as control:
+        with BackgroundBlender(), CommNode('Control-Blender', coverage=True) as control:
             control.client.run_command(dedent('''
                 from blenderneuron.datablocknames import *
                 registry = NameRegistry(63)
@@ -126,7 +126,7 @@ class TestDataBlockNames(BlenderTestCase):
             '''))
 
     def test_registry(self):
-        with Blender(), CommNode('Control-Blender', coverage=True) as control:
+        with BackgroundBlender(), CommNode('Control-Blender', coverage=True) as control:
             control.client.run_command(dedent('''
                 from blenderneuron.datablocknames import *
                 from unittest.mock import patch
@@ -312,7 +312,7 @@ class TestDataBlockNames(BlenderTestCase):
                     capture_output=True, text=True, timeout=60)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 groups = json.loads(Path(directory, 'groups.json').read_text())
-                with Blender(), CommNode('Control-Blender', coverage=True) as control:
+                with BackgroundBlender(), CommNode('Control-Blender', coverage=True) as control:
                     control.client.run_command('payload = ' + repr(groups))
                     control.client.run_command(dedent('''
                         from blenderneuron.blender.blenderroot import BlenderSection
