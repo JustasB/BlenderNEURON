@@ -61,7 +61,8 @@ class BlenderNEURONProcess:
                 with ServerProxy(address, transport=ProbeTransport(connection.local_secret())) as client:
                     if connected:
                         ready = client.run_command(
-                            'node_client = bpy.types.Object.BlenderNEURON_node.client;'
+                            'node = getattr(bpy.types.Object, "BlenderNEURON_node", None);'
+                            'node_client = getattr(node, "client", None);'
                             'return_value = node_client is not None and node_client.ping() == 1')
                     else:
                         ready = client.ping() == 1

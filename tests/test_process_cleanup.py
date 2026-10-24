@@ -7,6 +7,8 @@ import sys
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock, mock_open, patch
 
 from tests import BlenderNEURONProcess, BlenderTestCase
 from tests.process_utils import stop_process_group
@@ -21,6 +23,31 @@ def python_args(code):
 
 
 class TestProcessCleanup(BlenderTestCase):
+    def test_connected_probe_waits_for_node_and_client(self):
+        process = PythonProcess()
+        process.process = Mock()
+        process.process.poll.return_value = None
+        object_type = SimpleNamespace()
+        namespace = {'bpy': SimpleNamespace(types=SimpleNamespace(Object=object_type))}
+        replies = []
+
+        def run_command(command):
+            exec(command, namespace)
+            replies.append(namespace['return_value'])
+            if len(replies) == 1:
+                object_type.BlenderNEURON_node = SimpleNamespace(client=None)
+            elif len(replies) == 2:
+                object_type.BlenderNEURON_node.client = Mock()
+                object_type.BlenderNEURON_node.client.ping.return_value = 1
+            return namespace['return_value']
+
+        with patch('tests.ServerProxy') as proxy, \
+                patch('builtins.open', mock_open(read_data='"http://127.0.0.1:1"')), \
+                patch('tests.time.sleep'):
+            proxy.return_value.__enter__.return_value.run_command.side_effect = run_command
+            process.wait_ready(connected=True)
+        self.assertEqual(replies, [False, False, True])
+
     def test_context_exception_stops_process(self):
         process = PythonProcess(cmd_args=python_args('import time; time.sleep(60)'), sleep=0)
         with self.assertRaisesRegex(ValueError, 'test failure'):
