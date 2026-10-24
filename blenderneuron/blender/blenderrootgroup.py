@@ -9,7 +9,7 @@ import bpy
 from blenderneuron.datablocknames import get_registry, entity_key
 from blenderneuron.blender.views.curvecontainer import CurveContainer
 from fnmatch import fnmatch
-import json
+from blenderneuron.utils import serialize
 import os
 
 class BlenderRootGroup(RootGroup):
@@ -332,8 +332,9 @@ class BlenderRootGroup(RootGroup):
         if dir != '' and not os.path.exists(dir):
             os.makedirs(dir)
 
-        with open(file_name, 'w') as f:
-            json.dump(group_dict, f)
+        payload = serialize(group_dict)
+        with open(file_name, 'w', encoding='utf-8') as f:
+            f.write(payload)
 
 
 

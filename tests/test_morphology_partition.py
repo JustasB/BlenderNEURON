@@ -3,6 +3,7 @@ import json
 import unittest
 from types import SimpleNamespace
 from blenderneuron.nrn.neuronnode import NeuronNode
+from blenderneuron.utils import serialize
 
 
 class TestMorphologyPartition(unittest.TestCase):
@@ -85,6 +86,64 @@ class TestMorphologyPartition(unittest.TestCase):
         self.node._update_groups_local = received.append
         self.node.update_groups(self.groups)
         self.assertIs(received[0], self.groups)
+
+    def test_deep_file_tables_stay_flat_during_mpi_dispatch(self):
+        import pickle
+        root = self.groups[0]['roots'][0]
+        for _ in range(1500):
+            child = dict(name='Cell[0].dend', children=[])
+            root['children'] = [child]
+            root = child
+        table = json.loads(serialize(self.groups[0]))
+        original = json.dumps(table)
+        received = []
+        self.node._uses_mpi_coordinator = lambda: True
+        self.node._update_groups_local = received.append
+
+        def dispatch(operation, payloads):
+            # NEURON's collective pickles its input; nesting must stay shallow.
+            pickle.dumps(payloads)
+            self.assertTrue(all(isinstance(payload, str) for payload in payloads))
+            for payload in payloads:
+                self.node._execute_mpi_operation(operation, payload)
+
+        self.node._mpi_request_targeted = dispatch
+        with self.assertLogs('blenderneuron.nrn.neuronnode', level='DEBUG'):
+            self.node.update_groups([table, self.groups[1]])
+        root = received[0][0]['roots'][0]
+        for _ in range(1500):
+            root = root['children'][0]
+        self.assertEqual(root['children'], [])
+        self.assertEqual(json.dumps(table), original)
+
+    def test_deep_mpi_gather_and_coordinator_response(self):
+        import pickle
+        root = self.groups[0]['roots'][0]
+        for _ in range(1500):
+            child = dict(name='Cell[0].dend', children=[])
+            root['children'] = [child]
+            root = child
+        self.node.mpimap = None
+        self.node.parallel_ctx.id = lambda: 0
+
+        def exchange(values):
+            pickle.dumps(values)
+            return values
+
+        self.node.parallel_ctx.py_alltoall = exchange
+        gathered = self.node.gather_group_dicts(self.groups)
+        root = gathered[0]['roots'][0]
+        for _ in range(1500):
+            root = root['children'][0]
+        self.assertEqual(root['children'], [])
+
+        self.node._uses_mpi_coordinator = lambda: True
+        self.node._get_group_dicts_local = lambda **kwargs: self.groups
+        result = self.node._mpi_request('get_group_dicts', None)
+        root = result[0][0]['roots'][0]
+        for _ in range(1500):
+            root = root['children'][0]
+        self.assertEqual(root['children'], [])
 
 
 if __name__ == '__main__':

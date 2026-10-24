@@ -611,23 +611,9 @@ class CommNode(object):
                 time.sleep(0.1)
 
     def compress(self, obj):
-        # print('X'*100, 'pre-str', obj)
-        # compressed = iterative_str(obj)
-        compressed = serialize(obj)
-
-        # print('X' * 100, 'post-iterative_str', obj)
-
-        try:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed, 2)) # already-iterative
-        except:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed.encode('utf8'), 2)) # already-iterative
-
-        return compressed
+        payload = serialize(obj).encode('utf-8')
+        return xmlrpclib.Binary(zlib.compress(payload, 2))
 
     def decompress(self, compressed):
-        uncompressed = deserialize(zlib.decompress(compressed.data).decode('utf-8')) # already-iterative
-
-        # print('X'*100, uncompressed)
-
-        return uncompressed
+        return deserialize(zlib.decompress(compressed.data).decode('utf-8'))
 

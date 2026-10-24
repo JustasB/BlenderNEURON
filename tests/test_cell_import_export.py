@@ -593,12 +593,10 @@ return_value = True
                     "groups['Group.001'].to_file('" + file2 + "');"
                 )
 
-                # Read the saved files
-                import json
-                with open(file1) as f1, open(file2) as f2:
-                    json1 = json.load(f1)
-                    json2 = json.load(f2)
-
+                # Read and reconstruct saved groups through the public API.
+                from blenderneuron.rootgroup import RootGroup
+                json1 = RootGroup.from_file(file1)
+                json2 = RootGroup.from_file(file2)
 
                 # check that correct cells were saved
                 self.assertEqual(json1['roots'][0]['name'], 'TestCell[0].soma')

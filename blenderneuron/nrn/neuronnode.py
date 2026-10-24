@@ -1,10 +1,10 @@
 from neuron import h
 from blenderneuron.commnode import CommNode
+from blenderneuron.utils import deserialize, serialize
 from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
 from collections import OrderedDict
 import re, math, traceback
 import logging
-import pickle
 
 logger = logging.getLogger(__name__)
 from hashlib import sha1
@@ -125,7 +125,10 @@ class NeuronNode(CommNode):
                 logger.debug("MPI rank %d failed %s", rank, operation)
                 raise RuntimeError("MPI rank %d failed %s:\n%s" %
                                    (rank, operation, response["error"]))
-        return [response["result"] for response in responses if response is not None]
+        results = [response["result"] for response in responses if response is not None]
+        if operation in ("initialize_groups", "get_group_dicts"):
+            return [deserialize(result) for result in results]
+        return results
 
     def _mpi_operation_response(self, operation, payload):
         try:
@@ -143,13 +146,13 @@ class NeuronNode(CommNode):
             return self._get_roots_local()
         if operation == "initialize_groups":
             self._initialize_groups_local(payload)
-            return self._get_group_dicts_local(run_simulation=True)
+            return serialize(self._get_group_dicts_local(run_simulation=True))
         if operation == "get_group_dicts":
-            return self._get_group_dicts_local(run_simulation=True)
+            return serialize(self._get_group_dicts_local(run_simulation=True))
         if operation == "set_sim_params":
             return self._set_sim_params_local(payload)
         if operation == "update_groups":
-            return self._update_groups_local(payload)
+            return self._update_groups_local(deserialize(payload))
         if operation == "validate_synapse_sections":
             return self._validate_synapse_sections_local(payload)
         if operation == "create_synapses":
@@ -291,12 +294,14 @@ class NeuronNode(CommNode):
 
         rank_count = int(self.parallel_ctx.nhost())
         fragments = self.parallel_ctx.py_alltoall(
-            [local_groups] + [None] * (rank_count - 1))
+            [serialize(local_groups)] + [None] * (rank_count - 1))
 
         if int(self.parallel_ctx.id()) != 0:
             return None
 
-        return self.merge_mpi_group_fragments(fragments)
+        return self.merge_mpi_group_fragments(
+            [deserialize(fragment) if fragment is not None else None
+             for fragment in fragments])
 
     def merge_mpi_group_fragments(self, fragments):
         """Merge rank fragments deterministically, restoring Blender names."""
@@ -356,9 +361,26 @@ class NeuronNode(CommNode):
             stack.extend(section.get("children", []))
 
     def update_groups(self, blender_groups):
+        """Apply group dictionaries, serialized groups, or flat group-file tables.
+
+        A file loaded with json.load() can be passed as one item in the list.
+        Call deserialize() first if application code needs to inspect its roots.
+        """
+        if isinstance(blender_groups, xmlrpclib.Binary):
+            blender_groups = self.decompress(blender_groups)
+        elif isinstance(blender_groups, (str, bytes, dict)):
+            blender_groups = deserialize(blender_groups)
+            if isinstance(blender_groups, dict):
+                blender_groups = [blender_groups]
+        if any(isinstance(group, (str, bytes)) or "__blenderneuron_flat__" in group
+               for group in blender_groups):
+            blender_groups = [deserialize(group)
+                              if isinstance(group, (str, bytes)) or
+                              "__blenderneuron_flat__" in group else group
+                              for group in blender_groups]
         if self._uses_mpi_coordinator():
             partitions = self._partition_morphology_updates(blender_groups)
-            self._mpi_request_targeted("update_groups", partitions)
+            self._mpi_request_targeted("update_groups", [serialize(part) for part in partitions])
             return
         self._update_groups_local(blender_groups)
 
@@ -367,7 +389,7 @@ class NeuronNode(CommNode):
 
         Keep metadata on all ranks: recording settings also govern existing
         groups whose roots were not selected for this export. Root trees are
-        shared read-only here; the collective serializes only their destination.
+        shared read-only here; each destination receives a flat JSON payload.
         A mapping has one entry per visible cell, so conflicting duplicate keys
         cannot be represented by the supported mpimap dictionary format.
         """
@@ -396,11 +418,11 @@ class NeuronNode(CommNode):
                 partitions[rank].append(envelope)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("update_groups: %d groups, %d roots, %d serialized bytes",
-                         len(blender_groups), len(seen), len(pickle.dumps(blender_groups)))
+                         len(blender_groups), len(seen), len(serialize(blender_groups).encode("utf-8")))
             for rank, partition in enumerate(partitions):
                 logger.debug("update_groups rank %d: %d roots, %d serialized bytes",
                              rank, sum(len(g["roots"]) for g in partition),
-                             len(pickle.dumps(partition)))
+                             len(serialize(partition).encode("utf-8")))
         return partitions
 
     def _update_groups_local(self, blender_groups):

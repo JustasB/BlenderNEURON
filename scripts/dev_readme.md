@@ -87,6 +87,27 @@ container so its init process also reaps children after an abrupt runner exit.
 After a forcibly killed runner or container-level failure, use a fresh container.
 
 
+## Saved group files
+
+`group.to_file(path)` writes version 2 flat JSON so deeply nested cells can be
+encoded and decoded safely. Regenerate group files when upgrading; legacy
+transport formats are unsupported. Synapse files retain their existing format.
+
+Read a saved group in either Blender or NEURON using the shared API:
+
+```python
+from blenderneuron.rootgroup import RootGroup
+
+group = RootGroup.from_file(path)
+# Inspect group["roots"] or apply the geometry to existing NEURON cells:
+node.update_groups([group])
+```
+
+`from_file()` handles file reading and reconstructs the hierarchy. It returns
+a dictionary; it does not create cells or display geometry. It is also inherited
+by `BlenderRootGroup` and `NeuronRootGroup`. Application code must traverse deep
+hierarchies iteratively. Use matching add-on versions in Blender and NEURON.
+
 ## Modifying the Addon
 The container links the `[repo]/blenderneuron` folder to Blender addon folder. 
 It also puts the linked folder into PYTHONPATH environment variable.
