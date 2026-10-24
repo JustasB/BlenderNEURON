@@ -1,4 +1,4 @@
-"""Verify the reference and optimized traces drive identical Blender channels."""
+"""Verify a fixed simplified trace drives the expected Blender channels."""
 import unittest
 from textwrap import dedent
 from blenderneuron.commnode import CommNode
@@ -14,11 +14,9 @@ class TestRDPAnimation(BlenderTestCase):
                 from blenderneuron.activity import Activity
                 from blenderneuron.blender.views.objectview import ObjectViewAbstract
                 from blenderneuron.blender.utils import COLOR_RAMP_NAME
-                from tests.rdp_reference import rdp as reference
-
-                times = np.linspace(0, 25, 250)
-                values = -65 + 100*np.exp(-((times-8)/.65)**2) - 12*np.exp(-((times-10)/1.3)**2)
-                expected = reference(np.column_stack((times, values)), .1)
+                times = np.array([0., 2.5, 5., 7.5, 10., 12.5, 15., 20., 25.])
+                values = np.array([-65., -65., -65., -15., 35., -15., -65., -65., -65.])
+                expected = np.array([[0., -65.], [5., -65.], [10., 35.], [15., -65.], [25., -65.]])
                 activity = Activity()
                 activity.times, activity.values = times.copy(), values.copy()
                 activity.simplify(.1)
@@ -26,12 +24,13 @@ class TestRDPAnimation(BlenderTestCase):
                 ramp = bpy.data.materials.new('rdp_ramp')
                 ramp.use_nodes = True
                 ramp.node_tree.nodes.new('ShaderNodeValToRGB').name = COLOR_RAMP_NAME
+                bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms = 10
                 view = ObjectViewAbstract.__new__(ObjectViewAbstract)
                 view.group = SimpleNamespace(frames_per_ms=10, max_brightness=2,
                     animate_brightness=True, animate_color=True,
                     animation_range_low=-80, animation_range_high=40, color_ramp_material=ramp)
                 materials = []
-                for name, trace in [('rdp_reference', SimpleNamespace(times=expected[:, 0], values=expected[:, 1])),
+                for name, trace in [('rdp_expected', SimpleNamespace(times=expected[:, 0], values=expected[:, 1])),
                                     ('rdp_current', activity)]:
                     material = bpy.data.materials.new(name)
                     material.use_nodes = True
@@ -44,11 +43,12 @@ class TestRDPAnimation(BlenderTestCase):
                 else:
                     raw = action.fcurves.find('["recorded_value"]')
                 np.testing.assert_array_equal([p.co.y for p in raw.keyframe_points], expected[:, 1].astype(np.float32))
+                np.testing.assert_array_equal([p.co.x for p in raw.keyframe_points], expected[:, 0] * 10)
                 engines = ['BLENDER_WORKBENCH', 'CYCLES',
                            'BLENDER_EEVEE_NEXT' if bpy.app.version >= (4, 2, 0) else 'BLENDER_EEVEE']
                 for engine in engines:
                     bpy.context.scene.render.engine = engine
-                    for frame in [0, 80, 100, 250, 40, 80, 0]:
+                    for frame in [0, 50, 100, 150, 250, 75, 100, 0]:
                         bpy.context.scene.frame_set(frame)
                         def channels(mat):
                             emit = mat.node_tree.nodes['Emission']
@@ -57,7 +57,7 @@ class TestRDPAnimation(BlenderTestCase):
                         np.testing.assert_array_equal(channels(materials[0]), channels(materials[1]))
                 return_value = len(raw.keyframe_points)
             '''))
-            self.assertGreater(result, 2)
+            self.assertEqual(result, 5)
 
 
 if __name__ == '__main__':
