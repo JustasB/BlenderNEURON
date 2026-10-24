@@ -1,7 +1,7 @@
-"""Isolated EEVEE render sweep for Figures G–H; use inside the test image.
+"""EEVEE measurement helpers for final panels I–J; use inside the test image.
 
 Run this file with Python to orchestrate, or Blender --python ... -- --worker
-to measure one condition. Plotting needs matplotlib but not Blender.
+to measure one condition. Plot results only with plot_figures_a_to_j.py.
 """
 from __future__ import annotations
 
@@ -124,59 +124,11 @@ def measure_render_scene(cells, level, group, visible, rss_reader=None):
                 animation_samples=len(group.activity.times))
 
 
-def plot(directory):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    rows = json.loads((directory / "results.json").read_text())["records"]
-    fig, axes = plt.subplots(2, 1, figsize=(8.2, 7.2), sharex=True,
-                             constrained_layout=True)
-    colors = ("#0072B2", "#E69F00", "#009E73")
-    for ax, metric, title, ylabel in (
-        (axes[0], "seconds", "G. EEVEE Frame Render Time", "Seconds / Frame"),
-        (axes[1], "rss_render_peak_delta_mib", "H. Peak Additional Memory During Rendering", "MiB"),
-    ):
-        for level, color in zip(LEVELS, colors):
-            x, medians, lower, upper = [], [], [], []
-            for cells in COUNTS:
-                values = [r[metric] for r in rows if r["recording"] == level and r["cells"] == cells]
-                if not values:
-                    continue
-                median = statistics.median(values)
-                x.append(cells)
-                medians.append(median)
-                lower.append(median - min(values))
-                upper.append(max(values) - median)
-            ax.errorbar(x, medians, yerr=[lower, upper], fmt="o-", ms=3,
-                        lw=1.5, elinewidth=1, capsize=2.5, color=color, label=level)
-        ax.set(title=title, ylabel=ylabel, ylim=(0, None), xticks=COUNTS, xlim=(4, 134))
-        ax.grid(alpha=.25)
-        ax.legend(title="Animation Granularity", frameon=False, loc="upper left")
-    axes[1].set_xlabel("Cells (16 Sections per Cell)")
-    native = all("Metal" in row.get("graphics_renderer", "") for row in rows)
-    run_counts = {len([r for r in rows if r['cells'] == cells and r['recording'] == level])
-                  for cells in COUNTS for level in LEVELS}
-    repeated = min(run_counts) > 1
-    summary = (f"Median and Min–Max Across {min(run_counts)} Runs; 12 Warmed Frames per Run"
-               if repeated else "One Scene Run per Condition; Time Is Mean of 12 Warmed Frames")
-    platform_label = "Native macOS / Metal" if native else "Docker / Software OpenGL"
-    fig.suptitle(f"1800 × 900 · 64 Samples · Add-on Neon Glow · {platform_label}\n"
-                 f"{summary}", fontsize=10)
-    output_name = "eevee_g_h_native" if native else "eevee_g_h"
-    output = HERE / "figures" / (output_name + ("_minmax" if repeated else ""))
-    output.mkdir(parents=True, exist_ok=True)
-    for suffix in ("png", "svg"):
-        fig.savefig(str(output / f"figures_g_h.{suffix}"), dpi=220)
-    print(output / "figures_g_h.png", flush=True)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker", action="store_true")
     parser.add_argument("--save-blend", type=Path,
                         help="save the exact benchmark scene instead of timing renders")
-    parser.add_argument("--plot", action="store_true")
     parser.add_argument("--cells", type=int, default=8)
     parser.add_argument("--level", choices=LEVELS, default="Cell")
     parser.add_argument("--output", type=Path)
@@ -187,9 +139,6 @@ def main():
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(0)
-    if args.plot:
-        plot(args.results_dir)
-        return
     if args.worker:
         try:
             result = worker(args)

@@ -1,4 +1,4 @@
-"""Run five fresh, sequential Blender processes per A–F condition in Docker."""
+"""Measure static imports and animation setup for the final A–J figure."""
 
 import json
 import os

@@ -282,7 +282,7 @@ def neuron_export_morphology(cells: int, sections: int, recording="Cell", record
 
 def import_live_neuron_group(cells: int, sections: int, interaction: str,
                              recording: str, record_activity: bool, phases=None,
-                             phase_metrics=None, cprofile_prefix=None):
+                             phase_metrics=None, cprofile_prefix=None, after_import=None):
     """Use the add-on's live NEURON-to-Blender import operator.
 
     The helper process builds ``h.Section`` objects before importing
@@ -384,6 +384,9 @@ def import_live_neuron_group(cells: int, sections: int, interaction: str,
             scene.frame_start = int(round(ANIMATION_START_MS * ANIMATION_FRAMES_PER_MS))
             scene.frame_end = int(round(ANIMATION_END_MS * ANIMATION_FRAMES_PER_MS))
             scene.render.fps = ANIMATION_FPS
+        # Benchmark extensions that need a live round trip run before cleanup.
+        if after_import is not None:
+            after_import(group, node)
         return group
     finally:
         if node is not None:

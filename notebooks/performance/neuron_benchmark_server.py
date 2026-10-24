@@ -156,8 +156,13 @@ def cell_origin(cell_index, cell_count):
     rows = math.ceil(cell_count / columns)
     column = cell_index % columns
     row = cell_index // columns
+    # Numerical round-trip controls vary spatial extent independently of cell
+    # count. Default import/render benchmark layouts remain unchanged.
+    x_extent = os.environ.get("BLENDERNEURON_BENCH_X_EXTENT_UM")
+    column_spacing = (float(x_extent) / max(1, columns - 1)
+                      if x_extent is not None else CELL_COLUMN_SPACING_UM)
     return (
-        column * CELL_COLUMN_SPACING_UM,
+        column * column_spacing,
         0.0,
         (row - (rows - 1) / 2) * CELL_ROW_SPACING_UM,
     )
