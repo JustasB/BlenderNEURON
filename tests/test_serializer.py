@@ -6,6 +6,45 @@ from blenderneuron.utils import serialize, deserialize
 
 class TestSerialization(unittest.TestCase):
 
+    def test_legacy_scanner_literals_and_numbers(self):
+        # A tuple forces the legacy scanner even for otherwise valid JSON
+        # tokens. Exercise compatibility with both generations of peers.
+        payload = "(true, false, null, True, False, None, -12, 1.25, -2.5e+3, 4E-2,)"
+        self.assertEqual(deserialize(payload),
+                         [True, False, None, True, False, None, -12, 1.25, -2500., .04])
+        self.assertEqual(deserialize("  ({'items': [], 'empty': {},}, (),)  "),
+                         [{'items': [], 'empty': {}}, []])
+        self.assertEqual(deserialize("{'a': 1, 'b': 2}"), {'a': 1, 'b': 2})
+
+    def test_legacy_scanner_escape_boundaries(self):
+        self.assertEqual(deserialize(r"'\a\b\f\n\r\t\v\\\'\"'"),
+                         '\a\b\f\n\r\t\v\\\'"')
+        for payload in ["'unterminated", "'trailing\\", r"'\x1'", r"'\uZZZZ'",
+                        r"'\U00110000'", "{'a': 1 'b': 2}", "{[]: 1}",
+                        "(-,)", "(1e,)", "(1e+,)", "(1e-,)", "(1 2)",
+                        "(1,]", "{'a':}", "", "   "]:
+            with self.subTest(payload=payload):
+                with self.assertRaises(ValueError):
+                    deserialize(payload)
+
+    def test_flat_transport_empty_and_nested_values(self):
+        for version, nodes in [
+                (1, [[0, 'empty', [1], 'list', [2]], [0], [1, [3]], [1]]),
+                (2, [[0, ['empty', 1, 'list', 2], [1, 3]], [0, [], []],
+                     [1, [3], [0]], [1, [], []]])]:
+            with self.subTest(version=version):
+                self.assertEqual(deserialize(json.dumps({
+                    '__blenderneuron_flat__': version, 'root': [0], 'nodes': nodes})),
+                    {'empty': {}, 'list': [[]]})
+        # Similar-looking ordinary dictionaries must not be interpreted as
+        # envelopes, nor should scalar/empty roots need a node table entry.
+        for value in [None, True, False, 0, 1.25, [], {},
+                      {'__blenderneuron_flat__': 99, 'root': 0, 'nodes': []},
+                      {'__blenderneuron_flat__': 2, 'root': 0, 'nodes': [], 'extra': 1}]:
+            with self.subTest(value=value):
+                self.assertEqual(deserialize(serialize(value)), value)
+                self.assertEqual(deserialize(json.dumps(value)), value)
+
     def test_serialize_list(self):
         data = [1, 2, 3]
         result = serialize(data)

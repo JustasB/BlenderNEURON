@@ -8,11 +8,12 @@ import tempfile
 import http.client
 import time
 import subprocess
+from types import SimpleNamespace
 from xmlrpc.client import ServerProxy, dumps, ProtocolError
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from blenderneuron.commnode import CommNode
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 spec = importlib.util.spec_from_file_location('connection', Path(__file__).resolve().parents[1] / 'blenderneuron' / 'connection.py')
 connection = importlib.util.module_from_spec(spec)
@@ -33,6 +34,56 @@ class ConnectionSecurityTests(unittest.TestCase):
         first = connection.local_secret()
         self.assertEqual(64, len(first))
         self.assertEqual(first, connection.local_secret())
+
+    def test_default_config_directories(self):
+        root = Path(self.directory.name)
+        cases = [('nt', 'win32', {'LOCALAPPDATA': str(root)}, root / 'BlenderNEURON'),
+                 ('posix', 'darwin', {}, root / 'Library' / 'Application Support' / 'BlenderNEURON'),
+                 ('posix', 'linux', {}, root / '.config' / 'blenderneuron'),
+                 ('posix', 'linux', {'XDG_CONFIG_HOME': str(root / 'xdg')},
+                  root / 'xdg' / 'blenderneuron')]
+        for name, platform, environment, expected in cases:
+            with self.subTest(platform=platform, environment=environment):
+                with patch.object(connection, 'os', SimpleNamespace(name=name, environ=environment)), \
+                     patch.object(connection, 'sys', SimpleNamespace(platform=platform)), \
+                     patch.object(Path, 'home', return_value=root):
+                    self.assertEqual(connection.config_directory(), expected)
+                    self.assertTrue(expected.is_dir())
+
+    def test_failed_save_preserves_settings_and_removes_temporary_file(self):
+        connection.save('settings.json', {'mode': 'local'})
+        for operation in ('dump', 'replace'):
+            with self.subTest(operation=operation):
+                target = connection.json if operation == 'dump' else connection.os
+                with patch.object(target, operation, side_effect=OSError('write failed')):
+                    with self.assertRaisesRegex(OSError, 'write failed'):
+                        connection.save('settings.json', {'mode': 'manual'})
+                self.assertEqual(connection.load('settings.json'), {'mode': 'local'})
+                self.assertEqual([p.name for p in Path(self.directory.name).iterdir()],
+                                 ['settings.json'])
+
+    def test_secret_publication_wait_and_timeout(self):
+        secret = connection.local_secret()
+        with patch.object(Path, 'read_text', side_effect=['', secret]), \
+             patch.object(connection.time, 'sleep') as pause:
+            self.assertEqual(connection.local_secret(), secret)
+            pause.assert_called_once_with(.01)
+        with patch.object(Path, 'read_text', return_value='incomplete'), \
+             patch.object(connection.time, 'sleep') as pause:
+            with self.assertRaisesRegex(ValueError, 'Incomplete local pairing file'):
+                connection.local_secret()
+            self.assertEqual(pause.call_count, 100)
+
+    def test_handshake_rejects_unsupported_peer(self):
+        for status, epoch in [(403, b'a' * 32), (200, b'short')]:
+            with self.subTest(status=status, epoch=epoch):
+                peer = MagicMock()
+                peer.getresponse.return_value.status = status
+                peer.getresponse.return_value.read.return_value = epoch
+                with patch.object(connection.Transport, 'make_connection', return_value=peer):
+                    with self.assertRaisesRegex(ValueError, 'authenticated pairing'):
+                        connection.AuthTransport('a' * 64).make_connection('localhost')
+                peer.request.assert_called_once_with('GET', '/RPC2')
 
     def test_private_atomic_settings(self):
         connection.save('NEURON-connection.json', {'secret': 'example'})
