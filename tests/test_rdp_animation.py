@@ -1,4 +1,5 @@
 """Verify a fixed simplified trace drives the expected Blender channels."""
+import inspect
 import unittest
 from textwrap import dedent
 from blenderneuron.commnode import CommNode
@@ -44,7 +45,9 @@ class TestRenderEngineSelection(unittest.TestCase):
 class TestRDPAnimation(BlenderTestCase):
     def test_material_channels_and_scrubbing(self):
         with Blender(), CommNode('Control-Blender', coverage=True) as control:
-            result = control.client.run_command(dedent('''
+            # Official Blender builds ignore PYTHONPATH by default, so send the
+            # helper source instead of importing the host-only tests package.
+            result = control.client.run_command('\n' + inspect.getsource(select_eevee_engine) + dedent('''
                 import numpy as np
                 from types import SimpleNamespace
                 from blenderneuron.activity import Activity
@@ -80,7 +83,6 @@ class TestRDPAnimation(BlenderTestCase):
                     raw = action.fcurves.find('["recorded_value"]')
                 np.testing.assert_array_equal([p.co.y for p in raw.keyframe_points], expected[:, 1].astype(np.float32))
                 np.testing.assert_array_equal([p.co.x for p in raw.keyframe_points], expected[:, 0] * 10)
-                from tests import select_eevee_engine
                 eevee = select_eevee_engine(bpy.context.scene.render)
                 engines = ['BLENDER_WORKBENCH', 'CYCLES', eevee]
                 for engine in engines:
