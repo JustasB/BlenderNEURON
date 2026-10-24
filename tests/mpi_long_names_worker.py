@@ -14,13 +14,17 @@ rank = int(pc.id())
 name = 'GeneratedCell' + 'Hierarchy'*12
 h('begintemplate %s\npublic soma\ncreate soma\nendtemplate %s' % (name, name))
 cell = getattr(h, name)()
-h.pt3dclear(sec=cell.soma)
-h.pt3dadd(0, 0, 0, 2, sec=cell.soma)
-h.pt3dadd(10, 0, 0, 2, sec=cell.soma)
+# Reuse one Python Section handle across extraction, updates, and validation.
+# Repeated template-section lookups can trigger a HOC stack type error in
+# NEURON 8.2.6 when the final geometry check uses a different wrapper.
+soma = cell.soma
+h.pt3dclear(sec=soma)
+h.pt3dadd(0, 0, 0, 2, sec=soma)
+h.pt3dadd(10, 0, 0, 2, sec=soma)
 group = NeuronRootGroup()
 group.name = 'Long MPI'
 root = NeuronSection()
-root.from_nrn_section(cell.soma, group)
+root.from_nrn_section(soma, group)
 group.roots[root.name] = root
 node = NeuronNode.__new__(NeuronNode)
 node.groups = OrderedDict(((group.name, group),))
@@ -45,5 +49,5 @@ if rank == 0:
     node.stop_mpi_coordinator()
 else:
     node.start_mpi_coordinator()
-assert h.x3d(0, sec=cell.soma) == 7
+assert h.x3d(0, sec=soma) == 7
 assert node.synapse_sets['long_synapse']
