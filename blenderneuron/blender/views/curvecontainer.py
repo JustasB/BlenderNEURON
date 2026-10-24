@@ -1,24 +1,39 @@
 from math import sqrt, pi
 import bpy
 import numpy as np
-from blenderneuron.blender.utils import create_many_copies
+from blenderneuron.datablocknames import get_registry, entity_key, METADATA, key_json
 
 class CurveContainer:
 
     def __init__(self, root, curve_template, smooth_sections, color, brightness,
                  recording_granularity, recursive=True, origin_type="center", closed_ends=True,
-                 container_material=None):
+                 container_material=None, material_template=None, registry=None, identity_scope="",
+                 roots=None, container_name=None, root_materials=None):
 
-        self.name = root.name
+        roots = list(roots) if roots is not None else [root]
+        self.root_materials = root_materials or {}
+        self.name = self.canonical_name = container_name or root.name
+        self.registry = registry or get_registry()
+        self.identity_scope = identity_scope
+        self.object_key = entity_key('objects', 'section-container', self.canonical_name, identity_scope)
+        self.materials = {}
         self.smooth_sections = smooth_sections
         self.closed_ends = closed_ends
         self.assigned_container_material = container_material
+        self.material_template = material_template
         self.default_color = color
         self.default_brightness = brightness
         self.recording_granularity = recording_granularity
 
         # copy the curve template and make a new blender object out of it
-        bpy.data.objects.new(self.name, curve_template.copy())
+        curve_key = entity_key('curves', 'section-geometry', self.canonical_name, identity_scope)
+        self.registry.reserve(self.object_key)
+        self.registry.reserve(curve_key)
+        existing = self.registry.resolve(self.object_key)
+        self._object = self.registry.create(
+            self.object_key, lambda name: bpy.data.objects.new(
+                name, self.registry.copy(curve_key, curve_template)))
+        self.blender_name = self._object.name
 
         self.linked = False
         self.material_indices = []
@@ -28,14 +43,27 @@ class CurveContainer:
         self.spline_index2section = {}
 
         # Recursively add section splines and corresponding materials to the container
-        self.add_section(root, recursive, in_top_level=True, origin_type=origin_type)
+        if existing is None:
+            for index, cell_root in enumerate(roots):
+                self.assigned_container_material = self.root_materials.get(cell_root.name, container_material)
+                self.add_section(cell_root, recursive, in_top_level=index == 0, origin_type=origin_type)
+            # Persist spline identity separately: spline RNA references cannot survive edit mode.
+            import json
+            self._object['blenderneuron_splines'] = json.dumps(list(self.name2spline_index))
+        else:
+            self.restore_sections(roots, recursive)
 
     def get_object(self):
-        return bpy.data.objects.get(self.name)
+        ob = self.registry.resolve(self.object_key)
+        if ob is None:
+            raise self.registry.error(self.object_key, 'Container object is missing')
+        self._object = ob
+        self.blender_name = ob.name
+        return ob
 
     @property
     def object(self):
-        return bpy.data.objects[self.name]
+        return self.get_object()
 
     @property
     def curve(self):
@@ -55,35 +83,61 @@ class CurveContainer:
         # Rotations are allowed
         child.lock_location = child.lock_scale = [True] * 3
 
+    def restore_sections(self, roots, recursive):
+        import json
+        try:
+            geometry_key = entity_key('curves', 'section-geometry', self.canonical_name, self.identity_scope)
+            if self.registry.resolve(geometry_key) != self.curve:
+                raise ValueError('object geometry does not match its canonical identity')
+            names = json.loads(self._object['blenderneuron_splines'])
+            if not isinstance(names, list) or len(names) != len(self.curve.splines) or len(set(names)) != len(names):
+                raise ValueError('invalid spline identities')
+            self.name2spline_index = {name: i for i, name in enumerate(names)}
+            stack = [(root, self.root_materials.get(root.name, self.assigned_container_material))
+                     for root in roots]
+            while stack:
+                section, assigned_material = stack.pop()
+                section_names = ([section.name] if self.recording_granularity in ('Cell', 'Section') else
+                                 ['%s[%s]' % (section.name, i) for i in range(len(section.radii)-1)])
+                for name in section_names:
+                    index = self.name2spline_index[name]
+                    self.spline_index2section[index] = section
+                    material = self.curve.materials[self.curve.splines[index].material_index]
+                    expected = assigned_material
+                    key = entity_key('materials', 'section-material', name, self.identity_scope)
+                    if expected is None:
+                        expected = self.registry.resolve(key)
+                    if material is None or material != expected:
+                        raise ValueError('spline material does not have the expected identity')
+                    self.materials[name] = material
+                if recursive:
+                    stack.extend((child, assigned_material) for child in section.children)
+            if len(self.spline_index2section) != len(names):
+                raise ValueError('morphology differs from saved splines')
+        except (KeyError, ValueError, TypeError, IndexError) as exc:
+            raise self.registry.error(self.object_key, 'Cannot recover splines on %r: %s' % (self.blender_name, exc)) from exc
+
     def remove(self):
-        self.unlink()
-
-        bl_objects = bpy.data.objects
-        ob = self.get_object()
-        object_name = ob.name
-
-        def remove_if_in_main(collection, item):
-            if item is not None and collection.get(item.name) == item:
-                collection.remove(item)
-
-        # materials
-        for mat in ob.data.materials:
-            if mat is not None:
-                # remove material animation if any
-                if mat.animation_data is not None:
-                    remove_if_in_main(bpy.data.actions, mat.animation_data.action)
-
-                # remove material node animation
-                if mat.node_tree is not None and mat.node_tree.animation_data is not None:
-                    remove_if_in_main(bpy.data.actions, mat.node_tree.animation_data.action)
-
-                # remove material
-                remove_if_in_main(bpy.data.materials, mat)
-
-
-
-        # curve
-        remove_if_in_main(bpy.data.curves, ob.data)
+        ob = self.registry.resolve(self.object_key)
+        if ob is None:
+            return
+        curve = ob.data
+        materials = list({mat.as_pointer(): mat for mat in curve.materials if mat is not None}.values())
+        self.registry.remove(ob)
+        self.registry.remove(curve)
+        for mat in materials:
+            # Cell materials can be shared by several section containers.
+            if mat.users:
+                continue
+            actions = []
+            for owner in (mat, mat.node_tree):
+                if owner is not None and owner.animation_data is not None and owner.animation_data.action is not None:
+                    actions.append(owner.animation_data.action)
+            self.registry.remove(mat)
+            for action in actions:
+                if action.users == 0:
+                    self.registry.remove(action)
+        self.linked = False
 
     @property
     def origin(self):
@@ -157,13 +211,19 @@ class CurveContainer:
 
 
     @staticmethod
-    def create_material(name, color, brightness):
-        mat = bpy.data.materials.new(name)
+    def create_material(name, color, brightness, registry=None, identity_scope='', role='section-material'):
+        registry = registry or get_registry()
+        key = entity_key('materials', role, name, identity_scope)
+        existing = registry.resolve(key)
+        if existing is not None:
+            return existing
+        mat = registry.create(key, bpy.data.materials.new)
 
         mat.diffuse_color = color
 
         # Add Cycles nodes
         mat.use_nodes = True
+        CurveContainer.identify_node_tree(mat, registry)
 
         nodes = mat.node_tree.nodes
         links = mat.node_tree.links
@@ -181,6 +241,25 @@ class CurveContainer:
         links.new(cl_emit.outputs['Emission'], cl_out.inputs['Surface'])
 
         return mat
+
+    @staticmethod
+    def identify_node_tree(material, registry):
+        key = registry.identity(material)
+        tree_key = entity_key('node_trees', key[2] + '-nodes', key[3], key[4])
+        # Embedded node-tree names are read-only; their owner carries the mapping.
+        material.node_tree[METADATA] = key_json(tree_key)
+
+    def create_section_material(self, name):
+        if self.material_template is None:
+            material = CurveContainer.create_material(
+                name, self.default_color, self.default_brightness,
+                self.registry, self.identity_scope)
+        else:
+            key = entity_key('materials', 'section-material', name, self.identity_scope)
+            material = self.registry.copy(key, self.material_template)
+            self.identify_node_tree(material, self.registry)
+        self.materials[name] = material
+        return material
 
     def add_material_to_object(self, material):
         mats = self.curve.materials
@@ -324,15 +403,12 @@ class CurveContainer:
                 spline = self.add_spline(coords, current_node.radii, self.smooth_sections)
 
                 if self.assigned_container_material is None:
-                    material = CurveContainer.create_material(
-                        current_node.name,
-                        self.default_color,
-                        self.default_brightness
-                    )
+                    material = self.create_section_material(current_node.name)
 
                 # If material is provided, assign it to the spline
                 else:
                     material = self.assigned_container_material
+                    self.materials[current_node.name] = material
 
                 mat_idx = self.add_material_to_object(material)
 
@@ -363,11 +439,7 @@ class CurveContainer:
                     spline = self.add_spline(segment_coords, segment_radii, smooth=False)
 
                     # Each segment will get its own material with [seg_idx]'based name
-                    material = CurveContainer.create_material(
-                        f"{current_node.name}[{s}]",
-                        self.default_color,
-                        self.default_brightness
-                    )
+                    material = self.create_section_material(f"{current_node.name}[{s}]")
 
                     mat_idx = self.add_material_to_object(material)
 
@@ -409,7 +481,9 @@ class CurveContainer:
             self.get_object().location = coords[0]
 
     def link(self):
-        bpy.context.collection.objects.link(self.get_object()) # already-iterative
+        ob = self.get_object()
+        if bpy.context.collection.objects.get(ob.name) != ob:
+            bpy.context.collection.objects.link(ob)
 
         self.linked = True
 

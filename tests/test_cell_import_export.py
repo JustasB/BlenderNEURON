@@ -7,9 +7,51 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, NEURON, Blender, BlenderTestCase
+from tests import test_hoc_file, NEURON, BackgroundBlender as Blender, BlenderTestCase
+from tests import Blender as GUIBlender
 
 class TestCellImportExport(BlenderTestCase):
+
+    def test_group_interaction_granularity(self):
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+             Blender(), CommNode("Control-Blender") as bcn:
+            ncn.client.run_command(
+                'h.load_file("tests/TestCell.hoc"); cells = [h.TestCell(), h.TestCell()]')
+            bcn.client.run_command('bpy.ops.blenderneuron.get_cell_list_from_neuron()')
+            for recording in ('Cell', 'Section', '3D Segment'):
+                bcn.client.run_command(
+                    "ui = bpy.context.scene.BlenderNEURON.groups[0];"
+                    "ui.interaction_granularity = 'Group';"
+                    "ui.recording_granularity = %r;"
+                    "bpy.ops.blenderneuron.import_groups();" % recording)
+                result = bcn.client.run_command("""
+group = next(iter(bpy.types.Object.BlenderNEURON_node.groups.values()))
+view = group.view
+assert len(view.containers) == 1
+container = next(iter(view.containers.values()))
+assert len(group.roots) == 2
+import numpy as np
+before = {root.name: np.asarray(root.coords).reshape(-1).copy() for root in group.roots.values()}
+container.object.location.z += 25
+bpy.context.view_layer.update()
+view.update_group_with_view_data()
+assert all(abs(np.asarray(root.coords).reshape(-1)[2] - before[root.name][2] - 25) < 0.001
+           for root in group.roots.values())
+# Recover the same object and spline identities, as after reopening a file.
+from blenderneuron.blender.views.groupobjectview import GroupObjectView
+recovered = GroupObjectView(group, frame_view=False)
+recovered.show()
+assert next(iter(recovered.containers.values())).object == container.object
+recovered.update_group_with_view_data()
+return_value = True
+""")
+                self.assertTrue(result)
+            bcn.client.run_command(
+                "ui.interaction_granularity = 'Cell'; bpy.ops.blenderneuron.import_groups();"
+                "group = next(iter(bpy.types.Object.BlenderNEURON_node.groups.values()));"
+                "assert len(group.view.containers) == 2")
+            bcn.client.end_code_coverage()
+            ncn.client.end_code_coverage()
 
     def test_import_export_cell(self):
 
@@ -292,7 +334,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -316,7 +358,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -340,7 +382,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -375,7 +417,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].soma'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -399,7 +441,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].dendrites[0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -423,7 +465,7 @@ class TestCellImportExport(BlenderTestCase):
                 "mats = bpy.data.materials;"
                 "bpy.context.scene.frame_set(0);"
                 "start_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
-                "bpy.context.scene.frame_set(5);"
+                "bpy.context.scene.frame_set(round(5 * bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms));"
                 "end_emit = mats['TestCell[0].dendrites[0][0]'].node_tree.nodes.get('Emission').inputs['Strength'].default_value;"
                 "return_value = (start_emit, end_emit);"
             )
@@ -470,7 +512,7 @@ class TestCellImportExport(BlenderTestCase):
                 "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].interaction_granularity = 'Cell';"
                 "bpy.data.scenes['Scene'].BlenderNEURON.groups[0].as_lines = True;"
                 "bpy.ops.blenderneuron.import_groups();"
-                "return_value = bpy.data.curves['Group.000_bezier.001'].bevel_depth"
+                "return_value = bpy.data.objects['TestCell[0].soma'].data.bevel_depth"
             )
 
             # Should have no bevel
@@ -518,7 +560,7 @@ class TestCellImportExport(BlenderTestCase):
     def test_save_groups(self):
 
         with NEURON(), CommNode("Control-NEURON") as ncn, \
-             Blender(), CommNode("Control-Blender") as bcn:
+             GUIBlender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a group
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
@@ -551,12 +593,10 @@ class TestCellImportExport(BlenderTestCase):
                     "groups['Group.001'].to_file('" + file2 + "');"
                 )
 
-                # Read the saved files
-                import json
-                with open(file1) as f1, open(file2) as f2:
-                    json1 = json.load(f1)
-                    json2 = json.load(f2)
-
+                # Read and reconstruct saved groups through the public API.
+                from blenderneuron.rootgroup import RootGroup
+                json1 = RootGroup.from_file(file1)
+                json2 = RootGroup.from_file(file2)
 
                 # check that correct cells were saved
                 self.assertEqual(json1['roots'][0]['name'], 'TestCell[0].soma')

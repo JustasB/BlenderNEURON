@@ -61,10 +61,30 @@ Edit and Save Cells
  - Under 'Cell Group Options', select 'Interact with Each:' 'Section'
  - Import cells again
 
+ Choose 'Group' to display all cells in a cell group as one Blender object.
+ Moving or rotating that object moves the entire group together and reduces
+ object overhead for large networks. 'Cell' creates one object per cell;
+ 'Section' creates one per section. Recording granularity remains independent.
+
 3. To export changes to NEURON after editing cell morphology/position in Blender:
 
  - Click 'Update Groups with View Changes' under 'Import / Export'
  - Then click 'Export Cell Groups to NEURON' under 'Import / Export'
+
+ .. warning::
+
+    Morphology export updates the coordinates and radii of existing NEURON
+    sections; it does not create or delete sections or reconnect cell topology.
+    Child branches are matched to the previously imported morphology by their
+    position in the section tree rather than rebuilt by name. Adding, deleting,
+    or reordering splines or branches in Blender may therefore cause export to
+    fail or update the wrong section. Reshaping or repositioning existing
+    branches is supported.
+
+    Export updates the physical ``pt3d`` morphology: coordinates, the section
+    length implied by those coordinates, and diameters. Although ``nseg`` is
+    serialized, it is not assigned back to the NEURON section, so export does
+    not change NEURON's spatial discretization.
 
 **********************
 Add Cells to Groups
@@ -111,12 +131,20 @@ Animate Cell Model Activity
 
    - Record activity by cell (at each soma), section (at the midpoint of each section), or segment (at each segment). Finer granularity has better detail but requires more time and memory.
 
+   .. note::
+
+      For segment recording, BlenderNEURON assumes that section geometry remains
+      fixed during each simulation run. Geometry changes made between runs are
+      detected automatically. If a script changes NEURON ``pt3d`` geometry while
+      activity is being collected, start a new simulation run before continuing
+      collection so the segment recording locations are rebuilt.
+
 6. Choose Recording Settings
 
    - Select 'Record' variable: NEURON section variable name to record/animate. 'v' by default for voltage (e.g 'v' of soma(0.5).v). (note: for variables other not voltage, make sure target variable exists in sections that will be recorded from)
    - Set 'Start Recording' and 'Stop Recording' times (in ms): what time range in the NEURON simulation to record
    - Select 'Sampling Period': how many milliseconds between samples collected of the recorded variable (e.g. voltage)
-   - Select 'Frames per Milliseconds': how many frames of animation will represent each millisecond of NEURON activity
+   - Under NEURON, below 'Time (ms)', set 'Blender frames per millisecond' (default 10). This scene-wide setting applies to every cell group and retimes existing activity animations when changed.
    - Set colors on the color scale to correspond with low and high values
    - Set 'Variable Low' and 'High' values: set minimum and maximum values to cover the range of the recorded variable (e.g. voltage) in your model
 
@@ -124,7 +152,7 @@ Animate Cell Model Activity
 8. Scrub the timeline on the bottom to see animation
 
    - Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press 'Z' > 'Material Preview')
-   - Frame number = NEURON simulation time (ms) x 'Frames per Millisecond'
+   - Frame number = NEURON simulation time (ms) x 'Blender frames per millisecond'
 
  .. figure:: files_static/timeline.png
      :alt: Timeline
@@ -182,3 +210,8 @@ Confine Cells between Layers
 6. Press 'Confine' to confine the sections between the layers
 7. Save changes in Blender by pressing 'Update Groups with Confinement Results'
 8. Save confinement results to NEURON by pressing 'Export Cell Groups to NEURON' under 'Import / Export'
+
+Remote connections and MPI
+**************************
+
+See :doc:`remote-connections` for MPI, SSH tunnels, pairing, and restart recovery.

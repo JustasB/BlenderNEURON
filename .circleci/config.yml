@@ -15,6 +15,16 @@ orbs:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
+  windows-connections:
+    machine:
+      image: windows-server-2022-gui:current
+    resource_class: windows.medium
+    steps:
+      - checkout
+      - run:
+          name: Standard-library connection security tests
+          command: python tests/test_connection_security.py
+          shell: powershell.exe -ExecutionPolicy Bypass
   build-and-test:
     # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
@@ -33,7 +43,7 @@ jobs:
       - run:
           command: |
             sudo apt update 
-            sudo apt-get install -y libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0
+            sudo apt-get install -y libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0 openmpi-bin libopenmpi-dev
             sudo apt -y upgrade
       - run:
           command: python scripts/install_blender.py
@@ -57,3 +67,4 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build-and-test
+      - windows-connections

@@ -1,8 +1,12 @@
 from neuron import h
 from blenderneuron.commnode import CommNode
+from blenderneuron.utils import deserialize, serialize
 from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
 from collections import OrderedDict
-import re, math
+import re, math, traceback
+import logging
+
+logger = logging.getLogger(__name__)
 from hashlib import sha1
 
 try:
@@ -23,6 +27,7 @@ class NeuronNode(CommNode):
         self.parallel_ctx = None
         self.mpimap = None
         self.mpirank = None
+        self.mpi_coordinator_active = False
 
         def init():
             h.load_file('stdrun.hoc')
@@ -40,16 +45,165 @@ class NeuronNode(CommNode):
         if server_end is None:
             server_end = "NEURON"
 
+        # MPI workers have no XML-RPC server, but still need stdrun commands
+        # when rank zero later dispatches a simulation operation to them.
+        if server_end == "Package":
+            h.load_file('stdrun.hoc')
+
         super(NeuronNode, self).__init__(server_end, on_server_setup=init, *args, **kwargs)
 
-    def init_mpi(self, parallel_ctx, mpimap):
+    def init_mpi(self, parallel_ctx, mpimap=None):
         self.parallel_ctx = parallel_ctx
         self.mpimap = mpimap
         self.mpirank = parallel_ctx.id()
         self.current_gid = 0
 
+    def start_mpi_coordinator(self):
+        """Start rank-zero Blender coordination after MPI model setup.
+
+        Call this on every rank after ``init_mpi``.  It returns immediately on
+        rank zero, which remains available to Blender; worker ranks enter the
+        request loop and return only after ``stop_mpi_coordinator`` is called
+        on rank zero.
+        """
+        if self.parallel_ctx is None or int(self.parallel_ctx.nhost()) == 1:
+            return
+        if int(self.parallel_ctx.id()) == 0:
+            self.mpi_coordinator_active = True
+            if self.mpimap is None:
+                fragments = self._mpi_request("discover_mpimap", None)
+                self.mpimap = self._build_automatic_mpimap(fragments)
+                self._mpi_request("set_mpimap", self.mpimap)
+            return
+        self._serve_mpi_requests()
+
+    def stop_mpi_coordinator(self):
+        """Stop worker request loops.  This must be called from rank zero."""
+        if not self._uses_mpi_coordinator():
+            return
+        self._mpi_request("__stop__", None)
+        self.mpi_coordinator_active = False
+
+    def _uses_mpi_coordinator(self):
+        return (self.mpi_coordinator_active and self.parallel_ctx is not None and
+                int(self.parallel_ctx.nhost()) > 1 and int(self.parallel_ctx.id()) == 0)
+
+    def _serve_mpi_requests(self):
+        rank_count = int(self.parallel_ctx.nhost())
+        while True:
+            command = self.parallel_ctx.py_alltoall([None] * rank_count)[0]
+            operation, payload = command
+            if operation == "__stop__":
+                self.parallel_ctx.py_alltoall([None] * rank_count)
+                return
+            response = self._mpi_operation_response(operation, payload)
+            self.parallel_ctx.py_alltoall([response] + [None] * (rank_count - 1))
+
+    def _mpi_request(self, operation, payload):
+        """Broadcast an operation and gather one response from every rank."""
+        if not self._uses_mpi_coordinator():
+            raise RuntimeError("MPI coordinator requests must originate on rank zero")
+        return self._mpi_request_targeted(
+            operation, [payload] * int(self.parallel_ctx.nhost()))
+
+    def _mpi_request_targeted(self, operation, payloads):
+        """Deliver one payload per destination, then drain every response."""
+        if not self._uses_mpi_coordinator():
+            raise RuntimeError("MPI coordinator requests must originate on rank zero")
+        rank_count = int(self.parallel_ctx.nhost())
+        if len(payloads) != rank_count:
+            raise ValueError("Expected one MPI payload per rank")
+        self.parallel_ctx.py_alltoall([(operation, payload) for payload in payloads])
+        payload = payloads[0]
+        local_response = ({"ok": True, "result": None}
+                          if operation == "__stop__" else
+                          self._mpi_operation_response(operation, payload))
+        responses = self.parallel_ctx.py_alltoall(
+            [local_response] + [None] * (rank_count - 1))
+        for rank, response in enumerate(responses):
+            if response is not None and not response["ok"]:
+                logger.debug("MPI rank %d failed %s", rank, operation)
+                raise RuntimeError("MPI rank %d failed %s:\n%s" %
+                                   (rank, operation, response["error"]))
+        results = [response["result"] for response in responses if response is not None]
+        if operation in ("initialize_groups", "get_group_dicts"):
+            return [deserialize(result) for result in results]
+        return results
+
+    def _mpi_operation_response(self, operation, payload):
+        try:
+            return {"ok": True, "result": self._execute_mpi_operation(operation, payload)}
+        except Exception:
+            return {"ok": False, "error": traceback.format_exc()}
+
+    def _execute_mpi_operation(self, operation, payload):
+        if operation == "discover_mpimap":
+            return self._discover_local_cells()
+        if operation == "set_mpimap":
+            self.mpimap = payload
+            return None
+        if operation == "get_roots":
+            return self._get_roots_local()
+        if operation == "initialize_groups":
+            self._initialize_groups_local(payload)
+            return serialize(self._get_group_dicts_local(run_simulation=True))
+        if operation == "get_group_dicts":
+            return serialize(self._get_group_dicts_local(run_simulation=True))
+        if operation == "set_sim_params":
+            return self._set_sim_params_local(payload)
+        if operation == "update_groups":
+            return self._update_groups_local(deserialize(payload))
+        if operation == "validate_synapse_sections":
+            return self._validate_synapse_sections_local(payload)
+        if operation == "create_synapses":
+            return self._create_synapses_local(payload)
+        raise ValueError("Unsupported MPI operation: " + operation)
+
+    def _discover_local_cells(self):
+        roots = h.SectionList()
+        roots.allroots()
+        cells = []
+        for section in roots:
+            match = self.section_rx.match(section.name())
+            if match is None:
+                raise ValueError("Cannot derive an MPI cell name from root section '%s'; "
+                                 "pass mpimap explicitly" % section.name())
+            cells.append(match.group(1))
+        return cells
+
+    @staticmethod
+    def _build_automatic_mpimap(fragments):
+        mpimap = {}
+        counts = {}
+        for cells in fragments:
+            for cell_name in cells:
+                counts[cell_name] = counts.get(cell_name, 0) + 1
+
+        for rank, cells in enumerate(fragments):
+            for cell_name in cells:
+                blender_name = cell_name
+                if counts[cell_name] > 1:
+                    stem, index = cell_name.rsplit("[", 1)
+                    blender_name = "%s_rank%d[%s" % (stem, rank, index)
+                    # Preserve deterministic identities even if a model already
+                    # has a cell whose name happens to match this convention.
+                    while blender_name in mpimap:
+                        blender_name = "%s_mpi%d[%s" % (stem, rank, index)
+                mpimap[blender_name] = {"name": cell_name, "rank": rank}
+        return mpimap
+
 
     def get_roots(self):
+        if self._uses_mpi_coordinator():
+            roots = []
+            for rank, fragment in enumerate(self._mpi_request("get_roots", None)):
+                roots.extend(fragment)
+                for root in fragment:
+                    self._restore_blender_section_names(root, rank)
+            return sorted(roots, key=lambda root: root["name"])
+        return self._get_roots_local()
+
+    def _get_roots_local(self):
         self.roots = h.SectionList()
         self.roots.allroots()
         self.roots = list(self.roots)
@@ -69,6 +223,15 @@ class NeuronNode(CommNode):
         self.section_index = {sec.name(): sec for sec in all_sec}
 
     def initialize_groups(self, blender_groups, send_back=True):
+        if self._uses_mpi_coordinator():
+            fragments = self._mpi_request("initialize_groups", blender_groups)
+            result = self.merge_mpi_group_fragments(fragments)
+            return self.compress(result) if send_back else None
+        self._initialize_groups_local(blender_groups)
+        if send_back:
+            return self.get_group_dicts()
+
+    def _initialize_groups_local(self, blender_groups):
 
         self.groups = OrderedDict()
 
@@ -83,36 +246,203 @@ class NeuronNode(CommNode):
 
             self.groups[name] = nrn_group
 
-        if send_back:
-            return self.get_group_dicts()
-
     def get_group_dicts(self, compressed=True):
+        """Return the selected groups, gathering rank-local roots under MPI.
 
-        if any([g.record_activity for g in self.groups.values()]):
-            h.run()
+        When MPI is enabled this is a collective operation: every rank must call
+        it in the same order.  Only rank zero receives the complete result;
+        non-root ranks return ``None``.  Keeping the collective boundary here
+        means a caller can send precisely one complete payload to Blender.
+        """
 
-        result = [group.to_dict(include_activity=group.record_activity,
-                  include_root_children=True,
-                  include_coords_and_radii=True)
-                  for group in self.groups.values()]
+        if self._uses_mpi_coordinator():
+            result = self.merge_mpi_group_fragments(
+                self._mpi_request("get_group_dicts", None))
+        else:
+            result = self._get_group_dicts_local(run_simulation=True)
+            result = self.gather_group_dicts(result)
+
+        if result is None:
+            return None
 
         if compressed:
             return self.compress(result)
         else:
             return result
 
+    def _get_group_dicts_local(self, run_simulation):
+        if run_simulation and any([g.record_activity for g in self.groups.values()]):
+            h.run()
+        return self._get_local_group_dicts()
+
+    def _get_local_group_dicts(self):
+        """Serialize just the roots owned by this MPI rank."""
+        return [group.to_dict(include_activity=group.record_activity,
+                              include_root_children=True,
+                              include_coords_and_radii=True)
+                for group in self.groups.values()]
+
+    def gather_group_dicts(self, local_groups):
+        """Gather local group dictionaries on rank zero and merge their roots.
+
+        ``ParallelContext.py_alltoall`` is used rather than an external MPI
+        dependency.  Each rank sends its local fragment only to rank zero, so
+        large activity traces are not replicated on every worker.
+        """
+        if self.parallel_ctx is None or int(self.parallel_ctx.nhost()) == 1:
+            return local_groups
+
+        rank_count = int(self.parallel_ctx.nhost())
+        fragments = self.parallel_ctx.py_alltoall(
+            [serialize(local_groups)] + [None] * (rank_count - 1))
+
+        if int(self.parallel_ctx.id()) != 0:
+            return None
+
+        return self.merge_mpi_group_fragments(
+            [deserialize(fragment) if fragment is not None else None
+             for fragment in fragments])
+
+    def merge_mpi_group_fragments(self, fragments):
+        """Merge rank fragments deterministically, restoring Blender names."""
+        groups_by_name = OrderedDict()
+        for rank, fragment in enumerate(fragments):
+            if fragment is None:
+                continue
+            for group in fragment:
+                name = group["name"]
+                if name not in groups_by_name:
+                    merged = group.copy()
+                    merged["roots"] = []
+                    groups_by_name[name] = merged
+                else:
+                    merged = groups_by_name[name]
+                    self._check_mpi_group_activity(merged, group)
+
+                for root in group["roots"]:
+                    self._restore_blender_section_names(root, rank)
+                    root_name = root["name"]
+                    if any(existing["name"] == root_name for existing in merged["roots"]):
+                        raise ValueError("MPI group '%s' contains duplicate root '%s'" %
+                                         (name, root_name))
+                    merged["roots"].append(root)
+
+        for group in groups_by_name.values():
+            group["roots"].sort(key=lambda root: root["name"])
+
+        return list(groups_by_name.values())
+
+    @staticmethod
+    def _check_mpi_group_activity(merged, fragment):
+        """Reject divergent sampling schedules before Blender sees bad data."""
+        if "activity" not in merged or "activity" not in fragment:
+            return
+        if merged["activity"]["times"] != fragment["activity"]["times"]:
+            raise ValueError("MPI group '%s' has inconsistent activity sample times" %
+                             merged["name"])
+
+    def _restore_blender_section_names(self, root, rank=None):
+        """Translate MPI-local cell-name prefixes back to Blender's names."""
+        if self.mpimap is None:
+            return
+
+        mpi_to_blender = {
+            entry["name"]: original_name
+            for original_name, entry in self.mpimap.items()
+            if rank is None or entry["rank"] == rank
+        }
+        stack = [root]
+        while stack:
+            section = stack.pop()
+            mpi_cell_name, suffix = self.section_rx.match(section["name"]).groups()
+            if mpi_cell_name in mpi_to_blender:
+                section["name"] = mpi_to_blender[mpi_cell_name] + (
+                    "." + suffix if suffix else "")
+            stack.extend(section.get("children", []))
+
     def update_groups(self, blender_groups):
+        """Apply group dictionaries, serialized groups, or flat group-file tables.
+
+        A file loaded with json.load() can be passed as one item in the list.
+        Call deserialize() first if application code needs to inspect its roots.
+        """
+        if isinstance(blender_groups, xmlrpclib.Binary):
+            blender_groups = self.decompress(blender_groups)
+        elif isinstance(blender_groups, (str, bytes, dict)):
+            blender_groups = deserialize(blender_groups)
+            if isinstance(blender_groups, dict):
+                blender_groups = [blender_groups]
+        if any(isinstance(group, (str, bytes)) or "__blenderneuron_flat__" in group
+               for group in blender_groups):
+            blender_groups = [deserialize(group)
+                              if isinstance(group, (str, bytes)) or
+                              "__blenderneuron_flat__" in group else group
+                              for group in blender_groups]
+        if self._uses_mpi_coordinator():
+            partitions = self._partition_morphology_updates(blender_groups)
+            self._mpi_request_targeted("update_groups", [serialize(part) for part in partitions])
+            return
+        self._update_groups_local(blender_groups)
+
+    def _partition_morphology_updates(self, blender_groups):
+        """Validate the entire export before constructing destination envelopes.
+
+        Keep metadata on all ranks: recording settings also govern existing
+        groups whose roots were not selected for this export. Root trees are
+        shared read-only here; each destination receives a flat JSON payload.
+        A mapping has one entry per visible cell, so conflicting duplicate keys
+        cannot be represented by the supported mpimap dictionary format.
+        """
+        rank_count = int(self.parallel_ctx.nhost())
+        partitions = [[] for _ in range(rank_count)]
+        seen = set()
+        for group in blender_groups:
+            envelopes = [dict(group, roots=[]) for _ in range(rank_count)]
+            for root in group["roots"]:
+                name = root["name"]
+                context = "group %r root %r" % (group["name"], name)
+                if name in seen:
+                    raise ValueError("Duplicate Blender root in " + context)
+                seen.add(name)
+                match = self.section_rx.match(name)
+                cell = match.group(1) if match else name
+                if self.mpimap is None or cell not in self.mpimap:
+                    raise ValueError("Missing ownership for " + context)
+                rank = self.mpimap[cell]["rank"]
+                # ParallelContext.id() historically supplies integral floats.
+                if (isinstance(rank, bool) or not isinstance(rank, (int, float))
+                        or not 0 <= rank < rank_count or int(rank) != rank):
+                    raise ValueError("Invalid ownership rank %r for %s" % (rank, context))
+                envelopes[int(rank)]["roots"].append(root)
+            for rank, envelope in enumerate(envelopes):
+                partitions[rank].append(envelope)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("update_groups: %d groups, %d roots, %d serialized bytes",
+                         len(blender_groups), len(seen), len(serialize(blender_groups).encode("utf-8")))
+            for rank, partition in enumerate(partitions):
+                logger.debug("update_groups rank %d: %d roots, %d serialized bytes",
+                             rank, sum(len(g["roots"]) for g in partition),
+                             len(serialize(partition).encode("utf-8")))
+        return partitions
+
+    def _update_groups_local(self, blender_groups):
 
         for blender_group in blender_groups:
             name = blender_group["name"]
 
             if name not in self.groups:
-                self.initialize_groups(blender_groups, send_back=False)
+                self._initialize_groups_local(blender_groups)
 
             nrn_group = self.groups[name]
             nrn_group.from_updated_blender_group(blender_group)
 
     def set_sim_params(self, params):
+        if self._uses_mpi_coordinator():
+            self._mpi_request("set_sim_params", params)
+            return
+        self._set_sim_params_local(params)
+
+    def _set_sim_params_local(self, params):
         h.tstop = params["tstop"]
         h.dt = params["dt"]
         h.cvode.atol(params["atol"])
@@ -204,13 +534,75 @@ class NeuronNode(CommNode):
 
 
     def create_synapses(self, syn_set):
+        if self._uses_mpi_coordinator():
+            partitions, checks = self._partition_synapse_set(syn_set)
+            # A read-only collective checks rank-local sections before any rank
+            # creates point processes, spines, GIDs, or replaces retained sets.
+            self._mpi_request_targeted("validate_synapse_sections", checks)
+            self._mpi_request_targeted("create_synapses", partitions)
+            return
+        self._create_synapses_local(syn_set)
+
+    def _partition_synapse_set(self, syn_set):
+        """Route each entry to the union of endpoint owners, in input order."""
+        count = int(self.parallel_ctx.nhost())
+        parts = [dict(syn_set, entries=[], _entry_indices=[]) for _ in range(count)]
+        checks = [dict(name=syn_set['name'], sections=[]) for _ in range(count)]
+        for index, entry in enumerate(syn_set['entries']):
+            context = "synapse set %r entry %d" % (syn_set['name'], index)
+            required = ['source_section', 'dest_section', 'source_x', 'dest_x',
+                        'source_seg_i', 'dest_syn', 'dest_syn_params', 'threshold',
+                        'delay', 'weight', 'create_spine', 'is_reciprocal']
+            if entry.get('is_reciprocal'):
+                required += ['dest_seg_i', 'source_syn', 'source_syn_params']
+            if entry.get('create_spine'):
+                required += ['prefix', 'head_start', 'head_end', 'head_diameter',
+                             'neck_start']
+                if entry.get('neck_start') is not None:
+                    required += ['neck_end', 'neck_diameter']
+            for field in required:
+                if field not in entry:
+                    raise ValueError("Missing %s in %s" % (field, context))
+            owners = set()
+            for field in ('source_section', 'dest_section'):
+                section = entry.get(field)
+                if not isinstance(section, str) or not section:
+                    raise ValueError("Missing %s in %s" % (field, context))
+                match = self.section_rx.match(section)
+                cell = match.group(1) if match else section
+                if self.mpimap is None or cell not in self.mpimap:
+                    raise ValueError("Missing ownership for %s %r in %s" %
+                                     (field, section, context))
+                rank = self.mpimap[cell].get('rank')
+                if (isinstance(rank, bool) or not isinstance(rank, (int, float))
+                        or not 0 <= rank < count or int(rank) != rank):
+                    raise ValueError("Invalid ownership rank %r in %s (%s)" %
+                                     (rank, context, field))
+                rank = int(rank)
+                owners.add(rank)
+                checks[rank]['sections'].append((index, field, section))
+            for rank in sorted(owners):
+                parts[rank]['entries'].append(entry)
+                parts[rank]['_entry_indices'].append(index)
+        return parts, checks
+
+    def _validate_synapse_sections_local(self, payload):
+        # Refresh names without altering model geometry or retained synapses.
+        self.update_section_index()
+        for index, field, section in payload['sections']:
+            local = self.rank_section_name(section)
+            if local is None or local not in self.section_index:
+                raise ValueError("Missing %s %r in synapse set %r entry %d" %
+                                 (field, section, payload['name'], index))
+
+    def _create_synapses_local(self, syn_set):
 
         set_name = syn_set['name']
         syn_entries = syn_set['entries']
 
         synapses = self.synapse_sets[set_name] = []
 
-        for entry in syn_entries:
+        for entry_index, entry in enumerate(syn_entries):
 
             rank_source_section = self.rank_section_name(entry['source_section'])
             rank_dest_section = self.rank_section_name(entry['dest_section'])
@@ -238,7 +630,10 @@ class NeuronNode(CommNode):
 
             # Unless indicated otherwise
             if source_on_rank and entry['create_spine']:
-                prefix = set_name+"_"+entry['prefix']+"["+str(len(synapses))+"]"
+                # Preserve broadcast-era spine names when unrelated entries
+                # have been omitted from this rank's payload.
+                original_index = syn_set.get('_entry_indices', range(len(syn_entries)))[entry_index]
+                prefix = set_name+"_"+entry['prefix']+"["+str(original_index)+"]"
 
                 # Create the spine head
                 head = h.Section(name=prefix + ".head")

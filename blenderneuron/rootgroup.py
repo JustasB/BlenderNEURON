@@ -24,6 +24,23 @@ class RootGroup:
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def from_file(file_name):
+        """Read a saved group and return its reconstructed group dictionary.
+
+        Available in both Blender and NEURON without starting a connection.
+        The result can be inspected or passed to node.update_groups([group]).
+        """
+        from blenderneuron.utils import deserialize
+
+        with open(file_name, 'r', encoding='utf-8') as stream:
+            group = deserialize(stream.read())
+        if (not isinstance(group, dict)
+                or not isinstance(group.get('name'), str)
+                or not isinstance(group.get('roots'), list)):
+            raise ValueError("Expected a saved BlenderNEURON group with name and roots")
+        return group
+
     def clear_activity(self):
         # Clear group level activity
         self.activity.clear()

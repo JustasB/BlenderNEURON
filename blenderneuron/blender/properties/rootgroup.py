@@ -485,15 +485,6 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
                     " only completely co-linear activity points (e.g. lossless)"
     )
 
-    frames_per_ms: FloatProperty(
-        default=1,
-        min=0,
-        get=get_prop("frames_per_ms"),
-        set=set_prop("frames_per_ms"),
-        description="The number of Blender frames to use to represent 1 ms of NEURON "
-                    "activity"
-    )
-
     gran2int = {
         "Group": 3,
         "Cell": 2,
@@ -537,7 +528,8 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     '''
     interaction_granularity: bpy.props.EnumProperty(
         items=[
-           ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
+            ('Group', 'Group', 'All cells in the group share one Blender object', 3),
+            ('Cell', 'Cell', 'Each cell is represented as a Blender object', 2),
             ('Section', 'Section', 'Finest. Each cell section is represented as a Blender object', 1),
         ],
         name="Interaction granularity",
@@ -623,7 +615,6 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         self.recording_period = source_group.recording_period
         self.recording_time_start = source_group.recording_time_start
         self.recording_time_end = source_group.recording_time_end
-        self.frames_per_ms = source_group.frames_per_ms
         self.simplification_epsilon = source_group.simplification_epsilon
         self.animate_brightness = source_group.animate_brightness
         self.animate_color = source_group.animate_color
@@ -636,6 +627,46 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
 
 class SimulatorSettings(BlenderNodeClass, PropertyGroup):
+
+    def get_frames_per_ms(self):
+        return self.get("frames_per_ms", 10.0)
+
+    def set_frames_per_ms(self, value):
+        previous = self.get_frames_per_ms()
+        self["frames_per_ms"] = value
+        if value == previous:
+            return
+        # Only retime imported activity materials used by this scene.
+        scene = self.id_data
+        materials = {slot.material for obj in scene.objects
+                     for slot in obj.material_slots
+                     if slot.material is not None and "recorded_value" in slot.material}
+        actions = set()
+        for material in materials:
+            for data in (material, material.node_tree):
+                animation = data.animation_data if data is not None else None
+                if animation is not None and animation.action is not None:
+                    actions.add(animation.action)
+        for action in actions:
+            if hasattr(action, "fcurves"):
+                curves = action.fcurves
+            else:
+                curves = [curve for layer in action.layers for strip in layer.strips
+                          for bag in strip.channelbags for curve in bag.fcurves]
+            for curve in curves:
+                for point in curve.keyframe_points:
+                    point.co.x *= value / previous
+                    point.handle_left.x *= value / previous
+                    point.handle_right.x *= value / previous
+                curve.update()
+        scene.frame_set(scene.frame_current)
+
+    frames_per_ms: FloatProperty(
+        name="Blender frames per millisecond",
+        default=10, min=0.001,
+        get=get_frames_per_ms, set=set_frames_per_ms,
+        description="Shared timeline scale for all cell groups in this scene"
+    )
 
     def to_neuron(self, context=None):
         self.client.set_sim_params({

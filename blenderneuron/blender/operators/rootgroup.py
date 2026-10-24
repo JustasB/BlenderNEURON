@@ -264,7 +264,7 @@ class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
                           for group in self.node.groups.values()
                           if group.selected]
 
-        self.client.update_groups(blender_groups)
+        self.client.update_groups(self.node.compress(blender_groups))
 
         return{'FINISHED'}
 

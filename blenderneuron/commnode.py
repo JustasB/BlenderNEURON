@@ -1,3 +1,8 @@
+import io
+import hmac
+import secrets
+from blenderneuron import connection
+
 import ast
 import zlib
 
@@ -59,6 +64,9 @@ class CommNode(object):
             raise Exception("Unrecognized server_end: " + str(server_end) + ". Should be one of: "
                             + str(self.server_types.keys()))
 
+        self.connection_end = self.client_end if "Control" in server_end else server_end
+        self.connection_settings = connection.load(self.connection_end + "-connection.json", {"mode": "local"})
+        self.secret = connection.local_secret() if self.connection_settings["mode"] == "local" else self.connection_settings["secret"]
         self.on_client_connected = on_client_connected
         self.on_server_setup = on_server_setup
 
@@ -67,6 +75,19 @@ class CommNode(object):
 
         # 'Control' nodes are 1-directional (a node with a connected client, but no server of its own)
         if 'Control' in self.server_end:
+            # The integration-test control nodes can be created before the process
+            # that hosts their client.  Keep trying until that process publishes
+            # its address instead of permanently retaining a failed first attempt.
+            self.client_retry_stop = threading.Event()
+            self.client_connected = threading.Event()
+            if self.client is None:
+                self.client_retry_thread = threading.Thread(target=self.retry_setup_client)
+                self.client_retry_thread.daemon = True
+                self.client_retry_thread.start()
+                # A control node is normally consumed immediately after it is
+                # created.  Give a just-started peer time to publish its server
+                # address before exposing an unavailable client to the caller.
+                self.client_connected.wait(5)
             return
 
         # Create a server
@@ -88,6 +109,11 @@ class CommNode(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if hasattr(self, "client_retry_stop"):
+            self.client_retry_stop.set()
+        if hasattr(self, "client_retry_thread") and self.client_retry_thread.is_alive():
+            self.client_retry_thread.join()
+
         if self.coverage:
             self.client.end_code_coverage()
 
@@ -98,6 +124,10 @@ class CommNode(object):
         config_file = os.path.join(package_dir, 'config.json')
         with open(config_file, "r") as f:
             self.config = json.load(f)[0]
+        for path, value in connection.load('endpoint-settings.json', {}).items():
+            section, end = path.split('|')
+            self.config[section][end] = value
+
 
     def init_task_queue(self):
         self.queue = queue.Queue()
@@ -105,9 +135,52 @@ class CommNode(object):
         self.tasks = {}
         self.task_next_id = 0
 
-    def setup_server(self):
+    def setup_server(self, service_queue=True):
+
+        node = self
+        replay_lock = threading.Lock()
+        seen = {}
+        epoch = secrets.token_hex(16)
 
         class ErrorHandler(SimpleXMLRPCRequestHandler):
+            def do_GET(self):
+                # Public startup challenge invalidates captured requests after restart.
+                body = epoch.encode('ascii')
+                self.send_response(200)
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self):
+                try:
+                    length = int(self.headers.get('Content-Length', '0'))
+                    if length < 0 or length > 256 * 1024 * 1024:
+                        raise ValueError('Invalid request size')
+                    body = self.rfile.read(length)
+                    timestamp = self.headers.get('X-BN-Time', '')
+                    nonce = self.headers.get('X-BN-Nonce', '')
+                    digest = self.headers.get('X-BN-Signature', '')
+                    if abs(time.time() - int(timestamp)) > 60 or len(nonce) != 32:
+                        raise ValueError('Expired request')
+                    if self.headers.get('X-BN-Epoch', '') != epoch:
+                        raise ValueError('Server restarted')
+                    expected = connection.signature(node.secret, timestamp, epoch + nonce, body)
+                    if not hmac.compare_digest(expected, digest):
+                        raise ValueError('Authentication failed')
+                    with replay_lock:
+                        now = time.time()
+                        for key in list(seen):
+                            if seen[key] < now - 120:
+                                del seen[key]
+                        if nonce in seen:
+                            raise ValueError('Repeated request')
+                        seen[nonce] = now
+                except (ValueError, UnicodeError):
+                    self.send_error(403, 'Pairing authentication failed')
+                    return
+                self.rfile = io.BytesIO(body)
+                super().do_POST()
+
             def _dispatch(self, method, params):
                 try:
                     return self.server.funcs[method](*params)
@@ -130,15 +203,17 @@ class CommNode(object):
                     logRequests=False
                 )
 
-        self.init_task_queue()
+        if service_queue or not hasattr(self, "queue"):
+            self.init_task_queue()
 
-        port = self.config["default_port"][self.server_end]
+        port = self.connection_settings.get("listen_port", "") if self.connection_settings["mode"] == "manual" else ""
 
-        self.server_ip = self.config["default_ip"][self.server_end]
-        self.server_port = self.find_free_port() if port == "" else port
-        self.server_address = 'http://' + self.server_ip + ':' + self.server_port
-
+        self.server_requested_port = str(port)
+        self.server_ip = self.connection_settings.get("listen_host", "127.0.0.1") if self.connection_settings["mode"] == "manual" else "127.0.0.1"
+        self.server_port = "0" if port == "" else str(port)
         self.server = CommNodeServer((self.server_ip, int(self.server_port)))
+        self.server_port = str(self.server.server_address[1])
+        self.server_address = 'http://' + self.server_ip + ':' + self.server_port
         self.server.register_introspection_functions()
 
         # Basic server functions
@@ -164,10 +239,11 @@ class CommNode(object):
         self.server_thread.start()
 
         # Perform the servicing of queued tasks in a separate thread
-        self.service_thread = threading.Thread(target=self.service_queue_loop)
-        self.service_thread.daemon = True
-        self.service_thread_continue = True # When false, queue servicing thread will stop
-        self.service_thread.start()
+        if service_queue:
+            self.service_thread = threading.Thread(target=self.service_queue_loop)
+            self.service_thread.daemon = True
+            self.service_thread_continue = True
+            self.service_thread.start()
 
         if self.on_server_setup is not None:
             self.on_server_setup()
@@ -186,8 +262,7 @@ class CommNode(object):
 
         if hasattr(self, "server_thread") and self.server_thread is not None and self.server_thread.is_alive():
             try:
-                own_server_client = xmlrpclib.ServerProxy(self.server_address, allow_none=True)
-                own_server_client.stop()
+                self.sm_stop()
                 self.server_thread.join()
                 self.server_thread = None
             except:     # pragma: no cover
@@ -215,20 +290,23 @@ class CommNode(object):
             config_ip = self.config["default_ip"][self.client_end]
             config_port = self.config["default_port"][self.client_end]
 
-            if config_ip != "127.0.0.1" and config_port != "":
-                client_address = 'http://' + config_ip + ':' + config_port
+            if self.connection_settings["mode"] == "manual":
+                client_address = self.connection_settings["peer_address"]
             else:
                 # Try reading the client address file
                 client_address = self.read_client_address_file()
 
             # Create XML-RCP client and attempt to connect to it
-            self.client = xmlrpclib.ServerProxy(client_address, allow_none=True)
+            self.client = connection.proxy(client_address, self.secret)
             assert self.client.ping() == 1
 
             # If connection succeeded, save the address
             self.client_address = client_address
 
-        except (IOError, ValueError, AssertionError):
+        except (IOError, ValueError, AssertionError, KeyError, xmlrpclib.Error) as error:
+            self.last_connection_error = ('Pairing credentials do not match. Paste connection information again.'
+                if isinstance(error, xmlrpclib.ProtocolError) and error.errcode == 403
+                else 'NEURON did not respond at ' + str(locals().get('client_address', 'the saved address')))
             if warn:
                 self.print_safe("Could not connect to " + self.client_end + " server. Ensure "+
                     ("Blender+BlenderNEURON addon" if self.server_end == "NEURON" else "NEURON+BlenderNEURON package")+
@@ -237,8 +315,19 @@ class CommNode(object):
             self.client = None
             self.client_address = None
 
+        if self.client is not None:
+            self.last_connection_error = ""
+
         if self.client is not None and self.on_client_connected is not None:
             self.on_client_connected(self)
+
+        if self.client is not None and hasattr(self, "client_connected"):
+            self.client_connected.set()
+
+    def retry_setup_client(self):
+        while not self.client_retry_stop.is_set() and self.client is None:
+            self.try_setup_client(warn=False)
+            self.client_retry_stop.wait(0.1)
 
     def read_client_address_file(self):
         """
@@ -252,7 +341,7 @@ class CommNode(object):
             raise IOError("Client address file not found:" + file_name)
 
         with open(file_name, "r") as f:
-            client_address = f.read()
+            client_address = json.load(f)
 
         if "http" not in client_address:
             raise ValueError("Address in the client address file does not appear to be valid:" + client_address) # pragma: no cover
@@ -275,13 +364,76 @@ class CommNode(object):
                     pass        # pragma: no cover
 
         else:
-            with open(file_name, "w") as f:
-                f.write(self.server_address)
+            connection.save(os.path.basename(file_name), self.server_address)
 
     def get_end_address_file(self, end):
-        tmp_dir = os.path.abspath(tempfile.gettempdir())
-        file_name = os.path.join(tmp_dir, "BlenderNEURON-" + end + ".address")
+        file_name = str(connection.config_directory() / ("BlenderNEURON-" + end + ".address"))
         return file_name
+
+    def pairing_information(self):
+        """Return a credential-bearing string. Share only with a trusted peer."""
+        return json.dumps({"version": 1, "secret": self.secret,
+                           "address": self.server_address})
+
+    def configure_connection(self, mode="local", peer_address=None,
+                             listen_host=None, listen_port=None, pairing=None):
+        """Persist settings; changing listening settings requires restarting the node."""
+        remembered = connection.load(self.connection_end + "-manual.json", {}) if mode == "manual" else {}
+        settings = {"mode": mode,
+                    "listen_host": listen_host if listen_host is not None else remembered.get("listen_host", "127.0.0.1"),
+                    "listen_port": str(listen_port) if listen_port is not None else remembered.get("listen_port", "")}
+        if settings["listen_port"] and (not settings["listen_port"].isdigit() or not 1 <= int(settings["listen_port"]) <= 65535):
+            raise ValueError("Listening port must be between 1 and 65535")
+        if mode not in ("local", "manual"):
+            raise ValueError("Unknown connection mode")
+        if mode == "manual":
+            info = json.loads(pairing) if pairing else {}
+            if not isinstance(info, dict):
+                raise ValueError("Pairing information must be a JSON object")
+            secret = info.get("secret", remembered.get("secret", self.secret))
+            if not isinstance(secret, str) or len(secret) != 64 or any(c not in "0123456789abcdef" for c in secret):
+                raise ValueError("Invalid pairing secret")
+            if info and info.get("version") != 1:
+                raise ValueError("Unsupported pairing version")
+            address = peer_address or info.get("address") or self.connection_settings.get("peer_address") or remembered.get("peer_address")
+            from urllib.parse import urlparse
+            parsed = urlparse(address or "")
+            if address and (parsed.scheme != "http" or not parsed.hostname or not parsed.port or parsed.username):
+                raise ValueError("Provide an HTTP peer address with a port")
+            settings.update(secret=secret, peer_address=address or "")
+            connection.save(self.connection_end + "-manual.json", settings)
+        else:
+            secret = connection.local_secret()
+        connection.save(self.connection_end + "-connection.json", settings)
+        self.connection_settings, self.secret = settings, secret
+        self.client = None
+        self.client_address = None
+
+    def forget_connection(self):
+        """Revoke credentials without changing simulation or scene data."""
+        self.secret = secrets.token_hex(32)
+        if self.connection_settings["mode"] == "local":
+            path = connection.config_directory() / 'local-secret'
+            fd, temporary = tempfile.mkstemp(dir=str(path.parent))
+            with os.fdopen(fd, 'w') as stream:
+                stream.write(self.secret)
+            os.replace(temporary, str(path))
+        else:
+            self.connection_settings["secret"] = self.secret
+            self.connection_settings.pop("peer_address", None)
+        try:
+            (connection.config_directory() / (self.connection_end + "-manual.json")).unlink()
+        except FileNotFoundError:
+            pass
+        connection.save(self.connection_end + "-connection.json", self.connection_settings)
+        self.client = None
+        self.client_address = None
+
+    def test_connection(self):
+        self.try_setup_client()
+        if self.client is not None:
+            self.client.try_setup_client()
+        return self.client is not None
 
     def print_safe(self, value):
         if debug == False:
@@ -459,23 +611,9 @@ class CommNode(object):
                 time.sleep(0.1)
 
     def compress(self, obj):
-        # print('X'*100, 'pre-str', obj)
-        # compressed = iterative_str(obj)
-        compressed = serialize(obj)
-
-        # print('X' * 100, 'post-iterative_str', obj)
-
-        try:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed, 2)) # already-iterative
-        except:
-            compressed = xmlrpclib.Binary(zlib.compress(compressed.encode('utf8'), 2)) # already-iterative
-
-        return compressed
+        payload = serialize(obj).encode('utf-8')
+        return xmlrpclib.Binary(zlib.compress(payload, 2))
 
     def decompress(self, compressed):
-        uncompressed = deserialize(zlib.decompress(compressed.data).decode('utf-8')) # already-iterative
-
-        # print('X'*100, uncompressed)
-
-        return uncompressed
+        return deserialize(zlib.decompress(compressed.data).decode('utf-8'))
 

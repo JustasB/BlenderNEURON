@@ -6,6 +6,10 @@ import numpy as np
 
 class NeuronSection(Section):
 
+    def __init__(self):
+        super().__init__()
+        self._segment_midpoints = None
+
     def from_updated_blender_root(self, blender_section):
         """
         Update the coordinates and radii from the updated blender_section, iteratively for all child sections.
@@ -57,6 +61,7 @@ class NeuronSection(Section):
                 # Initial processing of the node
                 node.group = group
                 node.nrn_section = nrn_sec
+                node._segment_midpoints = None
                 node.name = nrn_sec.name()
 
                 # Mark the node as visited and process children
@@ -67,6 +72,8 @@ class NeuronSection(Section):
                     stack.append((child, nrn_child_sec, False))
 
     def update_coords_and_radii(self, blender_section):
+        # Invalidate before pt3d mutation, including partially failed updates.
+        self._segment_midpoints = None
         self.nseg = blender_section["nseg"]
         self.point_count = blender_section["point_count"]
         self.coords = blender_section["coords"]
@@ -120,6 +127,28 @@ class NeuronSection(Section):
         self.coords = coords
         self.radii = radii
 
+    def _build_segment_midpoints(self):
+        """Cache adjacent pt3d midpoints; geometry is fixed within a run.
+
+        Initialization already calls define_shape for sections lacking pt3d
+        points. Empty/one-point sections have no usable 3D segments.
+        """
+        sec = self.nrn_section
+        npts = int(h.n3d(sec=sec))
+        midpoints = []
+        for i in range(1, npts):
+            x_mid = (h.arc3d(i - 1, sec=sec) + h.arc3d(i, sec=sec)) / (2.0 * sec.L)
+            midpoints.append(min(max(x_mid, 0.0), 1.0))
+        self._segment_midpoints = tuple(midpoints)
+
+    def rebuild_segment_midpoints_recursive(self):
+        """Refresh local geometry once per initialization, without recursion."""
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            node._build_segment_midpoints()
+            stack.extend(reversed(node.children))
+
     def collect_segments_recursive(self):
         """
         Recursively collects the values of segments of a root section. Segments are given sequential 0-based
@@ -136,20 +165,14 @@ class NeuronSection(Section):
             nrn_sec = node.nrn_section
             record_var = node.group.record_variable
 
-            # Number of 3D points that define the section
-            npts = int(h.n3d(sec=nrn_sec))
+            if node._segment_midpoints is None:
+                node._build_segment_midpoints()
 
-            # Collect per-3D segment activity
-            for i in range(1, npts):
-                seg_index = i - 1
+            # Preserve adjacent-pt3d ordering, resolving live values each sample.
+            for seg_index, x_mid in enumerate(node._segment_midpoints):
                 if seg_index not in node.segment_activity:
                     node.segment_activity[seg_index] = Activity()
 
-                startL = h.arc3d(i - 1, sec=nrn_sec)
-                endL = h.arc3d(i, sec=nrn_sec)
-
-                x_mid = (startL + endL) / (2.0 * nrn_sec.L)
-                x_mid = min(max(x_mid, 0.0), 1.0)  # clamp to [0,1]
                 value = getattr(nrn_sec(x_mid), record_var)
 
                 node.segment_activity[seg_index].values.append(value)
