@@ -1,3 +1,4 @@
+from blenderneuron.blender.views.groupobjectview import GroupObjectView
 from blenderneuron.blender.views.cellobjectview import CellObjectView
 from blenderneuron.blender.views.sectionobjectview import SectionObjectView
 from blenderneuron.blender.views.jsonview import JsonView
@@ -5,6 +6,8 @@ from blenderneuron.blender.utils import remove_prop_collection_item, COLOR_RAMP_
 from blenderneuron.rootgroup import *
 from blenderneuron.blender.views.vectorconfinerview import VectorConfinerView
 import bpy
+from blenderneuron.datablocknames import get_registry, entity_key
+from blenderneuron.blender.views.curvecontainer import CurveContainer
 from fnmatch import fnmatch
 import json
 import os
@@ -17,6 +20,8 @@ class BlenderRootGroup(RootGroup):
 
     @property
     def color_ramp_material(self):
+        if hasattr(self, 'color_ramp_key'):
+            return get_registry().resolve(self.color_ramp_key)
         return bpy.data.materials.get(self.color_ramp_material_name)
 
     def __init__(self, name, node):
@@ -43,7 +48,6 @@ class BlenderRootGroup(RootGroup):
         self.animation_range_low = -85
         self.animation_range_high = 20
         self.simplification_epsilon = 0.1
-        self.frames_per_ms = 1
 
         self.state = 'new'
         self.root_filter = '*'
@@ -62,8 +66,14 @@ class BlenderRootGroup(RootGroup):
     def create_color_ramp_material(self, default_color):
         name = self.name + '_color_ramp'
 
-        mat = bpy.data.materials.new(name)
+        registry = get_registry()
+        key = self.color_ramp_key = entity_key('materials', 'color-ramp', name, self.name)
+        existing = registry.resolve(key)
+        if existing is not None:
+            return existing.name
+        mat = registry.create(key, bpy.data.materials.new)
         mat.use_nodes = True
+        CurveContainer.identify_node_tree(mat, registry)
         mat.use_fake_user = True
 
         node = mat.node_tree.nodes.new('ShaderNodeValToRGB')
@@ -71,7 +81,7 @@ class BlenderRootGroup(RootGroup):
         node.color_ramp.elements[0].color = default_color
         node.color_ramp.elements[-1].color = [1] * 4  # All white
 
-        return name
+        return mat.name
 
 
     def highlight(self):
@@ -162,6 +172,9 @@ class BlenderRootGroup(RootGroup):
 
     def show(self, view_class=None, *args, **kwargs):
         if view_class is None:
+            if self.interaction_granularity == 'Group':
+                view_class = GroupObjectView
+
             if self.interaction_granularity == 'Cell':
                 view_class = CellObjectView
 
@@ -175,8 +188,14 @@ class BlenderRootGroup(RootGroup):
         self.remove_view()
 
         # Show the new view
-        self.view = view_class(self, *args, **kwargs)
-        self.view.show()  # already-iterative
+        try:
+            registry = get_registry()
+            with registry.transaction(), registry.import_batch():
+                self.view = view_class(self, *args, **kwargs)
+                self.view.show()  # already-iterative
+        except Exception:
+            self.view = None
+            raise
 
         return self.view
 
@@ -224,7 +243,7 @@ class BlenderRootGroup(RootGroup):
 
         if ramp_mat is not None:
             ramp_mat.use_fake_user = False
-            bpy.data.materials.remove(ramp_mat) # already-iterative
+            get_registry().remove(ramp_mat) # already-iterative
 
     def remove_from_UI(self):
         remove_prop_collection_item(self.node.ui_properties.groups, self.ui_group)

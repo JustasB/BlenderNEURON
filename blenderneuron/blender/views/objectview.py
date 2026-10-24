@@ -1,4 +1,5 @@
 import threading
+from blenderneuron.datablocknames import get_registry, entity_key
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from blenderneuron.blender.utils import get_operator_context_override, rdp, COLOR_RAMP_NAME
@@ -24,6 +25,7 @@ class ViewAbstract(object):
 class ObjectViewAbstract(ViewAbstract):
     __metaclass__ = ABCMeta
 
+    frame_view = True
     has_linked = False
     link_lock = threading.Lock()
 
@@ -35,14 +37,62 @@ class ObjectViewAbstract(ViewAbstract):
                                           "has been imported from NEURON into Blender.")
 
         self.group = rootgroup
+        self.registry = get_registry()
+        self.identity_scope = self.group.name
+        self.materials = {}
 
         self.containers = OrderedDict()
         self.make_curve_template()
+        self.material_template = CurveContainer.create_material(
+            self.group.name + "_section_material_template",
+            self.group.default_color,
+            self.group.default_brightness, self.registry, self.identity_scope,
+            role="material-template",
+        )
 
         self.closed_ends = True
 
+    def reserve_import(self, cell_view=False, split_length=0, group_view=False):
+        """Reserve the complete geometry/material batch before building splines."""
+        keys = []
+        if group_view:
+            keys.extend(entity_key(namespace, role, self.group.name, self.identity_scope)
+                        for namespace, role in [('objects', 'section-container'), ('curves', 'section-geometry')])
+        seen_sections = set()
+        for root in self.group.roots.values():
+            stack = [root]
+            if self.group.recording_granularity == 'Cell' and not split_length:
+                keys.append(entity_key('materials', 'section-material', root.name, self.identity_scope))
+            while stack:
+                section = stack.pop()
+                if section.name in seen_sections:
+                    raise self.registry.error(entity_key('objects', 'section-container', section.name, self.identity_scope),
+                                              'Duplicate canonical section in import batch')
+                seen_sections.add(section.name)
+                sections = (section.make_split_sections(split_length) or [section]) if split_length else [section]
+                for part in sections:
+                    if not group_view and (not cell_view or section is root):
+                        keys.extend(entity_key(namespace, role, part.name, self.identity_scope)
+                                    for namespace, role in [('objects', 'section-container'), ('curves', 'section-geometry')])
+                    if self.group.recording_granularity != 'Cell' or split_length:
+                        names = ([part.name] if self.group.recording_granularity in ('Cell', 'Section') else
+                                 ['%s[%s]' % (part.name, i) for i in range(len(part.radii)-1)])
+                        keys.extend(entity_key('materials', 'section-material', name, self.identity_scope) for name in names)
+                stack.extend(section.children)
+        # Actions use the canonical owner identity, including embedded node trees.
+        for key in list(keys):
+            if key[1] == 'materials':
+                keys.extend(entity_key('actions', key[2] + suffix, key[3] + 'Action', key[4])
+                            for suffix in ('-action', '-nodes-action'))
+        self.reserved_keys = keys
+        # Protect readable planned names before allocating shortened candidates.
+        for key in sorted(keys, key=lambda key: len(key[3].encode('utf-8')) > self.registry.maximum_bytes):
+            self.registry.reserve(key)
+
     def make_curve_template(self):
-        curve_template = bpy.data.curves.new(self.group.name+"_bezier", type='CURVE')
+        key = entity_key('curves', 'curve-template', self.group.name+"_bezier", self.identity_scope)
+        curve_template = self.registry.create(key, lambda name: bpy.data.curves.new(name, type='CURVE'))
+        self.curve_template_key = key
         curve_template.use_fake_user = True
         curve_template.dimensions = '3D'
         curve_template.resolution_u = self.group.segment_subdivisions
@@ -54,7 +104,7 @@ class ObjectViewAbstract(ViewAbstract):
 
     @property
     def curve_template(self):
-        return bpy.data.curves.get(self.curve_template_name)
+        return self.registry.resolve(self.curve_template_key)
 
     def on_first_link(self):
         # Set grid to 100um squares
@@ -109,7 +159,11 @@ class ObjectViewAbstract(ViewAbstract):
                 if not container.linked:
                     container.link()
 
-        self.zoom_to_containers()
+        if self.frame_view:
+            self.zoom_to_containers()
+        else:
+            # Synapse searches still need current world transforms after linking.
+            bpy.context.view_layer.update()
 
     def select_containers(self, select=True, pattern=None, pattern_inverse=False):
         # First, unselect everything
@@ -123,21 +177,39 @@ class ObjectViewAbstract(ViewAbstract):
                 container.get_object().select_set(state=select)
 
     def zoom_to_containers(self):
-
-        # Select the container objects
-        self.select_containers(True)
-
-        # Zoom to selected
-        context = get_operator_context_override()
-        if bpy.app.version[0] < 4:
-            # Before Blender 4, context override could be passed into the operator
-            bpy.ops.view3d.view_selected(context, use_all_regions=False)
-        else:
-            with bpy.context.temp_override(**context): # pragma: no cover
-                bpy.ops.view3d.view_selected(use_all_regions=False) # pragma: no cover
-
-        # Unselect containers
-        self.select_containers(False)
+        # Framing must not select and deselect thousands of section objects.
+        # Update once so bounds and world transforms include newly linked curves.
+        from math import atan, sin
+        from mathutils import Vector
+        bpy.context.view_layer.update()
+        bpy.ops.object.select_all(action='DESELECT')
+        if not self.containers:
+            return
+        low = Vector((float('inf'),) * 3)
+        high = -low
+        for container in self.containers.values():
+            ob = container.get_object()
+            for corner in ob.bound_box:
+                point = ob.matrix_world @ Vector(corner)
+                for axis in range(3):
+                    low[axis] = min(low[axis], point[axis])
+                    high[axis] = max(high[axis], point[axis])
+        center = (low + high) / 2
+        radius = max((high - low).length / 2, 0.01)
+        for window in bpy.context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type != 'VIEW_3D':
+                    continue
+                space = area.spaces.active
+                region = next((r for r in area.regions if r.type == 'WINDOW'), None)
+                if region is None:
+                    continue
+                aspect = max(region.width, 1) / max(region.height, 1)
+                # A bounding sphere fits for any view rotation. Account for the
+                # narrower viewport dimension, lens and a 15% framing margin.
+                tangent = 16 / max(space.lens, 1) * min(1, 1 / aspect)
+                space.region_3d.view_location = center
+                space.region_3d.view_distance = 1.15 * radius / sin(atan(tangent))
 
     def remove_container(self, container):
         # Lookup if passed in a name
@@ -150,16 +222,24 @@ class ObjectViewAbstract(ViewAbstract):
         self.containers.pop(container.name)
 
     def remove(self):
+        for key in getattr(self, 'reserved_keys', ()):
+            self.registry.release(key)
         # Remove any previous containers
         containers = list(self.containers.values())
         for container in containers:
             self.remove_container(container)
 
+        # The template is never assigned to a curve. Its independent copies
+        # are removed by CurveContainer.remove above.
+        if self.material_template is not None:
+            self.registry.remove(self.material_template)
+            self.material_template = None
+
         # Remove curve template
         try:
             if self.curve_template is not None:
                 self.curve_template.use_fake_user = False
-            bpy.data.curves.remove(self.curve_template) # already-iterative
+            self.registry.remove(self.curve_template) # already-iterative
         except TypeError:
             pass
 
@@ -171,7 +251,7 @@ class ObjectViewAbstract(ViewAbstract):
         to_containers = [section]
 
         if split_longer_than > 0:
-            split_sections = section.make_split_sections(split_longer_than)
+            split_sections = section.split_sections if section.was_split else section.make_split_sections(split_longer_than)
 
             if split_sections is not None:
                 to_containers = split_sections
@@ -188,9 +268,11 @@ class ObjectViewAbstract(ViewAbstract):
                 origin_type,
                 self.closed_ends,
                 container_material,
+                self.material_template, self.registry, self.identity_scope,
             )
 
             self.containers[container.name] = container
+            self.materials.update(container.materials)
 
         return container
 
@@ -215,7 +297,13 @@ class ObjectViewAbstract(ViewAbstract):
         if activity is None:
             return
 
-        mat = bpy.data.materials.get(material_name)
+        # Public helper callers may pass an actual data-block or an actual Blender
+        # name. Model-facing calls always resolve through the canonical dictionary.
+        if isinstance(material_name, str):
+            mat = (self.materials.get(material_name) if hasattr(self, 'materials')
+                   else bpy.data.materials.get(material_name))
+        else:
+            mat = material_name
 
         if mat is None:
             return
@@ -230,13 +318,13 @@ class ObjectViewAbstract(ViewAbstract):
             return
 
         # Convert times to frames
-        frames = np.round(times * self.group.frames_per_ms).astype(int)
+        frames_per_ms = bpy.context.scene.BlenderNEURON.simulator_settings.frames_per_ms
+        frames = np.round(times * frames_per_ms).astype(int)
 
         # Store the values in a custom material property
         # This allows inspecting raw values in the Graph editor
-        for i, frame in enumerate(frames):
-            mat["recorded_value"] = values[i]
-            mat.keyframe_insert(data_path='["recorded_value"]', frame=frame)
+        mat["recorded_value"] = values[-1]
+        self.add_keyframes(mat, '["recorded_value"]', frames, values)
 
         # Map values to 0-1 range
         # These are then used to determine the brightness and color
@@ -250,13 +338,14 @@ class ObjectViewAbstract(ViewAbstract):
         if group.animate_brightness:
             # Get the Cycles emission shader node strength input
             emit_strength = mat.node_tree.nodes['Emission'].inputs['Strength']
-
-            for i, frame in enumerate(frames):
-                # Set the Cycles emit node intensity
-                emit_strength.default_value = intensity[i] * max_brightness
-
-                # Set the node emit keyframe
-                emit_strength.keyframe_insert(data_path="default_value", frame=frame)
+            strengths = intensity * max_brightness
+            emit_strength.default_value = strengths[-1]
+            self.add_keyframes(
+                mat.node_tree,
+                emit_strength.path_from_id("default_value"),
+                frames,
+                strengths,
+            )
 
         if group.animate_color:
             # Get the Cycles emission node input color
@@ -265,16 +354,68 @@ class ObjectViewAbstract(ViewAbstract):
             # Color ramp eval function
             color_value_at = group.color_ramp_material.node_tree.nodes[COLOR_RAMP_NAME].color_ramp.evaluate
 
-            for i, frame in enumerate(frames):
-                # Get the color value from the ramp widget
-                frame_color4 = color_value_at(intensity[i])
+            colors = np.asarray([color_value_at(value) for value in intensity])
+            node_color.default_value = mat.diffuse_color = colors[-1]
 
-                # Set the material color and Cycles node color
-                node_color.default_value = mat.diffuse_color = frame_color4
+            material_color_path = mat.path_from_id("diffuse_color")
+            node_color_path = node_color.path_from_id("default_value")
+            for component in range(4):
+                self.add_keyframes(
+                    mat,
+                    material_color_path,
+                    frames,
+                    colors[:, component],
+                    component,
+                )
+                self.add_keyframes(
+                    mat.node_tree,
+                    node_color_path,
+                    frames,
+                    colors[:, component],
+                    component,
+                )
 
-                # Set the material and node color keyframes
-                mat.keyframe_insert(data_path="diffuse_color", frame=frame)
-                node_color.keyframe_insert(data_path="default_value", frame=frame)
+    @staticmethod
+    def add_keyframes(id_data, data_path, frames, values, array_index=0):
+        """Append animation samples to an F-curve in Blender's bulk API."""
+        animation_data = id_data.animation_data_create()
+        if animation_data.action is None:
+            registry = get_registry()
+            owner_key = registry.identity(id_data)
+            if owner_key is None:
+                # Compatibility for callers animating their own Blender data-block.
+                owner_key = entity_key('actions', 'external-animation', id_data.name, id_data.bl_rna.identifier)
+            key = entity_key('actions', owner_key[2] + '-action', owner_key[3] + 'Action', owner_key[4])
+            animation_data.action = registry.create(key, bpy.data.actions.new)
+
+        action = animation_data.action
+        if hasattr(action, "fcurve_ensure_for_datablock"):
+            # Blender 4.4+ stores curves in slots/channelbags; the legacy
+            # action.fcurves collection was removed in Blender 5.0.
+            fcurve = action.fcurve_ensure_for_datablock(
+                id_data, data_path, index=array_index)
+        else:
+            fcurve = action.fcurves.find(data_path, index=array_index)
+
+        # Imported materials are new, so the normal fast path creates a fresh
+        # F-curve.  Preserve Blender's replace semantics if this helper is
+        # ever called for an already animated property.
+        if fcurve is not None and len(fcurve.keyframe_points):
+            for frame, value in zip(frames, values):
+                fcurve.keyframe_points.insert(frame, value, options={'REPLACE'})
+            fcurve.update()
+            return
+
+        if fcurve is None:
+            fcurve = action.fcurves.new(data_path, index=array_index)
+
+        point_count = len(frames)
+        fcurve.keyframe_points.add(point_count)
+        coordinates = np.empty(point_count * 2, dtype=np.float32)
+        coordinates[0::2] = frames
+        coordinates[1::2] = values
+        fcurve.keyframe_points.foreach_set("co", coordinates)
+        fcurve.update()
 
 
 

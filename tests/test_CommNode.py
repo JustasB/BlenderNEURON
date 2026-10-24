@@ -32,6 +32,8 @@ class TestCommNode(BlenderTestCase):
             'default_ip': {'Blender': '127.0.0.1'},
             'default_port': {'Blender': ''},
         }
+        node.connection_settings = {'mode': 'local'}
+        node.secret = 'a' * 64
         node.client_end = 'Blender'
         node.server_end = 'Control-NEURON'
         node.on_client_connected = None
@@ -40,7 +42,7 @@ class TestCommNode(BlenderTestCase):
         client.ping.return_value = 1
 
         with patch.object(node, 'read_client_address_file', return_value='http://test'), \
-                patch('blenderneuron.commnode.xmlrpclib.ServerProxy', return_value=client):
+                patch('blenderneuron.commnode.connection.proxy', return_value=client):
             node.try_setup_client()
 
         node.client_connected.set.assert_called_once_with()

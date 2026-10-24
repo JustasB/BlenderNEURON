@@ -216,10 +216,6 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             row.prop(group, "recording_period", text="")
 
             row = col.split(factor=0.5)
-            row.label(text='Frames per Millisecond:')
-            row.prop(group, "frames_per_ms", text="")
-
-            row = col.split(factor=0.5)
             row.label(text='Simplification Tolerance:')
             row.prop(group, "simplification_epsilon", text="")
 
@@ -350,16 +346,16 @@ class FormSynapsesPanel(AbstractBlenderNEURONPanel, Panel):
 
     @classmethod
     def poll(cls, context):
-        """
-        Checks if a connection to NEURON has been established and there are 2+ imported groups
-        """
-        return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
-               bpy.types.Object.BlenderNEURON_node is not None and \
-               bpy.types.Object.BlenderNEURON_node.client is not None and \
-               AbstractBlenderNEURONPanel.group_count(context) > 1
+        node = getattr(bpy.types.Object, "BlenderNEURON_node", None)
+        return node is not None and node.client is not None
 
     def draw(self, context):
-        scene = context.scene
+        if self.group_count(context) < 2:
+            explanation = self.layout.column()
+            explanation.enabled = False
+            explanation.label(text="Requires at least two cell groups.", icon='INFO')
+            explanation.label(text="Add a group under Cell Groups.")
+            return
 
         self.layout.label(text='Synapse Sets:')
 
@@ -460,6 +456,7 @@ class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         row = col.row()
         row.enabled = False
         row.prop(settings, "neuron_t", text="Time (ms)")
+        col.prop(settings, "frames_per_ms", text="Blender frames per millisecond")
 
         col.prop(settings, "neuron_tstop", text="Stop Time (ms)")
         col.prop(settings, "temperature", text=u"Temperature (°C)")

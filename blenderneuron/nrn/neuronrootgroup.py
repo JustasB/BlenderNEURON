@@ -32,10 +32,22 @@ class NeuronRootGroup(RootGroup):
                 self.roots[section.name] = section
 
         # Clear previously recorded activity on h.run()
-        self.fih = h.FInitializeHandler(self.clear_activity)
+        self.fih = h.FInitializeHandler(self.prepare_activity)
 
         # Setup to collect activity during h.run()
         self.create_collector()
+
+    def prepare_activity(self):
+        """Clear traces and refresh geometry before the first sample of a run.
+
+        Rebuilding also captures direct NEURON pt3d edits between runs. Direct
+        pt3d edits during collection require an explicit cache rebuild; Blender
+        coordinate updates invalidate the affected sections automatically.
+        """
+        self.clear_activity()
+        if self.record_activity and self.recording_granularity == '3D Segment':
+            for root in self.roots.values():
+                root.rebuild_segment_midpoints_recursive()
 
     def save_recording_params(self, blender_group):
         self.record_activity = blender_group["record_activity"]

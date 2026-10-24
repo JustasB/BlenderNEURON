@@ -3,6 +3,82 @@ import bpy, os, json, inspect, blenderneuron
 class BlenderNEURONProperties(bpy.types.PropertyGroup):
     config_cache_valid = False
 
+    connection_advanced_open: bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'})
+    connection_message: bpy.props.StringProperty(options={'SKIP_SAVE'})
+
+    pairing_secret_invalid: bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'})
+
+    def get_fixed_listen_port(self):
+        return bool(self.server_port)
+
+    def set_fixed_listen_port(self, enabled):
+        if enabled:
+            if not self.server_port:
+                node = getattr(bpy.types.Object, 'BlenderNEURON_node', None)
+                self.server_port = str(node.server_port) if node is not None and node.server_port else '8000'
+        else:
+            self.server_port = ''
+
+    fixed_listen_port: bpy.props.BoolProperty(
+        name='Use a fixed listening port',
+        description='Keep a predictable Blender port for SSH tunnels or container callbacks',
+        get=get_fixed_listen_port, set=set_fixed_listen_port)
+
+    def get_pairing_secret(self):
+        from blenderneuron import connection
+        return connection.load('Blender-manual.json', {}).get('secret', '')
+
+    def set_pairing_secret(self, value):
+        from blenderneuron import connection
+        value = value.strip()
+        if len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
+            self.pairing_secret_invalid = True
+            self.connection_message = 'Pairing secret must contain 64 lowercase hexadecimal characters.'
+            return
+        settings = connection.load('Blender-manual.json', {})
+        settings.update(mode='manual', secret=value)
+        connection.save('Blender-manual.json', settings)
+        current = connection.load('Blender-connection.json', {'mode': 'local'})
+        if current['mode'] == 'manual':
+            current['secret'] = value
+            connection.save('Blender-connection.json', current)
+            node = getattr(bpy.types.Object, 'BlenderNEURON_node', None)
+            if node is not None:
+                node.connection_settings = current
+                node.secret = value
+                node.client = None
+                node.client_address = None
+        self.pairing_secret_invalid = False
+        self.connection_message = 'Pairing secret saved privately on this computer.'
+
+    pairing_secret: bpy.props.StringProperty(
+        name='Pairing secret', subtype='PASSWORD', options={'SKIP_SAVE'},
+        get=get_pairing_secret, set=set_pairing_secret,
+        description='The 64-character secret from NEURON connection information; saved privately outside the blend file')
+
+    def get_connection_mode(self):
+        from blenderneuron import connection
+        return 1 if connection.load('Blender-connection.json', {'mode': 'local'})['mode'] == 'manual' else 0
+
+    def set_connection_mode(self, value):
+        from blenderneuron import connection
+        mode = 'manual' if value == 1 else 'local'
+        node = getattr(bpy.types.Object, 'BlenderNEURON_node', None)
+        if node is not None:
+            node.configure_connection(mode=mode)
+        else:
+            settings = connection.load('Blender-manual.json', {}) if mode == 'manual' else {}
+            settings.update(mode=mode)
+            if mode == 'manual':
+                settings.setdefault('secret', connection.local_secret())
+            connection.save('Blender-connection.json', settings)
+        self.connection_message = ''
+
+    connection_mode: bpy.props.EnumProperty(
+        items=[('LOCAL', 'On this computer', 'Automatically discover local NEURON'),
+               ('MANUAL', 'In Docker or on another computer', 'Pair with a remote or container NEURON')],
+        get=get_connection_mode, set=set_connection_mode)
+
     def load_config(self):
         package_dir = os.path.dirname(os.path.abspath(inspect.getfile(blenderneuron)))
         config_file = os.path.join(package_dir, 'config.json')
@@ -20,6 +96,31 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
     def set_config_prop(self, prop_path, value):
         self.load_config()
 
+        from blenderneuron import connection
+        if prop_path.startswith(('default_ip|', 'default_port|')):
+            if prop_path.startswith('default_port|') and value and (not value.isdigit() or not 1 <= int(value) <= 65535):
+                raise ValueError('Port must be between 1 and 65535, or blank')
+            values = connection.load('endpoint-settings.json', {})
+            values[prop_path] = value
+            connection.save('endpoint-settings.json', values)
+            settings = connection.load('Blender-connection.json', {'mode': 'local'})
+            if settings['mode'] == 'manual':
+                from urllib.parse import urlparse
+                if prop_path == 'default_ip|Blender':
+                    settings['listen_host'] = value
+                elif prop_path == 'default_port|Blender':
+                    settings['listen_port'] = value
+                else:
+                    peer = urlparse(settings.get('peer_address', ''))
+                    host = value if prop_path == 'default_ip|NEURON' else (peer.hostname or '127.0.0.1')
+                    port = value if prop_path == 'default_port|NEURON' else str(peer.port or '')
+                    settings['peer_address'] = 'http://' + host + ':' + port if port else ''
+                connection.save('Blender-connection.json', settings)
+                connection.save('Blender-manual.json', settings)
+                node = getattr(bpy.types.Object, 'BlenderNEURON_node', None)
+                if node is not None:
+                    node.connection_settings = settings
+            return
         current = self.config
         for prop in prop_path.split('|')[0:-1]:
             current = current[prop]
@@ -29,6 +130,23 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
 
     def get_config_prop(self, prop_path):
         self.load_config()
+        from blenderneuron import connection
+        settings = connection.load('Blender-connection.json', {'mode': 'local'})
+        if settings['mode'] == 'manual':
+            from urllib.parse import urlparse
+            if prop_path == 'default_ip|Blender':
+                return settings.get('listen_host', '127.0.0.1')
+            if prop_path == 'default_port|Blender':
+                return settings.get('listen_port', '')
+            peer = urlparse(settings.get('peer_address', ''))
+            if prop_path == 'default_ip|NEURON':
+                return peer.hostname or '127.0.0.1'
+            if prop_path == 'default_port|NEURON':
+                return str(peer.port or '')
+        values = connection.load('endpoint-settings.json', {})
+        if prop_path in values:
+            return values[prop_path]
+
 
         current = self.config
         for prop in prop_path.split('|'):

@@ -1,4 +1,5 @@
 import unittest
+import json
 
 from blenderneuron.utils import serialize, deserialize
 
@@ -6,18 +7,33 @@ from blenderneuron.utils import serialize, deserialize
 class TestSerialization(unittest.TestCase):
 
     def test_serialize_list(self):
-        # Test for line 29: if isinstance(obj, list)
         data = [1, 2, 3]
         result = serialize(data)
-        expected = "[1, 2, 3]"
-        self.assertEqual(result, expected)
+        self.assertEqual(deserialize(result), data)
+        self.assertEqual(json.loads(result)["nodes"], [[1, [1, 2, 3], []]])
+
+    def test_deserialize_v1_flat_transport(self):
+        data = {
+            "__blenderneuron_flat__": 1,
+            "root": [0],
+            "nodes": [[0, "children", [1]], [1, 1, 2, 3]],
+        }
+        self.assertEqual(deserialize(json.dumps(data)), {"children": [1, 2, 3]})
+
+        scalar_data = {
+            "__blenderneuron_flat__": 1,
+            "root": "scalar",
+            "nodes": [],
+        }
+        self.assertEqual(deserialize(json.dumps(scalar_data)), "scalar")
+
+    def test_serialize_scalar_root(self):
+        self.assertEqual(deserialize(serialize("soma")), "soma")
 
     def test_serialize_tuple(self):
-        # Test for line 33: else: result.append('(')
         data = (1, 2, 3)
         result = serialize(data)
-        expected = "(1, 2, 3)"
-        self.assertEqual(result, expected)
+        self.assertEqual(deserialize(result), list(data))
 
     def test_serialize_unsupported_type(self):
         # Test for line 52: raise TypeError(f"Unsupported type: {type(obj)}")
@@ -26,6 +42,44 @@ class TestSerialization(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             serialize(Unsupported())
+
+        with self.assertRaises(TypeError):
+            serialize({"value": Unsupported()})
+
+        with self.assertRaises(TypeError):
+            serialize([Unsupported()])
+
+        with self.assertRaises(TypeError):
+            serialize({("tuple", "key"): "value"})
+
+    def test_round_trip_deep_morphology_without_python_recursion(self):
+        """The transport must support arbitrarily deep single-child trees."""
+        depth = 5000
+        source = {
+            "name": "root",
+            "enabled": True,
+            "disabled": False,
+            "optional": None,
+            "offset": -1.25e-6,
+            "children": [],
+        }
+        node = source
+        for index in range(depth):
+            child = {"name": "section-%d" % index, "children": []}
+            node["children"].append(child)
+            node = child
+
+        restored = deserialize(serialize(source))
+        # The wire representation itself stays shallow enough for native JSON,
+        # even though the restored morphology is thousands of levels deep.
+        json.loads(serialize(source))
+        node = restored
+        for index in range(depth):
+            self.assertEqual(node["name"], "root" if index == 0 else "section-%d" % (index - 1))
+            self.assertEqual(len(node["children"]), 1)
+            node = node["children"][0]
+        self.assertEqual(node["name"], "section-%d" % (depth - 1))
+        self.assertEqual(node["children"], [])
 
 
 
@@ -89,6 +143,26 @@ class TestSerialization(unittest.TestCase):
         result = deserialize(data)
         expected = "Hello\nWorld"
         self.assertEqual(result, expected)
+
+    def test_deserialize_unicode_and_escaped_quotes(self):
+        source = {"label": "dendrite α's \\ branch", "children": []}
+        self.assertEqual(deserialize(serialize(source)), source)
+
+    def test_deserialize_legacy_unicode_and_unknown_escapes(self):
+        data = r"['\x41','\u03b1','\U0001F600','\q']"
+        self.assertEqual(deserialize(data), ['A', 'α', '😀', '\\q'])
+
+    def test_deserialize_rejects_incomplete_and_mismatched_containers(self):
+        invalid_values = [
+            "{'key': 'value'",
+            "[1, 2}",
+            "{'key' 'value'}",
+            "[1 2]",
+        ]
+        for value in invalid_values:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    deserialize(value)
 
     def test_deserialize_list_append_string(self):
         # Test for line 185: current.append(str_value)

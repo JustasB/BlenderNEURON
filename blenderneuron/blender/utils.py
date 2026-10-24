@@ -235,6 +235,21 @@ def fast_get(coll, prop_name, sub_items_per_item=1):
 # https://github.com/fhirschmann/rdp/issues/7
 
 def line_dists(points, start, end):
+    # Activity traces are two-dimensional. Avoid the general cross-product
+    # machinery and an Nx2 subtraction temporary for every RDP partition.
+    # Keep the original norm (including its rounding/overflow behavior) so
+    # points exactly on the epsilon boundary retain the same interpretation.
+    if points.shape[1] == 2:
+        if start[0] == end[0] and start[1] == end[1]:
+            return np.linalg.norm(points - start, axis=1)
+        vec = end - start
+        cross = vec[0] * (start[1] - points[:, 1])
+        cross -= vec[1] * (start[0] - points[:, 0])
+        # np.linalg.norm uses sqrt(dot(vec, vec)) for real floating vectors.
+        # Preserve its integer conversion and complex handling via the fallback.
+        norm = np.sqrt(vec.dot(vec)) if vec.dtype.kind == "f" else np.linalg.norm(vec)
+        return np.divide(abs(cross), norm)
+
     if np.all(start == end):
         return np.linalg.norm(points - start, axis=1)
 
@@ -252,7 +267,7 @@ def rdp(M, epsilon=0):
     :param epsilon: Tolerance value for simplification
     :return: Simplified array of points
     """
-    M = np.array(M)
+    M = np.asarray(M)
     stack = [(0, len(M) - 1)]
     indices = [0, len(M) - 1]
 
@@ -269,7 +284,7 @@ def rdp(M, epsilon=0):
             continue
 
         dists = line_dists(segment, start, end)
-        index = np.argmax(dists)
+        index = dists.argmax()
         dmax = dists[index]
 
         if dmax > epsilon:
@@ -277,8 +292,10 @@ def rdp(M, epsilon=0):
             actual_index = index + start_idx + 1
             indices.append(actual_index)
             # Add the two new segments to the stack
-            stack.append((start_idx, actual_index))
-            stack.append((actual_index, end_idx))
+            if actual_index - start_idx > 1:
+                stack.append((start_idx, actual_index))
+            if end_idx - actual_index > 1:
+                stack.append((actual_index, end_idx))
 
     # Sort the indices and construct the result
     indices.sort()

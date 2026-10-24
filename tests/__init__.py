@@ -1,3 +1,4 @@
+import json
 import os
 import shlex
 import socket
@@ -10,12 +11,15 @@ from unittest import TestCase
 from xmlrpc.client import ServerProxy, Transport
 
 from tests.process_utils import stop_process_group
+from blenderneuron import connection
 
 
 test_hoc_file = 'tests/TestCell.hoc'
 
 
-class ProbeTransport(Transport):
+class ProbeTransport(connection.AuthTransport):
+    reply_timeout = 1
+
     def make_connection(self, host):
         connection = super().make_connection(host)
         connection.timeout = 1
@@ -43,7 +47,7 @@ class BlenderNEURONProcess:
 
     @staticmethod
     def address_file(end):
-        return os.path.join(tempfile.gettempdir(), 'BlenderNEURON-%s.address' % end)
+        return str(connection.config_directory() / ('BlenderNEURON-%s.address' % end))
 
     def wait_ready(self, connected=False):
         deadline = time.monotonic() + self.startup_timeout
@@ -53,8 +57,8 @@ class BlenderNEURONProcess:
                                    (self.executable, self.process.returncode))
             try:
                 with open(self.address_file(self.server_end)) as stream:
-                    address = stream.read()
-                with ServerProxy(address, transport=ProbeTransport()) as client:
+                    address = json.load(stream)
+                with ServerProxy(address, transport=ProbeTransport(connection.local_secret())) as client:
                     if connected:
                         ready = client.run_command(
                             'node_client = bpy.types.Object.BlenderNEURON_node.client;'
