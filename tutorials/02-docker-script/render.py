@@ -209,7 +209,12 @@ try:
     movie.render.resolution_y = settings['height']
     movie.render.resolution_percentage = 100
     movie.render.fps = settings['fps']
-    movie.render.image_settings.file_format = 'FFMPEG'
+    # Blender 5 separates video output from still-image formats. Older Blender
+    # versions (including the ARM Docker runtime) select FFmpeg as a file format.
+    if hasattr(movie.render.image_settings, 'media_type'):
+        movie.render.image_settings.media_type = 'VIDEO'
+    else:
+        movie.render.image_settings.file_format = 'FFMPEG'
     movie.render.ffmpeg.format = 'MPEG4'
     movie.render.ffmpeg.codec = 'H264'
     movie.render.filepath = str(output / 'activity.mp4')
