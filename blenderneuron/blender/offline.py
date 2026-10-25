@@ -51,7 +51,7 @@ def import_simulation_snapshot(node, snapshot, source, restoring=False):
             for root in node.root_index.values():
                 root.add_to_UI_group(group.ui_group)
         group.selected = data.get('_selected', True) if restoring else True
-        group.record_activity = True
+        group.record_activity = data['record_activity']
         for key in RECORDING_KEYS:
             setattr(group, key, data[key])
         for key, value in data.get('display', {}).items():

@@ -126,11 +126,11 @@ return_value = True
                     self.assertGreater(len(set(root['activity']['values'])), 1)
 
     def test_mpi_round_trip_and_empty_ranks(self):
-        for mode in ('Cell', 'Section', '3D Segment', 'empty', 'groups'):
+        for mode in ('Cell', 'Section', '3D Segment', 'empty', 'groups', 'mixed', 'morphology-Cell'):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
                 path, _ = self.producer(directory, mode, mpi=True)
                 groups = read_snapshot(path)['groups']
-                if mode == 'groups':
+                if mode in ('groups', 'mixed'):
                     self.assertEqual({g['name'] for g in groups}, {'Network', 'Rank0 cells', 'Rank1 cells'})
                 roots = groups[0]['roots']
                 self.assertTrue(roots[0]['name'].startswith('rank0::'))
@@ -155,7 +155,7 @@ return_value = True
                 lambda s: s.update(version=99),
                 lambda s: s.update(groups=[]),
                 lambda s: s['groups'].append(copy.deepcopy(s['groups'][0])),
-                lambda s: s['groups'][0].update(record_activity=False),
+                lambda s: s['groups'][0].update(record_activity='invalid'),
                 lambda s: s['groups'][0].pop('record_variable'),
                 lambda s: s['groups'][0]['activity'].update(times=[]),
                 lambda s: s['groups'][0].update(roots=[]),
@@ -179,6 +179,114 @@ return_value = True
                 with self.assertRaises(ValueError):
                     read_snapshot(path)
 
+    def test_morphology_only_without_initialization_or_simulation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = []
+            for level in ('Cell', 'Section', '3D Segment'):
+                path, _ = self.producer(directory, 'morphology-' + level)
+                renamed = str(Path(directory) / (level + '.bnresults'))
+                Path(path).rename(renamed)
+                paths.append(renamed)
+                data = read_snapshot(renamed)['groups'][0]
+                self.assertFalse(data['record_activity'])
+                self.assertNotIn('activity', data)
+                stack = list(data['roots'])
+                while stack:
+                    section = stack.pop()
+                    self.assertEqual(section['point_count'], 3)
+                    self.assertNotIn('activity', section)
+                    self.assertNotIn('segment_activity', section)
+                    stack.extend(section['children'])
+            mpi_path, _ = self.producer(directory, 'morphology-Section', mpi=True)
+            paths.append(mpi_path)
+            with BackgroundBlender():
+                control = CommNode('Control-Blender')
+                self.assertTrue(control.client.run_command("""
+import bpy
+from blenderneuron.results import read_snapshot
+from blenderneuron.blender.dataset import save_offline_state, restore_offline_state, clear_dataset
+node = bpy.types.Object.BlenderNEURON_node
+for path in PATHS:
+    assert bpy.ops.blenderneuron.import_simulation_results(filepath=path) == {'FINISHED'}
+    group = node.groups['Network']
+    assert not group.record_activity
+    source = read_snapshot(path)['groups'][0]
+    assert group.view is not None and len(group.roots) == len(source['roots'])
+    for root_data in source['roots']:
+        root = group.roots[root_data['name']]
+        assert root.coords == root_data['coords']
+        assert root.radii == root_data['radii']
+        assert len(root.children) == len(root_data['children']) == 1
+    assert all(len(container.curve.splines) > 0 for container in group.view.containers.values())
+    for mat in group.view.materials.values():
+        assert mat.animation_data is None
+        assert mat.node_tree.animation_data is None
+        assert 'recorded_value' not in mat
+    save_offline_state()
+    clear_dataset(node)  # Restore into fresh runtime state, as on reopening.
+    restore_offline_state(node)
+    assert not node.groups['Network'].record_activity
+    assert node.groups['Network'].view is not None
+return_value = True
+""".replace('PATHS', repr(paths))))
+
+    def test_event_recording_matches_live_and_resets_between_runs(self):
+        from neuron import h
+        from types import SimpleNamespace
+        from blenderneuron.nrn.offline import SimulationExport
+        from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
+
+        h.load_file('stdrun.hoc')
+        root = h.Section(name='event_recording_soma')
+        dend = h.Section(name='event_recording_dend')
+        dend.connect(root(1))
+        for sec in (root, dend):
+            sec.insert('pas')
+            for x in (0, 10, 20):
+                h.pt3dadd(x, 0, 0, 2, sec=sec)
+        stimulus = h.IClamp(root(0.5))
+        stimulus.delay, stimulus.dur, stimulus.amp = 0, 1, 0.05
+        node = SimpleNamespace(section_index={sec.name(): sec for sec in (root, dend)},
+                               rank_section_name=lambda name: name)
+        pc = h.ParallelContext()
+        old_dt, old_tstop = h.dt, h.tstop
+        try:
+            for level in ('Cell', 'Section', '3D Segment'):
+                with self.subTest(level=level):
+                    export = SimulationExport().add_group(
+                        'Events', [root], recording_granularity=level,
+                        recording_time_start=0.125, recording_time_end=0.875,
+                        recording_period=0.25).prepare()
+                    with tempfile.TemporaryDirectory() as directory:
+                        path = str(Path(directory) / 'before_run.bnresults')
+                        export.save(path)
+                        self.assertFalse(read_snapshot(path)['groups'][0]['record_activity'])
+                    live = NeuronRootGroup()
+                    live.from_skeletal_blender_group(export.groups['Events'].to_dict(), node)
+                    for solver in ('run', 'psolve'):
+                        h.dt, h.tstop = 0.03125, 1
+                        if solver == 'run':
+                            h.run()
+                        else:
+                            pc.set_maxstep(10)
+                            h.finitialize(-65)
+                            pc.psolve(1)
+                        with tempfile.TemporaryDirectory() as directory:
+                            path = str(Path(directory) / 'after_run.bnresults')
+                            export.save(path)
+                            self.assertTrue(read_snapshot(path)['groups'][0]['record_activity'])
+                        actual = export._local_results()[0]
+                        expected = live.to_dict(True, True, True)
+                        for key in ('variable_units', 'display'):
+                            actual.pop(key)
+                        self.assertEqual(actual, expected)
+                        times = actual['activity']['times']
+                        self.assertEqual(len(times), 4)  # No accumulation across runs.
+                        for actual_time, expected_time in zip(times, (0.125, 0.375, 0.625, 0.875)):
+                            self.assertAlmostEqual(actual_time, expected_time)
+        finally:
+            h.dt, h.tstop = old_dt, old_tstop
+
     def test_configuration_and_lifecycle_errors(self):
         from neuron import h
         from blenderneuron.nrn.offline import SimulationExport
@@ -200,16 +308,22 @@ return_value = True
         with self.assertRaises(RuntimeError):
             export.add_group('B', [])
         with tempfile.TemporaryDirectory() as directory:
-            # Saving before any simulation cannot create an empty activity file.
-            with self.assertRaises(ValueError):
-                export.save(str(Path(directory) / 'unrun.bnresults'))
+            # Saving an unrun model automatically produces morphology only.
+            path = str(Path(directory) / 'unrun.bnresults')
+            export.save(path)
+            self.assertFalse(read_snapshot(path)['groups'][0]['record_activity'])
+        # Explicitly disabled recording does not require the variable to exist.
+        disabled = SimulationExport().add_group(
+            'Morphology', [root], record_activity=False, record_variable='missing_variable').prepare()
+        self.assertFalse(hasattr(disabled.groups['Morphology'], 'collector_stim'))
+        self.assertFalse(disabled._local_results()[0]['record_activity'])
         for settings in ({'recording_period': 0}, {'recording_time_start': -1},
                          {'recording_time_end': 1, 'recording_time_start': 2},
                          {'recording_granularity': 'unknown'}, {'record_variable': ''},
-                         {'variable_units': 3}, {'display': {'unknown': 1}}):
-            export = SimulationExport().add_group('A', [root], **settings)
+                         {'variable_units': 3}, {'display': {'unknown': 1}},
+                         {'record_activity': 'invalid'}):
             with self.assertRaises(ValueError):
-                export.prepare()
+                SimulationExport().add_group('A', [root], **settings).prepare()
         with self.assertRaisesRegex(ValueError, 'root sections'):
             SimulationExport().add_group('A', [dend]).prepare()
         export = SimulationExport().add_group('A', [root]).add_group('B', [root])

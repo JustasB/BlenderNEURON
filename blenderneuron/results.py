@@ -78,12 +78,13 @@ def validate_snapshot(snapshot):
             raise ValueError('Invalid or duplicate group name')
         group_names.add(name)
         validate_display(group.get('display', {}))
-        if group.get('recording_granularity') not in RECORDING_LEVELS or not group.get('record_activity'):
-            raise ValueError('Results require activity recording settings')
+        if not isinstance(group.get('record_activity'), bool):
+            raise ValueError('Results require a boolean record_activity setting')
         validate_recording(group)
-        times = group['activity']['times']
-        if (not times or any(not math.isfinite(t) for t in times)
-                or any(b <= a for a, b in zip(times, times[1:]))):
+        recording = group['record_activity']
+        times = group['activity']['times'] if recording else []
+        if recording and (not times or any(not math.isfinite(t) for t in times)
+                          or any(b <= a for a, b in zip(times, times[1:]))):
             raise ValueError('Group %r has missing or invalid sample times' % name)
         if not group['roots']:
             raise ValueError('Group %r has no cells' % name)
@@ -121,9 +122,9 @@ def validate_snapshot(snapshot):
                 if ((parent is not None and (not isinstance(parent, (int, float)) or not 0 <= parent <= 1))
                         or section['connection_end'] not in (0, 1)):
                     raise ValueError('Invalid section connection in group ' + name)
-                if level == 'Section' or (level == 'Cell' and is_root):
+                if recording and (level == 'Section' or (level == 'Cell' and is_root)):
                     check_values(section['activity'])
-                elif level == '3D Segment':
+                elif recording and level == '3D Segment':
                     if set(section['segment_activity']) != {str(i) for i in range(count - 1)}:
                         raise ValueError('Missing segment activity in ' + section['name'])
                     for activity in section['segment_activity'].values():

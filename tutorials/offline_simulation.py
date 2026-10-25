@@ -1,6 +1,7 @@
 """Run with Python, or: mpiexec -n 2 nrniv -mpi -python tutorials/offline_simulation.py
 
 Writes simulation.bnresults in the working directory. Blender need not be running.
+For morphology only, skip the simulation block and call save() after prepare().
 """
 from neuron import h
 from blenderneuron.nrn.offline import SimulationExport
@@ -34,6 +35,7 @@ export.add_group(
 )
 export.prepare()  # All MPI ranks call this, including ranks with no local cells.
 
+# Optional simulation block: skip this block to save morphology without activity.
 # Your simulation code owns initialization and execution.
 pc.set_maxstep(10)
 h.dt = 0.025
@@ -41,5 +43,6 @@ h.finitialize(-65)
 pc.psolve(10)
 
 # All ranks contribute; only rank 0 writes the combined file. No rerun occurs.
+# With no collected samples, save() automatically writes morphology only.
 export.save('simulation.bnresults')
 pc.done()

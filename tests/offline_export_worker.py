@@ -29,13 +29,15 @@ def main(path, mode):
         stimulus.delay, stimulus.dur, stimulus.amp = 0, 1, 0.05 * (rank + 1)
     else:
         root = None
+    morphology_only = mode.startswith('morphology-')
+    requested_level = mode.split('-', 1)[1] if morphology_only else mode
     export = SimulationExport(pc)
     for level in ('Cell', 'Section', '3D Segment'):
         # Each cell belongs to one group, matching live group membership.
         # Independent exports exercise all recording granularities.
-        if level != mode and mode in ('Cell', 'Section', '3D Segment'):
+        if level != requested_level and requested_level in ('Cell', 'Section', '3D Segment'):
             continue
-        if mode not in ('Cell', 'Section', '3D Segment') and level != 'Cell':
+        if requested_level not in ('Cell', 'Section', '3D Segment') and level != 'Cell':
             continue
         variable = 'missing_variable' if mode == 'missing' and rank == int(pc.nhost()) - 1 else 'v'
         export.add_group('Network', [] if root is None else [root], recording_granularity=level,
@@ -48,18 +50,19 @@ def main(path, mode):
         export = SimulationExport(pc)
         if rank == 0:
             export.add_group('Network', [root])
-    if mode == 'groups':
+    if mode in ('groups', 'mixed'):
         extra = h.Section(name='Extra.soma')
         extra.L, extra.diam = 10, 2
         extra.insert('pas')
         h.pt3dadd(0, 100, 0, 2, sec=extra)
         h.pt3dadd(10, 100, 0, 2, sec=extra)
-        export.add_group('Rank%d cells' % rank, [extra])
+        export.add_group('Rank%d cells' % rank, [extra], record_activity=mode != 'mixed')
     export.prepare()
-    pc.set_maxstep(10)
-    h.dt = 0.025
-    h.finitialize(-65)
-    pc.psolve(1.0 if mode != 'times' or rank == 0 else 0.5)
+    if not morphology_only:
+        pc.set_maxstep(10)
+        h.dt = 0.025
+        h.finitialize(-65)
+        pc.psolve(1.0 if mode != 'times' or rank == 0 else 0.5)
     before = h.t
     export.save(path + '/missing' if mode == 'write' else path)
     assert h.t == before, 'Saving reran or advanced the simulation'

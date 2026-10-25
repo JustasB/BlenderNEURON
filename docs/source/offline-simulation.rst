@@ -1,7 +1,7 @@
 Offline Simulation Results
 ==========================
 
-Run a NEURON script, save the cell morphology and recorded activity to a file,
+Build a NEURON model, save its cell morphology and optional recorded activity to a file,
 then import that file into Blender. Blender does not need to be running during
 the simulation. This works for a local script or an MPI job, including jobs on
 a remote cluster. No live connection, pairing, or SSH forwarding is needed.
@@ -41,11 +41,11 @@ Record and Save Results
       h.finitialize(-65)
       h.continuerun(100)
 
-   ``prepare()`` installs recording vectors. It does not initialize or run the
-   model. Configure it before ``finitialize`` and keep the export object and
-   model cells alive throughout the run. Keep morphology fixed during recording.
-   Recording vectors retain the latest initialized run; the start/end window is
-   applied when saving.
+   ``prepare()`` installs the same NetStim/NetCon callback collectors used by
+   live imports. It does not initialize or run the model. Configure it before
+   ``finitialize`` and keep the export object and model cells alive throughout
+   the run. Keep morphology fixed during recording. Each initialization clears
+   the previous traces; samples are collected within the configured start/end window.
 
 4. After the simulation finishes, save the results:
 
@@ -55,11 +55,41 @@ Record and Save Results
 
    Saving collects the recorded samples without advancing or rerunning the
    simulation. The file contains group membership, full cell morphology,
-   recording settings, activity, and units. Saving before recording any samples
-   fails rather than writing an empty results file.
+   recording settings, units, and any collected activity. If a group has no
+   samples, it is saved automatically as morphology only.
 
 For a complete example, see ``tutorials/offline_simulation.py`` in the repository.
 Run it with ``python tutorials/offline_simulation.py``.
+
+************************
+Save Only the Morphology
+************************
+
+Call ``save()`` immediately after ``prepare()`` to save cells without initializing
+or running NEURON. No extra option is needed:
+
+.. code-block:: python
+
+   export = SimulationExport()
+   export.add_group('Network', roots=local_roots)
+   export.prepare()
+   export.save('morphology.bnresults')
+
+This writes the full section hierarchy, coordinates, and radii without activity
+arrays. Import the file with the same 'Import Saved Simulation Results...' button:
+Blender builds the cells without animation data.
+
+If you later run the simulation and call ``save()`` again on the same exporter,
+the new file includes the collected activity automatically. The choice is made
+per group on each save. A group with no samples in its recording window saves
+morphology only; a file can contain both recorded and morphology-only groups.
+
+Optionally pass ``record_activity=False`` to ``add_group()`` to disable recording
+for a group entirely. No activity collectors are installed for that group, and
+the recording variable need not exist in the model.
+
+Morphology-only exports also work with MPI; every rank still calls ``prepare()``
+and ``save()``, but the simulation step can be skipped.
 
 ************
 Run with MPI
@@ -103,7 +133,7 @@ Import into Blender
 1. Start Blender with the BlenderNEURON add-on
 2. In the BlenderNEURON sidebar, expand 'Import / Export'
 3. Press 'Import Saved Simulation Results...' and select your ``.bnresults`` file
-4. Scrub the timeline to view the recorded activity
+4. View the morphology, or scrub the timeline if the file contains recorded activity
 
    - Use 'Cell Group Options' to change interaction level, colors, and brightness
    - After changing display options, press 'Show Imported Groups'
