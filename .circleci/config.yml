@@ -25,6 +25,38 @@ jobs:
           name: Standard-library connection security tests
           command: python tests/test_connection_security.py
           shell: powershell.exe -ExecutionPolicy Bypass
+  docker-tutorial:
+    # A VM provides a local Docker daemon, so repository/output bind mounts work.
+    machine:
+      image: ubuntu-2404:current
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Build the repository Docker image
+          command: ./scripts/build.sh
+      - run:
+          name: Render the headless tutorial inside Docker
+          command: |
+            mkdir -p "$PWD/tutorials/02-docker-script/output"
+            docker run --rm --init \
+              -v "$PWD:/BlenderNEURON:ro" \
+              -v "$PWD/tutorials/02-docker-script/output:/output" \
+              -w /BlenderNEURON blenderneuron:latest \
+              python -u tutorials/02-docker-script/run.py \
+              --width 320 --height 240 --frames 60 --samples 4 --fps 20 --timeout 600
+      - run:
+          name: Make tutorial artifacts readable
+          when: always
+          command: |
+            # The container writes as root, including private run directories.
+            # Let CircleCI collect the results and failure logs as its normal user.
+            if [ -d tutorials/02-docker-script/output ]; then
+              sudo chown -R "$(id -u):$(id -g)" tutorials/02-docker-script/output
+            fi
+      - store_artifacts:
+          path: tutorials/02-docker-script/output
+          destination: headless-tutorial
   build-and-test:
     # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
@@ -67,4 +99,5 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build-and-test
+      - docker-tutorial
       - windows-connections
