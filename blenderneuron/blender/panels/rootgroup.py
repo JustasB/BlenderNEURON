@@ -58,7 +58,8 @@ class CellGroupsPanel(AbstractBlenderNEURONPanel, Panel):
         """
         return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
                bpy.types.Object.BlenderNEURON_node is not None and \
-               bpy.types.Object.BlenderNEURON_node.client is not None
+               (bool(bpy.types.Object.BlenderNEURON_node.groups) or
+                bpy.types.Object.BlenderNEURON_node.client is not None)
 
     def draw(self, context):
         scene = context.scene
@@ -90,7 +91,9 @@ class GroupCellsPanel(AbstractBlenderNEURONPanel, Panel):
         self.layout.operator("blenderneuron.get_cell_list_from_neuron", text="Refresh NEURON Cell List",
                              icon="FILE_REFRESH")
 
-        self.layout.template_list("BLENDERNEURON_UL_CellListWidget", "",
+        cells = self.layout.column()
+        cells.enabled = not getattr(self.node, "offline_results", False)
+        cells.template_list("BLENDERNEURON_UL_CellListWidget", "",
                                   group, "root_entries",
                                   group, "root_entries_index",
                                   rows=5)
@@ -110,10 +113,17 @@ class ImportPanel(AbstractBlenderNEURONPanel, Panel):
 
     @classmethod
     def poll(cls, context):
-        return AbstractBlenderNEURONPanel.groups_exist(context)
+        return True
 
     def draw(self, context):
         scene = context.scene
+        self.layout.operator("blenderneuron.import_simulation_results",
+                             text="Import Saved Simulation Results...", icon="IMPORT")
+        node = getattr(bpy.types.Object, "BlenderNEURON_node", None)
+        if node is None or not node.groups:
+            return
+        if getattr(node, "offline_results", False):
+            self.layout.label(text="Offline simulation results")
 
         self.layout.operator("blenderneuron.import_groups", text="Import Cell Groups to Blender",
                              icon="FORWARD")
@@ -186,15 +196,20 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
         col = self.layout
         col.separator()
-        col.label(text="Recording Settings:")
+        offline = getattr(self.node, "offline_results", False)
+        col.label(text="Recorded Settings:" if offline else "Recording Settings:")
         col = self.layout.box().column()
         row = col.split(factor=0.5)
+        row.enabled = not offline
         row.label(text="Record Activity")
         row.prop(group, "record_activity", text='')
 
         if group.record_activity:
             col = col.column()
             col.enabled = group.record_activity
+            recording = col
+            col = col.column()
+            col.enabled = not offline
             col.label(text='Record from Each:')
             col.row().prop(group, "recording_granularity", expand=True)
             col.separator()
@@ -215,6 +230,7 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             row.label(text='Sampling Period:')
             row.prop(group, "recording_period", text="")
 
+            col = recording
             row = col.split(factor=0.5)
             row.label(text='Simplification Tolerance:')
             row.prop(group, "simplification_epsilon", text="")
@@ -447,10 +463,15 @@ class SimulationSettingsPanel(AbstractBlenderNEURONPanel, Panel):
         """
         return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
                bpy.types.Object.BlenderNEURON_node is not None and \
-               bpy.types.Object.BlenderNEURON_node.client is not None
+               (bpy.types.Object.BlenderNEURON_node.client is not None or
+                getattr(bpy.types.Object.BlenderNEURON_node, "offline_results", False))
 
     def draw(self, context):
         settings = self.get_sim_settings(context)
+        if getattr(self.node, "offline_results", False):
+            self.layout.prop(settings, "frames_per_ms", text="Blender frames per millisecond")
+            self.layout.label(text="Simulation settings were set during recording")
+            return
 
         col = self.layout
         row = col.row()

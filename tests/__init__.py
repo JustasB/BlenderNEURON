@@ -63,7 +63,7 @@ class BlenderNEURONProcess:
                         ready = client.run_command(
                             'node = getattr(bpy.types.Object, "BlenderNEURON_node", None);'
                             'node_client = getattr(node, "client", None);'
-                            'return_value = node_client is not None and node_client.ping() == 1')
+                            'return_value = getattr(node, "offline_results", False) or (node_client is not None and node_client.ping() == 1)')
                     else:
                         ready = client.ping() == 1
                     if ready:

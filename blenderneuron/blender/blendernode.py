@@ -10,6 +10,28 @@ class BlenderNode(CommNode):
         super(BlenderNode, self).__init__("Blender", *args, **kwargs)
 
     @property
+    def offline_results(self):
+        from blenderneuron.blender.dataset import is_offline
+        return is_offline()
+
+    def try_setup_client(self, warn=True):
+        if self.offline_results:
+            self.client = None
+            self.client_address = None
+            return
+        old_peer = getattr(self, '_last_live_peer', None)
+        disconnected = getattr(self, 'client', None) is None
+        result = super().try_setup_client(warn=warn)
+        if self.client is not None:
+            transport = vars(self.client).get('_ServerProxy__transport')
+            peer = (self.client_address, getattr(transport, 'epoch', None))
+            imported = any(group.state == 'imported' for group in self.groups.values())
+            if old_peer is not None and imported and (disconnected or peer != old_peer):
+                self.export_requires_confirmation = True
+            self._last_live_peer = peer
+        return result
+
+    @property
     def ui_properties(self):
         return bpy.data.scenes[0].BlenderNEURON
 
@@ -33,6 +55,8 @@ class BlenderNode(CommNode):
         return group
 
     def update_root_index(self):
+        from blenderneuron.blender.dataset import require_live
+        require_live(self)
         # Keep track which roots have been removed from NRN
         roots_to_delete = set(self.root_index.keys())
 
@@ -101,6 +125,8 @@ class BlenderNode(CommNode):
         return nrn_groups
 
     def import_groups_from_neuron(self, group_list):
+        from blenderneuron.blender.dataset import require_live
+        require_live(self)
 
         nrn_groups = self.get_group_data_from_neuron(group_list)
 
@@ -117,6 +143,9 @@ class BlenderNode(CommNode):
 
             # Update blender node group with the data received from NRN
             node_group.from_full_NEURON_group(nrn_group)
+
+        if all(group in group_list for group in self.groups.values() if group.state == 'imported'):
+            self.export_requires_confirmation = False
 
     def get_selected_groups(self):
         return [group for group in self.groups.values() if group.selected]

@@ -1,4 +1,4 @@
-# Performance Figures A–J
+# Reproducing the import/export and confinement figures
 
 The three retained aggregates contain 340 measurements: 68 conditions, five
 independent Blender processes per condition. Dots/bar heights are medians;
@@ -35,9 +35,7 @@ With matplotlib installed:
 python notebooks/performance/plot_figures_a_to_j.py
 ```
 
-Alternatively open `performance_evaluation.ipynb` and run its cells. The final
-cell produces `figures/figures_a_to_j.png`, `.svg`, and `.pdf`, embedding the
-PNG in the notebook for GitHub viewing.
+The plotter writes `figures/figures_a_to_j.png`, `.svg`, and `.pdf`.
 
 ## Rerun measurements
 
@@ -167,8 +165,8 @@ Per-run JSON/logs and regenerated `.blend` caches can be discarded afterward.
 
 ## File Organization
 
-`plot_figures_a_to_j.py` and `performance_evaluation.ipynb` are the only figure
-entry points. `figures/` contains only the final A–J PNG, SVG, and PDF.
+`plot_figures_a_to_j.py` is the import/export A–J figure entry point. `figures/` contains the final A–J PNG, SVG, and PDF, plus the approved
+confinement panels described below.
 This README is the single methodology and reproduction guide.
 
 The three `results/*/results.json` files are required inputs to the final
@@ -180,3 +178,118 @@ are needed to regenerate those measurements through production add-on code.
 Archives, exploratory artifacts, standalone panel figures, and redundant
 per-run JSON/logs have been removed. Retained aggregates are sufficient for
 plotting and resuming the final benchmark runs.
+
+## Confinement figure: approved panels A–D
+
+These four panels are the accepted visual baseline for the separate confinement
+figure. They are independent of the existing performance A–J figure above.
+
+| Panel | Case | Approved file |
+| --- | --- | --- |
+| A | Original cell, before confinement | `figures/confinement_panels/A_baseline.png` |
+| B | 5° maximum bend, 100 µm maximum piece length | `figures/confinement_panels/B_5deg_100um.png` |
+| C | 10°, 75 µm | `figures/confinement_panels/C_10deg_75um.png` |
+| D | 15°, 50 µm | `figures/confinement_panels/D_15deg_50um.png` |
+
+All use the same 16-section binary-tree morphology and seed 0. The source +X
+trunk is mapped to +Z, rotated 80° around world Z, then +50° around world Y
+(leaning right), about the soma center. The soma is placed at (−200, 0, 10) µm.
+The planes are Z = 0 and 100 µm; height fractions 0–1 target the entire slab.
+Each confinement trial starts from an identical original NEURON cell.
+
+The style uses a blue cell, white background, gray target band, front
+orthographic camera, and matching top-down inset looking along −Z. Front
+renders are cropped 30% at the top and 20% at the right. Insets occupy the upper
+left, shifted inward to keep axis labels within the figure margin. Target Zone
+is vertically centered, the top caption is 10 µm above its boundary, and the
+bottom caption is 20 µm below its boundary. No changes to this approved layout
+are needed when adding the remaining metric panels.
+
+`confinement_config.py` is the shared source of the pose, setup version,
+conditions, panel mapping, and layout. `confinement_setup.py` constructs and
+styles the scene. `confinement.py` runs production import/confinement/export
+and records point/cable containment plus NEURON area, length, and volume.
+The existing `tests/test_layer_confinement.py` also asserts total NEURON surface
+area is preserved through confinement/export within 0.001%.
+
+### Retained inputs and regeneration
+
+`results/confinement_panels/` contains the three-trial `results.json`, eight
+uncropped front/top source PNGs (including baseline), and `manifest.json` with
+panel mapping, setup/layout, and SHA-256 hashes of the four approved PNGs.
+This is sufficient to audit or recompose A–D. Superseded confinement scenes,
+parameter examples, intermediate figures, per-run JSON/logs, and exploratory
+sweeps have been removed.
+
+To regenerate measurements and raw renders, start the Docker environment as
+shown above and run inside it:
+
+```sh
+python notebooks/performance/render_confinement_examples.py
+```
+
+Then compose the four approved-layout panels on the host with matplotlib:
+
+```sh
+python notebooks/performance/confinement_insets.py
+```
+
+The renderer leaves the aggregate and eight raw images in
+`results/confinement_panels/`; the compositor writes the four canonical PNGs
+and updates the manifest. It never creates the superseded iteration folders.
+The accepted images are retained byte-for-byte from the last reviewed layout.
+
+The sensitivity sweep uses angles 5, 10, 15, and 25 degrees crossed
+with maximum section lengths 200, 100, 75, 50, and 25 µm, each with seeds 0–4.
+Every trial starts from identical original geometry. Run `confinement.py` inside
+Docker to collect `results/confinement_z_up/` (100 trials; no renders unless
+`--render` is supplied), then `plot_confinement_heatmap.py` on the host for
+standalone panel E (PNG/PDF/SVG) and `summary.csv`. The primary metric is the
+seed-averaged percentage of native dendrite n3d points outside the inclusive
+Z=0–100 µm target zone. Zero means every measured point is inside. Splitting
+can change point density, so the CSV also reports exact polyline cable-length
+outside percentages and uniformly sampled point percentages, with seed SD,
+minimum and maximum for each. Cable length means the summed lengths of all
+dendrite sections, including partial segments crossing the boundaries.
+Object counts and confinement times are retained to assess computational cost.
+Heat-map labels report mean ± sample standard deviation across five seeds;
+colors encode the mean. SD describes trial-to-trial variability, not the
+uncertainty of the mean. Individual trial JSON files and the aggregate retain
+each seed. Existing cached trials outside the current grid are excluded from
+the aggregate and plot; matching trials are reused.
+
+Run `plot_confinement.py` on the host to assemble the complete figure. The final
+plotter uses the approved A–D images directly, with containment heatmap E and
+runtime panel F, writing `confinement_a_to_f` PNG/PDF/SVG. The two-row,
+three-column layout places A/B above C/D in the left two columns, with E above
+F in the right column.
+Both sweep and panel setup versions must match; exploratory measurements cannot
+be silently reused.
+
+### Runtime (panel F)
+
+Run `python notebooks/performance/plot_confinement.py` to regenerate the final
+figure. `plot_confinement_runtime.py` and `plot_confinement_heatmap.py` provide
+the metric calculations and can optionally export standalone panels and CSV summaries. The plot reports mean ± sample SD for
+`setup_seconds + confine_seconds`, pooled over four angles × five seeds
+(20 trials) at each maximum section length. The blue curve reports mean ±
+sample SD; the CSV also includes minimum and maximum timings. The orange curve
+uses the right axis to show the maximum absolute whole-cell NEURON surface-area
+error across those same 20 trials: `100 * abs(post - original) / original`,
+after confinement and export back to NEURON. This maximum is also saved in the CSV.
+Setup includes construction/splitting of the confinement view; confinement
+includes the final Blender view-layer update. Import, rendering, export and
+NEURON validation are excluded. Export timings remain separately in the CSV.
+The top axis shows the measured number of Blender objects after splitting,
+which is identical across angles/seeds at each length in this dataset.
+All timings use the existing Docker trials on this machine; the runs were
+collected in batches rather than randomized as a dedicated timing benchmark.
+Seed SD therefore includes timing noise and run-order effects. These results
+apply to the 16-section test morphology; they do not establish scaling to
+large cells or groups. `plot_confinement.py` uses this runtime panel in A–F.
+
+Only the two final figures, their source images/measurement aggregates, and
+scripts required to regenerate them are retained. Confinement per-trial JSON
+files duplicate the aggregate and are omitted; the sweep resumes directly from
+`results/confinement_z_up/results.json`. To collect fresh measurements, use a
+new `--results-dir`. Standalone metric exports are optional generated outputs.

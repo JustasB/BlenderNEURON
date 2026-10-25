@@ -13,6 +13,7 @@ Welcome to BlenderNEURON documentation. To get started, please follow the sectio
    installation
    getting-started
    remote-connections
+   offline-simulation
 
    reference
 

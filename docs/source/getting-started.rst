@@ -214,4 +214,5 @@ Confine Cells between Layers
 Remote connections and MPI
 **************************
 
-See :doc:`remote-connections` for MPI, SSH tunnels, pairing, and restart recovery.
+See :doc:`remote-connections` for Docker, SSH tunnels, and pairing.
+For script-based simulations and MPI jobs, see :doc:`offline-simulation`.

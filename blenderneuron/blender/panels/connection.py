@@ -12,6 +12,16 @@ class NodesPanel(AbstractBlenderNEURONPanel, bpy.types.Panel):
         node = self.node
         props = context.scene.BlenderNEURON_properties
         layout = self.layout
+        from blenderneuron.blender.dataset import is_offline, SOURCE
+        if is_offline():
+            import os
+            layout.box().label(text='Offline Results: ' + os.path.basename(context.scene.get(SOURCE, '')))
+            if props.connection_message:
+                layout.label(text=props.connection_message)
+            layout.operator('blenderneuron.switch_to_live', text='Switch to Live NEURON...', icon='PLAY')
+            layout.operator('blenderneuron.add_neon_effect', text='Add Neon Effect', icon='PARTICLES')
+            return
+        layout.label(text='Live NEURON')
         running = node is not None and node.server is not None
         connected = running and node.client is not None
         status = layout.box()

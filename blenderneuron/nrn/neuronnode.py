@@ -35,6 +35,7 @@ class NeuronNode(CommNode):
             self.server.register_function(self.get_roots)
 
             self.server.register_function(self.set_sim_params)
+            self.server.register_function(self.run_simulation)
             self.server.register_function(self.get_sim_params)
 
             self.server.register_function(self.initialize_groups)
@@ -141,6 +142,9 @@ class NeuronNode(CommNode):
             return self._discover_local_cells()
         if operation == "set_mpimap":
             self.mpimap = payload
+            return None
+        if operation == "run_simulation":
+            self._run_simulation_local()
             return None
         if operation == "get_roots":
             return self._get_roots_local()
@@ -270,9 +274,33 @@ class NeuronNode(CommNode):
         else:
             return result
 
-    def _get_group_dicts_local(self, run_simulation):
-        if run_simulation and any([g.record_activity for g in self.groups.values()]):
+    def run_simulation(self):
+        """Initialize and run, dispatching to every rank under the coordinator.
+
+        Without the coordinator, MPI callers must call this on every rank.
+        """
+        if self._uses_mpi_coordinator():
+            self._mpi_request("run_simulation", None)
+        else:
+            self._run_simulation_local()
+        return True
+
+    def _run_simulation_local(self):
+        if self.parallel_ctx is not None and int(self.parallel_ctx.nhost()) > 1:
+            self.parallel_ctx.set_maxstep(1.0)
+            h.stdinit()
+            self.parallel_ctx.psolve(h.tstop)
+        else:
             h.run()
+
+    def _get_group_dicts_local(self, run_simulation):
+        if run_simulation:
+            record_activity = any(g.record_activity for g in self.groups.values())
+            if self.parallel_ctx is not None and int(self.parallel_ctx.nhost()) > 1:
+                # Even ranks with no recorded groups must enter the solver.
+                record_activity = self.parallel_ctx.allreduce(int(record_activity), 2)
+            if record_activity:
+                self._run_simulation_local()
         return self._get_local_group_dicts()
 
     def _get_local_group_dicts(self):

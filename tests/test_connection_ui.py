@@ -45,6 +45,14 @@ class TestConnectionUI(BlenderTestCase):
                 from blenderneuron import connection
                 node = bpy.types.Object.BlenderNEURON_node
                 props = bpy.context.scene.BlenderNEURON_properties
+                # Blender forbids scene writes from property getters during UI drawing.
+                from blenderneuron.blender.properties.connection import BlenderNEURONProperties
+                class ReadOnlyConfig:
+                    load_config = BlenderNEURONProperties.load_config
+                    get_config_prop = BlenderNEURONProperties.get_config_prop
+                    def __setattr__(self, name, value):
+                        raise AssertionError('Configuration reads must not write scene data')
+                assert ReadOnlyConfig().get_config_prop('default_port|Blender') == props.server_port
                 props.connection_mode = 'MANUAL'
                 neuron_address = connection.load('BlenderNEURON-NEURON.address', '')
                 node.configure_connection(mode='manual', peer_address=neuron_address)

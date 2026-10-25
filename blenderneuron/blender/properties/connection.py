@@ -84,17 +84,17 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
         config_file = os.path.join(package_dir, 'config.json')
 
         with open(config_file, "r") as f:
-            self.config = json.load(f)[0]
+            return json.load(f)[0]
 
-    def save_config(self):
+    def save_config(self, config):
         package_dir = os.path.dirname(os.path.abspath(inspect.getfile(blenderneuron)))
         config_file = os.path.join(package_dir, 'config.json')
 
         with open(config_file, "w") as f:
-            json.dump([self.config], f, indent=4, sort_keys=True)
+            json.dump([config], f, indent=4, sort_keys=True)
 
     def set_config_prop(self, prop_path, value):
-        self.load_config()
+        config = self.load_config()
 
         from blenderneuron import connection
         if prop_path.startswith(('default_ip|', 'default_port|')):
@@ -121,15 +121,15 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
                 if node is not None:
                     node.connection_settings = settings
             return
-        current = self.config
+        current = config
         for prop in prop_path.split('|')[0:-1]:
             current = current[prop]
         current[prop_path.split('|')[-1]] = value
 
-        self.save_config()
+        self.save_config(config)
 
     def get_config_prop(self, prop_path):
-        self.load_config()
+        config = self.load_config()
         from blenderneuron import connection
         settings = connection.load('Blender-connection.json', {'mode': 'local'})
         if settings['mode'] == 'manual':
@@ -148,7 +148,7 @@ class BlenderNEURONProperties(bpy.types.PropertyGroup):
             return values[prop_path]
 
 
-        current = self.config
+        current = config
         for prop in prop_path.split('|'):
             current = current[prop]
 

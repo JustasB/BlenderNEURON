@@ -31,10 +31,10 @@ class NeuronRootGroup(RootGroup):
             if section.name != '':
                 self.roots[section.name] = section
 
-        # Clear previously recorded activity on h.run()
+        # Clear recorded activity whenever the simulation is initialized.
         self.fih = h.FInitializeHandler(self.prepare_activity)
 
-        # Setup to collect activity during h.run()
+        # Set up activity collection for the next simulation.
         self.create_collector()
 
     def prepare_activity(self):

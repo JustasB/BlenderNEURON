@@ -24,8 +24,12 @@ def connected(node):
 
 node = MainThreadNode(on_client_connected=connected)
 bpy.types.Object.BlenderNEURON_node = node
-bpy.context.scene.BlenderNEURON.clear()
-if node.client is not None:
+if not node.offline_results:
+    bpy.context.scene.BlenderNEURON.clear()
+if node.offline_results:
+    from blenderneuron.blender.dataset import restore_offline_state
+    restore_offline_state(node)
+elif node.client is not None:
     node.add_group()
     node.add_synapse_set()
 try:

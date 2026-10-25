@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import (Operator)
-from bpy_extras.io_utils import ExportHelper
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 import numpy as np
 
 from blenderneuron.blender import BlenderNodeClass
@@ -21,6 +21,7 @@ class CellGroupOperatorAbstract(BlenderNodeClass):
         """
         return hasattr(bpy.types.Object, "BlenderNEURON_node") and \
                bpy.types.Object.BlenderNEURON_node is not None and \
+               not getattr(bpy.types.Object.BlenderNEURON_node, "offline_results", False) and \
                bpy.types.Object.BlenderNEURON_node.client is not None
 
 
@@ -66,7 +67,8 @@ class GetCellListFromNeuronOperator(Operator, CellGroupOperatorAbstract):
         """
         Checks if there are any cell groups
         """
-        return len(bpy.types.Object.BlenderNEURON_node.groups) > 0
+        return (CellGroupOperatorAbstract.poll(context)
+                and len(bpy.types.Object.BlenderNEURON_node.groups) > 0)
 
     def execute(self, context):
 
@@ -173,10 +175,10 @@ class ShowShapePlotOperator(Operator, CellGroupOperatorAbstract):
 class InitAndRunNeuronOperator(Operator, CellGroupOperatorAbstract):
     bl_idname = "blenderneuron.init_and_run_neuron"
     bl_label = "Init & Run NEURON"
-    bl_description = "Initializes and runs the NEURON simulation (i.e. `h.run()`)"
+    bl_description = "Initializes and runs the NEURON simulation on all participating ranks"
 
     def execute(self, context):
-        self.client.run_command("h.run()")
+        self.client.run_simulation()
 
         # Update the current time
         bpy.ops.blenderneuron.sim_settings_from_neuron()
@@ -252,11 +254,42 @@ class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
     bl_label = "Export Group Data"
     bl_description = "Exports cell group data (morhology) to NEURON"
 
+    confirm_reconnected: bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'})
+
+    confirmed_peer: bpy.props.StringProperty(options={'SKIP_SAVE'})
+
+    def invoke(self, context, event):
+        if not self.node.test_connection():
+            self.report({'ERROR'}, 'NEURON is disconnected. Reconnect before exporting.')
+            return {'CANCELLED'}
+        if getattr(self.node, 'export_requires_confirmation', False):
+            self.confirm_reconnected = True
+            self.confirmed_peer = repr(getattr(self.node, '_last_live_peer', None))
+            return context.window_manager.invoke_props_dialog(self, width=540)
+        return self.execute(context)
+
+    def draw(self, context):
+        self.layout.label(text='NEURON reconnected since these cells were imported.')
+        self.layout.label(text='The running model may differ. Export the retained cell changes?')
+
     @classmethod
     def poll(cls, context):
-        return BlenderNodeClass.imported_groups_exist(context)
+        return (BlenderNodeClass.imported_groups_exist(context)
+                and not getattr(bpy.types.Object.BlenderNEURON_node, "offline_results", False)
+                and bpy.types.Object.BlenderNEURON_node.client is not None)
 
     def execute(self, context):
+        from blenderneuron.blender.dataset import require_live
+        require_live(self.node)
+        # A stale HTTP client can reconnect transparently after a process restart.
+        # Refresh the authenticated peer identity before sending any morphology.
+        if not self.node.test_connection():
+            self.report({'ERROR'}, 'NEURON is disconnected. Reconnect before exporting.')
+            return {'CANCELLED'}
+        peer_changed = self.confirmed_peer and self.confirmed_peer != repr(getattr(self.node, '_last_live_peer', None))
+        if getattr(self.node, 'export_requires_confirmation', False) and (not self.confirm_reconnected or peer_changed):
+            self.report({'ERROR'}, 'Confirm export after reconnecting to NEURON.')
+            return {'CANCELLED'}
 
         blender_groups = [group.to_dict(
                               include_root_children=True,
@@ -265,6 +298,7 @@ class ExportGroupsOperator(Operator, CellGroupOperatorAbstract):
                           if group.selected]
 
         self.client.update_groups(self.node.compress(blender_groups))
+        self.node.export_requires_confirmation = False
 
         return{'FINISHED'}
 
@@ -375,6 +409,8 @@ class CreateSynapsesOperator(Operator, CellGroupOperatorAbstract):
     @classmethod
     def poll(cls, context):
 
+        if not CellGroupOperatorAbstract.poll(context):
+            return False
         settings = context.scene.BlenderNEURON.synapse_set
 
         # Enable only when two different groups are selected
@@ -475,3 +511,43 @@ class AddNeonEffectOperator(Operator, BlenderNodeClass):
 
 
 
+
+
+class ImportSimulationResultsOperator(Operator, ImportHelper, BlenderNodeClass):
+    bl_idname = "blenderneuron.import_simulation_results"
+    bl_label = "Import Saved Simulation Results"
+    bl_description = ("Import a .bnresults file saved by "
+                      "blenderneuron.nrn.offline.SimulationExport.save(), "
+                      "replacing the currently imported cells and activity")
+    filename_ext = ".bnresults"
+    filter_glob: bpy.props.StringProperty(default="*.bnresults", options={'HIDDEN'})
+
+    replace_live: bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'})
+
+    def draw(self, context):
+        self.layout.label(text='This will replace the current cells and switch to offline results.')
+        self.layout.label(text='Unsaved cell edits will be lost. Continue?')
+
+    def execute(self, context):
+        from blenderneuron.blender.offline import import_simulation_snapshot
+        from blenderneuron.results import read_snapshot
+        try:
+            # Reject bad files before starting a node or clearing existing groups.
+            snapshot = read_snapshot(self.filepath)
+            from blenderneuron.blender.dataset import is_offline
+            has_live_data = (not is_offline() and self.node is not None
+                             and (self.node.client is not None or bool(self.node.groups)))
+            if has_live_data and not self.replace_live:
+                if not self.options.is_invoke:
+                    self.report({'ERROR'}, 'Confirm replacement of the live dataset before importing offline results.')
+                    return {'CANCELLED'}
+                self.replace_live = True
+                return context.window_manager.invoke_props_dialog(self, width=560)
+            if self.node is None:
+                from blenderneuron.blender.blendernode import BlenderNode
+                self.node = BlenderNode()
+            import_simulation_snapshot(self.node, snapshot, self.filepath)
+        except (ValueError, OSError) as error:
+            self.report({'ERROR'}, str(error))
+            return {'CANCELLED'}
+        return {'FINISHED'}

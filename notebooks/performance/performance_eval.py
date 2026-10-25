@@ -6,7 +6,7 @@ inside the project's Docker image, where Blender is available::
 
     blender --background --python notebooks/performance/performance_eval.py -- --quick
 
-The module is also importable by ``performance_evaluation.ipynb``.  Blender is
+The module is also importable by the figure measurement runners. Blender is
 imported lazily so the notebook can load and plot already-recorded JSON on a
 normal Python kernel.
 """

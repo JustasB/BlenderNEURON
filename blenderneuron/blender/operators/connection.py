@@ -26,9 +26,16 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
         )
 
         # Clear existing UI groups (if any, eg. saved)
-        context.scene.BlenderNEURON.clear()
+        if not self.node.offline_results:
+            context.scene.BlenderNEURON.clear()
 
-        if self.client is not None:
+        if self.node.offline_results:
+            from blenderneuron.blender.dataset import restore_offline_state
+            try:
+                restore_offline_state(self.node)
+            except (ValueError, RuntimeError) as error:
+                context.scene.BlenderNEURON_properties.connection_message = str(error)
+        elif self.client is not None:
             # Add a cell group (will contain all root sections by default)
             self.node.add_group()
 
@@ -161,6 +168,9 @@ class ConnectionSettingsOperator(bpy.types.Operator, BlenderNodeClass):
                 context.window_manager.clipboard = NEURON_PAIRING_COMMAND
                 self.report({'INFO'}, 'Python command copied. Run it in your NEURON Python session.')
             elif self.action in {'CONNECT', 'RESTART'}:
+                from blenderneuron.blender.dataset import is_offline
+                if is_offline():
+                    raise ValueError('Switch to live mode before connecting to NEURON.')
                 if node is None:
                     bpy.ops.blenderneuron.node_start()
                     node = self.node
@@ -220,7 +230,7 @@ NEURON_PAIRING_COMMAND = (
 )
 
 
-def draw_connection_setup(layout, context, node):
+def draw_connection_setup(layout, context, node, dialog=None):
     props = context.scene.BlenderNEURON_properties
     layout.label(text='Where is NEURON running?')
     layout.prop(props, 'connection_mode', expand=True)
@@ -266,7 +276,7 @@ def draw_connection_setup(layout, context, node):
         advanced.label(text='Not currently listening.')
     if props.connection_mode == 'MANUAL':
         advanced.prop(props, 'server_ip', text='Listen address')
-        advanced.prop(props, 'fixed_listen_port')
+        advanced.prop(dialog if dialog is not None else props, 'fixed_listen_port')
         if props.fixed_listen_port:
             advanced.prop(props, 'server_port', text='Fixed port')
         else:
@@ -301,7 +311,19 @@ class ConnectDialogOperator(bpy.types.Operator, BlenderNodeClass):
     bl_label = 'Connect to NEURON'
     bl_description = 'Choose where NEURON runs and set up a remembered connection'
 
+    def update_fixed_listen_port(self, context):
+        context.scene.BlenderNEURON_properties.fixed_listen_port = self.fixed_listen_port
+
+    fixed_listen_port: bpy.props.BoolProperty(
+        name='Use a fixed listening port',
+        description='Keep a predictable Blender port for SSH tunnels or container callbacks',
+        options={'SKIP_SAVE'}, update=update_fixed_listen_port)
+
     def invoke(self, context, event):
+        from blenderneuron.blender.dataset import is_offline
+        if is_offline():
+            return bpy.ops.blenderneuron.switch_to_live('INVOKE_DEFAULT')
+        self.fixed_listen_port = context.scene.BlenderNEURON_properties.fixed_listen_port
         context.scene.BlenderNEURON_properties.connection_message = ''
         try:
             return context.window_manager.invoke_props_dialog(self, width=560, confirm_text='Connect')
@@ -309,8 +331,39 @@ class ConnectDialogOperator(bpy.types.Operator, BlenderNodeClass):
             return context.window_manager.invoke_props_dialog(self, width=560)
 
     def draw(self, context):
-        draw_connection_setup(self.layout, context, self.node)
+        draw_connection_setup(self.layout, context, self.node, dialog=self)
+
+    def check(self, context):
+        return True
 
     def execute(self, context):
         result = bpy.ops.blenderneuron.connection_settings(action='CONNECT')
         return result
+
+
+class SwitchToLiveOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = 'blenderneuron.switch_to_live'
+    bl_label = 'Switch to Live NEURON'
+    bl_description = 'Remove offline cells and groups before connecting to a live model'
+
+    @classmethod
+    def poll(cls, context):
+        from blenderneuron.blender.dataset import is_offline
+        return is_offline()
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=480)
+
+    def draw(self, context):
+        self.layout.label(text='This will remove the current offline cells and groups.')
+        self.layout.label(text='Other scene objects will be kept. Continue to live mode?')
+
+    def execute(self, context):
+        from blenderneuron.blender.dataset import switch_to_live
+        if self.node is None:
+            bpy.ops.blenderneuron.node_start()
+        switch_to_live(self.node)
+        context.scene.BlenderNEURON_properties.connection_message = ''
+        if self.options.is_invoke:
+            return bpy.ops.blenderneuron.connect_dialog('INVOKE_DEFAULT')
+        return {'FINISHED'}

@@ -56,6 +56,11 @@ if inside_blender:
         bpy.ops.blenderneuron.node_start()
         return None
 
+    @persistent
+    def save_dataset_state(scene):
+        from blenderneuron.blender.dataset import save_offline_state
+        save_offline_state(scene)
+
     def schedule_node_start():
         if not bpy.app.timers.is_registered(start_node_after_load):
             bpy.app.timers.register(start_node_after_load, first_interval=0.0)
@@ -91,8 +96,11 @@ if inside_blender:
 
         # Reload the addon on file open
         bpy.app.handlers.load_post.append(on_blend_load)
+        bpy.app.handlers.save_pre.append(save_dataset_state)
 
     def unregister():
+        if save_dataset_state in bpy.app.handlers.save_pre:
+            bpy.app.handlers.save_pre.remove(save_dataset_state)
         if bpy.app.timers.is_registered(start_node_after_load):
             bpy.app.timers.unregister(start_node_after_load)
         bpy.ops.blenderneuron.node_stop()

@@ -2,6 +2,7 @@
 # Run single test with: 'python tests/test_MPI.py TestMPI.test_method'
 
 import unittest
+from unittest.mock import Mock, patch
 import json
 import os, sys
 import subprocess
@@ -16,6 +17,37 @@ from tests import test_hoc_file, BackgroundBlender as Blender, NEURON, BlenderTe
 
 
 class TestMPI(BlenderTestCase):
+    def test_simulation_solver_selection(self):
+        node = NeuronNode.__new__(NeuronNode)
+        node.mpi_coordinator_active = False
+        for ranks in (None, 1, 2):
+            node.parallel_ctx = None if ranks is None else Mock()
+            if ranks is not None:
+                node.parallel_ctx.nhost.return_value = ranks
+            with patch("blenderneuron.nrn.neuronnode.h") as simulator:
+                simulator.tstop = 25
+                self.assertTrue(node.run_simulation())
+                if ranks == 2:
+                    simulator.run.assert_not_called()
+                    simulator.stdinit.assert_called_once_with()
+                    node.parallel_ctx.set_maxstep.assert_called_once_with(1.0)
+                    node.parallel_ctx.psolve.assert_called_once_with(25)
+                else:
+                    simulator.run.assert_called_once_with()
+                    simulator.stdinit.assert_not_called()
+
+    def test_empty_rank_participates_in_activity_run(self):
+        node = NeuronNode.__new__(NeuronNode)
+        node.groups = {}
+        node.parallel_ctx = Mock()
+        node.parallel_ctx.nhost.return_value = 2
+        node.parallel_ctx.allreduce.return_value = 1
+        with patch("blenderneuron.nrn.neuronnode.h") as simulator:
+            self.assertEqual(node._get_group_dicts_local(True), [])
+            simulator.stdinit.assert_called_once_with()
+            node.parallel_ctx.psolve.assert_called_once()
+        node.parallel_ctx.allreduce.assert_called_once_with(0, 2)
+
     def test_merge_duplicate_local_cell_names(self):
         node = NeuronNode.__new__(NeuronNode)
         node.mpimap = {

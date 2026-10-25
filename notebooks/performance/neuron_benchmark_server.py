@@ -286,7 +286,7 @@ class BenchmarkNeuronNode(NeuronNode):
         profile = self.benchmark_profile
         start = time.perf_counter()
         if any(group.record_activity for group in self.groups.values()):
-            h.run()
+            self._run_simulation_local()
         profile["neuron_simulation_and_collection"] = time.perf_counter() - start
 
         start = time.perf_counter()
