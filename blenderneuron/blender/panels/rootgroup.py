@@ -182,6 +182,10 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
             col.prop(group, "default_brightness", text='')
 
             col = box.split(factor=0.5)
+            col.label(text='Spherical Somas:')
+            col.prop(group, 'spherize_soma_if_DeqL', text='')
+
+            col = box.split(factor=0.5)
             col.label(text='Smooth Curves:')
             col.prop(group, "smooth_sections", text='')
 

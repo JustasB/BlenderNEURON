@@ -382,6 +382,13 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
     def set_prop(prop):
         def set(self, value):
             setattr(self.node_group, prop, value)
+            if prop == 'spherize_soma_if_DeqL' and self.node_group.view is not None:
+                from blenderneuron.blender.somadisplay import attach, detach
+                for container in self.node_group.view.containers.values():
+                    if value:
+                        attach(container)
+                    else:
+                        detach(container.object)
         return set
 
     index: IntProperty(get=get_prop("index"), set=set_prop("index"))

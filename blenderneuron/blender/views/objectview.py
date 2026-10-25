@@ -146,6 +146,11 @@ class ObjectViewAbstract(ViewAbstract):
 
     def link_containers(self):
 
+        from blenderneuron.blender.somadisplay import attach
+        if getattr(self.group, 'spherize_soma_if_DeqL', False):
+            for container in self.containers.values():
+                attach(container)
+
         # Ensure no concurrent object linking
         with self.link_lock:
 
@@ -277,21 +282,23 @@ class ObjectViewAbstract(ViewAbstract):
         return container
 
     def containers_to_mesh(self):
-        self.select_containers()
-
-        # Convert the selected container curves to mesh
-        active_ob = next(o for o in bpy.context.collection.objects if o.select_get())
-        bpy.context.view_layer.objects.active = active_ob
-        
-        #context = get_operator_context_override(selected_object=active_ob)
-        bpy.ops.object.convert(target='MESH', keep_original=False)
+        """Create display mesh copies; managed morphology curves remain intact."""
+        from blenderneuron.datablocknames import METADATA
+        copies = []
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        for container in self.containers.values():
+            source = container.object
+            mesh = bpy.data.meshes.new_from_object(source.evaluated_get(depsgraph))
+            if METADATA in mesh:
+                del mesh[METADATA]
+            copy = bpy.data.objects.new(source.name + '_display', mesh)
+            copy.matrix_world = source.matrix_world.copy()
+            bpy.context.collection.objects.link(copy)
+            copies.append(copy)
+        return copies
 
     def mesh_containers_to_curves(self):
-        self.select_containers()
-
-        # Convert the selected container meshes to curves
-        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
-        bpy.ops.object.convert(target='CURVE', keep_original=False)
+        raise RuntimeError('Display meshes cannot be restored as morphology. Use the original curves or reimport.')
 
     def animate_activity(self, activity, material_name):
         if activity is None:

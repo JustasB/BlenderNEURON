@@ -77,6 +77,8 @@ if inside_blender:
         schedule_node_start()
 
     def register():
+        from blenderneuron.blender import somadisplay
+        somadisplay.register()
         sys.setrecursionlimit(1500)
 
         register_module_classes(blenderneuron.blender.operators.rootgroup)
@@ -99,6 +101,8 @@ if inside_blender:
         bpy.app.handlers.save_pre.append(save_dataset_state)
 
     def unregister():
+        from blenderneuron.blender import somadisplay
+        somadisplay.unregister()
         if save_dataset_state in bpy.app.handlers.save_pre:
             bpy.app.handlers.save_pre.remove(save_dataset_state)
         if bpy.app.timers.is_registered(start_node_after_load):

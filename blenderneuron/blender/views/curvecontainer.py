@@ -52,6 +52,11 @@ class CurveContainer:
             self._object['blenderneuron_splines'] = json.dumps(list(self.name2spline_index))
         else:
             self.restore_sections(roots, recursive)
+        from blenderneuron.blender.somadisplay import SOURCE_TOPOLOGY, topology
+        if SOURCE_TOPOLOGY not in self._object:
+            import json
+            self._object[SOURCE_TOPOLOGY] = json.dumps(topology(self._object))
+
 
     def get_object(self):
         ob = self.registry.resolve(self.object_key)
@@ -68,6 +73,8 @@ class CurveContainer:
     @property
     def curve(self):
         ob = self.get_object()
+        if ob.type != 'CURVE':
+            raise RuntimeError("Morphology was converted to a mesh. Undo or reimport before exporting.")
 
         return ob.data
 
@@ -121,6 +128,8 @@ class CurveContainer:
         ob = self.registry.resolve(self.object_key)
         if ob is None:
             return
+        from blenderneuron.blender.somadisplay import detach
+        detach(ob)
         curve = ob.data
         materials = list({mat.as_pointer(): mat for mat in curve.materials if mat is not None}.values())
         self.registry.remove(ob)

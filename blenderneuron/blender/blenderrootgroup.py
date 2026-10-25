@@ -206,6 +206,9 @@ class BlenderRootGroup(RootGroup):
         if not hasattr(self.view, "update_group_with_view_data"):
             raise Exception(str(self.view.__class__) + ' does not implement update_group_with_view_data() method')
 
+        from blenderneuron.blender.somadisplay import validate
+        for container in getattr(self.view, 'containers', {}).values():
+            validate(container.object)
         self.view.update_group_with_view_data()
 
     def add_to_UI(self):
