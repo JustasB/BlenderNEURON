@@ -12,6 +12,7 @@ Welcome to BlenderNEURON documentation. To get started, please follow the sectio
    requirements
    installation
    getting-started
+   headless-docker
    remote-connections
    offline-simulation
 

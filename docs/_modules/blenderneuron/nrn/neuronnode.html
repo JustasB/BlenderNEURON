@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
@@ -77,9 +80,13 @@
   <h1>Source code for blenderneuron.nrn.neuronnode</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span>
 <span class="kn">from</span> <span class="nn">blenderneuron.commnode</span> <span class="kn">import</span> <span class="n">CommNode</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.utils</span> <span class="kn">import</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">serialize</span>
 <span class="kn">from</span> <span class="nn">blenderneuron.nrn.neuronrootgroup</span> <span class="kn">import</span> <span class="n">NeuronRootGroup</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -90,7 +97,7 @@
 
 <div class="viewcode-block" id="NeuronNode"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode">[docs]</a><span class="k">class</span> <span class="nc">NeuronNode</span><span class="p">(</span><span class="n">CommNode</span><span class="p">):</span>
     <span class="c1"># Match Cell[n].section[y] pattern e.g. MC1[0].soma</span>
-    <span class="n">section_rx</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(.+?])\.?(.*)&#39;</span><span class="p">)</span>
+    <span class="n">section_rx</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.+?])\.?(.*)&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="kc">None</span>
@@ -100,6 +107,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpi_coordinator_active</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
             <span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;stdrun.hoc&#39;</span><span class="p">)</span>
@@ -107,6 +115,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_roots</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_sim_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_simulation</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_sim_params</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">register_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialize_groups</span><span class="p">)</span>
@@ -117,16 +126,168 @@
         <span class="k">if</span> <span class="n">server_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">server_end</span> <span class="o">=</span> <span class="s2">&quot;NEURON&quot;</span>
 
+        <span class="c1"># MPI workers have no XML-RPC server, but still need stdrun commands</span>
+        <span class="c1"># when rank zero later dispatches a simulation operation to them.</span>
+        <span class="k">if</span> <span class="n">server_end</span> <span class="o">==</span> <span class="s2">&quot;Package&quot;</span><span class="p">:</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;stdrun.hoc&#39;</span><span class="p">)</span>
+
         <span class="nb">super</span><span class="p">(</span><span class="n">NeuronNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">server_end</span><span class="p">,</span> <span class="n">on_server_setup</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NeuronNode.init_mpi"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">[docs]</a>    <span class="k">def</span> <span class="nf">init_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallel_ctx</span><span class="p">,</span> <span class="n">mpimap</span><span class="p">):</span>
+<div class="viewcode-block" id="NeuronNode.init_mpi"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">[docs]</a>    <span class="k">def</span> <span class="nf">init_mpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallel_ctx</span><span class="p">,</span> <span class="n">mpimap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="o">=</span> <span class="n">parallel_ctx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="n">mpimap</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpirank</span> <span class="o">=</span> <span class="n">parallel_ctx</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_gid</span> <span class="o">=</span> <span class="mi">0</span></div>
 
+<div class="viewcode-block" id="NeuronNode.start_mpi_coordinator"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.start_mpi_coordinator">[docs]</a>    <span class="k">def</span> <span class="nf">start_mpi_coordinator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start rank-zero Blender coordination after MPI model setup.</span>
+
+<span class="sd">        Call this on every rank after ``init_mpi``.  It returns immediately on</span>
+<span class="sd">        rank zero, which remains available to Blender; worker ranks enter the</span>
+<span class="sd">        request loop and return only after ``stop_mpi_coordinator`` is called</span>
+<span class="sd">        on rank zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">id</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_coordinator_active</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;discover_mpimap&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_automatic_mpimap</span><span class="p">(</span><span class="n">fragments</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;set_mpimap&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_serve_mpi_requests</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NeuronNode.stop_mpi_coordinator"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.stop_mpi_coordinator">[docs]</a>    <span class="k">def</span> <span class="nf">stop_mpi_coordinator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop worker request loops.  This must be called from rank zero.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;__stop__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpi_coordinator_active</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">_uses_mpi_coordinator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mpi_coordinator_active</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">id</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_serve_mpi_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rank_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">rank_count</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">operation</span><span class="p">,</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">command</span>
+            <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;__stop__&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">rank_count</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_operation_response</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">([</span><span class="n">response</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rank_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_mpi_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Broadcast an operation and gather one response from every rank.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;MPI coordinator requests must originate on rank zero&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request_targeted</span><span class="p">(</span>
+            <span class="n">operation</span><span class="p">,</span> <span class="p">[</span><span class="n">payload</span><span class="p">]</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">_mpi_request_targeted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">payloads</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deliver one payload per destination, then drain every response.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;MPI coordinator requests must originate on rank zero&quot;</span><span class="p">)</span>
+        <span class="n">rank_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">payloads</span><span class="p">)</span> <span class="o">!=</span> <span class="n">rank_count</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected one MPI payload per rank&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">([(</span><span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span> <span class="k">for</span> <span class="n">payload</span> <span class="ow">in</span> <span class="n">payloads</span><span class="p">])</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">payloads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">local_response</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                          <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;__stop__&quot;</span> <span class="k">else</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_operation_response</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">local_response</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rank_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">responses</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MPI rank </span><span class="si">%d</span><span class="s2"> failed </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">operation</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;MPI rank </span><span class="si">%d</span><span class="s2"> failed </span><span class="si">%s</span><span class="s2">:</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                   <span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span> <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;initialize_groups&quot;</span><span class="p">,</span> <span class="s2">&quot;get_group_dicts&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">deserialize</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">_mpi_operation_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_mpi_operation</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">)}</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()}</span>
+
+    <span class="k">def</span> <span class="nf">_execute_mpi_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;discover_mpimap&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discover_local_cells</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;set_mpimap&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="o">=</span> <span class="n">payload</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;run_simulation&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_simulation_local</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;get_roots&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_roots_local</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;initialize_groups&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_groups_local</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_group_dicts_local</span><span class="p">(</span><span class="n">run_simulation</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;get_group_dicts&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_group_dicts_local</span><span class="p">(</span><span class="n">run_simulation</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;set_sim_params&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_sim_params_local</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;update_groups&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_groups_local</span><span class="p">(</span><span class="n">deserialize</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;validate_synapse_sections&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_synapse_sections_local</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;create_synapses&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_synapses_local</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported MPI operation: &quot;</span> <span class="o">+</span> <span class="n">operation</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_discover_local_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">roots</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">()</span>
+        <span class="n">roots</span><span class="o">.</span><span class="n">allroots</span><span class="p">()</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">roots</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_rx</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot derive an MPI cell name from root section &#39;</span><span class="si">%s</span><span class="s2">&#39;; &quot;</span>
+                                 <span class="s2">&quot;pass mpimap explicitly&quot;</span> <span class="o">%</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
+            <span class="n">cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cells</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_build_automatic_mpimap</span><span class="p">(</span><span class="n">fragments</span><span class="p">):</span>
+        <span class="n">mpimap</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">cells</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cell_name</span> <span class="ow">in</span> <span class="n">cells</span><span class="p">:</span>
+                <span class="n">counts</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cell_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">cells</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fragments</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">cell_name</span> <span class="ow">in</span> <span class="n">cells</span><span class="p">:</span>
+                <span class="n">blender_name</span> <span class="o">=</span> <span class="n">cell_name</span>
+                <span class="k">if</span> <span class="n">counts</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">stem</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">cell_name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">blender_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_rank</span><span class="si">%d</span><span class="s2">[</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stem</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+                    <span class="c1"># Preserve deterministic identities even if a model already</span>
+                    <span class="c1"># has a cell whose name happens to match this convention.</span>
+                    <span class="k">while</span> <span class="n">blender_name</span> <span class="ow">in</span> <span class="n">mpimap</span><span class="p">:</span>
+                        <span class="n">blender_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_mpi</span><span class="si">%d</span><span class="s2">[</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stem</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+                <span class="n">mpimap</span><span class="p">[</span><span class="n">blender_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">cell_name</span><span class="p">,</span> <span class="s2">&quot;rank&quot;</span><span class="p">:</span> <span class="n">rank</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">mpimap</span>
+
 
 <div class="viewcode-block" id="NeuronNode.get_roots"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_roots">[docs]</a>    <span class="k">def</span> <span class="nf">get_roots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="n">roots</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;get_roots&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+                <span class="n">roots</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_restore_blender_section_names</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">roots</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">root</span><span class="p">:</span> <span class="n">root</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_roots_local</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_roots_local</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">allroots</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">roots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">)</span>
@@ -139,13 +300,22 @@
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">)</span>
-        <span class="p">]</span></div>
+        <span class="p">]</span>
 
 <div class="viewcode-block" id="NeuronNode.update_section_index"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_section_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">all_sec</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">allsec</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span> <span class="o">=</span> <span class="p">{</span><span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">():</span> <span class="n">sec</span> <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">all_sec</span><span class="p">}</span></div>
 
 <div class="viewcode-block" id="NeuronNode.initialize_groups"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">,</span> <span class="n">send_back</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;initialize_groups&quot;</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_mpi_group_fragments</span><span class="p">(</span><span class="n">fragments</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="k">if</span> <span class="n">send_back</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_groups_local</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">send_back</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_dicts</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_initialize_groups_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
 
@@ -160,41 +330,232 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">nrn_group</span>
 
-        <span class="k">if</span> <span class="n">send_back</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_dicts</span><span class="p">()</span></div>
-
 <div class="viewcode-block" id="NeuronNode.get_group_dicts"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_dicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the selected groups, gathering rank-local roots under MPI.</span>
 
-        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">record_activity</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
-            <span class="n">h</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="sd">        When MPI is enabled this is a collective operation: every rank must call</span>
+<span class="sd">        it in the same order.  Only rank zero receives the complete result;</span>
+<span class="sd">        non-root ranks return ``None``.  Keeping the collective boundary here</span>
+<span class="sd">        means a caller can send precisely one complete payload to Blender.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include_activity</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">record_activity</span><span class="p">,</span>
-                  <span class="n">include_root_children</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                  <span class="n">include_coords_and_radii</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                  <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_mpi_group_fragments</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;get_group_dicts&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_group_dicts_local</span><span class="p">(</span><span class="n">run_simulation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gather_group_dicts</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="NeuronNode.run_simulation"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.run_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and run, dispatching to every rank under the coordinator.</span>
+
+<span class="sd">        Without the coordinator, MPI callers must call this on every rank.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;run_simulation&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_simulation_local</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_run_simulation_local</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">set_maxstep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">stdinit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">psolve</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">tstop</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_group_dicts_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_simulation</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">run_simulation</span><span class="p">:</span>
+            <span class="n">record_activity</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">record_activity</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Even ranks with no recorded groups must enter the solver.</span>
+                <span class="n">record_activity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">allreduce</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">record_activity</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">record_activity</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_run_simulation_local</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_local_group_dicts</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_local_group_dicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize just the roots owned by this MPI rank.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">include_activity</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">record_activity</span><span class="p">,</span>
+                              <span class="n">include_root_children</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">include_coords_and_radii</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="NeuronNode.gather_group_dicts"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.gather_group_dicts">[docs]</a>    <span class="k">def</span> <span class="nf">gather_group_dicts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_groups</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gather local group dictionaries on rank zero and merge their roots.</span>
+
+<span class="sd">        ``ParallelContext.py_alltoall`` is used rather than an external MPI</span>
+<span class="sd">        dependency.  Each rank sends its local fragment only to rank zero, so</span>
+<span class="sd">        large activity traces are not replicated on every worker.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">local_groups</span>
+
+        <span class="n">rank_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span>
+        <span class="n">fragments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">py_alltoall</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">serialize</span><span class="p">(</span><span class="n">local_groups</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rank_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">id</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_mpi_group_fragments</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">deserialize</span><span class="p">(</span><span class="n">fragment</span><span class="p">)</span> <span class="k">if</span> <span class="n">fragment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+             <span class="k">for</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="NeuronNode.merge_mpi_group_fragments"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.merge_mpi_group_fragments">[docs]</a>    <span class="k">def</span> <span class="nf">merge_mpi_group_fragments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragments</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge rank fragments deterministically, restoring Blender names.&quot;&quot;&quot;</span>
+        <span class="n">groups_by_name</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">fragment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fragments</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">fragment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">groups_by_name</span><span class="p">:</span>
+                    <span class="n">merged</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">groups_by_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">merged</span> <span class="o">=</span> <span class="n">groups_by_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_check_mpi_group_activity</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_restore_blender_section_names</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">rank</span><span class="p">)</span>
+                    <span class="n">root_name</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">existing</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">root_name</span> <span class="k">for</span> <span class="n">existing</span> <span class="ow">in</span> <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MPI group &#39;</span><span class="si">%s</span><span class="s2">&#39; contains duplicate root &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span>
+                                         <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">root_name</span><span class="p">))</span>
+                    <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">group</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">root</span><span class="p">:</span> <span class="n">root</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_mpi_group_activity</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">fragment</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reject divergent sampling schedules before Blender sees bad data.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;activity&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">merged</span> <span class="ow">or</span> <span class="s2">&quot;activity&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fragment</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;activity&quot;</span><span class="p">][</span><span class="s2">&quot;times&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">fragment</span><span class="p">[</span><span class="s2">&quot;activity&quot;</span><span class="p">][</span><span class="s2">&quot;times&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MPI group &#39;</span><span class="si">%s</span><span class="s2">&#39; has inconsistent activity sample times&quot;</span> <span class="o">%</span>
+                             <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_restore_blender_section_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Translate MPI-local cell-name prefixes back to Blender&#39;s names.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">mpi_to_blender</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span> <span class="n">original_name</span>
+            <span class="k">for</span> <span class="n">original_name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">rank</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">rank</span>
+        <span class="p">}</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">root</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">mpi_cell_name</span><span class="p">,</span> <span class="n">suffix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_rx</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">mpi_cell_name</span> <span class="ow">in</span> <span class="n">mpi_to_blender</span><span class="p">:</span>
+                <span class="n">section</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mpi_to_blender</span><span class="p">[</span><span class="n">mpi_cell_name</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">suffix</span> <span class="k">if</span> <span class="n">suffix</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+
 <div class="viewcode-block" id="NeuronNode.update_groups"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.update_groups">[docs]</a>    <span class="k">def</span> <span class="nf">update_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply group dictionaries, serialized groups, or flat group-file tables.</span>
+
+<span class="sd">        A file loaded with json.load() can be passed as one item in the list.</span>
+<span class="sd">        Call deserialize() first if application code needs to inspect its roots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">,</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">Binary</span><span class="p">):</span>
+            <span class="n">blender_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
+            <span class="n">blender_groups</span> <span class="o">=</span> <span class="n">deserialize</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">blender_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">blender_groups</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;__blenderneuron_flat__&quot;</span> <span class="ow">in</span> <span class="n">group</span>
+               <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">):</span>
+            <span class="n">blender_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">deserialize</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+                              <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">))</span> <span class="ow">or</span>
+                              <span class="s2">&quot;__blenderneuron_flat__&quot;</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">else</span> <span class="n">group</span>
+                              <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="n">partitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partition_morphology_updates</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request_targeted</span><span class="p">(</span><span class="s2">&quot;update_groups&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">serialize</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">])</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_groups_local</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_partition_morphology_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the entire export before constructing destination envelopes.</span>
+
+<span class="sd">        Keep metadata on all ranks: recording settings also govern existing</span>
+<span class="sd">        groups whose roots were not selected for this export. Root trees are</span>
+<span class="sd">        shared read-only here; each destination receives a flat JSON payload.</span>
+<span class="sd">        A mapping has one entry per visible cell, so conflicting duplicate keys</span>
+<span class="sd">        cannot be represented by the supported mpimap dictionary format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rank_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span>
+        <span class="n">partitions</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rank_count</span><span class="p">)]</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">:</span>
+            <span class="n">envelopes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">roots</span><span class="o">=</span><span class="p">[])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rank_count</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">]:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="s2">&quot;group </span><span class="si">%r</span><span class="s2"> root </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Duplicate Blender root in &quot;</span> <span class="o">+</span> <span class="n">context</span><span class="p">)</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_rx</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="n">name</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cell</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing ownership for &quot;</span> <span class="o">+</span> <span class="n">context</span><span class="p">)</span>
+                <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">[</span><span class="n">cell</span><span class="p">][</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span>
+                <span class="c1"># ParallelContext.id() historically supplies integral floats.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+                        <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">rank</span> <span class="o">&lt;</span> <span class="n">rank_count</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">!=</span> <span class="n">rank</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid ownership rank </span><span class="si">%r</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+                <span class="n">envelopes</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)][</span><span class="s2">&quot;roots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">envelope</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">envelopes</span><span class="p">):</span>
+                <span class="n">partitions</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">envelope</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;update_groups: </span><span class="si">%d</span><span class="s2"> groups, </span><span class="si">%d</span><span class="s2"> roots, </span><span class="si">%d</span><span class="s2"> serialized bytes&quot;</span><span class="p">,</span>
+                         <span class="nb">len</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">seen</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">serialize</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">partition</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">partitions</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;update_groups rank </span><span class="si">%d</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> roots, </span><span class="si">%d</span><span class="s2"> serialized bytes&quot;</span><span class="p">,</span>
+                             <span class="n">rank</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;roots&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">),</span>
+                             <span class="nb">len</span><span class="p">(</span><span class="n">serialize</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">partitions</span>
+
+    <span class="k">def</span> <span class="nf">_update_groups_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_groups</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">blender_group</span> <span class="ow">in</span> <span class="n">blender_groups</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">initialize_groups</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">,</span> <span class="n">send_back</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_groups_local</span><span class="p">(</span><span class="n">blender_groups</span><span class="p">)</span>
 
             <span class="n">nrn_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="n">nrn_group</span><span class="o">.</span><span class="n">from_updated_blender_group</span><span class="p">(</span><span class="n">blender_group</span><span class="p">)</span></div>
+            <span class="n">nrn_group</span><span class="o">.</span><span class="n">from_updated_blender_group</span><span class="p">(</span><span class="n">blender_group</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NeuronNode.set_sim_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_sim_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request</span><span class="p">(</span><span class="s2">&quot;set_sim_params&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_sim_params_local</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_sim_params_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="n">h</span><span class="o">.</span><span class="n">tstop</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;tstop&quot;</span><span class="p">]</span>
         <span class="n">h</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span>
         <span class="n">h</span><span class="o">.</span><span class="n">cvode</span><span class="o">.</span><span class="n">atol</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;atol&quot;</span><span class="p">])</span>
         <span class="n">h</span><span class="o">.</span><span class="n">celsius</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;celsius&quot;</span><span class="p">]</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">cvode_active</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;cvode&quot;</span><span class="p">]))</span></div>
+        <span class="n">h</span><span class="o">.</span><span class="n">cvode_active</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;cvode&quot;</span><span class="p">]))</span>
 
 <div class="viewcode-block" id="NeuronNode.get_sim_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_sim_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
@@ -281,13 +642,75 @@
 
 
 <div class="viewcode-block" id="NeuronNode.create_synapses"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses">[docs]</a>    <span class="k">def</span> <span class="nf">create_synapses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syn_set</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_mpi_coordinator</span><span class="p">():</span>
+            <span class="n">partitions</span><span class="p">,</span> <span class="n">checks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partition_synapse_set</span><span class="p">(</span><span class="n">syn_set</span><span class="p">)</span>
+            <span class="c1"># A read-only collective checks rank-local sections before any rank</span>
+            <span class="c1"># creates point processes, spines, GIDs, or replaces retained sets.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request_targeted</span><span class="p">(</span><span class="s2">&quot;validate_synapse_sections&quot;</span><span class="p">,</span> <span class="n">checks</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mpi_request_targeted</span><span class="p">(</span><span class="s2">&quot;create_synapses&quot;</span><span class="p">,</span> <span class="n">partitions</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_synapses_local</span><span class="p">(</span><span class="n">syn_set</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_partition_synapse_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syn_set</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Route each entry to the union of endpoint owners, in input order.&quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_ctx</span><span class="o">.</span><span class="n">nhost</span><span class="p">())</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">syn_set</span><span class="p">,</span> <span class="n">entries</span><span class="o">=</span><span class="p">[],</span> <span class="n">_entry_indices</span><span class="o">=</span><span class="p">[])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span>
+        <span class="n">checks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">sections</span><span class="o">=</span><span class="p">[])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;entries&#39;</span><span class="p">]):</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="s2">&quot;synapse set </span><span class="si">%r</span><span class="s2"> entry </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">index</span><span class="p">)</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;source_section&#39;</span><span class="p">,</span> <span class="s1">&#39;dest_section&#39;</span><span class="p">,</span> <span class="s1">&#39;source_x&#39;</span><span class="p">,</span> <span class="s1">&#39;dest_x&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;source_seg_i&#39;</span><span class="p">,</span> <span class="s1">&#39;dest_syn&#39;</span><span class="p">,</span> <span class="s1">&#39;dest_syn_params&#39;</span><span class="p">,</span> <span class="s1">&#39;threshold&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;delay&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;create_spine&#39;</span><span class="p">,</span> <span class="s1">&#39;is_reciprocal&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_reciprocal&#39;</span><span class="p">):</span>
+                <span class="n">required</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;dest_seg_i&#39;</span><span class="p">,</span> <span class="s1">&#39;source_syn&#39;</span><span class="p">,</span> <span class="s1">&#39;source_syn_params&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;create_spine&#39;</span><span class="p">):</span>
+                <span class="n">required</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;prefix&#39;</span><span class="p">,</span> <span class="s1">&#39;head_start&#39;</span><span class="p">,</span> <span class="s1">&#39;head_end&#39;</span><span class="p">,</span> <span class="s1">&#39;head_diameter&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;neck_start&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;neck_start&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">required</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;neck_end&#39;</span><span class="p">,</span> <span class="s1">&#39;neck_diameter&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+            <span class="n">owners</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;source_section&#39;</span><span class="p">,</span> <span class="s1">&#39;dest_section&#39;</span><span class="p">):</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_rx</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="n">section</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cell</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing ownership for </span><span class="si">%s</span><span class="s2"> </span><span class="si">%r</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                     <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+                <span class="n">rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpimap</span><span class="p">[</span><span class="n">cell</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rank&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+                        <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">rank</span> <span class="o">&lt;</span> <span class="n">count</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">!=</span> <span class="n">rank</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid ownership rank </span><span class="si">%r</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span>
+                                     <span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+                <span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
+                <span class="n">owners</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
+                <span class="n">checks</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="s1">&#39;sections&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">section</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">rank</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">owners</span><span class="p">):</span>
+                <span class="n">parts</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="s1">&#39;entries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+                <span class="n">parts</span><span class="p">[</span><span class="n">rank</span><span class="p">][</span><span class="s1">&#39;_entry_indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parts</span><span class="p">,</span> <span class="n">checks</span>
+
+    <span class="k">def</span> <span class="nf">_validate_synapse_sections_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
+        <span class="c1"># Refresh names without altering model geometry or retained synapses.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_section_index</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">]:</span>
+            <span class="n">local</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">local</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">local</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing </span><span class="si">%s</span><span class="s2"> </span><span class="si">%r</span><span class="s2"> in synapse set </span><span class="si">%r</span><span class="s2"> entry </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">index</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_create_synapses_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syn_set</span><span class="p">):</span>
 
         <span class="n">set_name</span> <span class="o">=</span> <span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
         <span class="n">syn_entries</span> <span class="o">=</span> <span class="n">syn_set</span><span class="p">[</span><span class="s1">&#39;entries&#39;</span><span class="p">]</span>
 
         <span class="n">synapses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synapse_sets</span><span class="p">[</span><span class="n">set_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">syn_entries</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">entry_index</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">syn_entries</span><span class="p">):</span>
 
             <span class="n">rank_source_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;source_section&#39;</span><span class="p">])</span>
             <span class="n">rank_dest_section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_section_name</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dest_section&#39;</span><span class="p">])</span>
@@ -315,7 +738,10 @@
 
             <span class="c1"># Unless indicated otherwise</span>
             <span class="k">if</span> <span class="n">source_on_rank</span> <span class="ow">and</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;create_spine&#39;</span><span class="p">]:</span>
-                <span class="n">prefix</span> <span class="o">=</span> <span class="n">set_name</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;prefix&#39;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">synapses</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;]&quot;</span>
+                <span class="c1"># Preserve broadcast-era spine names when unrelated entries</span>
+                <span class="c1"># have been omitted from this rank&#39;s payload.</span>
+                <span class="n">original_index</span> <span class="o">=</span> <span class="n">syn_set</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_entry_indices&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">syn_entries</span><span class="p">)))[</span><span class="n">entry_index</span><span class="p">]</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">set_name</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;prefix&#39;</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">original_index</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span>
 
                 <span class="c1"># Create the spine head</span>
                 <span class="n">head</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;.head&quot;</span><span class="p">)</span>
@@ -385,7 +811,7 @@
                 <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
             <span class="c1"># Keep references to the synapse parts</span>
-            <span class="n">synapses</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span><span class="p">,</span> <span class="n">neck</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span><span class="p">))</span></div>
+            <span class="n">synapses</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">netcon</span><span class="p">,</span> <span class="n">syn</span><span class="p">,</span> <span class="n">neck</span><span class="p">,</span> <span class="n">head</span><span class="p">,</span> <span class="n">netcon_recip</span><span class="p">,</span> <span class="n">syn_recip</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="NeuronNode.create_netcon_syn"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn">[docs]</a>    <span class="k">def</span> <span class="nf">create_netcon_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -460,7 +886,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

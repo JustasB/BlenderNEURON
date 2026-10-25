@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Tutorial &mdash; BlenderNEURON  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Remote Connections and MPI" href="remote-connections.html" />
+    <link rel="prev" title="Getting Started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            BlenderNEURON
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Docker Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build">Build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-example">Simple example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#full-example-with-render-options">Full example with render options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output">Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-and-adapting-the-code">Reading and adapting the code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlenderNEURON</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Docker Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/headless-docker.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="docker-tutorial">
+<h1>Docker Tutorial<a class="headerlink" href="#docker-tutorial" title="Permalink to this heading"></a></h1>
+<p>With Docker installed, you can run a complete BlenderNEURON example without
+following the manual installation steps. The container provides Blender, NEURON,
+and their dependencies. Clone the repository, build the image, and run the example
+to produce a preview, an activity video, and an editable Blender scene. No GUI,
+VNC, display server, or GPU is required on the host.</p>
+<p>The example builds three independent branching Hodgkin–Huxley cells in NEURON,
+injects staggered currents, and transfers morphology and membrane voltage to
+Blender through BlenderNEURON’s live connection. Blender renders all three cells
+in one fixed orthographic view.</p>
+<video controls autoplay muted loop playsinline preload="metadata" width="960"
+       style="display: block; width: 100%; height: auto;"
+       poster="_static/docker-tutorial-preview.png"
+       aria-label="Three cells showing simulated membrane voltage over 30 milliseconds">
+  <source src="_static/docker-tutorial-activity.mp4" type="video/mp4">
+  <p>Your browser does not support embedded video.
+    <a href="_static/docker-tutorial-activity.mp4">Download the activity video</a>.</p>
+</video><section id="build">
+<h2>Build<a class="headerlink" href="#build" title="Permalink to this heading"></a></h2>
+<p>If you have not already cloned the <a class="reference external" href="https://github.com/JustasB/BlenderNEURON">BlenderNEURON GitHub repository</a>, clone it and enter its directory:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/JustasB/BlenderNEURON.git
+<span class="nb">cd</span><span class="w"> </span>BlenderNEURON
+</pre></div>
+</div>
+<p>With Docker running, build the shared NEURON + Blender image from the root of
+your local BlenderNEURON checkout:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./scripts/build.sh
+</pre></div>
+</div>
+<p>The first build downloads the runtime dependencies and takes considerably longer
+than the example itself. Subsequent builds reuse Docker’s cache. The build script
+selects the host architecture, including Apple Silicon. All commands below also
+run from the repository root.</p>
+</section>
+<section id="simple-example">
+<h2>Simple example<a class="headerlink" href="#simple-example" title="Permalink to this heading"></a></h2>
+<p>Run with the default smoke-test settings: 320 × 240 pixels, 60 frames, four Cycles
+samples per pixel, 20 FPS, and a 600-second deadline.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/tutorials/02-docker-script/output&quot;</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--init<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/BlenderNEURON:ro&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/tutorials/02-docker-script/output:/output&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/BlenderNEURON<span class="w"> </span>blenderneuron:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>python<span class="w"> </span>-u<span class="w"> </span>tutorials/02-docker-script/run.py
+</pre></div>
+</div>
+<p>The terminal reports model startup, live transfer, frame-rendering progress, and
+video encoding. Detailed runtime output is saved in <code class="docutils literal notranslate"><span class="pre">neuron.log</span></code> and <code class="docutils literal notranslate"><span class="pre">blender.log</span></code>
+inside the results folder. Long operations print a waiting update every 15 seconds.</p>
+<p>The repository mount includes the editable tutorial scripts. Edit them on the
+host, then repeat the same <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> command to use your changes. Each run
+creates a new results subfolder without overwriting previous output. The <code class="docutils literal notranslate"><span class="pre">:ro</span></code>
+mount lets the container read the scripts without modifying them.</p>
+</section>
+<section id="full-example-with-render-options">
+<h2>Full example with render options<a class="headerlink" href="#full-example-with-render-options" title="Permalink to this heading"></a></h2>
+<p>This complete command uses higher resolution, more frames, and more samples,
+with a longer deadline. Change the values to suit your machine and desired
+quality:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/tutorials/02-docker-script/output&quot;</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--init<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">:/BlenderNEURON:ro&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/tutorials/02-docker-script/output:/output&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/BlenderNEURON<span class="w"> </span>blenderneuron:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>python<span class="w"> </span>-u<span class="w"> </span>tutorials/02-docker-script/run.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--width<span class="w"> </span><span class="m">960</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--height<span class="w"> </span><span class="m">720</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--frames<span class="w"> </span><span class="m">180</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--samples<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--fps<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--timeout<span class="w"> </span><span class="m">1800</span>
+</pre></div>
+</div>
+<p>Width and height must be even for H.264 video. The simulation remains 30 ms long
+regardless of movie FPS or frame count. FPS controls playback speed; frame count
+controls how finely the animation samples the simulation. Very sparse frames
+can miss brief spikes. The timeout is in seconds and covers model startup,
+transfer, rendering, and video encoding. Append <code class="docutils literal notranslate"><span class="pre">--help</span></code> after <code class="docutils literal notranslate"><span class="pre">run.py</span></code> to list
+all options.</p>
+<p>The convenience launcher builds the image and runs the same workflow:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./tutorials/02-docker-script/run.sh
+</pre></div>
+</div>
+<p>It accepts the same render options. Set <code class="docutils literal notranslate"><span class="pre">OUTPUT_DIR</span></code> to change the host results
+directory when using this launcher.</p>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this heading"></a></h2>
+<p>The default render is deliberately small: 60 frames, 320 × 240 pixels, four
+Cycles samples per pixel. Each run creates a dated subfolder inside the
+<code class="docutils literal notranslate"><span class="pre">tutorials/02-docker-script/output/</span></code> directory containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">preview.png</span></code>: one rendered frame at the first soma’s voltage peak.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">activity.mp4</span></code>: voltage animation with simulation time in milliseconds
+(blue at −80 mV, red at +40 mV).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">frames/</span></code>: the individual PNG frames.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scene.blend</span></code>: imported cells, voltage animation, orthographic camera, and
+the built-in neon glare compositor, ready for scrubbing or rendering.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">activity.json</span></code>: morphology and recorded activity received by Blender.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">summary.json</span></code>: soma peak voltages and basic run information. The example
+fails unless all three somas produce an action potential above 0 mV.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">settings.json</span></code>, <code class="docutils literal notranslate"><span class="pre">neuron.log</span></code>, and <code class="docutils literal notranslate"><span class="pre">blender.log</span></code>: configuration and diagnostics.</p></li>
+</ul>
+</section>
+<section id="reading-and-adapting-the-code">
+<h2>Reading and adapting the code<a class="headerlink" href="#reading-and-adapting-the-code" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">model.py</span></code> defines the cells, their XY positions, membrane mechanisms, current
+clamps, and simulation settings. Replace this section with your own model while
+keeping references to cells and stimuli alive. The NEURON process stays running
+so Blender can request data through the normal live API. This is a single-process
+NEURON example; no MPI launch or custom compiled mechanisms are needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">render.py</span></code> runs in Blender’s Python interpreter. It registers the addon, connects
+to NEURON, configures section-level voltage recording, and imports the group.
+That import asks NEURON to run the simulation and return the recorded data over
+the live connection. It then checks for spikes, frames all the cells from their
+combined bounds, and renders using Cycles on CPU. Adjust the voltage range,
+color ramp, camera margin, and caption there. Changing the model’s duration also
+requires updating the 30 ms animation mapping in this file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run.py</span></code> starts and stops the two runtimes, limits the total execution time,
+and writes logs. <code class="docutils literal notranslate"><span class="pre">render.py</span></code> uses Blender’s video sequencer to assemble the
+PNGs into an MP4. Width and height must be even for H.264 video. <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> reuses
+the repository build command and runtime image.
+The run command overrides the development image’s VNC startup command;
+no display services are started and no network ports are published. The repository
+and tutorial scripts are mounted, so edits take effect without rebuilding.
+Rebuild with <code class="docutils literal notranslate"><span class="pre">./scripts/build.sh</span></code> only when changing the runtime dependencies.</p>
+<p>Open <code class="docutils literal notranslate"><span class="pre">scene.blend</span></code> in Blender and scrub the timeline (frames 0–59 by default).
+The baked material keyframes work without a running NEURON process or an addon
+installation. In solid view the material colors show activity; use rendered view
+or render a frame to see emission and the neon glare effect. Install BlenderNEURON
+if you also want to use its model controls for a new live session. The saved
+scene starts with a <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">0.0</span> <span class="pre">ms</span></code> caption; the tutorial rendering loop updates
+that text for each frame in the PNG sequence and movie.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="remote-connections.html" class="btn btn-neutral float-right" title="Remote Connections and MPI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

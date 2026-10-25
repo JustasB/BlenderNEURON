@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline Simulation Results &mdash; BlenderNEURON  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="BlenderNEURON Class Reference" href="reference.html" />
+    <link rel="prev" title="Remote Connections and MPI" href="remote-connections.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            BlenderNEURON
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Offline Simulation Results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#record-and-save-results">Record and Save Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-only-the-morphology">Save Only the Morphology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-with-mpi">Run with MPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-into-blender">Import into Blender</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-optional-display-values">Set Optional Display Values</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlenderNEURON</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Offline Simulation Results</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/offline-simulation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="offline-simulation-results">
+<h1>Offline Simulation Results<a class="headerlink" href="#offline-simulation-results" title="Permalink to this heading"></a></h1>
+<p>Build a NEURON model, save its cell morphology and optional recorded activity to a file,
+then import that file into Blender. Blender does not need to be running during
+the simulation. This works for a local script or an MPI job, including jobs on
+a remote cluster. No live connection, pairing, or SSH forwarding is needed.</p>
+<section id="record-and-save-results">
+<h2>Record and Save Results<a class="headerlink" href="#record-and-save-results" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Build your cells, connections, and stimuli in your NEURON script</p></li>
+<li><p>Configure the groups you want to visualize, before initializing the simulation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">blenderneuron.nrn.offline</span> <span class="kn">import</span> <span class="n">SimulationExport</span>
+
+<span class="n">export</span> <span class="o">=</span> <span class="n">SimulationExport</span><span class="p">()</span>
+<span class="n">export</span><span class="o">.</span><span class="n">add_group</span><span class="p">(</span>
+    <span class="s1">&#39;Network&#39;</span><span class="p">,</span> <span class="n">roots</span><span class="o">=</span><span class="p">[</span><span class="n">cell</span><span class="o">.</span><span class="n">soma</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">cells</span><span class="p">],</span>
+    <span class="n">recording_granularity</span><span class="o">=</span><span class="s1">&#39;Section&#39;</span><span class="p">,</span>
+    <span class="n">record_variable</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">recording_period</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">recording_time_start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">recording_time_end</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">export</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Pass NEURON root sections in <code class="docutils literal notranslate"><span class="pre">roots</span></code>; a cell can belong to only one group</p></li>
+<li><p>Add more groups with additional <code class="docutils literal notranslate"><span class="pre">add_group</span></code> calls</p></li>
+<li><p>‘Cell’ records the root section midpoint; ‘Section’ records every section midpoint</p></li>
+<li><p>‘3D Segment’ records between adjacent morphology points, matching Blender’s segment animation</p></li>
+<li><p>Recording is enabled by default, using voltage (<code class="docutils literal notranslate"><span class="pre">v</span></code>) at cell level with a 1 ms sampling period</p></li>
+<li><p>Start and end times are in milliseconds; an end time of 0 includes samples through the end of the run</p></li>
+<li><p>For a variable other than voltage, supply <code class="docutils literal notranslate"><span class="pre">variable_units</span></code> to describe its units</p></li>
+</ul>
+</li>
+<li><p>Initialize and run your simulation using your existing code</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">h</span><span class="o">.</span><span class="n">finitialize</span><span class="p">(</span><span class="o">-</span><span class="mi">65</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">continuerun</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">prepare()</span></code> installs the same NetStim/NetCon callback collectors used by
+live imports. It does not initialize or run the model. Configure it before
+<code class="docutils literal notranslate"><span class="pre">finitialize</span></code> and keep the export object and model cells alive throughout
+the run. Keep morphology fixed during recording. Each initialization clears
+the previous traces; samples are collected within the configured start/end window.</p>
+</li>
+<li><p>After the simulation finishes, save the results:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">export</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;simulation.bnresults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Saving collects the recorded samples without advancing or rerunning the
+simulation. The file contains group membership, full cell morphology,
+recording settings, units, and any collected activity. If a group has no
+samples, it is saved automatically as morphology only.</p>
+</li>
+</ol>
+<p>For a complete example, see <code class="docutils literal notranslate"><span class="pre">tutorials/offline_simulation.py</span></code> in the repository.
+Run it with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tutorials/offline_simulation.py</span></code>.</p>
+</section>
+<section id="save-only-the-morphology">
+<h2>Save Only the Morphology<a class="headerlink" href="#save-only-the-morphology" title="Permalink to this heading"></a></h2>
+<p>Call <code class="docutils literal notranslate"><span class="pre">save()</span></code> immediately after <code class="docutils literal notranslate"><span class="pre">prepare()</span></code> to save cells without initializing
+or running NEURON. No extra option is needed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="o">=</span> <span class="n">SimulationExport</span><span class="p">()</span>
+<span class="n">export</span><span class="o">.</span><span class="n">add_group</span><span class="p">(</span><span class="s1">&#39;Network&#39;</span><span class="p">,</span> <span class="n">roots</span><span class="o">=</span><span class="n">local_roots</span><span class="p">)</span>
+<span class="n">export</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
+<span class="n">export</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;morphology.bnresults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This writes the full section hierarchy, coordinates, and radii without activity
+arrays. Import the file with the same ‘Import Saved Simulation Results…’ button:
+Blender builds the cells without animation data.</p>
+<p>If you later run the simulation and call <code class="docutils literal notranslate"><span class="pre">save()</span></code> again on the same exporter,
+the new file includes the collected activity automatically. The choice is made
+per group on each save. A group with no samples in its recording window saves
+morphology only; a file can contain both recorded and morphology-only groups.</p>
+<p>Optionally pass <code class="docutils literal notranslate"><span class="pre">record_activity=False</span></code> to <code class="docutils literal notranslate"><span class="pre">add_group()</span></code> to disable recording
+for a group entirely. No activity collectors are installed for that group, and
+the recording variable need not exist in the model.</p>
+<p>Morphology-only exports also work with MPI; every rank still calls <code class="docutils literal notranslate"><span class="pre">prepare()</span></code>
+and <code class="docutils literal notranslate"><span class="pre">save()</span></code>, but the simulation step can be skipped.</p>
+</section>
+<section id="run-with-mpi">
+<h2>Run with MPI<a class="headerlink" href="#run-with-mpi" title="Permalink to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Create the exporter with your model’s parallel context:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="o">=</span> <span class="n">SimulationExport</span><span class="p">(</span><span class="n">parallel_context</span><span class="o">=</span><span class="n">pc</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>On each rank, add groups using that rank’s local root sections</p>
+<ul class="simple">
+<li><p>Use the same name for groups whose cells should be combined</p></li>
+<li><p>Recording settings and supplied display settings must agree for a shared group</p></li>
+<li><p>A rank may have different groups, empty groups, or no groups</p></li>
+</ul>
+</li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">export.prepare()</span></code> on every rank before running the simulation</p></li>
+<li><p>Run your parallel simulation normally, for example with <code class="docutils literal notranslate"><span class="pre">pc.psolve()</span></code></p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">export.save('simulation.bnresults')</span></code> on every rank</p>
+<ul class="simple">
+<li><p>Results gather on rank 0, which writes one combined file</p></li>
+<li><p>Cell and section names include a <code class="docutils literal notranslate"><span class="pre">rank0::</span></code>, <code class="docutils literal notranslate"><span class="pre">rank1::</span></code>, etc. prefix to distinguish identical local names</p></li>
+<li><p>Setup and save errors are reported to all ranks; do not catch an error and continue the simulation</p></li>
+<li><p>Rank 0 must have enough memory for the combined results</p></li>
+</ul>
+</li>
+</ol>
+<p>For example, launch the supplied example with:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpiexec<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>nrniv<span class="w"> </span>-mpi<span class="w"> </span>-python<span class="w"> </span>tutorials/offline_simulation.py
+</pre></div>
+</div>
+<p>Use your cluster’s launcher or submission command as appropriate. After the job
+finishes, copy the results file to your Blender computer. No coordinator loop
+or interactive Blender session is needed in the MPI script.</p>
+</section>
+<section id="import-into-blender">
+<h2>Import into Blender<a class="headerlink" href="#import-into-blender" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Start Blender with the BlenderNEURON add-on</p></li>
+<li><p>In the BlenderNEURON sidebar, expand ‘Import / Export’</p></li>
+<li><p>Press ‘Import Saved Simulation Results…’ and select your <code class="docutils literal notranslate"><span class="pre">.bnresults</span></code> file</p></li>
+<li><p>View the morphology, or scrub the timeline if the file contains recorded activity</p>
+<ul class="simple">
+<li><p>Use ‘Cell Group Options’ to change interaction level, colors, and brightness</p></li>
+<li><p>After changing display options, press ‘Show Imported Groups’</p></li>
+<li><p>Under ‘NEURON’, adjust ‘Blender frames per millisecond’ to change animation speed</p></li>
+<li><p>Recording settings describe what is already in the file and cannot be changed for this import</p></li>
+</ul>
+</li>
+</ol>
+<p>Node Status shows ‘Offline Results’ and the source filename. If you have a live
+NEURON connection or dataset, importing the file asks for confirmation before
+replacing it. Canceling leaves the connection and cells unchanged. Accepting
+switches to offline mode and disconnects the NEURON client; saved pairing settings
+are kept for later use.</p>
+<p>Importing another results file replaces the previously imported dataset and its
+cell objects. Other scene objects are kept. Matching group names retain their
+Blender display settings unless the new file explicitly overrides them.</p>
+<p>You can edit and render the visualization without NEURON running. Live simulation
+and export controls are disabled for offline results. To collect a different
+variable or recording detail, change the script, rerun the simulation, and import
+the new file.</p>
+<p>Saving a <code class="docutils literal notranslate"><span class="pre">.blend</span></code> keeps the offline mode, source filename, and a copy of the
+simulation snapshot. Reopening it restores the offline dataset even if NEURON is
+running or the original results file has been moved or deleted.</p>
+<p>To return to live use, press ‘Switch to Live NEURON…’ in Node Status and confirm.
+This removes the offline cells and groups before opening connection setup. Other
+scene objects are kept. The live dataset starts empty, including if the subsequent
+connection attempt fails. Add groups after connecting to your live model.</p>
+<p>A live disconnection does not switch modes or delete cells. After reconnecting,
+exporting retained cells asks for confirmation because the running model may have
+changed. A process restart does not prove that it is a different model; review
+the warning and choose whether to export or import the live cells again.</p>
+</section>
+<section id="set-optional-display-values">
+<h2>Set Optional Display Values<a class="headerlink" href="#set-optional-display-values" title="Permalink to this heading"></a></h2>
+<p>Supply <code class="docutils literal notranslate"><span class="pre">display</span></code> when declaring a group to set its initial appearance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">export</span><span class="o">.</span><span class="n">add_group</span><span class="p">(</span>
+    <span class="s1">&#39;Network&#39;</span><span class="p">,</span> <span class="n">roots</span><span class="o">=</span><span class="n">local_roots</span><span class="p">,</span>
+    <span class="n">recording_granularity</span><span class="o">=</span><span class="s1">&#39;Section&#39;</span><span class="p">,</span>
+    <span class="n">display</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;default_color&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+        <span class="s1">&#39;interaction_granularity&#39;</span><span class="p">:</span> <span class="s1">&#39;Cell&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;animation_range_low&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">85</span><span class="p">,</span>
+        <span class="s1">&#39;animation_range_high&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Each supplied value overrides the corresponding Blender setting on every import.
+Omitted values retain the existing group’s settings, or use the add-on defaults
+for a new group. Animation speed stays in Blender and is not stored in the file.</p>
+<p>Other supported display values are <code class="docutils literal notranslate"><span class="pre">smooth_sections</span></code>, <code class="docutils literal notranslate"><span class="pre">spherize_soma_if_DeqL</span></code>,
+<code class="docutils literal notranslate"><span class="pre">as_lines</span></code>, <code class="docutils literal notranslate"><span class="pre">segment_subdivisions</span></code>, <code class="docutils literal notranslate"><span class="pre">circular_subdivisions</span></code>,
+<code class="docutils literal notranslate"><span class="pre">default_brightness</span></code>, <code class="docutils literal notranslate"><span class="pre">animate_brightness</span></code>, <code class="docutils literal notranslate"><span class="pre">max_brightness</span></code>,
+<code class="docutils literal notranslate"><span class="pre">animate_color</span></code>, and <code class="docutils literal notranslate"><span class="pre">simplification_epsilon</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="remote-connections.html" class="btn btn-neutral float-left" title="Remote Connections and MPI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reference.html" class="btn btn-neutral float-right" title="BlenderNEURON Class Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

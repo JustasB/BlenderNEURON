@@ -50,6 +50,9 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="blenderneuron.html">Abstract Classes</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Classes for NEURON</a><ul>
@@ -59,15 +62,20 @@
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.clamp_section_x"><code class="docutils literal notranslate"><span class="pre">NeuronNode.clamp_section_x()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_netcon_syn"><code class="docutils literal notranslate"><span class="pre">NeuronNode.create_netcon_syn()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.create_synapses"><code class="docutils literal notranslate"><span class="pre">NeuronNode.create_synapses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.gather_group_dicts"><code class="docutils literal notranslate"><span class="pre">NeuronNode.gather_group_dicts()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_group_dicts()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_roots"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_roots()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_sim_params"><code class="docutils literal notranslate"><span class="pre">NeuronNode.get_sim_params()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi"><code class="docutils literal notranslate"><span class="pre">NeuronNode.init_mpi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.initialize_groups"><code class="docutils literal notranslate"><span class="pre">NeuronNode.initialize_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.merge_mpi_group_fragments"><code class="docutils literal notranslate"><span class="pre">NeuronNode.merge_mpi_group_fragments()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name"><code class="docutils literal notranslate"><span class="pre">NeuronNode.rank_section_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.run_simulation"><code class="docutils literal notranslate"><span class="pre">NeuronNode.run_simulation()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.section_rx"><code class="docutils literal notranslate"><span class="pre">NeuronNode.section_rx</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.segment_gid"><code class="docutils literal notranslate"><span class="pre">NeuronNode.segment_gid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.set_sim_params"><code class="docutils literal notranslate"><span class="pre">NeuronNode.set_sim_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.start_mpi_coordinator"><code class="docutils literal notranslate"><span class="pre">NeuronNode.start_mpi_coordinator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.stop_mpi_coordinator"><code class="docutils literal notranslate"><span class="pre">NeuronNode.stop_mpi_coordinator()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_groups"><code class="docutils literal notranslate"><span class="pre">NeuronNode.update_groups()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_section_index"><code class="docutils literal notranslate"><span class="pre">NeuronNode.update_section_index()</span></code></a></li>
 </ul>
@@ -77,6 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.create_collector()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.from_skeletal_blender_group()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.from_updated_blender_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.prepare_activity()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.save_recording_params()</span></code></a></li>
 </ul>
 </li>
@@ -87,6 +96,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root"><code class="docutils literal notranslate"><span class="pre">NeuronSection.from_skeletal_blender_root()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.from_updated_blender_root"><code class="docutils literal notranslate"><span class="pre">NeuronSection.from_updated_blender_root()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii"><code class="docutils literal notranslate"><span class="pre">NeuronSection.get_coords_and_radii()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.rebuild_segment_midpoints_recursive"><code class="docutils literal notranslate"><span class="pre">NeuronSection.rebuild_segment_midpoints_recursive()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii"><code class="docutils literal notranslate"><span class="pre">NeuronSection.update_coords_and_radii()</span></code></a></li>
 </ul>
 </li>
@@ -167,9 +177,23 @@ extracellular potentials will be computed. See the warning comment in:</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.gather_group_dicts">
+<span class="sig-name descname"><span class="pre">gather_group_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.gather_group_dicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.gather_group_dicts" title="Permalink to this definition"></a></dt>
+<dd><p>Gather local group dictionaries on rank zero and merge their roots.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ParallelContext.py_alltoall</span></code> is used rather than an external MPI
+dependency.  Each rank sends its local fragment only to rank zero, so
+large activity traces are not replicated on every worker.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">
 <span class="sig-name descname"><span class="pre">get_group_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compressed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.get_group_dicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return the selected groups, gathering rank-local roots under MPI.</p>
+<p>When MPI is enabled this is a collective operation: every rank must call
+it in the same order.  Only rank zero receives the complete result;
+non-root ranks return <code class="docutils literal notranslate"><span class="pre">None</span></code>.  Keeping the collective boundary here
+means a caller can send precisely one complete payload to Blender.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.get_roots">
@@ -183,7 +207,7 @@ extracellular potentials will be computed. See the warning comment in:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.init_mpi">
-<span class="sig-name descname"><span class="pre">init_mpi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallel_ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpimap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.init_mpi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_mpi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parallel_ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpimap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.init_mpi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.init_mpi" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -192,9 +216,22 @@ extracellular potentials will be computed. See the warning comment in:</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.merge_mpi_group_fragments">
+<span class="sig-name descname"><span class="pre">merge_mpi_group_fragments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fragments</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.merge_mpi_group_fragments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.merge_mpi_group_fragments" title="Permalink to this definition"></a></dt>
+<dd><p>Merge rank fragments deterministically, restoring Blender names.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name">
 <span class="sig-name descname"><span class="pre">rank_section_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">single_rank_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.rank_section_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.run_simulation">
+<span class="sig-name descname"><span class="pre">run_simulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.run_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.run_simulation" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize and run, dispatching to every rank under the coordinator.</p>
+<p>Without the coordinator, MPI callers must call this on every rank.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.section_rx">
@@ -231,9 +268,28 @@ index. Where section(0) -&gt; seg_id=0 and section(1) -&gt; seg_id=nseg-1</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.start_mpi_coordinator">
+<span class="sig-name descname"><span class="pre">start_mpi_coordinator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.start_mpi_coordinator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.start_mpi_coordinator" title="Permalink to this definition"></a></dt>
+<dd><p>Start rank-zero Blender coordination after MPI model setup.</p>
+<p>Call this on every rank after <code class="docutils literal notranslate"><span class="pre">init_mpi</span></code>.  It returns immediately on
+rank zero, which remains available to Blender; worker ranks enter the
+request loop and return only after <code class="docutils literal notranslate"><span class="pre">stop_mpi_coordinator</span></code> is called
+on rank zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.stop_mpi_coordinator">
+<span class="sig-name descname"><span class="pre">stop_mpi_coordinator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.stop_mpi_coordinator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.stop_mpi_coordinator" title="Permalink to this definition"></a></dt>
+<dd><p>Stop worker request loops.  This must be called from rank zero.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.update_groups">
 <span class="sig-name descname"><span class="pre">update_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronnode.html#NeuronNode.update_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronnode.NeuronNode.update_groups" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Apply group dictionaries, serialized groups, or flat group-file tables.</p>
+<p>A file loaded with json.load() can be passed as one item in the list.
+Call deserialize() first if application code needs to inspect its roots.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronnode.NeuronNode.update_section_index">
@@ -273,6 +329,15 @@ segments. This method does nothing if group.record_activity is False</p>
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group">
 <span class="sig-name descname"><span class="pre">from_updated_blender_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.from_updated_blender_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_updated_blender_group" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity">
+<span class="sig-name descname"><span class="pre">prepare_activity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.prepare_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity" title="Permalink to this definition"></a></dt>
+<dd><p>Clear traces and refresh geometry before the first sample of a run.</p>
+<p>Rebuilding also captures direct NEURON pt3d edits between runs. Direct
+pt3d edits during collection require an explicit cache rebuild; Blender
+coordinate updates invalidate the affected sections automatically.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params">
@@ -353,6 +418,12 @@ dendrite, 5th segment. Segment order is determined by the order in which they ap
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.rebuild_segment_midpoints_recursive">
+<span class="sig-name descname"><span class="pre">rebuild_segment_midpoints_recursive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.rebuild_segment_midpoints_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.rebuild_segment_midpoints_recursive" title="Permalink to this definition"></a></dt>
+<dd><p>Refresh local geometry once per initialization, without recursion.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii">
 <span class="sig-name descname"><span class="pre">update_coords_and_radii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blender_section</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronsection.html#NeuronSection.update_coords_and_radii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronsection.NeuronSection.update_coords_and_radii" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -372,7 +443,7 @@ dendrite, 5th segment. Segment order is determined by the order in which they ap
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

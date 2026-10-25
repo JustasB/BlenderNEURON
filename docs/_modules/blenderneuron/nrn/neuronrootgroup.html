@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
@@ -108,11 +111,23 @@
             <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="p">[</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">section</span>
 
-        <span class="c1"># Clear previously recorded activity on h.run()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fih</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">FInitializeHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clear_activity</span><span class="p">)</span>
+        <span class="c1"># Clear recorded activity whenever the simulation is initialized.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fih</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">FInitializeHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prepare_activity</span><span class="p">)</span>
 
-        <span class="c1"># Setup to collect activity during h.run()</span>
+        <span class="c1"># Set up activity collection for the next simulation.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_collector</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NeuronRootGroup.prepare_activity"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_activity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear traces and refresh geometry before the first sample of a run.</span>
+
+<span class="sd">        Rebuilding also captures direct NEURON pt3d edits between runs. Direct</span>
+<span class="sd">        pt3d edits during collection require an explicit cache rebuild; Blender</span>
+<span class="sd">        coordinate updates invalidate the affected sections automatically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_activity</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">record_activity</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_granularity</span> <span class="o">==</span> <span class="s1">&#39;3D Segment&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">roots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">root</span><span class="o">.</span><span class="n">rebuild_segment_midpoints_recursive</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NeuronRootGroup.save_recording_params"><a class="viewcode-back" href="../../../blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.save_recording_params">[docs]</a>    <span class="k">def</span> <span class="nf">save_recording_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blender_group</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">record_activity</span> <span class="o">=</span> <span class="n">blender_group</span><span class="p">[</span><span class="s2">&quot;record_activity&quot;</span><span class="p">]</span>
@@ -194,7 +209,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
