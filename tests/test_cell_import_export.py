@@ -101,7 +101,7 @@ return_value = True
 
             # Test if coordinates in NRN changed by same amount
             z_soma, z_dend1, z_dend2 = ncn.client.run_command(
-                'return_value = [h.z3d(0,sec=tc.soma), h.z3d(0,sec=tc.dendrites[-1]), h.z3d(0,sec=tc.dendrites[15])]'
+                'return_value = [h.z3d(0,sec=tc.soma), h.z3d(0,sec=list(tc.dendrites)[-1]), h.z3d(0,sec=tc.dendrites[15])]'
             )
 
             self.assertEqual(z_soma, 100.0)
@@ -177,7 +177,7 @@ return_value = True
 
             # Test if coordinates in NRN changed by same amount
             z_soma, z_dend1, z_dend2 = ncn.client.run_command(
-                'return_value = [h.z3d(0,sec=tc.soma), h.z3d(0,sec=tc.dendrites[-1]), h.z3d(0,sec=tc.dendrites[15])]'
+                'return_value = [h.z3d(0,sec=tc.soma), h.z3d(0,sec=list(tc.dendrites)[-1]), h.z3d(0,sec=tc.dendrites[15])]'
             )
 
             self.assertEqual(z_soma, 100.0)

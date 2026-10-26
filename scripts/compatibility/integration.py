@@ -61,7 +61,7 @@ def run_lane(lane, args):
             '--name', container, '-v', str(ROOT) + ':/source:ro',
             '-v', str(directory) + ':/reports', '-e', 'PYTHONUNBUFFERED=1',
             '-e', 'PYTHONDONTWRITEBYTECODE=1', '-e', 'OPENBLAS_NUM_THREADS=1',
-            '-e', 'OMP_NUM_THREADS=2', '-e', 'LIBGL_ALWAYS_SOFTWARE=1',
+            '-e', 'OMP_NUM_THREADS=2', '-e', 'OMPI_MCA_rmaps_base_oversubscribe=1', '-e', 'LIBGL_ALWAYS_SOFTWARE=1',
             '-e', 'LP_NUM_THREADS=1', '-e', 'LP_NATIVE_VECTOR_WIDTH=128',
             '-e', 'EXPECTED_ARCH=x86_64', '-e', 'EXPECTED_NEURON=' + neuron,
             '-e', 'EXPECTED_BLENDER=' + blender, '-e', 'EXPECTED_PYTHON=' + python,

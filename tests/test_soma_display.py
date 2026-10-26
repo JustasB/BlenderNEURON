@@ -8,6 +8,12 @@ class TestSomaDisplay(unittest.TestCase):
         subprocess.run(['blender', '-b', '--factory-startup', '--python-exit-code', '1',
                         '--python', 'tests/soma_display_worker.py'], check=True, timeout=90)
 
+    def test_legacy_incremental_geometry(self):
+        subprocess.run(['blender', '-b', '--factory-startup', '--python-exit-code', '1',
+                        '--python-expr', 'from blenderneuron.blender import somadisplay; '
+                        'somadisplay._legacy_nodes = True',
+                        '--python', 'tests/soma_incremental_worker.py'], check=True, timeout=60)
+
     def test_animation_render(self):
         subprocess.run(['blender', '-b', '--factory-startup', '--python-exit-code', '1',
                         '--python', 'tests/soma_animation_worker.py'], check=True, timeout=60)

@@ -60,6 +60,7 @@ elif sys.argv[1] == 'run':
         for call in runs:
             self.assertIn('/source/scripts/compatibility/integration_check.py', call)
             self.assertIn('BLENDERNEURON_TEST_KEEP_GOING=1', call)
+            self.assertIn('OMPI_MCA_rmaps_base_oversubscribe=1', call)
 
     def test_suite_deadline_reports_timeout_and_removes_container(self):
         completed = self.run_runner('baseline', '--timeout', '1', FAKE_SLEEP='60')
