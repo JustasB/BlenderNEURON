@@ -35,10 +35,10 @@ class TestProcessCleanup(BlenderTestCase):
             exec(command, namespace)
             replies.append(namespace['return_value'])
             if len(replies) == 1:
-                object_type.BlenderNEURON_node = SimpleNamespace(client=None)
+                object_type.BlenderNEURON_node = SimpleNamespace(client=None, client_address=None)
             elif len(replies) == 2:
                 object_type.BlenderNEURON_node.client = Mock()
-                object_type.BlenderNEURON_node.client.ping.return_value = 1
+                object_type.BlenderNEURON_node.client_address = 'http://127.0.0.1:1'
             return namespace['return_value']
 
         with patch('tests.ServerProxy') as proxy, \
@@ -47,6 +47,7 @@ class TestProcessCleanup(BlenderTestCase):
             proxy.return_value.__enter__.return_value.run_command.side_effect = run_command
             process.wait_ready(connected=True)
         self.assertEqual(replies, [False, False, True])
+        object_type.BlenderNEURON_node.client.ping.assert_not_called()
 
     def test_context_exception_stops_process(self):
         process = PythonProcess(cmd_args=python_args('import time; time.sleep(60)'), sleep=0)
@@ -134,6 +135,33 @@ class TestProcessCleanup(BlenderTestCase):
 
     def test_runner_reaps_orphans_after_normal_exit(self):
         self.check_runner_cleanup(hang=False)
+
+    def test_runner_keep_going_preserves_failure_status(self):
+        with tempfile.TemporaryDirectory() as directory:
+            marker = os.path.join(directory, 'attempts')
+            script = os.path.join(directory, 'fixture.py')
+            with open(script, 'w') as stream:
+                stream.write('import sys\n'
+                             'with open(%r, "a") as stream: stream.write(sys.argv[-1] + "\\n")\n'
+                             'raise SystemExit(7 if "First." in sys.argv[-1] else 0)\n' % marker)
+            code = ('import unittest, test_with_coverage as runner\n'
+                    'class First(unittest.TestCase):\n'
+                    ' def test_first(self): pass\n'
+                    'class Second(unittest.TestCase):\n'
+                    ' def test_second(self): pass\n'
+                    'suite = unittest.TestSuite([First("test_first"), Second("test_second")])\n'
+                    'runner.unittest.TestLoader.discover = lambda *a, **k: suite\n'
+                    'runner.test_file = lambda test: %r\n'
+                    'raise SystemExit(runner.main())\n' % script)
+            for keep_going, attempts in (('0', 1), ('1', 2)):
+                with self.subTest(keep_going=keep_going):
+                    with open(marker, 'w'):
+                        pass
+                    env = dict(os.environ, BLENDERNEURON_TEST_KEEP_GOING=keep_going)
+                    completed = subprocess.run([sys.executable, '-c', code], env=env, timeout=15)
+                    self.assertEqual(completed.returncode, 7)
+                    with open(marker) as stream:
+                        self.assertEqual(len(stream.readlines()), attempts)
 
     def test_runner_reaps_orphans_after_timeout(self):
         self.check_runner_cleanup(hang=True)

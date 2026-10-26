@@ -1,4 +1,5 @@
 import json
+import multiprocessing
 import os
 import shlex
 import socket
@@ -63,7 +64,8 @@ class BlenderNEURONProcess:
                         ready = client.run_command(
                             'node = getattr(bpy.types.Object, "BlenderNEURON_node", None);'
                             'node_client = getattr(node, "client", None);'
-                            'return_value = getattr(node, "offline_results", False) or (node_client is not None and node_client.ping() == 1)')
+                            'return_value = getattr(node, "offline_results", False) or '
+                            '(node_client is not None and getattr(node, "client_address", None) is not None)')
                     else:
                         ready = client.ping() == 1
                     if ready:
@@ -138,8 +140,12 @@ class BlenderTestCase(TestCase):
                 traceback.print_exc()
                 result.put([-1, error])
 
-        result = Queue()
-        process = Process(target=func_with_exception, args=(result,))
+        # These workers intentionally inherit local NEURON state and closures.
+        # Python 3.14 changed Linux's default to forkserver; select fork locally.
+        context = (multiprocessing.get_context('fork')
+                   if hasattr(multiprocessing, 'get_context') else multiprocessing)
+        result = context.Queue()
+        process = context.Process(target=func_with_exception, args=(result,))
         process.start()
         deadline = time.monotonic() + timeout
         try:

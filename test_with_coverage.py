@@ -113,11 +113,15 @@ def main():
     signal.signal(signal.SIGTERM, interrupted)
     timeout = float(os.environ.get('BLENDERNEURON_TEST_TIMEOUT', '30'))
     suite = unittest.TestLoader().discover(start_dir='tests')
+    keep_going = os.environ.get('BLENDERNEURON_TEST_KEEP_GOING') == '1'
+    failed_status = 0
     for batch in test_batches(iter_tests(suite)):
         if len(batch) > 1:
             status = run_batch(batch, timeout)
             if status:
-                return status
+                failed_status = failed_status or status
+                if not keep_going:
+                    return status
             continue
         test = batch[0]
         test_name = test.id().rsplit('.', 2)[-2] + '.' + test._testMethodName
@@ -136,8 +140,10 @@ def main():
             finally:
                 reap_descendants()
         if status:
-            return status
-    return 0
+            failed_status = failed_status or status
+            if not keep_going:
+                return status
+    return failed_status
 
 
 if __name__ == '__main__':

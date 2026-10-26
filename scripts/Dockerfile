@@ -25,7 +25,7 @@ RUN chmod +x miniconda.sh && ./miniconda.sh -b -p $HOME/miniconda && source $HOM
 ENV PATH=$PATH:/root/miniconda/bin/
 
 RUN case "$TARGETARCH" in \
-        amd64) python install_blender.py && rm blender.tar.xz ;; \
+        amd64) python install_blender.py ;; \
         arm64) apt-get update && apt-get install -y blender python3-numpy python3-coverage ;; \
         *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; \
     esac

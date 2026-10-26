@@ -57,40 +57,39 @@ jobs:
       - store_artifacts:
           path: tutorials/02-docker-script/output
           destination: headless-tutorial
-  build-and-test:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
-    docker:
-      # Specify the version you desire here
-      # See:https://circleci.com/developer/images/image/cimg/python
-      - image: cimg/python:3.7.16
-
-    # Add steps to the job
-    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
+  compatibility:
+    parameters:
+      lane:
+        type: enum
+        enum: [baseline, python2, neuron7, neuron9, blender2, blender4]
+    # Native x86-64 VM: official wheels/Blender archives, local Docker mounts.
+    machine:
+      image: ubuntu-2404:current
+      docker_layer_caching: true
+    resource_class: medium
     steps:
-      # Checkout the code as the first step.
       - checkout
       - run:
-          command: pip install neuron coverage codecov
+          name: Full compatibility suite — << parameters.lane >>
+          # The runner separately bounds image setup (30m) and the suite (10m).
+          no_output_timeout: 35m
+          command: python3 scripts/test-compatibility.py << parameters.lane >>
       - run:
+          name: Make compatibility reports readable
+          when: always
           command: |
-            sudo apt update 
-            sudo apt-get install -y libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0 openmpi-bin libopenmpi-dev
-            sudo apt -y upgrade
-      - run:
-          command: python scripts/install_blender.py
-      - run:
-          command: |
-            export REPO=$(pwd)
-            export PATH=$PATH:/home/circleci/project/blender
-            export PYTHONPATH=$REPO/
-            export BLENDER_SYSTEM_SCRIPTS=$REPO/blender_scripts
-            $REPO/blender/5.2/python/bin/python3.13 -m pip install coverage==7.12
-            mkdir -p $BLENDER_SYSTEM_SCRIPTS/addons
-            ln -sfn $REPO/blenderneuron $BLENDER_SYSTEM_SCRIPTS/addons/blenderneuron
-            $REPO/blender/blender --python scripts/enable_addon.py --background -noaudio
-            xvfb-run --auto-servernum --server-args "-screen 0 1920x1080x24" ./test.sh
-      - codecov/upload
+            if [ -d .compatibility-results ]; then
+              sudo chown -R "$(id -u):$(id -g)" .compatibility-results
+            fi
+      - store_artifacts:
+          path: .compatibility-results/<< parameters.lane >>
+          destination: compatibility/<< parameters.lane >>
+      - when:
+          condition:
+            equal: [baseline, << parameters.lane >>]
+          steps:
+            - codecov/upload:
+                file: .compatibility-results/baseline/coverage.xml
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
@@ -98,6 +97,10 @@ workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - build-and-test
+      - compatibility:
+          name: compatibility-<< matrix.lane >>
+          matrix:
+            parameters:
+              lane: [baseline, python2, neuron7, neuron9, blender2, blender4]
       - docker-tutorial
       - windows-connections

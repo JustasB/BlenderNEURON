@@ -77,4 +77,11 @@ def main(path, mode):
 
 
 if __name__ == '__main__':
-    main(sys.argv[-2], sys.argv[-1])
+    try:
+        main(sys.argv[-2], sys.argv[-1])
+    except Exception:
+        # Older nrniv versions print uncaught Python exceptions but exit zero.
+        # Explicit SystemExit preserves the fixture's error-status contract.
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

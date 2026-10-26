@@ -60,7 +60,8 @@ class TestTestRunner(unittest.TestCase):
                 'signal.signal(signal.SIGTERM, r.interrupted);'
                 'suite=unittest.defaultTestLoader.loadTestsFromName("batch_fixture.Fixture");'
                 'sys.exit(r.run_batch(list(suite), 1.5))')
-            env = dict(os.environ, PYTHONPATH=directory + os.pathsep + os.getcwd())
+            env = dict(os.environ, PYTHONPATH=directory + os.pathsep + os.getcwd(),
+                       BLENDERNEURON_TEST_KEEP_GOING='0')
             process = subprocess.Popen([sys.executable, '-c', code], env=env,
                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             try:

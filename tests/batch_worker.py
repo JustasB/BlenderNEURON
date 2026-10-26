@@ -18,7 +18,8 @@ class ProgressResult(unittest.TextTestResult):
 if __name__ == '__main__':
     PROGRESS_FD = int(sys.argv[1])
     suite = unittest.defaultTestLoader.loadTestsFromNames(sys.argv[2:])
-    result = unittest.TextTestRunner(resultclass=ProgressResult, failfast=True,
+    result = unittest.TextTestRunner(resultclass=ProgressResult,
+                                     failfast=os.environ.get('BLENDERNEURON_TEST_KEEP_GOING') != '1',
                                      verbosity=2).run(suite)
     if result.wasSuccessful():
         os.write(PROGRESS_FD, b'COMPLETE\n')
