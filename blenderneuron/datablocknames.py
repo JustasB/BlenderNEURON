@@ -3,6 +3,7 @@
 Schema 1 uses a JSON array [1, namespace, role, canonical name, disambiguator]
 encoded as UTF-8 and SHA-256. Do not change this encoding without a migration.
 """
+from blenderneuron.compat import string_types
 import hashlib
 import json
 import re
@@ -18,7 +19,7 @@ def name_limit(version):
 
 def entity_key(namespace, role, canonical_name, disambiguator=''):
     fields = (namespace, role, canonical_name, disambiguator)
-    if any(not isinstance(field, str) or '\0' in field for field in fields):
+    if any(not isinstance(field, string_types) or '\0' in field for field in fields):
         raise ValueError('Identity fields must be strings without NUL characters')
     if not namespace or not role or not canonical_name:
         raise ValueError('Namespace, role and canonical name must be nonempty')
@@ -45,7 +46,7 @@ class MappingError(RuntimeError):
     pass
 
 
-class NameRegistry:
+class NameRegistry(object):
     """Own references, never infer ownership from a visible data-block name."""
     def __init__(self, maximum_bytes=None):
         import bpy
@@ -76,7 +77,7 @@ class NameRegistry:
             return entity_key(*key[1:])
         except (ValueError, TypeError) as exc:
             raise MappingError('Malformed BlenderNEURON metadata on %r: %s. Remove and re-import it.'
-                               % (block.name, exc)) from exc
+                               % (block.name, exc))
 
     def rebuild(self):
         entries = {}

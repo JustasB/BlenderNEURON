@@ -15,13 +15,20 @@ ARG NEURON_VERSION=8.2.7
 # Fail rather than silently compiling an unavailable wheel.
 RUN coverage_pin=$(python -c 'import sys; print("5.5" if sys.version_info[0] == 2 else "7.10.7" if sys.version_info < (3, 10) else "7.12")') \
     && python -m pip install --no-cache-dir --only-binary=neuron "neuron==${NEURON_VERSION}" "coverage==${coverage_pin}"
+RUN if python -c 'import sys; sys.exit(sys.version_info[0] != 2)'; then \
+      python -m pip install --no-cache-dir future==0.18.3 pathlib2==2.3.7.post1 \
+        backports.weakref==1.0.post1 monotonic==1.6 mock==3.0.5 unittest2==1.1.0 \
+        subprocess32==3.5.4 backports.tempfile==1.0; \
+    fi
+COPY compatibility/python2_startup.py /compat-python2/sitecustomize.py
 COPY install_blender.py /compat/install_blender.py
 ARG BLENDER_VERSION=5.2.3
 RUN python3 /compat/install_blender.py --version "${BLENDER_VERSION}" --destination /blender --coverage
 COPY compatibility/integration_check.py /compat/integration_check.py
 COPY compatibility/python2_assessment.py /compat/python2_assessment.py
 ENV PATH=/blender:$PATH
-ENV PYTHONPATH=/BlenderNEURON
+ENV PYTHONPATH=/compat-python2:/BlenderNEURON
+ENV PYTHONIOENCODING=utf-8
 ENV BLENDER_USER_SCRIPTS=/tmp/blender-scripts
 ENV DISPLAY=:0
 ENV COVERAGE_PROCESS_START=.coveragerc

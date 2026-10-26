@@ -1,3 +1,4 @@
+from __future__ import division
 """Geometry-cache equivalence and lifecycle regressions (run inside Docker)."""
 import sys
 import unittest
@@ -132,7 +133,7 @@ class TestSegmentMidpointCache(unittest.TestCase):
             while stack:
                 item = stack.pop()
                 self.assertNotIn('_segment_midpoints', item)
-                self.assertEqual(list(item['segment_activity']), ['0', '1'])
+                self.assertEqual(sorted(item['segment_activity']), ['0', '1'])
                 self.assertEqual([len(trace['values']) for trace in item['segment_activity'].values()], [5, 5])
                 stack.extend(item['children'])
 

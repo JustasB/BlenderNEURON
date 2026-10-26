@@ -1,3 +1,5 @@
+from blenderneuron import compat
+
 bl_info = {
     "name": "BlenderNEURON",
     "description": "A Blender GUI for NEURON simulator",

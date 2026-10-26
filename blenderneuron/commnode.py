@@ -1,6 +1,8 @@
 import io
 import hmac
-import secrets
+from blenderneuron import compat as secrets
+from blenderneuron.compat import string_types
+import errno
 from blenderneuron import connection
 
 import ast
@@ -179,7 +181,7 @@ class CommNode(object):
                     self.send_error(403, 'Pairing authentication failed')
                     return
                 self.rfile = io.BytesIO(body)
-                super().do_POST()
+                SimpleXMLRPCRequestHandler.do_POST(self)
 
             def _dispatch(self, method, params):
                 try:
@@ -391,7 +393,7 @@ class CommNode(object):
             if not isinstance(info, dict):
                 raise ValueError("Pairing information must be a JSON object")
             secret = info.get("secret", remembered.get("secret", self.secret))
-            if not isinstance(secret, str) or len(secret) != 64 or any(c not in "0123456789abcdef" for c in secret):
+            if not isinstance(secret, string_types) or len(secret) != 64 or any(c not in "0123456789abcdef" for c in secret):
                 raise ValueError("Invalid pairing secret")
             if info and info.get("version") != 1:
                 raise ValueError("Unsupported pairing version")
@@ -417,14 +419,15 @@ class CommNode(object):
             fd, temporary = tempfile.mkstemp(dir=str(path.parent))
             with os.fdopen(fd, 'w') as stream:
                 stream.write(self.secret)
-            os.replace(temporary, str(path))
+            secrets.replace(temporary, str(path))
         else:
             self.connection_settings["secret"] = self.secret
             self.connection_settings.pop("peer_address", None)
         try:
             (connection.config_directory() / (self.connection_end + "-manual.json")).unlink()
-        except FileNotFoundError:
-            pass
+        except OSError as error:
+            if error.errno != errno.ENOENT:
+                raise
         connection.save(self.connection_end + "-connection.json", self.connection_settings)
         self.client = None
         self.client_address = None

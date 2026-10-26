@@ -62,7 +62,7 @@ class NeuronRootGroup(RootGroup):
         if recorder is not None:
             recorder.close(queue_cleared)
             self._recorder = None
-        super().clear_activity()
+        RootGroup.clear_activity(self)
 
     def close(self):
         """Detach owned recordings and initialization callbacks."""

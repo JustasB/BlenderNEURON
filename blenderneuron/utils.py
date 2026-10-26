@@ -1,3 +1,5 @@
+from blenderneuron.compat import string_types, integer_types
+
 def serialize(obj):
     """Serialize supported values as a shallow, deep-tree-safe JSON table."""
     import json
@@ -5,7 +7,7 @@ def serialize(obj):
     nodes = []
     pending = []
     container_types = (dict, list, tuple)
-    scalar_types = (str, int, float, bool, type(None))
+    scalar_types = string_types + integer_types + (float, bool, type(None))
 
     def reserve(value):
         index = len(nodes)

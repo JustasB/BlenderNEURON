@@ -165,11 +165,13 @@ class TestVectorRecording(unittest.TestCase):
             h.continuerun(.12)
             vectors = list(group._recorder.vectors)
             counts = [len(vector) for vector in vectors]
+            root = next(iter(group.roots.values()))
             group_ref = weakref.ref(group)
-            self.groups.clear()
+            del self.groups[:]
             del group
-            gc.collect()
             self.assertIsNone(group_ref())
+            gc.collect()
+            self.assertIsNotNone(root)
             h.continuerun(1)
             self.assertTrue(all(len(vector) <= count + 1 for vector, count in zip(vectors, counts)))
             drained = [len(vector) for vector in vectors]

@@ -1,3 +1,4 @@
+from __future__ import print_function
 """One interpreter for an explicitly audited batch; parent owns the watchdog."""
 import os
 from pathlib import Path
@@ -12,7 +13,7 @@ sys.path.insert(0, str(HERE))
 class ProgressResult(unittest.TextTestResult):
     def startTest(self, test):
         os.write(PROGRESS_FD, (test.id() + '\n').encode('utf-8'))
-        super().startTest(test)
+        unittest.TextTestResult.startTest(self, test)
 
 
 if __name__ == '__main__':

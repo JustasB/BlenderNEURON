@@ -1,3 +1,4 @@
+from blenderneuron.compat import string_types
 import copy
 import json
 import unittest
@@ -103,7 +104,7 @@ class TestMorphologyPartition(unittest.TestCase):
         def dispatch(operation, payloads):
             # NEURON's collective pickles its input; nesting must stay shallow.
             pickle.dumps(payloads)
-            self.assertTrue(all(isinstance(payload, str) for payload in payloads))
+            self.assertTrue(all(isinstance(payload, string_types) for payload in payloads))
             for payload in payloads:
                 self.node._execute_mpi_operation(operation, payload)
 

@@ -182,7 +182,7 @@ with CommNode('Blender') as peer:
                 deadline = time.monotonic() + 10
                 while not published.exists() and process.poll() is None and time.monotonic() < deadline:
                     time.sleep(0.01)
-                self.assertTrue(published.exists())
+                self.assertTrue(published.exists(), process.stderr.read() if process.poll() is not None else 'Peer did not publish its endpoint')
                 node.configure_connection('manual', pairing=json.loads(published.read_text()),
                                           listen_port=node.server_port)
                 self.assertTrue(node.test_connection())

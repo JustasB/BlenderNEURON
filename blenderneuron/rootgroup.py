@@ -1,8 +1,10 @@
+from io import open
+from blenderneuron.compat import string_types
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from blenderneuron.activity import Activity
 
-class RootGroup:
+class RootGroup(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -33,10 +35,10 @@ class RootGroup:
         """
         from blenderneuron.utils import deserialize
 
-        with open(file_name, 'r', encoding='utf-8') as stream:
+        with open(str(file_name), 'r', encoding='utf-8') as stream:
             group = deserialize(stream.read())
         if (not isinstance(group, dict)
-                or not isinstance(group.get('name'), str)
+                or not isinstance(group.get('name'), string_types)
                 or not isinstance(group.get('roots'), list)):
             raise ValueError("Expected a saved BlenderNEURON group with name and roots")
         return group

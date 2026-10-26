@@ -20,11 +20,12 @@ class TestCompatibilityRunner(unittest.TestCase):
         self.root = Path(self.directory.name)
         scripts = self.root / 'scripts'
         (scripts / 'compatibility').mkdir(parents=True)
-        for path in ('test-compatibility.py', 'compatibility/integration.py'):
-            shutil.copy2(ROOT / 'scripts' / path, scripts / path)
+        for path in ('test-compatibility.py', 'compatibility/__init__.py', 'compatibility/integration.py'):
+            shutil.copy2(str(ROOT / 'scripts' / path), str(scripts / path))
         self.calls = self.root / 'docker-calls.jsonl'
         fake = self.root / 'docker'
-        fake.write_text('#!' + sys.executable + '\n' + '''import json, os, sys, time
+        fake.write_text('#!' + sys.executable + '\n' + '''from __future__ import print_function
+import json, os, sys, time
 with open(os.environ['FAKE_DOCKER_CALLS'], 'a') as stream:
     stream.write(json.dumps(sys.argv[1:]) + '\\n')
 if sys.argv[1] == 'info':

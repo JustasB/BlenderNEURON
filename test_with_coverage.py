@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ctypes
 import os
 import select
@@ -89,7 +90,8 @@ def run_batch(tests, timeout):
 def iter_tests(suite):
     for test in suite:
         if isinstance(test, unittest.TestSuite):
-            yield from iter_tests(test)
+            for nested in iter_tests(test):
+                yield nested
         else:
             yield test
 

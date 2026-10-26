@@ -1,5 +1,5 @@
 """Native activity recording and user-facing variable lookup."""
-from collections.abc import Sequence
+from blenderneuron.compat import Sequence, finalize
 import math
 import weakref
 
@@ -18,7 +18,7 @@ _retired = {}
 def _release_vectors(vectors):
     for vector in vectors:
         vector.play_remove()
-    vectors.clear()
+    del vectors[:]
 
 
 def _release_retired():
@@ -104,7 +104,7 @@ class RecordedTimes(Sequence):
     def __eq__(self, other):
         return list(self) == list(other)
 
-class VectorRecorder:
+class VectorRecorder(object):
     """One native trace per compartment; grow the schedule ahead of the solver.
 
     The schedule is extended halfway through each block, before its final event
@@ -119,11 +119,11 @@ class VectorRecorder:
         self.local_times = []
         self.schedule = h.Vector()
         self.start, self.period = group.recording_time_start, group.recording_period
-        self._finalizer = weakref.finalize(self, _retire_vectors, self.vectors,
+        self._finalizer = finalize(self, _retire_vectors, self.vectors,
                                           self.schedule, self.local_times)
         self._finalizer.atexit = False
         end = group.recording_time_end
-        self.limit = None if end == 0 else max(0, math.floor((end - self.start) / self.period + 1e-9) + 1)
+        self.limit = None if end == 0 else max(0, int(math.floor((end - self.start) / self.period + 1e-9)) + 1)
         self._extend()
         unique = {}
         cvode = h.CVode()
@@ -186,6 +186,6 @@ class VectorRecorder:
         if queue_cleared:
             self._finalizer.detach()
             _release_vectors(self.vectors)
-            self.local_times.clear()
+            del self.local_times[:]
         else:
             self._finalizer()

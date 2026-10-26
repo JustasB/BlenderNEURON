@@ -3,7 +3,7 @@ from abc import ABCMeta
 from blenderneuron.activity import Activity
 
 
-class Section:
+class Section(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):

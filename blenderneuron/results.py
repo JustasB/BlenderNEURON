@@ -2,7 +2,7 @@
 import gzip
 import math
 import os
-from pathlib import Path
+from blenderneuron.compat import Path, string_types, integer_types, isfinite, replace
 import tempfile
 
 from blenderneuron.utils import serialize, deserialize
@@ -33,13 +33,13 @@ def validate_display(display):
             valid = value in ('Group', 'Cell', 'Section')
         elif key == 'default_color':
             valid = (isinstance(value, (list, tuple)) and len(value) == 4
-                     and all(isinstance(x, (int, float)) and math.isfinite(x)
+                     and all(isinstance(x, (int, float)) and isfinite(x)
                              and 0 <= x <= 1 for x in value))
         elif isinstance(default, bool):
             valid = isinstance(value, bool)
         else:
             valid = (isinstance(value, (int, float)) and not isinstance(value, bool)
-                     and math.isfinite(value))
+                     and isfinite(value))
             if key in ('segment_subdivisions', 'circular_subdivisions'):
                 valid = valid and isinstance(value, int) and value >= (3 if key == 'circular_subdivisions' else 0)
             elif key not in ('animation_range_low', 'animation_range_high'):
@@ -55,10 +55,10 @@ def validate_recording(settings):
     start, end, period = (settings[k] for k in
                           ('recording_time_start', 'recording_time_end', 'recording_period'))
     if (settings['recording_granularity'] not in RECORDING_LEVELS
-            or not isinstance(settings['record_variable'], str) or not settings['record_variable']
-            or not isinstance(settings['variable_units'], str)
+            or not isinstance(settings['record_variable'], string_types) or not settings['record_variable']
+            or not isinstance(settings['variable_units'], string_types)
             or any(not isinstance(v, (int, float)) or isinstance(v, bool)
-                   or not math.isfinite(v) for v in (start, end, period))
+                   or not isfinite(v) for v in (start, end, period))
             or period <= 0 or start < 0 or (end != 0 and end < start)):
         raise ValueError('Invalid recording settings')
 
@@ -74,7 +74,7 @@ def validate_snapshot(snapshot):
     group_names, root_names = set(), set()
     for group in groups:
         name = group.get('name')
-        if not isinstance(name, str) or not name or name in group_names:
+        if not isinstance(name, string_types) or not name or name in group_names:
             raise ValueError('Invalid or duplicate group name')
         group_names.add(name)
         validate_display(group.get('display', {}))
@@ -83,7 +83,7 @@ def validate_snapshot(snapshot):
         validate_recording(group)
         recording = group['record_activity']
         times = group['activity']['times'] if recording else []
-        if recording and (not times or any(not math.isfinite(t) for t in times)
+        if recording and (not times or any(not isfinite(t) for t in times)
                           or any(b <= a for a, b in zip(times, times[1:]))):
             raise ValueError('Group %r has missing or invalid sample times' % name)
         if not group['roots']:
@@ -92,7 +92,7 @@ def validate_snapshot(snapshot):
 
         def check_values(activity):
             values = activity['values']
-            if len(values) != len(times) or any(not math.isfinite(v) for v in values):
+            if len(values) != len(times) or any(not isfinite(v) for v in values):
                 raise ValueError('Group %r has invalid activity samples' % name)
 
         section_ids, section_names = set(), set()
@@ -108,14 +108,14 @@ def validate_snapshot(snapshot):
                 section_ids.add(id(section))
                 section_names.add(section['name'])
                 count = section['point_count']
-                if (not isinstance(section['name'], str)
+                if (not isinstance(section['name'], string_types)
                         or not isinstance(count, int) or count < 2
                         or not isinstance(section['nseg'], int)
                         or section['nseg'] < 1
                         or len(section['coords']) != 3 * count
                         or len(section['radii']) != count
-                        or any(not math.isfinite(v) for v in section['coords'])
-                        or any(not math.isfinite(v) or v < 0 for v in section['radii'])):
+                        or any(not isfinite(v) for v in section['coords'])
+                        or any(not isfinite(v) or v < 0 for v in section['radii'])):
                     raise ValueError('Invalid section morphology in group ' + name)
                 # These fields are required by the Blender geometry builder.
                 parent = section['parent_connection_loc']
@@ -143,7 +143,7 @@ def write_snapshot(path, groups):
         with os.fdopen(fd, 'wb') as raw:
             with gzip.GzipFile(fileobj=raw, mode='wb', mtime=0) as stream:
                 stream.write(serialize(snapshot).encode('utf-8'))
-        os.replace(temporary, str(path))
+        replace(temporary, str(path))
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
@@ -151,7 +151,7 @@ def write_snapshot(path, groups):
 
 def read_snapshot(path):
     try:
-        with gzip.open(path, 'rt', encoding='utf-8') as stream:
-            return validate_snapshot(deserialize(stream.read()))
-    except (KeyError, TypeError, IndexError, AttributeError, EOFError, OSError) as error:
-        raise ValueError('Invalid simulation results file: %s' % error) from error
+        with gzip.open(str(path), 'rb') as stream:
+            return validate_snapshot(deserialize(stream.read().decode('utf-8')))
+    except (KeyError, TypeError, IndexError, AttributeError, EOFError, OSError, IOError) as error:
+        raise ValueError('Invalid simulation results file: %s' % error)

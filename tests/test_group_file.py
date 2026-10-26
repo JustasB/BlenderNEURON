@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 """Exercise deep group files through Blender export and NEURON geometry updates."""
 import json
 import os

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 """Encoder tests run in ordinary Python; Blender integration uses existing helpers."""
 import unittest
 from textwrap import dedent
@@ -33,7 +35,7 @@ class TestNameEncoder(unittest.TestCase):
         import subprocess, sys
         key = entity_key('objects', 'section', 'é'*200, 'rank1')
         code = 'from blenderneuron.datablocknames import encode_name; print(encode_name(%r, 63))' % (key,)
-        result = subprocess.check_output([sys.executable, '-c', code]).decode().strip().splitlines()[-1]
+        result = subprocess.check_output([sys.executable, '-c', code]).decode('utf-8').strip().splitlines()[-1]
         self.assertEqual(result, encode_name(key, 63))
 
 

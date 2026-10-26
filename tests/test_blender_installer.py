@@ -23,11 +23,13 @@ class TestBlenderInstaller(unittest.TestCase):
         self.root = Path(self.directory.name)
         self.destination = self.root / 'installed'
         self.archive = self.root / 'fixture.tar.xz'
-        with tarfile.open(str(self.archive), 'w:xz') as archive:
+        uncompressed = self.root / 'fixture.tar'
+        with tarfile.open(str(uncompressed), 'w') as archive:
             content = b'fixture executable'
             info = tarfile.TarInfo('blender-5.2.3-linux-x64/blender')
             info.size = len(content)
             archive.addfile(info, io.BytesIO(content))
+        subprocess.check_call(['xz', str(uncompressed)])
         self.checksum = hashlib.sha256(self.archive.read_bytes()).hexdigest()
         self.calls = []
         self.real_check_call = subprocess.check_call
@@ -37,7 +39,7 @@ class TestBlenderInstaller(unittest.TestCase):
         if command[0] != 'curl':
             return self.real_check_call(command)
         if command[-3].endswith('.tar.xz'):
-            shutil.copy2(self.archive, command[-1])
+            shutil.copy2(str(self.archive), command[-1])
         else:
             Path(command[-1]).write_text(self.checksum + '  blender-5.2.3-linux-x64.tar.xz\n')
         return 0

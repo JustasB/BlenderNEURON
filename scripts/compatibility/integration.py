@@ -1,5 +1,7 @@
 """One lane definition shared by local commands and the parallel CI matrix."""
+from __future__ import print_function
 import argparse
+import errno
 import fcntl
 import json
 from pathlib import Path
@@ -25,10 +27,11 @@ AXES = {'neuron': ('baseline', 'python2', 'neuron7', 'neuron9'),
         'blender': ('baseline', 'blender2', 'blender4')}
 
 
-def run_tests(command, path, timeout):
+def run_tests(command, path, timeout, cleanup=None):
     """Keep full logs as artifacts while streaming individual results to CI."""
-    with path.open('w') as log, path.open('r') as reader:
-        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+    with path.open('w') as log, path.open('r', errors='replace') as reader:
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
+                                   start_new_session=cleanup is not None)
         deadline = time.monotonic() + timeout
         try:
             while True:
@@ -46,7 +49,9 @@ def run_tests(command, path, timeout):
                 if status is not None:
                     return status
         finally:
-            if process.poll() is None:
+            if cleanup is not None:
+                cleanup(process)
+            elif process.poll() is None:
                 process.kill()
                 process.wait(timeout=10)
             output = reader.read()
@@ -66,9 +71,10 @@ def run_lane(lane, args):
     for name in ('coverage.xml', 'python2-assessment.json', 'result.json', 'tests.log'):
         try:
             (directory / name).unlink()
-        except FileNotFoundError:
-            pass
-    shutil.rmtree(directory / 'htmlcov', ignore_errors=True)
+        except (OSError, IOError) as error:
+            if error.errno != errno.ENOENT:
+                raise
+    shutil.rmtree(str(directory / 'htmlcov'), ignore_errors=True)
     image = 'blenderneuron-integration:' + lane
     container = 'blenderneuron-matrix-' + uuid.uuid4().hex[:12]
     status, error_message, phase = 1, None, 'build'
@@ -112,7 +118,7 @@ def run_lane(lane, args):
                   architecture='amd64', phase=phase,
                   elapsed_seconds=round(time.monotonic() - started, 1))
     (directory / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-    print('{}: {} — {}'.format(lane, 'PASS' if status == 0 else 'FAIL', directory), flush=True)
+    print('{}: {} - {}'.format(lane, 'PASS' if status == 0 else 'FAIL', directory), flush=True)
     return status
 
 

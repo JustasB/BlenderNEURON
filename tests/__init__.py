@@ -1,4 +1,6 @@
 import json
+import errno
+from io import open
 import multiprocessing
 import os
 import shlex
@@ -22,12 +24,12 @@ class ProbeTransport(connection.AuthTransport):
     reply_timeout = 1
 
     def make_connection(self, host):
-        connection = super().make_connection(host)
-        connection.timeout = 1
-        return connection
+        peer = connection.AuthTransport.make_connection(self, host)
+        peer.timeout = 1
+        return peer
 
 
-class BlenderNEURONProcess:
+class BlenderNEURONProcess(object):
     executable = None
     server_end = None
     cmd_args = ''
@@ -43,8 +45,9 @@ class BlenderNEURONProcess:
         if self.server_end is not None:
             try:
                 os.remove(self.address_file(self.server_end))
-            except FileNotFoundError:
-                pass
+            except (OSError, IOError) as error:
+                if error.errno != errno.ENOENT:
+                    raise
 
     @staticmethod
     def address_file(end):
@@ -70,7 +73,7 @@ class BlenderNEURONProcess:
                         ready = client.ping() == 1
                     if ready:
                         return
-            except (OSError, ValueError, socket.timeout):
+            except (OSError, IOError, ValueError, socket.timeout):
                 pass
             time.sleep(0.1)
         raise RuntimeError('%s did not become ready within %s seconds%s' %
@@ -116,7 +119,7 @@ class Blender(BlenderNEURONProcess):
 class BackgroundBlender(Blender):
     """Fresh, main-thread Blender worker for tests without UI requirements."""
     def __init__(self, keep=False, cmd_args=None, sleep=1):
-        super().__init__(keep=keep, cmd_args=cmd_args, sleep=sleep)
+        BlenderNEURONProcess.__init__(self, keep=keep, cmd_args=cmd_args, sleep=sleep)
         if os.environ.get('BLENDERNEURON_TEST_HEADLESS', '1') != '0':
             self.cmd_args = ('--background --python-exit-code 1 ' +
                              (cmd_args or '-noaudio') +

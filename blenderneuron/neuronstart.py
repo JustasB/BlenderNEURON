@@ -11,7 +11,7 @@ BlenderNEURON = globals()["BlenderNEURON"] = NeuronNode(
     server_end="Package" if _is_mpi_worker else None)
 
 if not _is_mpi_worker:
-    print(f'BlenderNEURON running in NEURON and accessible by Blender with BlenderNEURON addon at: {BlenderNEURON.server_address}')
+    print('BlenderNEURON running in NEURON and accessible by Blender with BlenderNEURON addon at: ' + BlenderNEURON.server_address)
     if int(_parallel_ctx.nhost()) > 1:
         print('BlenderNEURON MPI rank 0 of %d: this is the only Blender-facing rank. '
               'After model setup, call init_mpi(...) and start_mpi_coordinator() on every rank.' %

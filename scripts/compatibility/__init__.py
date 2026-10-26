@@ -1,0 +1,1 @@
+"""Shared compatibility test infrastructure."""

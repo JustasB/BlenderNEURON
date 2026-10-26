@@ -6,8 +6,9 @@ import hashlib
 import hmac
 import json
 import os
-from pathlib import Path
-import secrets
+from blenderneuron.compat import Path, string_types
+from blenderneuron import compat as secrets
+import errno
 import sys
 import tempfile
 import time
@@ -36,7 +37,7 @@ def save(name, value):
     try:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream)
-        os.replace(temporary, str(directory / name))
+        secrets.replace(temporary, str(directory / name))
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
@@ -46,7 +47,9 @@ def load(name, default=None):
     try:
         with (config_directory() / name).open() as stream:
             return json.load(stream)
-    except FileNotFoundError:
+    except (IOError, OSError) as error:
+        if error.errno != errno.ENOENT:
+            raise
         return default
 
 
@@ -54,7 +57,9 @@ def local_secret():
     path = config_directory() / 'local-secret'
     try:
         fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
+    except OSError as error:
+        if error.errno != errno.EEXIST:
+            raise
         # A concurrent process may still be publishing its first secret.
         for _ in range(100):
             secret = path.read_text()
@@ -77,11 +82,11 @@ class AuthTransport(Transport):
     reply_timeout = None
 
     def __init__(self, secret):
-        super().__init__()
+        Transport.__init__(self)
         self.secret = secret
 
     def make_connection(self, host):
-        connection = super().make_connection(host)
+        connection = Transport.make_connection(self, host)
         connection.timeout = 10
         connection.request('GET', '/RPC2')
         response = connection.getresponse()
@@ -96,7 +101,7 @@ class AuthTransport(Transport):
         connection.putheader('X-BN-Time', timestamp)
         connection.putheader('X-BN-Nonce', nonce)
         connection.putheader('X-BN-Signature', signature(self.secret, timestamp, self.epoch + nonce, body))
-        super().send_content(connection, body)
+        Transport.send_content(self, connection, body)
         # Model operations may legitimately run for hours. Bound the handshake,
         # but preserve the existing unlimited operation wait.
         if connection.sock is not None:

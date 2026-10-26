@@ -1,5 +1,6 @@
 """Script-owned recording and offline export, without a communication node."""
 from collections import OrderedDict
+from blenderneuron.compat import string_types
 
 from neuron import h
 
@@ -11,7 +12,7 @@ from blenderneuron.results import (RECORDING_KEYS,
 from blenderneuron.utils import serialize, deserialize
 
 
-class SimulationExport:
+class SimulationExport(object):
     """Configure groups, prepare collectively, run your model, then save collectively.
 
     ``roots`` passed to add_group are local NEURON root sections (e.g. cell.soma).
@@ -33,7 +34,7 @@ class SimulationExport:
         """Declare a rank-local group. Empty membership on a rank is allowed."""
         if self.prepared:
             raise RuntimeError('Configure all groups before prepare()')
-        if not isinstance(name, str) or not name or name in self.specs:
+        if not isinstance(name, string_types) or not name or name in self.specs:
             raise ValueError('Group names must be nonempty and unique on each rank')
         if not isinstance(record_activity, bool):
             raise ValueError('record_activity must be a boolean')
@@ -119,7 +120,7 @@ class SimulationExport:
                             get_recording_value(node.nrn_section(x), spec['record_variable'])
                         except AttributeError as exc:
                             raise ValueError('Group %r, cell %s, section %s: missing variable %s' %
-                                             (name, root.name, node.name, spec['record_variable'])) from exc
+                                             (name, root.name, node.name, spec['record_variable']))
                     stack.extend((child, False) for child in node.children)
 
             # Reuse the live path's vector recorder and initialization lifecycle.

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+from scripts.compatibility.integration import run_tests
 
 spec = importlib.util.spec_from_file_location('process_utils', 'tests/process_utils.py')
 cleanup = importlib.util.module_from_spec(spec)
@@ -57,23 +58,22 @@ print(json.dumps(results))
 '''
 report['component_imports'] = json.loads(subprocess.check_output(
     ['python', '-c', import_probe]).decode('utf-8').splitlines()[-1])
+def finish_test(process):
+    cleanup.stop_process_group(process)
+    cleanup.reap_descendants()
+
+
 for path in sorted(Path('tests').glob('test_*.py')):
     tree = ast.parse(path.read_text(), filename=str(path))
     candidates = sum(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                      and node.name.startswith('test_') for node in ast.walk(tree))
     log = Path('/reports') / (path.stem + '.log')
-    with log.open('w') as stream:
-        process = subprocess.Popen(['python', '-m', 'coverage', 'run', '--rcfile=' + coverage_config, '--parallel-mode',
-                                    '--branch', str(path)], stdout=stream,
-                                   stderr=subprocess.STDOUT, start_new_session=True)
-        try:
-            try:
-                status = process.wait(timeout=float(os.environ['BLENDERNEURON_TEST_TIMEOUT']))
-            except subprocess.TimeoutExpired:
-                status = 124
-        finally:
-            cleanup.stop_process_group(process)
-            cleanup.reap_descendants()
+    try:
+        status = run_tests(['python', '-m', 'coverage', 'run', '--rcfile=' + coverage_config,
+                            '--parallel-mode', '--branch', str(path)], log,
+                           float(os.environ['BLENDERNEURON_TEST_TIMEOUT']), cleanup=finish_test)
+    except subprocess.TimeoutExpired:
+        status = 124
     output = log.read_text()
     ran = re.search(r'Ran (\d+) tests? in', output)
     blocked = not ran and bool(re.search(r'(ImportError|SyntaxError|ModuleNotFoundError):', output))

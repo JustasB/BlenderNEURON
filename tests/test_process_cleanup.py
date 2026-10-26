@@ -42,7 +42,7 @@ class TestProcessCleanup(BlenderTestCase):
             return namespace['return_value']
 
         with patch('tests.ServerProxy') as proxy, \
-                patch('builtins.open', mock_open(read_data='"http://127.0.0.1:1"')), \
+                patch('tests.open', mock_open(read_data='"http://127.0.0.1:1"')), \
                 patch('tests.time.sleep'):
             proxy.return_value.__enter__.return_value.run_command.side_effect = run_command
             process.wait_ready(connected=True)

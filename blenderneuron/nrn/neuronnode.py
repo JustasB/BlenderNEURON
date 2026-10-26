@@ -1,3 +1,4 @@
+from blenderneuron.compat import string_types
 from neuron import h
 from blenderneuron.commnode import CommNode
 from blenderneuron.utils import deserialize, serialize
@@ -398,14 +399,14 @@ class NeuronNode(CommNode):
         """
         if isinstance(blender_groups, xmlrpclib.Binary):
             blender_groups = self.decompress(blender_groups)
-        elif isinstance(blender_groups, (str, bytes, dict)):
+        elif isinstance(blender_groups, string_types + (dict,)):
             blender_groups = deserialize(blender_groups)
             if isinstance(blender_groups, dict):
                 blender_groups = [blender_groups]
-        if any(isinstance(group, (str, bytes)) or "__blenderneuron_flat__" in group
+        if any(isinstance(group, string_types) or "__blenderneuron_flat__" in group
                for group in blender_groups):
             blender_groups = [deserialize(group)
-                              if isinstance(group, (str, bytes)) or
+                              if isinstance(group, string_types) or
                               "__blenderneuron_flat__" in group else group
                               for group in blender_groups]
         if self._uses_mpi_coordinator():
@@ -596,7 +597,7 @@ class NeuronNode(CommNode):
             owners = set()
             for field in ('source_section', 'dest_section'):
                 section = entry.get(field)
-                if not isinstance(section, str) or not section:
+                if not isinstance(section, string_types) or not section:
                     raise ValueError("Missing %s in %s" % (field, context))
                 match = self.section_rx.match(section)
                 cell = match.group(1) if match else section

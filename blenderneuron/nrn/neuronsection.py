@@ -2,13 +2,14 @@ from blenderneuron.activity import Activity
 from blenderneuron.section import Section
 from neuron import h
 from blenderneuron.nrn.recording import get_recording_value
+import weakref
 import numpy as np
 
 
 class NeuronSection(Section):
 
     def __init__(self):
-        super().__init__()
+        Section.__init__(self)
         self._segment_midpoints = None
 
     def from_updated_blender_root(self, blender_section):
@@ -60,7 +61,7 @@ class NeuronSection(Section):
 
             else:
                 # Initial processing of the node
-                node.group = group
+                node.group = weakref.proxy(group)
                 node.nrn_section = nrn_sec
                 node._segment_midpoints = None
                 node.name = nrn_sec.name()

@@ -1,4 +1,5 @@
 """Install a checksum-verified Blender archive for development or CI."""
+from __future__ import print_function
 import argparse
 import glob
 import hashlib
