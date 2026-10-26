@@ -5,6 +5,7 @@ from neuron import h
 
 from blenderneuron.nrn.neuronrootgroup import NeuronRootGroup
 from blenderneuron.nrn.neuronsection import NeuronSection
+from blenderneuron.nrn.recording import get_recording_value
 from blenderneuron.results import (RECORDING_KEYS,
                                   validate_display, validate_recording, write_snapshot)
 from blenderneuron.utils import serialize, deserialize
@@ -57,7 +58,7 @@ class SimulationExport:
             raise ValueError(error)
 
     def prepare(self):
-        """Install NetStim/NetCon collectors before finitialize; call on every rank."""
+        """Install vector collectors before finitialize; call on every rank."""
         if self.prepared:
             raise RuntimeError('Export already prepared')
         error = None
@@ -115,16 +116,14 @@ class SimulationExport:
                         targets.append(0.5)
                     for x in targets:
                         try:
-                            getattr(node.nrn_section(x), spec['record_variable'])
+                            get_recording_value(node.nrn_section(x), spec['record_variable'])
                         except AttributeError as exc:
                             raise ValueError('Group %r, cell %s, section %s: missing variable %s' %
                                              (name, root.name, node.name, spec['record_variable'])) from exc
                     stack.extend((child, False) for child in node.children)
 
-            # Reuse the live path's initialization reset and event collector.
-            # Keep both handlers alive with the export-owned group.
+            # Reuse the live path's vector recorder and initialization lifecycle.
             if group.record_activity and group.roots:
-                group.fih = h.FInitializeHandler(group.prepare_activity)
                 group.create_collector()
 
     def _local_results(self):

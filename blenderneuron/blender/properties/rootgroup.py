@@ -445,8 +445,10 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
         default="v",
         get=get_prop("record_variable"),
         set=set_prop("record_variable"),
-        description="The NEURON section variable to record"
-                    " (e.g. 'v' of soma(0.5).v) and use to animate segments in Blender"
+        description="The NEURON segment variable or dotted mechanism variable to record"
+                    " and use to animate segments in Blender (e.g. 'v' for voltage,"
+                    " 'i_pas' or 'pas.i' for passive current density)."
+                    " Enter variable names without _ref_; expressions are not supported"
     )
 
     animate_brightness: BoolProperty(

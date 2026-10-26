@@ -32,9 +32,7 @@ class TestSegmentMidpointCache(unittest.TestCase):
 
     def tearDown(self):
         for group in self.groups:
-            group.fih = None
-            group.collector_con = None
-            group.collector_stim = None
+            group.close()
         for sec in reversed(self.sections):
             h.delete_section(sec=sec)
 
@@ -154,9 +152,9 @@ class TestSegmentMidpointCache(unittest.TestCase):
                 for x in points:
                     h.pt3dadd(x, 0, 0, 2, sec=sec)
                 # Sentinels prove initialization clears old traces before
-                # the NetStim's time-zero sample is collected.
-                group.activity.times.append(-999)
-                root.segment_activity.setdefault(0, Activity()).values.append(999)
+                # the native recorder's time-zero sample is collected.
+                group.activity.times = [-999]
+                root.segment_activity.setdefault(0, Activity()).values = [999]
                 h.run()
                 self.assertEqual(root._segment_midpoints, ((points[0] + points[1]) / 200,
                                                           (points[1] + points[2]) / 200))

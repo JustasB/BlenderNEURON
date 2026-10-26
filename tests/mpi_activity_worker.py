@@ -73,7 +73,6 @@ def main(output_dir):
     root.from_nrn_section(section, group)
     group.roots[root.name] = root
     group.create_collector()
-    group.fih = h.FInitializeHandler(group.prepare_activity)
     cache_builds = []
     build_midpoints = root._build_segment_midpoints
 

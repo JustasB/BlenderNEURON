@@ -1,6 +1,7 @@
 from blenderneuron.activity import Activity
 from blenderneuron.section import Section
 from neuron import h
+from blenderneuron.nrn.recording import get_recording_value
 import numpy as np
 
 
@@ -173,7 +174,7 @@ class NeuronSection(Section):
                 if seg_index not in node.segment_activity:
                     node.segment_activity[seg_index] = Activity()
 
-                value = getattr(nrn_sec(x_mid), record_var)
+                value = get_recording_value(nrn_sec(x_mid), record_var)
 
                 node.segment_activity[seg_index].values.append(value)
 
@@ -191,7 +192,7 @@ class NeuronSection(Section):
         stack = [self]
         while stack:
             node = stack.pop()
-            value = getattr(node.nrn_section(0.5), node.group.record_variable)
+            value = get_recording_value(node.nrn_section(0.5), node.group.record_variable)
             node.activity.values.append(value)
             if recursive:
                 # Add children to stack in reverse order to maintain traversal order

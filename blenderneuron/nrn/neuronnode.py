@@ -237,6 +237,8 @@ class NeuronNode(CommNode):
 
     def _initialize_groups_local(self, blender_groups):
 
+        for group in getattr(self, "groups", {}).values():
+            group.close()
         self.groups = OrderedDict()
 
         if self.section_index is None:

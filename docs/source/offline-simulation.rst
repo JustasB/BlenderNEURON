@@ -33,6 +33,8 @@ Record and Save Results
    - Recording is enabled by default, using voltage (``v``) at cell level with a 1 ms sampling period
    - Start and end times are in milliseconds; an end time of 0 includes samples through the end of the run
    - For a variable other than voltage, supply ``variable_units`` to describe its units
+   - Variable names can be direct (``v``, ``ina``, ``i_pas``) or dotted mechanism paths
+     (``pas.i``, ``hh.m``). Do not include ``_ref_``; expressions such as ``ina + ik`` are not supported
 
 3. Initialize and run your simulation using your existing code
 
@@ -41,11 +43,23 @@ Record and Save Results
       h.finitialize(-65)
       h.continuerun(100)
 
-   ``prepare()`` installs the same NetStim/NetCon callback collectors used by
+   ``prepare()`` installs the same native vector recorder used by
    live imports. It does not initialize or run the model. Configure it before
    ``finitialize`` and keep the export object and model cells alive throughout
    the run. Keep morphology fixed during recording. Each initialization clears
-   the previous traces; samples are collected within the configured start/end window.
+   the previous traces and creates fresh vectors for the current granularity,
+   variable and geometry. Samples are requested at ``start + n * recording_period``;
+   a finite end time includes its endpoint when it lies on that sampling grid.
+   An end time of zero allows recording to continue without knowing the final
+   simulation time, including across multiple ``continuerun`` calls.
+
+   Displayed 3D intervals that read the same computational compartment share one
+   native trace. Recorded activity exposes live read-only sequences; use
+   ``list(...)`` for mutable copies. Exporting formats these directly without
+   duplicating every trace into Python float lists.
+   Saving does not detach the recorder, so the simulation can continue afterward.
+   Retired vectors detach at the next initialization, after NEURON clears queued
+   recording events; they are not reused for the new run.
 
 4. After the simulation finishes, save the results:
 

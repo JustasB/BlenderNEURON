@@ -2,6 +2,8 @@ from blenderneuron.nrn.neuronsection import NeuronSection
 from blenderneuron.rootgroup import RootGroup
 from blenderneuron.activity import Activity
 from neuron import h
+import weakref
+from blenderneuron.nrn.recording import VectorRecorder
 
 
 class NeuronRootGroup(RootGroup):
@@ -31,25 +33,23 @@ class NeuronRootGroup(RootGroup):
             if section.name != '':
                 self.roots[section.name] = section
 
-        # Clear recorded activity whenever the simulation is initialized.
-        self.fih = h.FInitializeHandler(self.prepare_activity)
-
         # Set up activity collection for the next simulation.
         self.create_collector()
 
-    def prepare_activity(self):
+    def prepare_activity(self, queue_cleared=False):
         """Clear traces and refresh geometry before the first sample of a run.
 
         Rebuilding also captures direct NEURON pt3d edits between runs. Direct
         pt3d edits during collection require an explicit cache rebuild; Blender
         coordinate updates invalidate the affected sections automatically.
         """
-        self.clear_activity()
+        self.clear_activity(queue_cleared)
         if self.record_activity and self.recording_granularity == '3D Segment':
             for root in self.roots.values():
                 root.rebuild_segment_midpoints_recursive()
 
     def save_recording_params(self, blender_group):
+        self.clear_activity()
         self.record_activity = blender_group["record_activity"]
         self.record_variable = blender_group["record_variable"]
         self.recording_granularity = blender_group["recording_granularity"]
@@ -57,24 +57,45 @@ class NeuronRootGroup(RootGroup):
         self.recording_time_start = blender_group["recording_time_start"]
         self.recording_time_end = blender_group["recording_time_end"]
 
+    def clear_activity(self, queue_cleared=False):
+        recorder = getattr(self, '_recorder', None)
+        if recorder is not None:
+            recorder.close(queue_cleared)
+            self._recorder = None
+        super().clear_activity()
+
+    def close(self):
+        """Detach owned recordings and initialization callbacks."""
+        self.clear_activity()
+        self.fih = None
+        self.recording_fih = None
+
+    def _initialize_recording(self):
+        self.prepare_activity(queue_cleared=True)
+        if self.record_activity and self.roots:
+            try:
+                self._recorder = VectorRecorder(self)
+            except Exception:
+                self.clear_activity()
+                raise
+
     def create_collector(self):
-        """
-        Greates a pair of NetStim and NetCon which trigger an event to recursively collect the activity of the group
-        segments. This method does nothing if group.record_activity is False
-        """
+        """Install weak initialization hooks; rebuild native vectors each run."""
+        self.close()
+        group_ref = weakref.ref(self)
 
-        if self.record_activity:
-            collector_stim = h.NetStim(0.5)
-            collector_stim.start = self.recording_time_start
-            collector_stim.interval = self.recording_period
-            collector_stim.number = 1e9
-            collector_stim.noise = 0
+        def initialize():
+            group = group_ref()
+            if group is not None:
+                group._initialize_recording()
 
-            collector_con = h.NetCon(collector_stim, None)
-            collector_con.record((self.collect))
+        def schedule():
+            group = group_ref()
+            if group is not None and getattr(group, '_recorder', None) is not None:
+                group._recorder.schedule_extension()
 
-            self.collector_stim = collector_stim
-            self.collector_con = collector_con
+        self.fih = h.FInitializeHandler(1, initialize)
+        self.recording_fih = h.FInitializeHandler(2, schedule)
 
     def collect(self):
         """
