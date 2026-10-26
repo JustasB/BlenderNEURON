@@ -147,7 +147,12 @@ class CurveContainer:
                     owner.animation_data_clear()
             self.registry.remove(mat)
             for action in actions:
-                if action.users == 0:
+                unused = action.users == 0
+                if not unused and bpy.app.version < (3, 0, 0) and not action.use_fake_user:
+                    # 2.93 may retain a stale user count after the owning ID is
+                    # deleted. Check actual ID references before removing it.
+                    unused = not bpy.data.user_map(subset={action}).get(action)
+                if unused:
                     self.registry.remove(action)
         self.linked = False
 
