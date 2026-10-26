@@ -210,7 +210,3 @@ Other supported display values are ``smooth_sections``, ``spherize_soma_if_DeqL`
 ``as_lines``, ``segment_subdivisions``, ``circular_subdivisions``,
 ``default_brightness``, ``animate_brightness``, ``max_brightness``,
 ``animate_color``, and ``simplification_epsilon``.
-
-Spherical soma styling requires Blender 4 or newer. Blender 2.93 retains the
-original cylindrical soma geometry, including its animation and export behavior.
-The spherical-soma control is disabled with an explanatory notice on that version.
