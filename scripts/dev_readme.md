@@ -194,3 +194,9 @@ Majority of code for the **Blender** part of BlenderNEURON (the addon) is stored
 ```
 [repo]/blenderneuron/blender
 ```
+
+Blender 2.93 uses native cylindrical somas; spherical styling requires Blender 4+.
+Its full suite exercises cylindrical geometry, editing, animation, rendering and
+round trips. Coverage retains the 91% threshold for supported code; the sphere-only
+module is measured by the Blender 4/5 lanes. Individual test output is streamed
+to the CircleCI step console and also saved in each lane’s `tests.log` artifact.

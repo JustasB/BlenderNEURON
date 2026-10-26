@@ -30,6 +30,7 @@ with open(os.environ['FAKE_DOCKER_CALLS'], 'a') as stream:
 if sys.argv[1] == 'info':
     print(os.environ.get('FAKE_ARCH', 'x86_64'))
 elif sys.argv[1] == 'run':
+    print('individual test output', flush=True)
     time.sleep(float(os.environ.get('FAKE_SLEEP', '0')))
     if 'blenderneuron-integration:baseline' in sys.argv:
         sys.exit(int(os.environ.get('FAKE_FAILURE', '0')))
@@ -55,6 +56,8 @@ elif sys.argv[1] == 'run':
         self.assertEqual(completed.returncode, 1, completed.stderr)
         self.assertEqual(self.read_result('baseline')['exit_code'], 7)
         self.assertEqual(self.read_result('neuron9')['exit_code'], 0)
+        self.assertIn('individual test output', completed.stdout)
+        self.assertIn('individual test output', (self.root / '.compatibility-results/baseline/tests.log').read_text())
         runs = [call for call in self.read_calls() if call[0] == 'run']
         self.assertEqual(len(runs), 2)
         for call in runs:

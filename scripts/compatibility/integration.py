@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 import uuid
 
@@ -22,6 +23,36 @@ LANES = {
 }
 AXES = {'neuron': ('baseline', 'python2', 'neuron7', 'neuron9'),
         'blender': ('baseline', 'blender2', 'blender4')}
+
+
+def run_tests(command, path, timeout):
+    """Keep full logs as artifacts while streaming individual results to CI."""
+    with path.open('w') as log, path.open('r') as reader:
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+        deadline = time.monotonic() + timeout
+        try:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise subprocess.TimeoutExpired(command, timeout)
+                try:
+                    status = process.wait(timeout=min(.2, remaining))
+                except subprocess.TimeoutExpired:
+                    status = None
+                output = reader.read()
+                if output:
+                    sys.stdout.write(output)
+                    sys.stdout.flush()
+                if status is not None:
+                    return status
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait(timeout=10)
+            output = reader.read()
+            if output:
+                sys.stdout.write(output)
+                sys.stdout.flush()
 
 
 def run_lane(lane, args):
@@ -68,9 +99,7 @@ def run_lane(lane, args):
             '-e', 'BLENDERNEURON_TEST_KEEP_GOING=1',
             '-e', 'BLENDERNEURON_TEST_TIMEOUT=' + str(args.test_timeout),
             image, '/usr/bin/python3', '/source/scripts/compatibility/integration_check.py']
-        with (directory / 'tests.log').open('w') as log:
-            status = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT,
-                                    timeout=args.timeout).returncode
+        status = run_tests(command, directory / 'tests.log', args.timeout)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as error:
         status = 124 if isinstance(error, subprocess.TimeoutExpired) else getattr(error, 'returncode', 1)
         error_message = str(error)

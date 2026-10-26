@@ -183,7 +183,11 @@ class GroupSettingsPanel(AbstractBlenderNEURONPanel, Panel):
 
             col = box.split(factor=0.5)
             col.label(text='Spherical Somas:')
+            from blenderneuron.blender.somadisplay import SPHERICAL_SOMAS_SUPPORTED
+            col.enabled = SPHERICAL_SOMAS_SUPPORTED
             col.prop(group, 'spherize_soma_if_DeqL', text='')
+            if not SPHERICAL_SOMAS_SUPPORTED:
+                box.label(text='Cylindrical somas (spheres require Blender 4+)', icon='INFO')
 
             col = box.split(factor=0.5)
             col.label(text='Smooth Curves:')

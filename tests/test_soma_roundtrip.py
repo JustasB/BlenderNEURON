@@ -25,7 +25,7 @@ return_value = [(s.name(), s.L, s.nseg, [(s.x3d(i), s.y3d(i), s.z3d(i), s.diam3d
             for interaction in ('Cell', 'Group'):
                 for recording in ('Cell', 'Section', '3D Segment'):
                     blender.client.run_command('''
-from blenderneuron.blender.somadisplay import attach, detach
+from blenderneuron.blender.somadisplay import attach, detach, SPHERICAL_SOMAS_SUPPORTED
 ui = bpy.context.scene.BlenderNEURON.groups[0]
 ui.interaction_granularity = %r
 ui.recording_granularity = %r
@@ -33,7 +33,7 @@ bpy.ops.blenderneuron.import_groups()
 group = ui.node_group
 for container in group.view.containers.values():
     modifier = attach(container)
-    assert modifier.show_viewport
+    assert modifier.show_viewport if SPHERICAL_SOMAS_SUPPORTED else modifier is None
 bpy.ops.blenderneuron.export_groups()
 ''' % (interaction, recording))
                     self.assertEqual(nrn.client.run_command(snapshot), original)
@@ -42,7 +42,7 @@ ui.spherize_soma_if_DeqL = False
 assert all('blenderneuron_soma_display' not in c.object for c in group.view.containers.values())
 bpy.ops.blenderneuron.export_groups()
 ui.spherize_soma_if_DeqL = True
-assert all('blenderneuron_soma_display' in c.object for c in group.view.containers.values())
+assert all(('blenderneuron_soma_display' in c.object) == SPHERICAL_SOMAS_SUPPORTED for c in group.view.containers.values())
 bpy.ops.blenderneuron.import_groups()
 bpy.ops.blenderneuron.export_groups()
 ''')

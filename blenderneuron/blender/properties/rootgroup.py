@@ -572,7 +572,8 @@ class RootGroupProperties(PropertyGroup, BlenderNodeClass):
 
     spherize_soma_if_DeqL: BoolProperty(
         default=True,
-        description="Whether to display a soma section with diameter ~= length as a sphere in Blender",
+        description="Whether to display a soma section with diameter ~= length as a sphere in Blender 4 or newer. "
+                    "Older Blender versions retain cylindrical somas",
         get=get_prop("spherize_soma_if_DeqL"),
         set=set_prop("spherize_soma_if_DeqL")
     )

@@ -8,9 +8,9 @@ from bpy.app.handlers import persistent
 
 TAG = 'blenderneuron_soma_display'
 SOURCE_TOPOLOGY = 'blenderneuron_source_topology'
+SPHERICAL_SOMAS_SUPPORTED = bpy.app.version >= (4, 0, 0)
 _busy = False
 _signatures = {}
-_legacy_nodes = bpy.app.version < (3, 4, 0)
 
 
 def modifier_for(obj):
@@ -188,50 +188,6 @@ def _sphere(mesh, obj, result):
     mesh.polygons.foreach_set('use_smooth', [True]*len(faces))
 
 
-def _legacy_mesh(obj, cache, hidden, descriptor):
-    """Blender 2.93 has no fields: filter a display copy of the native mesh."""
-    fingerprint = repr((signature(obj), hidden))
-    key = (obj.as_pointer(), cache.name)
-    if _signatures.get(key) == fingerprint:
-        return
-    source = obj.copy()
-    source.modifiers.clear()
-    try:
-        native = source.to_mesh()
-        vertices = [tuple(vertex.co) for vertex in native.vertices]
-        polygons = [face for face in native.polygons if not hidden[face.material_index]]
-        faces = [tuple(face.vertices) for face in polygons]
-        slots = [face.material_index for face in polygons]
-        smooth = [face.use_smooth for face in polygons]
-        materials = list(obj.data.materials)
-        for entry in descriptor['spheres']:
-            sphere = bpy.data.objects[entry['cache']].data
-            offset = len(vertices)
-            vertices.extend(tuple(vertex.co) for vertex in sphere.vertices)
-            mapping = []
-            for material in sphere.materials:
-                if material not in materials:
-                    materials.append(material)
-                mapping.append(materials.index(material))
-            for face in sphere.polygons:
-                faces.append(tuple(offset + index for index in face.vertices))
-                slots.append(mapping[face.material_index])
-                smooth.append(face.use_smooth)
-        mesh = cache.data
-        mesh.clear_geometry()
-        mesh.materials.clear()
-        for material in materials:
-            mesh.materials.append(material)
-        mesh.from_pydata(vertices, [], faces)
-        mesh.polygons.foreach_set('material_index', slots)
-        mesh.polygons.foreach_set('use_smooth', smooth)
-        mesh.update()
-        _signatures[key] = fingerprint
-    finally:
-        source.to_mesh_clear()
-        bpy.data.objects.remove(source)
-
-
 def rebuild(obj):
     descriptor = json.loads(obj[TAG])
     if 'spheres' not in descriptor:
@@ -274,15 +230,12 @@ def rebuild(obj):
             any_sphere = True
             for index in indices:
                 hidden[obj.data.splines[index].material_index] = True
-    if descriptor.get('legacy_nodes'):
-        _legacy_mesh(obj, mask, hidden, descriptor)
-    else:
-        attribute = mask.data.attributes[HIDE_ATTRIBUTE]
-        old = [False]*len(hidden)
-        attribute.data.foreach_get('value', old)
-        if old != hidden:
-            attribute.data.foreach_set('value', hidden)
-            mask.data.update()
+    attribute = mask.data.attributes[HIDE_ATTRIBUTE]
+    old = [False]*len(hidden)
+    attribute.data.foreach_get('value', old)
+    if old != hidden:
+        attribute.data.foreach_set('value', hidden)
+        mask.data.update()
     modifier.show_viewport = modifier.show_render = any_sphere
 
 
@@ -311,6 +264,8 @@ def updated(scene, depsgraph):
 
 
 def attach(container):
+    if not SPHERICAL_SOMAS_SUPPORTED:
+        return None
     obj = container.object
     try:
         validate(obj)
@@ -332,8 +287,7 @@ def attach(container):
     bpy.context.scene.render.use_lock_interface = True
     mask_mesh = bpy.data.meshes.new(TAG+'_mask')
     mask_mesh.from_pydata([(0,0,0)]*len(obj.data.materials), [], [])
-    if not _legacy_nodes:
-        mask_mesh.attributes.new(HIDE_ATTRIBUTE, 'BOOLEAN', 'POINT')
+    mask_mesh.attributes.new(HIDE_ATTRIBUTE, 'BOOLEAN', 'POINT')
     cache = _resource(TAG+'_mask', mask_mesh)
     spheres = []
     for indices in sections.values():
@@ -342,51 +296,39 @@ def attach(container):
         spheres.append(dict(indices=indices, cache=sphere.name))
     obj[TAG] = json.dumps(dict(cache=cache.name, capped=container.closed_ends,
                               topology=topology(obj), slot_count=len(obj.data.materials), spheres=spheres,
-                              sections=list(sections.values()), legacy_nodes=_legacy_nodes))
+                              sections=list(sections.values())))
     nodes = bpy.data.node_groups.new(TAG, 'GeometryNodeTree')
     nodes[TAG+'_resource'] = True
-    if hasattr(nodes, 'interface'):
-        nodes.interface.new_socket(name='Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
-        nodes.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
-    else:
-        nodes.inputs.new('NodeSocketGeometry', 'Geometry')
-        nodes.outputs.new('NodeSocketGeometry', 'Geometry')
-    if _legacy_nodes:
-        out = nodes.nodes.new('NodeGroupOutput')
-        out.is_active_output = True
-        info = nodes.nodes.new('GeometryNodeObjectInfo')
-        info.transform_space = 'ORIGINAL'
-        info.inputs['Object'].default_value = cache
-        nodes.links.new(info.outputs['Geometry'], out.inputs['Geometry'])
-    else:
-        original = nodes.nodes.new('NodeGroupInput')
-        out = nodes.nodes.new('NodeGroupOutput')
-        info = nodes.nodes.new('GeometryNodeObjectInfo')
-        info.inputs['Object'].default_value = cache
-        info.transform_space = 'ORIGINAL'
-        attribute = nodes.nodes.new('GeometryNodeInputNamedAttribute')
-        attribute.data_type = 'BOOLEAN'
-        attribute.inputs['Name'].default_value = HIDE_ATTRIBUTE
-        sample = nodes.nodes.new('GeometryNodeSampleIndex')
-        sample.data_type = 'BOOLEAN'
-        sample.domain = 'POINT'
-        material = nodes.nodes.new('GeometryNodeInputMaterialIndex')
-        delete = nodes.nodes.new('GeometryNodeDeleteGeometry')
-        delete.domain = 'FACE'
-        delete.mode = 'ALL'
-        join = nodes.nodes.new('GeometryNodeJoinGeometry')
-        nodes.links.new(info.outputs['Geometry'], sample.inputs['Geometry'])
-        nodes.links.new(attribute.outputs['Attribute'], sample.inputs['Value'])
-        nodes.links.new(material.outputs['Material Index'], sample.inputs['Index'])
-        nodes.links.new(sample.outputs['Value'], delete.inputs['Selection'])
-        nodes.links.new(original.outputs['Geometry'], delete.inputs['Geometry'])
-        nodes.links.new(delete.outputs['Geometry'], join.inputs['Geometry'])
-        for entry in spheres:
-            sphere_info = nodes.nodes.new('GeometryNodeObjectInfo')
-            sphere_info.transform_space = 'ORIGINAL'
-            sphere_info.inputs['Object'].default_value = bpy.data.objects[entry['cache']]
-            nodes.links.new(sphere_info.outputs['Geometry'], join.inputs['Geometry'])
-        nodes.links.new(join.outputs['Geometry'], out.inputs['Geometry'])
+    nodes.interface.new_socket(name='Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
+    nodes.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
+    original = nodes.nodes.new('NodeGroupInput')
+    out = nodes.nodes.new('NodeGroupOutput')
+    info = nodes.nodes.new('GeometryNodeObjectInfo')
+    info.inputs['Object'].default_value = cache
+    info.transform_space = 'ORIGINAL'
+    attribute = nodes.nodes.new('GeometryNodeInputNamedAttribute')
+    attribute.data_type = 'BOOLEAN'
+    attribute.inputs['Name'].default_value = HIDE_ATTRIBUTE
+    sample = nodes.nodes.new('GeometryNodeSampleIndex')
+    sample.data_type = 'BOOLEAN'
+    sample.domain = 'POINT'
+    material = nodes.nodes.new('GeometryNodeInputMaterialIndex')
+    delete = nodes.nodes.new('GeometryNodeDeleteGeometry')
+    delete.domain = 'FACE'
+    delete.mode = 'ALL'
+    join = nodes.nodes.new('GeometryNodeJoinGeometry')
+    nodes.links.new(info.outputs['Geometry'], sample.inputs['Geometry'])
+    nodes.links.new(attribute.outputs['Attribute'], sample.inputs['Value'])
+    nodes.links.new(material.outputs['Material Index'], sample.inputs['Index'])
+    nodes.links.new(sample.outputs['Value'], delete.inputs['Selection'])
+    nodes.links.new(original.outputs['Geometry'], delete.inputs['Geometry'])
+    nodes.links.new(delete.outputs['Geometry'], join.inputs['Geometry'])
+    for entry in spheres:
+        sphere_info = nodes.nodes.new('GeometryNodeObjectInfo')
+        sphere_info.transform_space = 'ORIGINAL'
+        sphere_info.inputs['Object'].default_value = bpy.data.objects[entry['cache']]
+        nodes.links.new(sphere_info.outputs['Geometry'], join.inputs['Geometry'])
+    nodes.links.new(join.outputs['Geometry'], out.inputs['Geometry'])
     modifier = obj.modifiers.new(TAG, 'NODES')
     modifier.node_group = nodes
     modifier.show_in_editmode = False
