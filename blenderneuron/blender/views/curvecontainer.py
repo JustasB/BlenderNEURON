@@ -142,6 +142,9 @@ class CurveContainer:
             for owner in (mat, mat.node_tree):
                 if owner is not None and owner.animation_data is not None and owner.animation_data.action is not None:
                     actions.append(owner.animation_data.action)
+                    # Blender 2.93 can retain node-tree action users until the
+                    # deleted material is evaluated. Release our links explicitly.
+                    owner.animation_data_clear()
             self.registry.remove(mat)
             for action in actions:
                 if action.users == 0:
