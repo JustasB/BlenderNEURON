@@ -14,7 +14,7 @@ class TestRenderEngineSelection(unittest.TestCase):
                                     ({'BLENDER_EEVEE', 'BLENDER_EEVEE_NEXT'}, 'BLENDER_EEVEE_NEXT'),
                                     (set(), None)):
             with self.subTest(supported=supported):
-                class Render:
+                class Render(object):
                     @property
                     def engine(self):
                         return self.selected

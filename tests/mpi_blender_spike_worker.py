@@ -48,9 +48,9 @@ def main(directory):
                 raise RuntimeError('Timed out waiting for Blender test completion')
             time.sleep(.05)
         node.stop_mpi_coordinator()
-    with (directory / ('rank-%d.json' % rank)).open('w') as destination:
-        json.dump({'rank': rank, 'spikes_ms': list(spikes), 'time_ms': h.t,
-                   'server': getattr(node, 'server_address', None)}, destination)
+    (directory / ('rank-%d.json' % rank)).write_bytes(json.dumps(
+        {'rank': rank, 'spikes_ms': list(spikes), 'time_ms': h.t,
+         'server': getattr(node, 'server_address', None)}).encode('utf-8'))
     node.stop_server()
     pc.barrier()
     pc.gid_clear()
