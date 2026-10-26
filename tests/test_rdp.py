@@ -110,7 +110,7 @@ class TestRDP(unittest.TestCase):
     def test_activity_alignment(self):
         times = [0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4.]
         values = [-65., -65., -65., -15., 35., -15., -65., -65., -65.]
-        original_times, original_values = times.copy(), values.copy()
+        original_times, original_values = list(times), list(values)
         expected = np.array([[0., -65.], [1., -65.], [2., 35.], [3., -65.], [4., -65.]])
         activity = Activity().from_dict(dict(times=times, values=values))
         with patch.multiple(activity_module, np=np, rdp=utils.rdp, numpy_available=True, create=True):

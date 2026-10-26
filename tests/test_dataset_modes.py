@@ -11,7 +11,8 @@ from blenderneuron.commnode import CommNode
 
 from tests import BlenderTestCase
 class TestDatasetSource(BlenderTestCase):
-    producer = test_offline.TestOffline.producer
+    def producer(self, *args, **kwargs):
+        return test_offline.TestOffline.__dict__['producer'](self, *args, **kwargs)
 
     def test_explicit_switching_and_reconnect_warning(self):
         with tempfile.TemporaryDirectory() as directory:

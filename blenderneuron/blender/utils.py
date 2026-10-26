@@ -9,7 +9,7 @@ import bpy
 import numpy as np
 
 
-COLOR_RAMP_NAME = "ColorRamp" if str(bpy.app.version[0]).isnumeric() and bpy.app.version[0] < 4 else "Color Ramp"
+COLOR_RAMP_NAME = "ColorRamp" if str(bpy.app.version[0]).isdigit() and bpy.app.version[0] < 4 else "Color Ramp"
 
 def launch_neuron(command):
     command = shlex.split(command)

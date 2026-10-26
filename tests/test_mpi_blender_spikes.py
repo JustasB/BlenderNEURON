@@ -1,3 +1,4 @@
+from __future__ import print_function
 """Blender -> rank-zero RPC -> two-rank simulation -> material animation."""
 import json
 from pathlib import Path
