@@ -1,11 +1,16 @@
 # One image recipe for all CI lanes, including the Python 2 assessment.
 ARG BASE_IMAGE=python:3.13.17-slim-bookworm
+# Keep the prebuilt Python 2 interpreter with modern Mesa for Blender's GUI.
+FROM python:2.7.18-buster AS python2-legacy
+RUN mkdir /python2-libs && for library in libssl.so.1.1 libcrypto.so.1.1 libffi.so.6 libreadline.so.7; do \
+      find /lib /usr/lib -name "$library" -exec cp -L '{}' /python2-libs/ \; ; \
+    done
+FROM python:3.13.17-slim-bookworm AS python2-modern
+COPY --from=python2-legacy /usr/local/ /usr/local/
+COPY --from=python2-legacy /python2-libs/ /usr/local/lib/
+RUN ldconfig
 FROM ${BASE_IMAGE}
-# Python 2's final image uses archived Debian Buster repositories.
-RUN if python -c 'import sys; sys.exit(sys.version_info[0] != 2)'; then \
-      sed -i 's/deb.debian.org/archive.debian.org/g; s/security.debian.org/archive.debian.org/g; /buster-updates/d' /etc/apt/sources.list; \
-    fi \
-    && apt-get -o Acquire::Check-Valid-Until=false update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends curl xz-utils python3 xvfb xauth procps \
        openbox libgl1 libegl1 libxi6 libxrender1 libxfixes3 libxxf86vm1 \
        libxkbcommon-x11-0 libsm6 libice6 libglib2.0-0 libdbus-1-3 libasound2 \

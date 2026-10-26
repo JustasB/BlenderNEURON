@@ -58,6 +58,10 @@ try:
     print(blender_version, flush=True)
     if blender_version.splitlines()[0].split()[:2] != ['Blender', os.environ['EXPECTED_BLENDER']]:
         raise RuntimeError('Cached image has an unexpected Blender version')
+    # Background mode does not exercise Mesa/OpenGL or GUI initialization.
+    subprocess.run(['blender', '--factory-startup', '--python-exit-code', '1',
+                    '--python-expr', 'import bpy; print("Blender GUI startup: PASS", flush=True); '
+                                     'bpy.ops.wm.quit_blender()'], check=True, timeout=30)
     preferences = ('import bpy; view = bpy.context.preferences.view; view.show_splash = False; '
                    'setattr(view, "use_save_prompt", False) if hasattr(view, "use_save_prompt") else None')
     addon_status = subprocess.call(['blender', '--background', '--python-exit-code', '1',

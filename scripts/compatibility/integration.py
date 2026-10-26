@@ -86,7 +86,7 @@ def run_lane(lane, args):
                 subprocess.run([
                     'docker', 'build', '--platform', 'linux/amd64', '-t', image,
                     '-f', str(ROOT / 'scripts/compatibility/Dockerfile.integration'),
-                    '--build-arg', 'BASE_IMAGE=python:' + python_image,
+                    '--build-arg', 'BASE_IMAGE=' + ('python2-modern' if python == '2.7.18' else 'python:' + python_image),
                     '--build-arg', 'NEURON_VERSION=' + neuron,
                     '--build-arg', 'BLENDER_VERSION=' + blender,
                     str(ROOT / 'scripts')], stdout=log, stderr=subprocess.STDOUT,
