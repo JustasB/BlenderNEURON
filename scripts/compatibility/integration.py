@@ -11,7 +11,7 @@ import sys
 import time
 import uuid
 
-from compatibility.releases import resolve_latest
+from .releases import resolve_latest
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXED_BLENDER = '5.2.3'

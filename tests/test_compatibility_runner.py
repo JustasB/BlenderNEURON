@@ -83,6 +83,13 @@ elif sys.argv[1] == 'run':
         self.assertIn('native x86-64', completed.stderr)
         self.assertFalse(any(call[0] == 'run' for call in self.read_calls()))
 
+    def test_supervisor_import_from_repository_root(self):
+        completed = subprocess.run(
+            [sys.executable, '-c', 'from scripts.compatibility.integration import run_tests'],
+            cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            universal_newlines=True, timeout=10)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+
     def test_latest_resolved_versions_reach_build_runtime_and_report(self):
         from unittest.mock import patch
         from types import SimpleNamespace
@@ -126,7 +133,7 @@ elif sys.argv[1] == 'run':
     def test_ci_matrix_covers_shared_lane_definitions_once(self):
         sys.path.insert(0, str(ROOT / 'scripts'))
         self.addCleanup(sys.path.remove, str(ROOT / 'scripts'))
-        spec = importlib.util.spec_from_file_location('compatibility_matrix',
+        spec = importlib.util.spec_from_file_location('compatibility.matrix_checked',
                                                       ROOT / 'scripts/compatibility/integration.py')
         matrix = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(matrix)
