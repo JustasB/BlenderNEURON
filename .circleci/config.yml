@@ -61,7 +61,7 @@ jobs:
     parameters:
       lane:
         type: enum
-        enum: [baseline, python2, neuron7, neuron9, blender2, blender4]
+        enum: [latest, python2, neuron7, neuron8, blender2, blender4]
     # Native x86-64 VM: official wheels/Blender archives, local Docker mounts.
     machine:
       image: ubuntu-2404:current
@@ -86,10 +86,10 @@ jobs:
           destination: compatibility/<< parameters.lane >>
       - when:
           condition:
-            equal: [baseline, << parameters.lane >>]
+            equal: [latest, << parameters.lane >>]
           steps:
             - codecov/upload:
-                file: .compatibility-results/baseline/coverage.xml
+                file: .compatibility-results/latest/coverage.xml
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
@@ -101,6 +101,6 @@ workflows:
           name: compatibility-<< matrix.lane >>
           matrix:
             parameters:
-              lane: [baseline, python2, neuron7, neuron9, blender2, blender4]
+              lane: [latest, python2, neuron7, neuron8, blender2, blender4]
       - docker-tutorial
       - windows-connections

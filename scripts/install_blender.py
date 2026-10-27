@@ -17,7 +17,7 @@ def install(version, destination, with_coverage=False):
     else:
         series = '.'.join(version.split('.')[:2])
         archive = 'blender-{}-linux-x64.tar.xz'.format(version)
-        base = 'https://mirror.clarkson.edu/blender/release/Blender' + series + '/'
+        base = 'https://download.blender.org/release/Blender' + series + '/'
         destination.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=str(destination.parent)) as temporary:
             temporary = Path(temporary)

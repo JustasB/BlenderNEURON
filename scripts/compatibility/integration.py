@@ -11,20 +11,22 @@ import sys
 import time
 import uuid
 
+from compatibility.releases import resolve_latest
+
 ROOT = Path(__file__).resolve().parents[2]
 FIXED_BLENDER = '5.2.3'
 FIXED_NEURON = '8.2.7'
 # Python is the NEURON-side interpreter. Blender uses its bundled interpreter.
 LANES = {
-    'baseline': (FIXED_NEURON, '3.13.17-slim-bookworm', FIXED_BLENDER),
+    'neuron8': (FIXED_NEURON, '3.13.18-slim-bookworm', FIXED_BLENDER),
     'python2': ('8.0.2', '2.7.18-buster', FIXED_BLENDER),
     'neuron7': ('7.8.2', '3.9.25-slim-bookworm', FIXED_BLENDER),
-    'neuron9': ('9.0.2', '3.14.9-slim-bookworm', FIXED_BLENDER),
-    'blender2': (FIXED_NEURON, '3.13.17-slim-bookworm', '2.93.18'),
-    'blender4': (FIXED_NEURON, '3.13.17-slim-bookworm', '4.5.15'),
+    'latest': None,
+    'blender2': (FIXED_NEURON, '3.13.18-slim-bookworm', '2.93.18'),
+    'blender4': (FIXED_NEURON, '3.13.18-slim-bookworm', '4.5.15'),
 }
-AXES = {'neuron': ('baseline', 'python2', 'neuron7', 'neuron9'),
-        'blender': ('baseline', 'blender2', 'blender4')}
+AXES = {'neuron': ('neuron8', 'python2', 'neuron7', 'latest'),
+        'blender': ('neuron8', 'blender2', 'blender4')}
 
 
 def run_tests(command, path, timeout, cleanup=None):
@@ -61,10 +63,6 @@ def run_tests(command, path, timeout, cleanup=None):
 
 
 def run_lane(lane, args):
-    neuron, python_image, blender = LANES[lane]
-    python = python_image.split('-')[0]
-    print('{}: NEURON {}, Python {}, Blender {} (linux/amd64, {})'.format(
-        lane, neuron, python, blender, 'full suite'), flush=True)
     directory = (args.results / lane).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     print('Logs and reports: ' + str(directory), flush=True)
@@ -77,9 +75,15 @@ def run_lane(lane, args):
     shutil.rmtree(str(directory / 'htmlcov'), ignore_errors=True)
     image = 'blenderneuron-integration:' + lane
     container = 'blenderneuron-matrix-' + uuid.uuid4().hex[:12]
-    status, error_message, phase = 1, None, 'build'
+    status, error_message, phase = 1, None, 'resolve'
+    neuron = python = blender = None
     started = time.monotonic()
     try:
+        neuron, python_image, blender = resolve_latest() if lane == 'latest' else LANES[lane]
+        python = python_image.split('-')[0]
+        print('{}: NEURON {}, Python {}, Blender {} (linux/amd64, full suite)'.format(
+            lane, neuron, python, blender), flush=True)
+        phase = 'build'
         if not args.skip_build:
             print('{}: building cached dependency image (limit {}s)'.format(lane, args.build_timeout), flush=True)
             with (directory / 'build.log').open('w') as log:
@@ -106,7 +110,7 @@ def run_lane(lane, args):
             '-e', 'BLENDERNEURON_TEST_TIMEOUT=' + str(args.test_timeout),
             image, '/usr/bin/python3', '/source/scripts/compatibility/integration_check.py']
         status = run_tests(command, directory / 'tests.log', args.timeout)
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as error:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError, ValueError) as error:
         status = 124 if isinstance(error, subprocess.TimeoutExpired) else getattr(error, 'returncode', 1)
         error_message = str(error)
         print('{}: {}'.format(lane, error), flush=True)
@@ -139,7 +143,7 @@ def main():
     selected = args.lanes or tuple(LANES)
     if args.list:
         for lane in selected:
-            neuron, python, blender = LANES[lane]
+            neuron, python, blender = resolve_latest() if lane == 'latest' else LANES[lane]
             print('{}: NEURON {}, Python {}, Blender {}'.format(lane, neuron, python.split('-')[0], blender))
         return 0
     architecture = subprocess.check_output(['docker', 'info', '--format', '{{.Architecture}}'], timeout=30).decode().strip()

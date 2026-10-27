@@ -1,5 +1,5 @@
 # One image recipe for all CI lanes, including the Python 2 assessment.
-ARG BASE_IMAGE=python:3.13.17-slim-bookworm
+ARG BASE_IMAGE=python:3.13.18-slim-bookworm
 # Keep the prebuilt Python 2 interpreter with modern Mesa for Blender's GUI.
 FROM python:2.7.18-buster AS python2-legacy
 RUN mkdir /python2-libs && for library in libssl.so.1.1 libcrypto.so.1.1 libffi.so.6 libreadline.so.7; do \
