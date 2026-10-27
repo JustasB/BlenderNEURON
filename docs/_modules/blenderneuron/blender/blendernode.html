@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
@@ -87,6 +90,28 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">BlenderNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Blender&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">offline_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">blenderneuron.blender.dataset</span> <span class="kn">import</span> <span class="n">is_offline</span>
+        <span class="k">return</span> <span class="n">is_offline</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BlenderNode.try_setup_client"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.try_setup_client">[docs]</a>    <span class="k">def</span> <span class="nf">try_setup_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offline_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+        <span class="n">old_peer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_last_live_peer&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">disconnected</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;client&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">try_setup_client</span><span class="p">(</span><span class="n">warn</span><span class="o">=</span><span class="n">warn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">transport</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_ServerProxy__transport&#39;</span><span class="p">)</span>
+            <span class="n">peer</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client_address</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">transport</span><span class="p">,</span> <span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="n">imported</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;imported&#39;</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">old_peer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">imported</span> <span class="ow">and</span> <span class="p">(</span><span class="n">disconnected</span> <span class="ow">or</span> <span class="n">peer</span> <span class="o">!=</span> <span class="n">old_peer</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">export_requires_confirmation</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_live_peer</span> <span class="o">=</span> <span class="n">peer</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ui_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scenes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">BlenderNEURON</span>
 
@@ -110,6 +135,8 @@
         <span class="k">return</span> <span class="n">group</span></div>
 
 <div class="viewcode-block" id="BlenderNode.update_root_index"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.update_root_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_root_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">blenderneuron.blender.dataset</span> <span class="kn">import</span> <span class="n">require_live</span>
+        <span class="n">require_live</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="c1"># Keep track which roots have been removed from NRN</span>
         <span class="n">roots_to_delete</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_index</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
@@ -178,6 +205,8 @@
         <span class="k">return</span> <span class="n">nrn_groups</span></div>
 
 <div class="viewcode-block" id="BlenderNode.import_groups_from_neuron"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.import_groups_from_neuron">[docs]</a>    <span class="k">def</span> <span class="nf">import_groups_from_neuron</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_list</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">blenderneuron.blender.dataset</span> <span class="kn">import</span> <span class="n">require_live</span>
+        <span class="n">require_live</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="n">nrn_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_group_data_from_neuron</span><span class="p">(</span><span class="n">group_list</span><span class="p">)</span>
 
@@ -193,7 +222,10 @@
                 <span class="n">node_group</span><span class="o">.</span><span class="n">view</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># Update blender node group with the data received from NRN</span>
-            <span class="n">node_group</span><span class="o">.</span><span class="n">from_full_NEURON_group</span><span class="p">(</span><span class="n">nrn_group</span><span class="p">)</span></div>
+            <span class="n">node_group</span><span class="o">.</span><span class="n">from_full_NEURON_group</span><span class="p">(</span><span class="n">nrn_group</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">group</span> <span class="ow">in</span> <span class="n">group_list</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;imported&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">export_requires_confirmation</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="BlenderNode.get_selected_groups"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_selected_groups">[docs]</a>    <span class="k">def</span> <span class="nf">get_selected_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">selected</span><span class="p">]</span></div>
@@ -236,22 +268,37 @@
 
 <div class="viewcode-block" id="BlenderNode.add_neon_effect"><a class="viewcode-back" href="../../../blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.add_neon_effect">[docs]</a>    <span class="k">def</span> <span class="nf">add_neon_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Adds a neon-style glare effect for Cycles (via compositor)</span>
-<span class="sd">        and enables bloom for Eevee so the glow appears in both engines.</span>
+<span class="sd">        Adds a neon-style glare effect via the compositor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">scene</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scene</span>
 
-        <span class="c1"># ============================================================</span>
-        <span class="c1"># 1. ENABLE BLOOM IF USING EEVEE</span>
-        <span class="c1"># ============================================================</span>
-        <span class="n">scene</span><span class="o">.</span><span class="n">eevee</span><span class="o">.</span><span class="n">use_bloom</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Eevee bloom was removed in newer Blender versions. Keep using it</span>
+        <span class="c1"># where it exists, and fall back to the compositor glare setup below.</span>
+        <span class="n">eevee_settings</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="s2">&quot;eevee&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">eevee_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">eevee_settings</span><span class="p">,</span> <span class="s2">&quot;use_bloom&quot;</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+            <span class="n">eevee_settings</span><span class="o">.</span><span class="n">use_bloom</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># ============================================================</span>
-        <span class="c1"># 2. ENABLE COMPOSITOR NODES (Cycles bloom)</span>
-        <span class="c1"># ============================================================</span>
-        <span class="n">scene</span><span class="o">.</span><span class="n">use_nodes</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">nt</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span>
+        <span class="n">use_blender_5_compositor</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">5</span>
+
+        <span class="k">if</span> <span class="n">use_blender_5_compositor</span><span class="p">:</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">compositing_node_group</span>
+            <span class="k">if</span> <span class="n">nt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nt</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">node_groups</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;BlenderNEURON Neon Composite&quot;</span><span class="p">,</span> <span class="s2">&quot;CompositorNodeTree&quot;</span><span class="p">)</span>
+                <span class="n">scene</span><span class="o">.</span><span class="n">compositing_node_group</span> <span class="o">=</span> <span class="n">nt</span>
+
+            <span class="k">for</span> <span class="n">window</span> <span class="ow">in</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">windows</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">window</span><span class="o">.</span><span class="n">screen</span><span class="o">.</span><span class="n">areas</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">area</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s1">&#39;VIEW_3D&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">space</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">active</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="s2">&quot;shading&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">space</span><span class="o">.</span><span class="n">shading</span><span class="p">,</span> <span class="s2">&quot;use_compositor&quot;</span><span class="p">):</span>
+                        <span class="n">space</span><span class="o">.</span><span class="n">shading</span><span class="o">.</span><span class="n">use_compositor</span> <span class="o">=</span> <span class="s1">&#39;ALWAYS&#39;</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">use_nodes</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">node_tree</span>
+
         <span class="n">nodes</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">nodes</span>
         <span class="n">links</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">links</span>
 
@@ -268,17 +315,22 @@
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Composite&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">comp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeComposite&#39;</span><span class="p">)</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;NodeGroupOutput&#39;</span> <span class="k">if</span> <span class="n">use_blender_5_compositor</span> <span class="k">else</span> <span class="s1">&#39;CompositorNodeComposite&#39;</span><span class="p">)</span>
             <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Composite&#39;</span>
+
+        <span class="k">if</span> <span class="n">use_blender_5_compositor</span> <span class="ow">and</span> <span class="s1">&#39;Image&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">comp</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="n">nt</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">new_socket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Image&quot;</span><span class="p">,</span> <span class="n">in_out</span><span class="o">=</span><span class="s1">&#39;OUTPUT&#39;</span><span class="p">,</span> <span class="n">socket_type</span><span class="o">=</span><span class="s1">&#39;NodeSocketColor&#39;</span><span class="p">)</span>
 
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Optional Viewer node for compositor preview</span>
         <span class="c1"># ------------------------------------------------------------</span>
-        <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Viewer&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeViewer&#39;</span><span class="p">)</span>
-            <span class="n">viewer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Viewer&#39;</span>
-            <span class="n">viewer</span><span class="o">.</span><span class="n">use_alpha</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">viewer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_blender_5_compositor</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Viewer&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">viewer</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeViewer&#39;</span><span class="p">)</span>
+                <span class="n">viewer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Viewer&#39;</span>
+                <span class="n">viewer</span><span class="o">.</span><span class="n">use_alpha</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Get or create Glare node (no duplication)</span>
@@ -293,32 +345,45 @@
             <span class="n">glare</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;CompositorNodeGlare&#39;</span><span class="p">)</span>
             <span class="n">glare</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;NeonGlare&#39;</span>
 
+        <span class="k">def</span> <span class="nf">set_node_setting</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_value</span><span class="p">,</span> <span class="n">input_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_value</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">input_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">input_name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span><span class="o">.</span><span class="n">default_value</span> <span class="o">=</span> <span class="n">input_value</span> <span class="k">if</span> <span class="n">input_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">prop_value</span>
+
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Configure glare for neon-style streak effect</span>
         <span class="c1"># ------------------------------------------------------------</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">glare_type</span> <span class="o">=</span> <span class="s1">&#39;STREAKS&#39;</span>  <span class="c1"># neon streak effect</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="s1">&#39;HIGH&#39;</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">3</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">color_modulation</span> <span class="o">=</span> <span class="mf">0.2</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.1</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">streaks</span> <span class="o">=</span> <span class="mi">7</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">fade</span> <span class="o">=</span> <span class="mf">0.75</span>
-        <span class="n">glare</span><span class="o">.</span><span class="n">mix</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 0 = effect only</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;glare_type&#39;</span><span class="p">,</span> <span class="s1">&#39;STREAKS&#39;</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Streaks&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;quality&#39;</span><span class="p">,</span> <span class="s1">&#39;HIGH&#39;</span><span class="p">,</span> <span class="s1">&#39;Quality&#39;</span><span class="p">,</span> <span class="s1">&#39;High&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;iterations&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Iterations&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;color_modulation&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;Color Modulation&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;threshold&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s1">&#39;Threshold&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;streaks&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;Streaks&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;fade&#39;</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="s1">&#39;Fade&#39;</span><span class="p">)</span>
+        <span class="n">set_node_setting</span><span class="p">(</span><span class="n">glare</span><span class="p">,</span> <span class="s1">&#39;mix&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Mix&#39;</span><span class="p">)</span>
 
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Remove old links to Composite/Viewer to avoid stacking</span>
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">links</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">to_node</span> <span class="ow">in</span> <span class="p">{</span><span class="n">comp</span><span class="p">,</span> <span class="n">viewer</span><span class="p">}:</span>
+            <span class="n">output_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">comp</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">output_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">viewer</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">to_node</span> <span class="ow">in</span> <span class="n">output_nodes</span><span class="p">:</span>
                 <span class="n">links</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
 
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="c1"># Connect nodes cleanly:</span>
-        <span class="c1"># Render Layers → Glare → Composite + Viewer</span>
+        <span class="c1"># Render Layers -&gt; Glare -&gt; Composite (+ Viewer before Blender 5)</span>
         <span class="c1"># ------------------------------------------------------------</span>
         <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">rl</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">glare</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
         <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">comp</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span>
-        <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">viewer</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span></div></div>
+        <span class="k">if</span> <span class="n">viewer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">glare</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">],</span> <span class="n">viewer</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;Image&#39;</span><span class="p">])</span></div></div>
 
 
 </pre></div>
@@ -330,7 +395,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

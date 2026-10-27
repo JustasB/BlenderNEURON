@@ -7,13 +7,17 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, NEURON, Blender, BlenderTestCase
+from tests import test_hoc_file, NEURON, BackgroundBlender as Blender, BlenderTestCase
 
 class TestBlenderNode(BlenderTestCase):
     def test_server_established(self):
         # Start Blender with a running node
         with Blender(), CommNode("Control-Blender") as bcn:
             self.assertEqual(bcn.client.ping(), 1)
+            self.assertEqual(os.environ.get('BLENDERNEURON_TEST_HEADLESS', '1') != '0',
+                             bcn.client.run_command('return_value = bpy.app.background'))
+            self.assertTrue(bcn.client.run_command(
+                'import threading; return_value = threading.current_thread() is threading.main_thread()'))
 
             bcn.client.end_code_coverage()
 

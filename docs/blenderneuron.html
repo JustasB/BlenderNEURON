@@ -50,17 +50,24 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Abstract Classes</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#blenderneuron.commnode.CommNode"><code class="docutils literal notranslate"><span class="pre">CommNode</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.compress"><code class="docutils literal notranslate"><span class="pre">CommNode.compress()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.configure_connection"><code class="docutils literal notranslate"><span class="pre">CommNode.configure_connection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.decompress"><code class="docutils literal notranslate"><span class="pre">CommNode.decompress()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.find_free_port"><code class="docutils literal notranslate"><span class="pre">CommNode.find_free_port()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.forget_connection"><code class="docutils literal notranslate"><span class="pre">CommNode.forget_connection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.get_end_address_file"><code class="docutils literal notranslate"><span class="pre">CommNode.get_end_address_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.init_task_queue"><code class="docutils literal notranslate"><span class="pre">CommNode.init_task_queue()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.load_config"><code class="docutils literal notranslate"><span class="pre">CommNode.load_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.pairing_information"><code class="docutils literal notranslate"><span class="pre">CommNode.pairing_information()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.print_safe"><code class="docutils literal notranslate"><span class="pre">CommNode.print_safe()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.read_client_address_file"><code class="docutils literal notranslate"><span class="pre">CommNode.read_client_address_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.retry_setup_client"><code class="docutils literal notranslate"><span class="pre">CommNode.retry_setup_client()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.save_server_address_file"><code class="docutils literal notranslate"><span class="pre">CommNode.save_server_address_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.server_types"><code class="docutils literal notranslate"><span class="pre">CommNode.server_types</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.service_queue_loop"><code class="docutils literal notranslate"><span class="pre">CommNode.service_queue_loop()</span></code></a></li>
@@ -74,12 +81,14 @@
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.sm_run_command"><code class="docutils literal notranslate"><span class="pre">CommNode.sm_run_command()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.sm_stop"><code class="docutils literal notranslate"><span class="pre">CommNode.sm_stop()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.stop_server"><code class="docutils literal notranslate"><span class="pre">CommNode.stop_server()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.test_connection"><code class="docutils literal notranslate"><span class="pre">CommNode.test_connection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.try_setup_client"><code class="docutils literal notranslate"><span class="pre">CommNode.try_setup_client()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.commnode.CommNode.work_on_queue_tasks"><code class="docutils literal notranslate"><span class="pre">CommNode.work_on_queue_tasks()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#blenderneuron.rootgroup.RootGroup"><code class="docutils literal notranslate"><span class="pre">RootGroup</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.rootgroup.RootGroup.clear_activity"><code class="docutils literal notranslate"><span class="pre">RootGroup.clear_activity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.rootgroup.RootGroup.from_file"><code class="docutils literal notranslate"><span class="pre">RootGroup.from_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.rootgroup.RootGroup.to_dict"><code class="docutils literal notranslate"><span class="pre">RootGroup.to_dict()</span></code></a></li>
 </ul>
 </li>
@@ -129,15 +138,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-blenderneuron.neuronstart">
-<span id="abstract-classes"></span><h1>Abstract Classes<a class="headerlink" href="#module-blenderneuron.neuronstart" title="Permalink to this heading"></a></h1>
-<span class="target" id="module-blenderneuron.commnode"></span><dl class="py class">
+  <section id="module-blenderneuron.commnode">
+<span id="abstract-classes"></span><h1>Abstract Classes<a class="headerlink" href="#module-blenderneuron.commnode" title="Permalink to this heading"></a></h1>
+<dl class="py class">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blenderneuron.commnode.</span></span><span class="sig-name descname"><span class="pre">CommNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server_end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_client_connected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_server_setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.compress">
 <span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.compress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.compress" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.configure_connection">
+<span class="sig-name descname"><span class="pre">configure_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peer_address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listen_host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listen_port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.configure_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.configure_connection" title="Permalink to this definition"></a></dt>
+<dd><p>Persist settings; changing listening settings requires restarting the node.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.decompress">
@@ -152,6 +167,12 @@
 <dd class="field-odd"><p>A random available port</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.forget_connection">
+<span class="sig-name descname"><span class="pre">forget_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.forget_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.forget_connection" title="Permalink to this definition"></a></dt>
+<dd><p>Revoke credentials without changing simulation or scene data.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -170,6 +191,12 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.pairing_information">
+<span class="sig-name descname"><span class="pre">pairing_information</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.pairing_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.pairing_information" title="Permalink to this definition"></a></dt>
+<dd><p>Return a credential-bearing string. Share only with a trusted peer.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.print_safe">
 <span class="sig-name descname"><span class="pre">print_safe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.print_safe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.print_safe" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -180,6 +207,11 @@
 <dd><p>Read from a file in tmp folder that contains the address of the other node’s XML-RCP server
 :return: The address of the other end’s XML-RCP server</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.retry_setup_client">
+<span class="sig-name descname"><span class="pre">retry_setup_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.retry_setup_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.retry_setup_client" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.save_server_address_file">
@@ -200,7 +232,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.setup_server">
-<span class="sig-name descname"><span class="pre">setup_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.setup_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.setup_server" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setup_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.setup_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.setup_server" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -251,6 +283,11 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.test_connection">
+<span class="sig-name descname"><span class="pre">test_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.test_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.test_connection" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.commnode.CommNode.try_setup_client">
 <span class="sig-name descname"><span class="pre">try_setup_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/commnode.html#CommNode.try_setup_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.commnode.CommNode.try_setup_client" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -269,6 +306,14 @@
 <dt class="sig sig-object py" id="blenderneuron.rootgroup.RootGroup.clear_activity">
 <span class="sig-name descname"><span class="pre">clear_activity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/rootgroup.html#RootGroup.clear_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.rootgroup.RootGroup.clear_activity" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.rootgroup.RootGroup.from_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/rootgroup.html#RootGroup.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.rootgroup.RootGroup.from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Read a saved group and return its reconstructed group dictionary.</p>
+<p>Available in both Blender and NEURON without starting a connection.
+The result can be inspected or passed to node.update_groups([group]).</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.rootgroup.RootGroup.to_dict">
@@ -347,7 +392,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

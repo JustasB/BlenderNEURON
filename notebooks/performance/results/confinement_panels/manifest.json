@@ -1,0 +1,128 @@
+{
+  "setup": {
+    "version": "tilt80-50-soma-xminus200-z10-slab100-labels-v8",
+    "axis": 2,
+    "slab_um": [
+      0.0,
+      100.0
+    ],
+    "target_um": [
+      0.0,
+      100.0
+    ],
+    "height_fractions": [
+      0.0,
+      1.0
+    ],
+    "plane_size_um": 600.0,
+    "source_soma_center_um": [
+      5.0,
+      0.0,
+      0.0
+    ],
+    "soma_center_um": [
+      -200.0,
+      0.0,
+      10.0
+    ],
+    "cell_z_rotation_degrees": 80.0,
+    "cell_y_rotation_degrees": 50.0,
+    "section_pattern": "*dend*",
+    "cell_rgba": [
+      0.015,
+      0.12,
+      0.55,
+      1.0
+    ],
+    "world_rgba": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "target_rgba": [
+      0.88,
+      0.88,
+      0.88,
+      1.0
+    ],
+    "camera_location_um": [
+      0.0,
+      -1200.0,
+      210.0
+    ],
+    "camera_target_um": [
+      0.0,
+      0.0,
+      210.0
+    ],
+    "camera_type": "ORTHO",
+    "camera_width_um": 680.0,
+    "resolution": [
+      1200,
+      900
+    ],
+    "view_transform": "Standard",
+    "look": "None",
+    "inset_camera_location_um": [
+      -60.0,
+      0.0,
+      1200.0
+    ],
+    "inset_camera_target_um": [
+      -60.0,
+      0.0,
+      0.0
+    ],
+    "inset_width_um": 400.0,
+    "inset_resolution": [
+      400,
+      400
+    ]
+  },
+  "layout": {
+    "crop_top_fraction": 0.3,
+    "crop_right_fraction": 0.2,
+    "inset_bounds": [
+      0.16,
+      0.59,
+      0.24,
+      0.35
+    ]
+  },
+  "seed": 0,
+  "panels": [
+    {
+      "panel": "A",
+      "label": "Baseline",
+      "file": "A_baseline.png",
+      "front": "before_confinement.png",
+      "top": "before_confinement_top.png",
+      "sha256": "cbe2bc8a6fe62df94ff016d47fe8391ebebc7be9acfec27fbb54cc783099300e"
+    },
+    {
+      "panel": "B",
+      "label": "5\u00b0 / 100 \u00b5m",
+      "file": "B_5deg_100um.png",
+      "front": "confined_5deg_100um.png",
+      "top": "confined_5deg_100um_top.png",
+      "sha256": "1665331e1782ad0e3c0945f94522008f635984b7ae046954f3c76a4024dedff6"
+    },
+    {
+      "panel": "C",
+      "label": "10\u00b0 / 75 \u00b5m",
+      "file": "C_10deg_75um.png",
+      "front": "confined_10deg_75um.png",
+      "top": "confined_10deg_75um_top.png",
+      "sha256": "ae052765b889d855a9b25be3b32277ddc67985f42d7e039013cc1041d8e3fbc8"
+    },
+    {
+      "panel": "D",
+      "label": "15\u00b0 / 50 \u00b5m",
+      "file": "D_15deg_50um.png",
+      "front": "confined_15deg_50um.png",
+      "top": "confined_15deg_50um_top.png",
+      "sha256": "57a328a37f2b69c3fc0dba25c2cf8f3e551d522a20660e5aed5501f3421d8912"
+    }
+  ]
+}

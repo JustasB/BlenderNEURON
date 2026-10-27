@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Remote Connections and MPI &mdash; BlenderNEURON  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Offline Simulation Results" href="offline-simulation.html" />
+    <link rel="prev" title="Docker Tutorial" href="headless-docker.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            BlenderNEURON
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Remote Connections and MPI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#connection-addresses">Connection addresses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-settings-are-saved">Where settings are saved</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pairing-information">Pairing information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#connection-settings-in-python">Connection settings in Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#connect-to-docker">Connect to Docker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connect-to-a-remote-machine-through-ssh">Connect to a Remote Machine through SSH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-neuron-with-mpi">Use NEURON with MPI</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlenderNEURON</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Remote Connections and MPI</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/remote-connections.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="remote-connections-and-mpi">
+<h1>Remote Connections and MPI<a class="headerlink" href="#remote-connections-and-mpi" title="Permalink to this heading"></a></h1>
+<p>BlenderNEURON normally connects Blender and NEURON automatically on the same
+computer. Each application listens on <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code>, selects an available port,
+and writes its address to a file in the user’s private settings directory. The
+two applications discover each other’s addresses there and read the same
+<code class="docutils literal notranslate"><span class="pre">local-secret</span></code> file to authenticate requests. The secret is saved between
+sessions; it is not a temporary file that must be exchanged again at each start.</p>
+<p>When NEURON runs in Docker or on another computer, it has a separate network
+and settings directory. Keep Blender on your local computer and configure the
+connection manually using the steps below. After connecting, use
+<a class="reference internal" href="getting-started.html"><span class="doc">Getting Started</span></a> to import and edit cells.</p>
+<p>For MPI jobs or scripts that run to completion, use <a class="reference internal" href="offline-simulation.html"><span class="doc">Offline Simulation Results</span></a>
+instead. Configure recording in the script, run the simulation, and save a
+<code class="docutils literal notranslate"><span class="pre">.bnresults</span></code> file to import into Blender later. Blender does not need to be
+running during the job, and no pairing or network connection is needed. The
+Docker and SSH instructions below apply to live connections.</p>
+<section id="connection-addresses">
+<h2>Connection addresses<a class="headerlink" href="#connection-addresses" title="Permalink to this heading"></a></h2>
+<p>Both applications receive requests, so both need a listening address and an
+address for the other application:</p>
+<ul class="simple">
+<li><p>The listening address controls which interface an application receives requests on</p></li>
+<li><p>The peer address tells that application how to reach the other application</p></li>
+<li><p>Blender’s ‘NEURON address’ is interpreted from Blender’s computer</p></li>
+<li><p>NEURON’s <code class="docutils literal notranslate"><span class="pre">peer_address</span></code> is interpreted from NEURON’s computer or container</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> always refers to the computer or container using the address. It
+does not refer to the other computer. With SSH forwarding, it can point to a
+tunnel entrance on the same computer, which carries requests to the other end.
+<code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> is a listening address for all interfaces; do not use it as a peer
+address.</p>
+<p>Throughout the manual connection examples, Blender uses port 8000 and NEURON
+uses port 8001. These are example fixed ports, not the automatically selected
+ports used for same-computer discovery. Choose available ports and update all
+matching settings and forwarding rules if you change them.</p>
+</section>
+<section id="where-settings-are-saved">
+<h2>Where settings are saved<a class="headerlink" href="#where-settings-are-saved" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Windows: <code class="docutils literal notranslate"><span class="pre">%LOCALAPPDATA%/BlenderNEURON</span></code></p></li>
+<li><p>macOS: <code class="docutils literal notranslate"><span class="pre">~/Library/Application</span> <span class="pre">Support/BlenderNEURON</span></code></p></li>
+<li><p>Linux: <code class="docutils literal notranslate"><span class="pre">$XDG_CONFIG_HOME/blenderneuron</span></code> (or <code class="docutils literal notranslate"><span class="pre">~/.config/blenderneuron</span></code>)</p></li>
+</ul>
+<p>This directory holds the local secret, discovery address files, and saved
+connection settings. Set <code class="docutils literal notranslate"><span class="pre">BLENDERNEURON_CONFIG_DIR</span></code> to use another private
+directory, such as a persistent container volume. Credentials are stored outside
+the <code class="docutils literal notranslate"><span class="pre">.blend</span></code> file. Do not put them in a shared repository. Unix files use
+private permissions; Windows uses the user profile directory’s permissions.
+Processes running as the same user can read them.</p>
+</section>
+<section id="pairing-information">
+<h2>Pairing information<a class="headerlink" href="#pairing-information" title="Permalink to this heading"></a></h2>
+<p>Manual pairing gives both applications the same authentication secret. In the
+Python session running your NEURON model, run:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">blenderneuron.neuronstart</span> <span class="kn">import</span> <span class="n">BlenderNEURON</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">pairing_information</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The output is a JSON string with three fields. For example (the secret below is
+a placeholder):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;secret&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;64 hexadecimal characters&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;http://127.0.0.1:8001&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">version</span></code> identifies the pairing information format, currently 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">secret</span></code> is the 64-character authentication secret that both applications must share</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">address</span></code> is the exporting application’s listening URL, including its port</p></li>
+</ul>
+<p>The exported address is not necessarily reachable from the other application.
+For example, NEURON’s <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> inside Docker refers to the container, while
+Blender’s <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> refers to the host. After importing pairing information,
+replace the address and port with the ones reachable from the receiving
+application, as shown in each example below. Keep the secret unchanged.</p>
+<ol class="arabic simple">
+<li><p>In Blender’s ‘Node Status’, press ‘Connect to NEURON…’ (or ‘Change connection…’ for a saved connection)</p></li>
+<li><p>Choose ‘In Docker or on another computer’</p></li>
+<li><p>Use ‘Copy Python command’ to get the command above and run it in NEURON</p></li>
+<li><p>Copy the full JSON output, including the braces, and press ‘Paste from clipboard’ in Blender</p>
+<ul class="simple">
+<li><p>You can also enter ‘NEURON address’, ‘NEURON port’, and ‘Pairing secret’ manually</p></li>
+</ul>
+</li>
+<li><p>Set the addresses and listening ports for your setup using the Docker or SSH steps below</p></li>
+<li><p>Press ‘Connect’ (‘OK’ in Blender 4.0)</p></li>
+</ol>
+<p>The settings are remembered. Use ‘Reconnect’ after restarting either application.
+Reconnecting restores communication; it does not reload the model or recreate
+cell groups and Blender objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Pair only with processes you trust: a paired process can execute Python in
+the other application. Keep the JSON and secret private, including clipboard
+contents. Authentication does not encrypt HTTP traffic. Use SSH tunnels
+between computers.</p>
+</div>
+</section>
+<section id="connection-settings-in-python">
+<h2>Connection settings in Python<a class="headerlink" href="#connection-settings-in-python" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">configure_connection</span></code> sets NEURON’s listening interface and port, the address
+it uses to reach Blender, and optionally pairing information copied from Blender:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">configure_connection</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
+    <span class="n">listen_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="n">listen_port</span><span class="o">=</span><span class="s2">&quot;8001&quot;</span><span class="p">,</span>
+    <span class="n">peer_address</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8000&quot;</span><span class="p">,</span>
+    <span class="n">pairing</span><span class="o">=</span><span class="n">blender_pairing_string</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, NEURON receives requests on port 8001 and reaches Blender on
+port 8000. The loopback addresses work when both applications are on the same
+computer, or when using the SSH tunnels below. For Docker, use the host address
+reachable from the container as shown in the next section.</p>
+<p><code class="docutils literal notranslate"><span class="pre">blender_pairing_string</span></code> is the JSON copied with ‘Copy Blender connection
+information’ in the dialog’s ‘Advanced’ section. Omit <code class="docutils literal notranslate"><span class="pre">pairing</span></code> when using
+NEURON’s secret and importing its JSON into Blender instead. The explicit
+<code class="docutils literal notranslate"><span class="pre">peer_address</span></code> overrides the address in the imported JSON.</p>
+<p>Restart the NEURON node/process after changing its listening interface or port.
+Then retrieve its pairing information. Use <code class="docutils literal notranslate"><span class="pre">BlenderNEURON.test_connection()</span></code>
+to check whether Blender is authenticated and reachable from NEURON.</p>
+<section id="connect-to-docker">
+<h3>Connect to Docker<a class="headerlink" href="#connect-to-docker" title="Permalink to this heading"></a></h3>
+<p>In this example, Blender runs on the host and NEURON runs inside a container.
+NEURON listens on container port 8001; Blender listens on host port 8000.
+Docker publishes NEURON’s port on the host, so Blender sends requests to host
+port 8001. NEURON sends requests back directly to Blender’s host port 8000.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 40.0%" />
+<col style="width: 45.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Port</p></th>
+<th class="head"><p>On the host (Blender’s computer)</p></th>
+<th class="head"><p>Inside the container</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>8000</p></td>
+<td><p>Blender listens here</p></td>
+<td><p>No listener; NEURON sends requests to the host’s port 8000</p></td>
+</tr>
+<tr class="row-odd"><td><p>8001</p></td>
+<td><p>Docker publishes this port and forwards to container port 8001</p></td>
+<td><p>NEURON listens here</p></td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic">
+<li><p>Publish NEURON’s port when starting the container by adding this option to <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>-p<span class="w"> </span><span class="m">127</span>.0.0.1:8001:8001
+</pre></div>
+</div>
+<p>The format is <code class="docutils literal notranslate"><span class="pre">host-address:host-port:container-port</span></code>. Here, host port
+8001 forwards to container port 8001. Blender reaches the published port at
+<code class="docutils literal notranslate"><span class="pre">127.0.0.1:8001</span></code> on the host; this is Blender’s ‘NEURON address’ and port,
+not Blender’s own listening address and port.</p>
+</li>
+<li><p>Choose a host IP address reachable from the container</p>
+<p>For this example, assume the host has address <code class="docutils literal notranslate"><span class="pre">192.168.1.10</span></code> and the
+container can reach it. Replace this example IP with your host’s reachable
+address in both Blender’s listening settings and NEURON’s <code class="docutils literal notranslate"><span class="pre">peer_address</span></code>.
+Do not use the container’s IP here.</p>
+</li>
+<li><p>In Blender’s connection dialog, select ‘In Docker or on another computer’ and expand ‘Advanced’</p>
+<ul class="simple">
+<li><p>Set ‘Listen address’ to the host’s reachable IP (<code class="docutils literal notranslate"><span class="pre">192.168.1.10</span></code> in this example)</p></li>
+<li><p>Enable ‘Use a fixed listening port’ and set it to 8000</p></li>
+<li><p>Allow connections from the container to this interface and port through the host firewall</p></li>
+</ul>
+</li>
+<li><p>In the container’s NEURON Python session, configure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">blenderneuron.neuronstart</span> <span class="kn">import</span> <span class="n">BlenderNEURON</span>
+<span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">configure_connection</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span> <span class="n">listen_host</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">listen_port</span><span class="o">=</span><span class="s2">&quot;8001&quot;</span><span class="p">,</span>
+    <span class="n">peer_address</span><span class="o">=</span><span class="s2">&quot;http://192.168.1.10:8000&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">listen_host=&quot;0.0.0.0&quot;</span></code> lets NEURON receive Docker’s forwarded requests
+on container port 8001. <code class="docutils literal notranslate"><span class="pre">peer_address=&quot;http://192.168.1.10:8000&quot;</span></code> tells
+NEURON to send requests to Blender’s port 8000 on the host. Using
+<code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> here would send requests to the container itself.</p>
+</li>
+<li><p>Restart the NEURON node/process and copy its pairing JSON into Blender as described above</p></li>
+<li><p>In Blender, set ‘NEURON address’ to <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> and ‘NEURON port’ to 8001, then press ‘Connect’</p></li>
+</ol>
+<p>The two request paths are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Blender</span> <span class="n">on</span> <span class="n">host</span> <span class="o">-&gt;</span> <span class="n">host</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">8001</span> <span class="o">-&gt;</span> <span class="n">Docker</span> <span class="n">forwarding</span> <span class="o">-&gt;</span> <span class="n">NEURON</span> <span class="n">container</span> <span class="p">:</span><span class="mi">8001</span>
+<span class="n">NEURON</span> <span class="n">container</span> <span class="o">-&gt;</span> <span class="n">host</span> <span class="mf">192.168.1.10</span><span class="p">:</span><span class="mi">8000</span> <span class="o">-&gt;</span> <span class="n">Blender</span>
+</pre></div>
+</div>
+<p>The host address used for the return path depends on your Docker network setup.
+Publishing NEURON’s port sets up only the first path; it does not make Blender’s
+host loopback listener reachable from inside the container. Docker on Windows
+and macOS also uses a separate container network.</p>
+</section>
+<section id="connect-to-a-remote-machine-through-ssh">
+<h3>Connect to a Remote Machine through SSH<a class="headerlink" href="#connect-to-a-remote-machine-through-ssh" title="Permalink to this heading"></a></h3>
+<p>Blender and NEURON both send requests to each other. SSH therefore needs two
+tunnels: one to reach NEURON from Blender, and one to reach Blender from NEURON.
+This example uses port 8000 for Blender and port 8001 for NEURON:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 35.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Port</p></th>
+<th class="head"><p>On your local computer</p></th>
+<th class="head"><p>On the remote computer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>8000</p></td>
+<td><p>Blender listens here</p></td>
+<td><p>SSH listens here and forwards to local Blender port 8000</p></td>
+</tr>
+<tr class="row-odd"><td><p>8001</p></td>
+<td><p>SSH listens here and forwards to remote port 8001</p></td>
+<td><p>NEURON listens here</p></td>
+</tr>
+</tbody>
+</table>
+<p>Each port number is used on both computers. Port 8000 belongs to Blender
+locally and to its SSH tunnel entrance remotely. Port 8001 belongs to NEURON
+remotely and to its SSH tunnel entrance locally. Reusing the numbers works
+because the listeners are on different computers. All listeners use
+<code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> on their own computer.</p>
+<p>These port numbers are examples. Choose available ports and keep the application
+settings and SSH forwarding command consistent if you change them.</p>
+<ol class="arabic">
+<li><p>In Blender’s connection dialog, choose ‘In Docker or on another computer’ and expand ‘Advanced’</p>
+<ul class="simple">
+<li><p>Set ‘Listen address’ to <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> (Blender’s local computer)</p></li>
+<li><p>Enable ‘Use a fixed listening port’ and set it to 8000</p></li>
+</ul>
+</li>
+<li><p>In the remote NEURON Python session, configure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">blenderneuron.neuronstart</span> <span class="kn">import</span> <span class="n">BlenderNEURON</span>
+<span class="n">BlenderNEURON</span><span class="o">.</span><span class="n">configure_connection</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span> <span class="n">listen_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="n">listen_port</span><span class="o">=</span><span class="s2">&quot;8001&quot;</span><span class="p">,</span>
+    <span class="n">peer_address</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8000&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">listen_port=&quot;8001&quot;</span></code> is NEURON’s own receiving port on the remote computer.
+<code class="docutils literal notranslate"><span class="pre">peer_address=&quot;http://127.0.0.1:8000&quot;</span></code> tells NEURON where to send requests
+for Blender: to SSH’s port 8000 on that same remote computer. SSH forwards
+those requests to Blender’s port 8000 on your local computer. The SSH command
+below creates this tunnel.</p>
+</li>
+<li><p>Restart the NEURON node/process to apply its listening settings</p></li>
+<li><p>On your local computer, run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>ssh<span class="w"> </span>-N<span class="w"> </span>-L<span class="w"> </span><span class="m">8001</span>:127.0.0.1:8001<span class="w"> </span>-R<span class="w"> </span><span class="m">8000</span>:127.0.0.1:8000<span class="w"> </span>user@remote
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Replace <code class="docutils literal notranslate"><span class="pre">user&#64;remote</span></code> with your SSH account and the remote hostname or IP</p></li>
+<li><p>Leave this terminal running while using BlenderNEURON</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-L</span> <span class="pre">8001:127.0.0.1:8001</span></code> creates a local SSH listener on port 8001 and forwards requests to NEURON’s remote port 8001</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-R</span> <span class="pre">8000:127.0.0.1:8000</span></code> creates a remote SSH listener on port 8000 and forwards requests to Blender’s local port 8000</p></li>
+</ul>
+<p>The request paths are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Local</span> <span class="n">computer</span>                         <span class="n">Remote</span> <span class="n">computer</span>
+<span class="o">----------------</span>                       <span class="o">----------------</span>
+<span class="n">Blender</span>
+  <span class="o">|</span> <span class="n">requests</span> <span class="n">to</span> <span class="n">local</span> <span class="p">:</span><span class="mi">8001</span>
+  <span class="n">v</span>
+<span class="n">SSH</span> <span class="n">listener</span> <span class="p">:</span><span class="mi">8001</span> <span class="o">----</span> <span class="n">SSH</span> <span class="o">---------&gt;</span> <span class="n">NEURON</span> <span class="p">:</span><span class="mi">8001</span>
+
+<span class="n">Blender</span> <span class="p">:</span><span class="mi">8000</span> <span class="o">&lt;--------</span> <span class="n">SSH</span> <span class="o">----------</span> <span class="n">SSH</span> <span class="n">listener</span> <span class="p">:</span><span class="mi">8000</span>
+                                         <span class="o">^</span>
+                                         <span class="o">|</span> <span class="n">requests</span> <span class="n">to</span> <span class="n">remote</span> <span class="p">:</span><span class="mi">8000</span>
+                                       <span class="n">NEURON</span>
+</pre></div>
+</div>
+<p>All listeners in this diagram use <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> on their own computer.</p>
+</li>
+<li><p>Copy NEURON’s pairing JSON into Blender using the pairing steps above</p></li>
+<li><p>In Blender, set ‘NEURON address’ to <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> and ‘NEURON port’ to 8001, then press ‘Connect’</p>
+<p>Blender’s address points to the SSH listener on your local computer, rather
+than directly to the remote computer. NEURON’s peer address points to the
+SSH listener on the remote computer.</p>
+</li>
+</ol>
+<p>Keep the computers’ clocks synchronized; authenticated requests allow 60 seconds
+of clock difference. If a jump host is required, add <code class="docutils literal notranslate"><span class="pre">-J</span> <span class="pre">user&#64;login</span></code> and use
+the computer running NEURON as the destination. Follow your site’s access and
+port forwarding rules.</p>
+</section>
+<section id="use-neuron-with-mpi">
+<h3>Use NEURON with MPI<a class="headerlink" href="#use-neuron-with-mpi" title="Permalink to this heading"></a></h3>
+<p>Use the saved-results workflow for MPI simulations:</p>
+<ol class="arabic simple">
+<li><p>Configure groups and activity recording in your simulation script after building the local cells on each rank</p></li>
+<li><p>Run the simulation using your model’s initialization and solver code</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">SimulationExport.save()</span></code> on every rank; rank 0 writes one combined <code class="docutils literal notranslate"><span class="pre">.bnresults</span></code> file</p></li>
+<li><p>After the job finishes, copy the file to your Blender computer</p></li>
+<li><p>In Blender’s ‘Import / Export’ panel, press ‘Import Saved Simulation Results…’ and select the file</p></li>
+</ol>
+<p>For a complete example, run this command from the repository root on the machine
+running NEURON:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpiexec<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>nrniv<span class="w"> </span>-mpi<span class="w"> </span>-python<span class="w"> </span>tutorials/offline_simulation.py
+</pre></div>
+</div>
+<p>This script configures recording, runs a short simulation, and saves
+<code class="docutils literal notranslate"><span class="pre">simulation.bnresults</span></code> in the working directory. Use your cluster’s launcher
+or job submission command as appropriate. Blender can remain closed until you
+are ready to import the file.</p>
+<p>See <a class="reference internal" href="offline-simulation.html"><span class="doc">Offline Simulation Results</span></a> for the script API, group settings, and importing
+recorded activity. To collect different activity or change the model, update
+and rerun the script, then import the new results file.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="headless-docker.html" class="btn btn-neutral float-left" title="Docker Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="offline-simulation.html" class="btn btn-neutral float-right" title="Offline Simulation Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

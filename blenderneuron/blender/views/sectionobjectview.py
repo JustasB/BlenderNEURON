@@ -4,6 +4,7 @@ from blenderneuron.blender.views.curvecontainer import CurveContainer
 
 class SectionObjectView(ObjectViewAbstract):
     def show(self):
+        self.reserve_import()
 
         if self.group.recording_granularity not in ["Section", "Cell", "3D Segment"]:
             raise NotImplementedError(self.group.recording_granularity)
@@ -17,7 +18,8 @@ class SectionObjectView(ObjectViewAbstract):
 
             # Create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
-                material = CurveContainer.create_material(root.name, color, brightness)
+                material = CurveContainer.create_material(root.name, color, brightness,
+                                                          self.registry, self.identity_scope)
 
             # Let each container create their own material
             else:

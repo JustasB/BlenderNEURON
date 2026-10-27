@@ -4,12 +4,14 @@ from blenderneuron.blender.views.objectview import ObjectViewAbstract
 
 class CellObjectView(ObjectViewAbstract):
 
-    def __init__(self, rootgroup, closed_ends=True):
+    def __init__(self, rootgroup, closed_ends=True, frame_view=True):
         super(CellObjectView, self).__init__(rootgroup)
 
         self.closed_ends = closed_ends
+        self.frame_view = frame_view
 
     def show(self):
+        self.reserve_import(cell_view=True)
         if self.group.recording_granularity not in ["Section", "Cell", "3D Segment"]:
             raise NotImplementedError(self.group.recording_granularity)
 
@@ -22,7 +24,8 @@ class CellObjectView(ObjectViewAbstract):
 
             # Cell gran: create one material for the whole cell
             if self.group.recording_granularity == 'Cell':
-                material = CurveContainer.create_material(root.name, color, brightness)
+                material = CurveContainer.create_material(root.name, color, brightness,
+                                                          self.registry, self.identity_scope)
 
             # Section gran: let each container create their own material
             else:

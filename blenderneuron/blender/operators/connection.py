@@ -26,9 +26,16 @@ class NodeStartOpearator(bpy.types.Operator, BlenderNodeClass):
         )
 
         # Clear existing UI groups (if any, eg. saved)
-        context.scene.BlenderNEURON.clear()
+        if not self.node.offline_results:
+            context.scene.BlenderNEURON.clear()
 
-        if self.client is not None:
+        if self.node.offline_results:
+            from blenderneuron.blender.dataset import restore_offline_state
+            try:
+                restore_offline_state(self.node)
+            except (ValueError, RuntimeError) as error:
+                context.scene.BlenderNEURON_properties.connection_message = str(error)
+        elif self.client is not None:
             # Add a cell group (will contain all root sections by default)
             self.node.add_group()
 
@@ -132,7 +139,7 @@ class TryConnectToNeuronOperator(bpy.types.Operator, BlenderNodeClass):
     bl_description = "Attemps to connect to NEURON+BlenderNEURON process at the above IP address and port"
 
     def execute(self, context):
-        bpy.types.Object.BlenderNEURON_node.try_setup_client()
+        bpy.types.Object.BlenderNEURON_node.test_connection()
         return {'FINISHED'}
 
 class ExecNeuronCommandOperator(bpy.types.Operator, BlenderNodeClass):
@@ -144,4 +151,219 @@ class ExecNeuronCommandOperator(bpy.types.Operator, BlenderNodeClass):
         command = context.scene.BlenderNEURON_properties.neuron_last_command
         bpy.types.Object.BlenderNEURON_node.client.run_command(command)
 
+        return {'FINISHED'}
+
+
+class ConnectionSettingsOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = 'blenderneuron.connection_settings'
+    bl_label = 'Connection settings'
+    action: bpy.props.StringProperty()
+
+    def execute(self, context):
+        from blenderneuron import connection
+        node = self.node
+        props = context.scene.BlenderNEURON_properties
+        try:
+            if self.action == 'COPY_COMMAND':
+                context.window_manager.clipboard = NEURON_PAIRING_COMMAND
+                self.report({'INFO'}, 'Python command copied. Run it in your NEURON Python session.')
+            elif self.action in {'CONNECT', 'RESTART'}:
+                from blenderneuron.blender.dataset import is_offline
+                if is_offline():
+                    raise ValueError('Switch to live mode before connecting to NEURON.')
+                if node is None:
+                    bpy.ops.blenderneuron.node_start()
+                    node = self.node
+                settings = node.connection_settings
+                manual = settings['mode'] == 'manual'
+                if manual and props.pairing_secret_invalid:
+                    raise ValueError('Enter a valid pairing secret or import NEURON connection information.')
+                if manual and not settings.get('peer_address'):
+                    raise ValueError('Paste NEURON connection information or enter its address and port.')
+                changed = (node.server is None or
+                    (manual and (settings.get('listen_host', '127.0.0.1') != node.server_ip or
+                     str(settings.get('listen_port', '')) != getattr(node, 'server_requested_port', ''))) or
+                    (not manual and (node.server_ip != '127.0.0.1' or getattr(node, 'server_requested_port', ''))))
+                if self.action == 'RESTART' or changed:
+                    # Keep model groups and the existing modal queue handler.
+                    node.stop_server()
+                    node.setup_server(service_queue=False)
+                connected = node.test_connection()
+                props.connection_message = ('Connected to NEURON.' if connected else
+                    getattr(node, 'last_connection_error', 'NEURON is unavailable. Check the address and port.'))
+                self.report({'INFO'} if connected else {'WARNING'}, props.connection_message)
+            elif self.action == 'COPY':
+                if node is None:
+                    raise ValueError('Start the Blender connection before copying its information.')
+                context.window_manager.clipboard = node.pairing_information()
+                self.report({'INFO'}, 'Blender connection information copied. Share only with a trusted peer.')
+            elif self.action == 'FORGET':
+                if node is None:
+                    raise ValueError('Start the Blender connection before forgetting its credentials.')
+                node.forget_connection()
+                props.connection_message = 'Connection forgotten. Pair again to reconnect.'
+            elif self.action == 'PASTE':
+                if node is None:
+                    bpy.ops.blenderneuron.node_start()
+                    node = self.node
+                previous = connection.load('Blender-manual.json', {})
+                node.configure_connection(mode='manual', pairing=context.window_manager.clipboard,
+                    listen_host=previous.get('listen_host', '127.0.0.1'),
+                    listen_port=previous.get('listen_port', ''))
+                props.pairing_secret_invalid = False
+                props.connection_message = 'Connection information loaded. Pairing secret saved privately.'
+                self.report({'INFO'}, props.connection_message)
+            elif self.action in {'LOCAL', 'MANUAL'}:
+                props.connection_mode = 'LOCAL' if self.action == 'LOCAL' else 'MANUAL'
+            else:
+                raise ValueError('Unknown connection action')
+        except (ValueError, KeyError, TypeError, OSError) as error:
+            props.connection_message = str(error)
+            self.report({'ERROR'}, str(error))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+NEURON_PAIRING_COMMAND = (
+    "from blenderneuron.neuronstart import BlenderNEURON\n"
+    "print(BlenderNEURON.pairing_information())"
+)
+
+
+def draw_connection_setup(layout, context, node, dialog=None):
+    props = context.scene.BlenderNEURON_properties
+    layout.label(text='Where is NEURON running?')
+    layout.prop(props, 'connection_mode', expand=True)
+    if props.connection_mode == 'MANUAL':
+        steps = layout.box()
+        steps.label(text='1. In the Python session running your NEURON model, run:')
+        for line in NEURON_PAIRING_COMMAND.splitlines():
+            steps.label(text=line)
+        steps.operator('blenderneuron.connection_settings',
+                       text='Copy Python command', icon='COPYDOWN').action = 'COPY_COMMAND'
+        steps.separator()
+        steps.label(text='2. Copy the full output, including the { } braces.')
+        steps.label(text='3. Return here and paste it from the clipboard.')
+        steps.operator('blenderneuron.connection_settings',
+                       text='Paste from clipboard', icon='PASTEDOWN').action = 'PASTE'
+        layout.label(text='Check the address used by Blender (or your SSH tunnel):')
+        layout.prop(props, 'client_ip', text='NEURON address')
+        layout.prop(props, 'client_port', text='NEURON port')
+        layout.prop(props, 'pairing_secret', text='Pairing secret')
+        secret = props.pairing_secret
+        if secret:
+            layout.label(text='Saved secret: ' + secret[:4] + ' ****** ' + secret[-2:])
+        else:
+            layout.label(text='No pairing secret saved. Import or enter it above.')
+        layout.label(text='Import the information above, or enter all three fields manually.')
+    else:
+        layout.label(text='Find NEURON automatically on this computer.')
+    if props.connection_message:
+        import textwrap
+        for line in textwrap.wrap(props.connection_message, width=72):
+            layout.label(text=line)
+    layout.prop(props, 'connection_advanced_open', text='Advanced',
+                icon='TRIA_DOWN' if props.connection_advanced_open else 'TRIA_RIGHT', emboss=False)
+    if not props.connection_advanced_open:
+        return
+    running = node is not None and node.server is not None
+    advanced = layout.box()
+    advanced.label(text='Blender receives connections at:')
+    if running:
+        automatic = not getattr(node, 'server_requested_port', '')
+        advanced.label(text=node.server_address + (' (automatic port)' if automatic else ' (fixed port)'))
+    else:
+        advanced.label(text='Not currently listening.')
+    if props.connection_mode == 'MANUAL':
+        advanced.prop(props, 'server_ip', text='Listen address')
+        advanced.prop(dialog if dialog is not None else props, 'fixed_listen_port')
+        if props.fixed_listen_port:
+            advanced.prop(props, 'server_port', text='Fixed port')
+        else:
+            advanced.label(text='Automatic: Blender chooses an available port.')
+        advanced.label(text='Listening changes are applied when you connect.')
+    else:
+        advanced.label(text='An available port is chosen automatically.')
+    advanced.label(text='For Docker or SSH, NEURON may use a different address')
+    advanced.label(text='to reach this listener. Configure that address in NEURON.')
+    copy = advanced.row()
+    copy.enabled = running
+    copy.operator('blenderneuron.connection_settings',
+                  text='Copy Blender connection information', icon='COPYDOWN').action = 'COPY'
+    advanced.separator()
+    forget = advanced.row()
+    forget.enabled = running
+    forget.operator('blenderneuron.connection_settings',
+                    text='Forget saved connection', icon='X').action = 'FORGET'
+    advanced.separator()
+    advanced.label(text='Diagnostics')
+    advanced.label(text='Blender: ' + (node.server_address if running else 'Stopped'))
+    connected = running and node.client is not None
+    advanced.label(text='NEURON: ' + (node.client_address if connected else 'Not connected'))
+    if running:
+        advanced.operator('blenderneuron.node_stop', text='Stop Blender connection', icon='CANCEL')
+    if blender_launched_neuron_running():
+        advanced.operator('blenderneuron.stop_neuron', text='Stop NEURON', icon='CANCEL')
+
+
+class ConnectDialogOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = 'blenderneuron.connect_dialog'
+    bl_label = 'Connect to NEURON'
+    bl_description = 'Choose where NEURON runs and set up a remembered connection'
+
+    def update_fixed_listen_port(self, context):
+        context.scene.BlenderNEURON_properties.fixed_listen_port = self.fixed_listen_port
+
+    fixed_listen_port: bpy.props.BoolProperty(
+        name='Use a fixed listening port',
+        description='Keep a predictable Blender port for SSH tunnels or container callbacks',
+        options={'SKIP_SAVE'}, update=update_fixed_listen_port)
+
+    def invoke(self, context, event):
+        from blenderneuron.blender.dataset import is_offline
+        if is_offline():
+            return bpy.ops.blenderneuron.switch_to_live('INVOKE_DEFAULT')
+        self.fixed_listen_port = context.scene.BlenderNEURON_properties.fixed_listen_port
+        context.scene.BlenderNEURON_properties.connection_message = ''
+        try:
+            return context.window_manager.invoke_props_dialog(self, width=560, confirm_text='Connect')
+        except TypeError:  # Blender 4.0 uses its standard confirmation label.
+            return context.window_manager.invoke_props_dialog(self, width=560)
+
+    def draw(self, context):
+        draw_connection_setup(self.layout, context, self.node, dialog=self)
+
+    def check(self, context):
+        return True
+
+    def execute(self, context):
+        result = bpy.ops.blenderneuron.connection_settings(action='CONNECT')
+        return result
+
+
+class SwitchToLiveOperator(bpy.types.Operator, BlenderNodeClass):
+    bl_idname = 'blenderneuron.switch_to_live'
+    bl_label = 'Switch to Live NEURON'
+    bl_description = 'Remove offline cells and groups before connecting to a live model'
+
+    @classmethod
+    def poll(cls, context):
+        from blenderneuron.blender.dataset import is_offline
+        return is_offline()
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=480)
+
+    def draw(self, context):
+        self.layout.label(text='This will remove the current offline cells and groups.')
+        self.layout.label(text='Other scene objects will be kept. Continue to live mode?')
+
+    def execute(self, context):
+        from blenderneuron.blender.dataset import switch_to_live
+        if self.node is None:
+            bpy.ops.blenderneuron.node_start()
+        switch_to_live(self.node)
+        context.scene.BlenderNEURON_properties.connection_message = ''
+        if self.options.is_invoke:
+            return bpy.ops.blenderneuron.connect_dialog('INVOKE_DEFAULT')
         return {'FINISHED'}

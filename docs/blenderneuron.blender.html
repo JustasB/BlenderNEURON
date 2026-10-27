@@ -49,6 +49,9 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="blenderneuron.html">Abstract Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="blenderneuron.nrn.html">Classes for NEURON</a></li>
@@ -63,7 +66,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.get_group_dicts"><code class="docutils literal notranslate"><span class="pre">BlenderNode.get_group_dicts()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.get_selected_groups"><code class="docutils literal notranslate"><span class="pre">BlenderNode.get_selected_groups()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.import_groups_from_neuron"><code class="docutils literal notranslate"><span class="pre">BlenderNode.import_groups_from_neuron()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.offline_results"><code class="docutils literal notranslate"><span class="pre">BlenderNode.offline_results</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.synapse_sets"><code class="docutils literal notranslate"><span class="pre">BlenderNode.synapse_sets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.try_setup_client"><code class="docutils literal notranslate"><span class="pre">BlenderNode.try_setup_client()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.ui_properties"><code class="docutils literal notranslate"><span class="pre">BlenderNode.ui_properties</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.blender.blendernode.BlenderNode.update_root_index"><code class="docutils literal notranslate"><span class="pre">BlenderNode.update_root_index()</span></code></a></li>
 </ul>
@@ -112,8 +117,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.blender.blendernode.BlenderNode.add_neon_effect">
 <span class="sig-name descname"><span class="pre">add_neon_effect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/blender/blendernode.html#BlenderNode.add_neon_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.blender.blendernode.BlenderNode.add_neon_effect" title="Permalink to this definition"></a></dt>
-<dd><p>Adds a neon-style glare effect for Cycles (via compositor)
-and enables bloom for Eevee so the glow appears in both engines.</p>
+<dd><p>Adds a neon-style glare effect via the compositor.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -152,8 +156,18 @@ and enables bloom for Eevee so the glow appears in both engines.</p>
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="blenderneuron.blender.blendernode.BlenderNode.offline_results">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offline_results</span></span><a class="headerlink" href="#blenderneuron.blender.blendernode.BlenderNode.offline_results" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="blenderneuron.blender.blendernode.BlenderNode.synapse_sets">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">synapse_sets</span></span><a class="headerlink" href="#blenderneuron.blender.blendernode.BlenderNode.synapse_sets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.blender.blendernode.BlenderNode.try_setup_client">
+<span class="sig-name descname"><span class="pre">try_setup_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/blender/blendernode.html#BlenderNode.try_setup_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.blender.blendernode.BlenderNode.try_setup_client" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -180,7 +194,7 @@ and enables bloom for Eevee so the glow appears in both engines.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -38,7 +38,7 @@ class SynapsePair:
 
 class SynapseFormerView(CellObjectView):
     def __init__(self, source_group, dest_group):
-        super(SynapseFormerView, self).__init__(source_group, closed_ends=False)
+        super(SynapseFormerView, self).__init__(source_group, closed_ends=False, frame_view=False)
 
         self.dest_group = dest_group
 
@@ -47,7 +47,7 @@ class SynapseFormerView(CellObjectView):
 
     def show(self):
 
-        self.dest_group.show(CellObjectView, closed_ends=False) # already-iterative
+        self.dest_group.show(CellObjectView, closed_ends=False, frame_view=False) # already-iterative
 
         super(SynapseFormerView, self).show()
 

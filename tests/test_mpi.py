@@ -2,18 +2,121 @@
 # Run single test with: 'python tests/test_MPI.py TestMPI.test_method'
 
 import unittest
+from unittest.mock import Mock, patch
+import json
 import os, sys
+import subprocess
+import tempfile
 from multiprocessing import Process, Queue
+from pathlib import Path
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
+from blenderneuron.nrn.neuronnode import NeuronNode
+from tests import test_hoc_file, BackgroundBlender as Blender, NEURON, BlenderTestCase
 
 
 class TestMPI(BlenderTestCase):
+    def test_simulation_solver_selection(self):
+        node = NeuronNode.__new__(NeuronNode)
+        node.mpi_coordinator_active = False
+        for ranks in (None, 1, 2):
+            node.parallel_ctx = None if ranks is None else Mock()
+            if ranks is not None:
+                node.parallel_ctx.nhost.return_value = ranks
+            with patch("blenderneuron.nrn.neuronnode.h") as simulator:
+                simulator.tstop = 25
+                self.assertTrue(node.run_simulation())
+                if ranks == 2:
+                    simulator.run.assert_not_called()
+                    simulator.stdinit.assert_called_once_with()
+                    node.parallel_ctx.set_maxstep.assert_called_once_with(1.0)
+                    node.parallel_ctx.psolve.assert_called_once_with(25)
+                else:
+                    simulator.run.assert_called_once_with()
+                    simulator.stdinit.assert_not_called()
+
+    def test_empty_rank_participates_in_activity_run(self):
+        node = NeuronNode.__new__(NeuronNode)
+        node.groups = {}
+        node.parallel_ctx = Mock()
+        node.parallel_ctx.nhost.return_value = 2
+        node.parallel_ctx.allreduce.return_value = 1
+        with patch("blenderneuron.nrn.neuronnode.h") as simulator:
+            self.assertEqual(node._get_group_dicts_local(True), [])
+            simulator.stdinit.assert_called_once_with()
+            node.parallel_ctx.psolve.assert_called_once()
+        node.parallel_ctx.allreduce.assert_called_once_with(0, 2)
+
+    def test_merge_duplicate_local_cell_names(self):
+        node = NeuronNode.__new__(NeuronNode)
+        node.mpimap = {
+            "MitralCell[0]": {"name": "MitralCell[0]", "rank": 0},
+            "MitralCell[1]": {"name": "MitralCell[0]", "rank": 1},
+        }
+        fragments = [[{"name": "Group", "roots": [{"name": "MitralCell[0].soma"}]}],
+                     [{"name": "Group", "roots": [{"name": "MitralCell[0].soma"}]}]]
+        merged = node.merge_mpi_group_fragments(fragments)
+        self.assertEqual([root["name"] for root in merged[0]["roots"]],
+                         ["MitralCell[0].soma", "MitralCell[1].soma"])
+
+    def test_duplicate_hoc_cell_names(self):
+        with tempfile.TemporaryDirectory() as directory:
+            command = ["mpiexec", "--allow-run-as-root", "-n", "2", "nrniv", "-mpi",
+                       "-python", "tests/mpi_duplicate_hoc_worker.py", directory]
+            environment = dict(os.environ, OMPI_ALLOW_RUN_AS_ROOT="1",
+                               OMPI_ALLOW_RUN_AS_ROOT_CONFIRM="1")
+            completed = subprocess.run(command, cwd=os.getcwd(), env=environment,
+                                       text=True, capture_output=True, timeout=60)
+            self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+            groups = json.loads((Path(directory) / "rank-0.json").read_text())
+            self.assertEqual([root["name"] for root in groups[0]["roots"]],
+                             ["TestCell_rank0[0].soma", "TestCell_rank1[0].soma"])
+
+    def test_two_rank_activity_collection(self):
+        """Rank zero imports a complete, deterministic activity payload."""
+        with tempfile.TemporaryDirectory() as directory:
+            command = [
+                "mpiexec", "--allow-run-as-root", "-n", "2", "nrniv", "-mpi", "-python",
+                "tests/mpi_activity_worker.py", directory,
+            ]
+            environment = dict(os.environ, OMPI_ALLOW_RUN_AS_ROOT="1",
+                               OMPI_ALLOW_RUN_AS_ROOT_CONFIRM="1")
+            completed = subprocess.run(command, cwd=os.getcwd(), env=environment,
+                                       text=True, capture_output=True, timeout=60)
+            self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+
+            records = [json.loads((Path(directory) / ("rank-%d.json" % rank)).read_text())
+                       for rank in range(2)]
+            self.assertEqual([record["rank"] for record in records], [0, 1])
+            self.assertIsNone(records[1]["groups"])
+
+            groups = records[0]["groups"]
+            self.assertEqual(len(groups), 1)
+            roots = groups[0]["roots"]
+            self.assertEqual([root["name"] for root in roots],
+                             ["Cell[0].soma", "Cell[1].soma"])
+            for root in roots:
+                self.assertEqual(set(root["segment_activity"]), {"0", "1"})
+                for values in root["segment_activity"].values():
+                    self.assertEqual(len(values["values"]),
+                                     len(groups[0]["activity"]["times"]))
+
+            # Every Blender-facing operation is sent only through rank zero.
+            self.assertEqual([root["name"] for root in records[0]["roots"]],
+                             ["Cell[0].soma", "Cell[1].soma"])
+            self.assertEqual([root["name"] for root in records[0]["initialized_groups"][0]["roots"]],
+                             ["Cell[0].soma", "Cell[1].soma"])
+            for record in records:
+                self.assertAlmostEqual(record["tstop"], 2.0)
+                self.assertAlmostEqual(record["dt"], 0.05)
+                self.assertAlmostEqual(record["celsius"], 33.0)
+                self.assertAlmostEqual(record["first_x"], 100.0)
+                self.assertEqual(record["synapse_count"], 0)
+
     def test_mpi(self):
-        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
-                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+                Blender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a cell name:mpi rank map
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
@@ -46,8 +149,8 @@ class TestMPI(BlenderTestCase):
                              None)
 
     def test_mpi_synset(self):
-        with NEURON(), CommNode("Control-NEURON", coverage=True) as ncn, \
-                Blender(), CommNode("Control-Blender", coverage=True) as bcn:
+        with NEURON(), CommNode("Control-NEURON") as ncn, \
+                Blender(), CommNode("Control-Blender") as bcn:
 
             # Load TestCell.hoc - create a cell name:mpi rank map
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'

@@ -30,12 +30,39 @@ class TestSynapseFormer(BlenderTestCase):
             # Create 2nd cell
             ncn.client.run_command('tc2 = h.TestCell();')
 
+            # Normal imports still frame cells; synapse searches must retain
+            # every viewport's position, zoom, rotation and projection.
+            bcn.client.run_command("""
+viewports = [space.region_3d
+             for window in bpy.context.window_manager.windows
+             for area in window.screen.areas if area.type == 'VIEW_3D'
+             for space in area.spaces if space.type == 'VIEW_3D']
+assert viewports, 'Expected a 3D viewport'
+def viewport_state():
+    return [(tuple(v.view_location), v.view_distance,
+             tuple(v.view_rotation), v.view_perspective) for v in viewports]
+for v in viewports:
+    v.view_location = (1000, 2000, 3000)
+    v.view_distance = 123
+before_import = viewport_state()
+""")
+
             # Add second group, and shift 2nd cell up by 5 um
             bcn.client.run_command(
                 "bpy.ops.blenderneuron.cell_group_add();"
                 "bpy.ops.blenderneuron.import_groups();"
                 "bpy.data.objects['TestCell[1].soma'].location[2] += 5;"
             )
+
+            bcn.client.run_command("""
+assert viewport_state() != before_import, 'Normal import should frame cells'
+for v in viewports:
+    v.view_location = (1000, 2000, 3000)
+    v.view_distance = 123
+    v.view_rotation = (1, 0, 0, 0)
+    v.view_perspective = 'ORTHO'
+before_search = viewport_state()
+""")
 
             # Setup synapse former to look for synapses between the two cells
             syn_count = bcn.client.run_command(
@@ -51,6 +78,7 @@ class TestSynapseFormer(BlenderTestCase):
             )
 
             self.assertEqual(syn_count, 32)
+            bcn.client.run_command("assert viewport_state() == before_search")
 
             # There should be no synapses when max search distance is very small
             syn_count = bcn.client.run_command(
@@ -61,6 +89,7 @@ class TestSynapseFormer(BlenderTestCase):
             )
 
             self.assertEqual(syn_count, 0)
+            bcn.client.run_command("assert viewport_state() == before_search")
 
             # When using radius, it should find the same synapses at a shortened distance
             syn_count = bcn.client.run_command(

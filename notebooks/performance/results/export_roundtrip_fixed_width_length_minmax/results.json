@@ -1,0 +1,4345 @@
+{
+  "repeats": 5,
+  "records": [
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.24241129198344424,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246583.9663472548,
+          "delta": 0.10812191502191126,
+          "relative_delta_percent": 8.673457008807708e-06
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0452437624,
+          "delta": 0.34419919399078935,
+          "relative_delta_percent": 4.891161364791742e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 1.1191714589949697,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.303753116,
+          "delta": 0.4138014102354646,
+          "relative_delta_percent": 8.298707094107781e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.362870565,
+          "delta": 1.3268115348182619,
+          "relative_delta_percent": 4.7135851101367526e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.06435316696297377,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311646.00211981474,
+          "delta": 0.03836350893834606,
+          "relative_delta_percent": 1.230996496022157e-05
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.26047602182,
+          "delta": 0.0856148942548316,
+          "relative_delta_percent": 4.8664409596880705e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.028465915995184332,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155822.99117803742,
+          "delta": 0.01250000501750037,
+          "relative_delta_percent": 8.021926626963264e-06
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.62597500643,
+          "delta": 0.04014450289832894,
+          "relative_delta_percent": 4.563711921031748e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.016974667028989643,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50091390715,
+          "delta": 0.012374919519061223,
+          "relative_delta_percent": 1.5883305210975014e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32717485374,
+          "delta": 0.034659616263525095,
+          "relative_delta_percent": 7.880356907616268e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 1.1261096260277554,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1339596263,
+          "delta": 0.23090704809874296,
+          "relative_delta_percent": 9.261592362713543e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1673923482,
+          "delta": 0.679672165773809,
+          "relative_delta_percent": 4.8291601109674415e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.44681516697164625,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1229800372,
+          "delta": 0.21992745902389288,
+          "relative_delta_percent": 8.821205292857279e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1619025536,
+          "delta": 0.6741823712363839,
+          "relative_delta_percent": 4.7901543989013064e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.10876587504753843,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0320872243,
+          "delta": 0.04688994272146374,
+          "relative_delta_percent": 7.522949730634246e-06
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5362317035,
+          "delta": 0.15766711335163563,
+          "relative_delta_percent": 4.480982206387702e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00017264482235021137,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.029233999957796186,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155823.00110537556,
+          "delta": 0.022427343152230605,
+          "relative_delta_percent": 1.4392834319109551e-05
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.6309386755,
+          "delta": 0.045108171965694055,
+          "relative_delta_percent": 5.127992309611019e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.01657070900546387,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50494231244,
+          "delta": 0.016403324814746156,
+          "relative_delta_percent": 2.1053794661537985e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32918905638,
+          "delta": 0.036673818904091604,
+          "relative_delta_percent": 8.338314536784576e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 4.207527335034683,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.355383501,
+          "delta": 0.4654317954555154,
+          "relative_delta_percent": 9.334144464544349e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.3886857578,
+          "delta": 1.3526267274282873,
+          "relative_delta_percent": 4.805295277186661e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.16198170802090317,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0503698656,
+          "delta": 0.06517258402891457,
+          "relative_delta_percent": 1.0456188363835039e-05
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5453730242,
+          "delta": 0.1668084340635687,
+          "relative_delta_percent": 4.7407833442553065e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 6.115424935104904e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.05275312502635643,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311645.9872409728,
+          "delta": 0.023484667006414384,
+          "relative_delta_percent": 7.535687843779815e-06
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.25303660083,
+          "delta": 0.07817547325976193,
+          "relative_delta_percent": 4.443576417695982e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.3819809580454603,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246584.029812315,
+          "delta": 0.17158697522245347,
+          "relative_delta_percent": 1.3764575410652911e-05
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0769762925,
+          "delta": 0.37593172409106046,
+          "relative_delta_percent": 5.342088990257624e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 1
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.06475770799443126,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311646.00211981474,
+          "delta": 0.03836350893834606,
+          "relative_delta_percent": 1.230996496022157e-05
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.26047602182,
+          "delta": 0.0856148942548316,
+          "relative_delta_percent": 4.8664409596880705e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.017210459045600146,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50494231244,
+          "delta": 0.016403324814746156,
+          "relative_delta_percent": 2.1053794661537985e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32918905638,
+          "delta": 0.036673818904091604,
+          "relative_delta_percent": 8.338314536784576e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.3773034589830786,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246584.029812315,
+          "delta": 0.17158697522245347,
+          "relative_delta_percent": 1.3764575410652911e-05
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0769762925,
+          "delta": 0.37593172409106046,
+          "relative_delta_percent": 5.342088990257624e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.4633468750398606,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1229800372,
+          "delta": 0.21992745902389288,
+          "relative_delta_percent": 8.821205292857279e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1619025536,
+          "delta": 0.6741823712363839,
+          "relative_delta_percent": 4.7901543989013064e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 4.140879625978414,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.355383501,
+          "delta": 0.4654317954555154,
+          "relative_delta_percent": 9.334144464544349e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.3886857578,
+          "delta": 1.3526267274282873,
+          "relative_delta_percent": 4.805295277186661e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.014712833042722195,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50091390715,
+          "delta": 0.012374919519061223,
+          "relative_delta_percent": 1.5883305210975014e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32717485374,
+          "delta": 0.034659616263525095,
+          "relative_delta_percent": 7.880356907616268e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 1.1274651249987073,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.303753116,
+          "delta": 0.4138014102354646,
+          "relative_delta_percent": 8.298707094107781e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.362870565,
+          "delta": 1.3268115348182619,
+          "relative_delta_percent": 4.7135851101367526e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.11019999999552965,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0320872243,
+          "delta": 0.04688994272146374,
+          "relative_delta_percent": 7.522949730634246e-06
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5362317035,
+          "delta": 0.15766711335163563,
+          "relative_delta_percent": 4.480982206387702e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00017264482235021137,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.22912812500726432,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246583.9663472548,
+          "delta": 0.10812191502191126,
+          "relative_delta_percent": 8.673457008807708e-06
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0452437624,
+          "delta": 0.34419919399078935,
+          "relative_delta_percent": 4.891161364791742e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 1.2065161670325324,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1339596263,
+          "delta": 0.23090704809874296,
+          "relative_delta_percent": 9.261592362713543e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1673923482,
+          "delta": 0.679672165773809,
+          "relative_delta_percent": 4.8291601109674415e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.02599120797822252,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155822.99117803742,
+          "delta": 0.01250000501750037,
+          "relative_delta_percent": 8.021926626963264e-06
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.62597500643,
+          "delta": 0.04014450289832894,
+          "relative_delta_percent": 4.563711921031748e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.05568058299832046,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311645.9872409728,
+          "delta": 0.023484667006414384,
+          "relative_delta_percent": 7.535687843779815e-06
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.25303660083,
+          "delta": 0.07817547325976193,
+          "relative_delta_percent": 4.443576417695982e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.03173120797146112,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155823.00110537556,
+          "delta": 0.022427343152230605,
+          "relative_delta_percent": 1.4392834319109551e-05
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.6309386755,
+          "delta": 0.045108171965694055,
+          "relative_delta_percent": 5.127992309611019e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.15105808398220688,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0503698656,
+          "delta": 0.06517258402891457,
+          "relative_delta_percent": 1.0456188363835039e-05
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5453730242,
+          "delta": 0.1668084340635687,
+          "relative_delta_percent": 4.7407833442553065e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 6.115424935104904e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 2
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.11282237502746284,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0320872243,
+          "delta": 0.04688994272146374,
+          "relative_delta_percent": 7.522949730634246e-06
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5362317035,
+          "delta": 0.15766711335163563,
+          "relative_delta_percent": 4.480982206387702e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00017264482235021137,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 1.1377841680077836,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.303753116,
+          "delta": 0.4138014102354646,
+          "relative_delta_percent": 8.298707094107781e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.362870565,
+          "delta": 1.3268115348182619,
+          "relative_delta_percent": 4.7135851101367526e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.15069054201012477,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0503698656,
+          "delta": 0.06517258402891457,
+          "relative_delta_percent": 1.0456188363835039e-05
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5453730242,
+          "delta": 0.1668084340635687,
+          "relative_delta_percent": 4.7407833442553065e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 6.115424935104904e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.06264295795699582,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311646.00211981474,
+          "delta": 0.03836350893834606,
+          "relative_delta_percent": 1.230996496022157e-05
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.26047602182,
+          "delta": 0.0856148942548316,
+          "relative_delta_percent": 4.8664409596880705e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.027008917008060962,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155822.99117803742,
+          "delta": 0.01250000501750037,
+          "relative_delta_percent": 8.021926626963264e-06
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.62597500643,
+          "delta": 0.04014450289832894,
+          "relative_delta_percent": 4.563711921031748e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 3.886612836038694,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.355383501,
+          "delta": 0.4654317954555154,
+          "relative_delta_percent": 9.334144464544349e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.3886857578,
+          "delta": 1.3526267274282873,
+          "relative_delta_percent": 4.805295277186661e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.3667988340021111,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246584.029812315,
+          "delta": 0.17158697522245347,
+          "relative_delta_percent": 1.3764575410652911e-05
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0769762925,
+          "delta": 0.37593172409106046,
+          "relative_delta_percent": 5.342088990257624e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.22409916704054922,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246583.9663472548,
+          "delta": 0.10812191502191126,
+          "relative_delta_percent": 8.673457008807708e-06
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0452437624,
+          "delta": 0.34419919399078935,
+          "relative_delta_percent": 4.891161364791742e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.05309554096311331,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311645.9872409728,
+          "delta": 0.023484667006414384,
+          "relative_delta_percent": 7.535687843779815e-06
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.25303660083,
+          "delta": 0.07817547325976193,
+          "relative_delta_percent": 4.443576417695982e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.4668359170318581,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1229800372,
+          "delta": 0.21992745902389288,
+          "relative_delta_percent": 8.821205292857279e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1619025536,
+          "delta": 0.6741823712363839,
+          "relative_delta_percent": 4.7901543989013064e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.03166495799086988,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155823.00110537556,
+          "delta": 0.022427343152230605,
+          "relative_delta_percent": 1.4392834319109551e-05
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.6309386755,
+          "delta": 0.045108171965694055,
+          "relative_delta_percent": 5.127992309611019e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 1.135088167968206,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1339596263,
+          "delta": 0.23090704809874296,
+          "relative_delta_percent": 9.261592362713543e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1673923482,
+          "delta": 0.679672165773809,
+          "relative_delta_percent": 4.8291601109674415e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.014623125025536865,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50091390715,
+          "delta": 0.012374919519061223,
+          "relative_delta_percent": 1.5883305210975014e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32717485374,
+          "delta": 0.034659616263525095,
+          "relative_delta_percent": 7.880356907616268e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.016703042027074844,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50494231244,
+          "delta": 0.016403324814746156,
+          "relative_delta_percent": 2.1053794661537985e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32918905638,
+          "delta": 0.036673818904091604,
+          "relative_delta_percent": 8.338314536784576e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 3
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.03158983401954174,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155823.00110537556,
+          "delta": 0.022427343152230605,
+          "relative_delta_percent": 1.4392834319109551e-05
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.6309386755,
+          "delta": 0.045108171965694055,
+          "relative_delta_percent": 5.127992309611019e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.017012208001688123,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50494231244,
+          "delta": 0.016403324814746156,
+          "relative_delta_percent": 2.1053794661537985e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32918905638,
+          "delta": 0.036673818904091604,
+          "relative_delta_percent": 8.338314536784576e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.4720801670337096,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1229800372,
+          "delta": 0.21992745902389288,
+          "relative_delta_percent": 8.821205292857279e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1619025536,
+          "delta": 0.6741823712363839,
+          "relative_delta_percent": 4.7901543989013064e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.37193504197057337,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246584.029812315,
+          "delta": 0.17158697522245347,
+          "relative_delta_percent": 1.3764575410652911e-05
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0769762925,
+          "delta": 0.37593172409106046,
+          "relative_delta_percent": 5.342088990257624e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.2227507919888012,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246583.9663472548,
+          "delta": 0.10812191502191126,
+          "relative_delta_percent": 8.673457008807708e-06
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0452437624,
+          "delta": 0.34419919399078935,
+          "relative_delta_percent": 4.891161364791742e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.05425870802719146,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311645.9872409728,
+          "delta": 0.023484667006414384,
+          "relative_delta_percent": 7.535687843779815e-06
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.25303660083,
+          "delta": 0.07817547325976193,
+          "relative_delta_percent": 4.443576417695982e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.06240083300508559,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311646.00211981474,
+          "delta": 0.03836350893834606,
+          "relative_delta_percent": 1.230996496022157e-05
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.26047602182,
+          "delta": 0.0856148942548316,
+          "relative_delta_percent": 4.8664409596880705e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 3.9086552929948084,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.355383501,
+          "delta": 0.4654317954555154,
+          "relative_delta_percent": 9.334144464544349e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.3886857578,
+          "delta": 1.3526267274282873,
+          "relative_delta_percent": 4.805295277186661e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.1697764169657603,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0320872243,
+          "delta": 0.04688994272146374,
+          "relative_delta_percent": 7.522949730634246e-06
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5362317035,
+          "delta": 0.15766711335163563,
+          "relative_delta_percent": 4.480982206387702e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00017264482235021137,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.015211833000648767,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50091390715,
+          "delta": 0.012374919519061223,
+          "relative_delta_percent": 1.5883305210975014e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32717485374,
+          "delta": 0.034659616263525095,
+          "relative_delta_percent": 7.880356907616268e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.026436083018779755,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155822.99117803742,
+          "delta": 0.01250000501750037,
+          "relative_delta_percent": 8.021926626963264e-06
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.62597500643,
+          "delta": 0.04014450289832894,
+          "relative_delta_percent": 4.563711921031748e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 1.1766419999767095,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.303753116,
+          "delta": 0.4138014102354646,
+          "relative_delta_percent": 8.298707094107781e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.362870565,
+          "delta": 1.3268115348182619,
+          "relative_delta_percent": 4.7135851101367526e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.14999279100447893,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0503698656,
+          "delta": 0.06517258402891457,
+          "relative_delta_percent": 1.0456188363835039e-05
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5453730242,
+          "delta": 0.1668084340635687,
+          "relative_delta_percent": 4.7407833442553065e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 6.115424935104904e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 1.1667538339970633,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1339596263,
+          "delta": 0.23090704809874296,
+          "relative_delta_percent": 9.261592362713543e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1673923482,
+          "delta": 0.679672165773809,
+          "relative_delta_percent": 4.8291601109674415e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 4
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.24663104204228148,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246583.9663472548,
+          "delta": 0.10812191502191126,
+          "relative_delta_percent": 8.673457008807708e-06
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0452437624,
+          "delta": 0.34419919399078935,
+          "relative_delta_percent": 4.891161364791742e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.027571292011998594,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155822.99117803742,
+          "delta": 0.01250000501750037,
+          "relative_delta_percent": 8.021926626963264e-06
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.62597500643,
+          "delta": 0.04014450289832894,
+          "relative_delta_percent": 4.563711921031748e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.0718843339709565,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311646.00211981474,
+          "delta": 0.03836350893834606,
+          "relative_delta_percent": 1.230996496022157e-05
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.26047602182,
+          "delta": 0.0856148942548316,
+          "relative_delta_percent": 4.8664409596880705e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 4.018399210006464,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.355383501,
+          "delta": 0.4654317954555154,
+          "relative_delta_percent": 9.334144464544349e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.3886857578,
+          "delta": 1.3526267274282873,
+          "relative_delta_percent": 4.805295277186661e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 32,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.057347416994161904,
+      "metrics": {
+        "area": {
+          "before": 311645.9637563058,
+          "after": 311645.9872409728,
+          "delta": 0.023484667006414384,
+          "relative_delta_percent": 7.535687843779815e-06
+        },
+        "volume": {
+          "before": 175929.17486112757,
+          "after": 175929.25303660083,
+          "delta": 0.07817547325976193,
+          "relative_delta_percent": 4.443576417695982e-05
+        },
+        "nseg": {
+          "before": 2560,
+          "after": 2560,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 1536,
+          "after": 1536,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[10].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 32,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.4798373749945313,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1229800372,
+          "delta": 0.21992745902389288,
+          "relative_delta_percent": 8.821205292857279e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1619025536,
+          "delta": 0.6741823712363839,
+          "relative_delta_percent": 4.7901543989013064e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.017917791032232344,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50494231244,
+          "delta": 0.016403324814746156,
+          "relative_delta_percent": 2.1053794661537985e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32918905638,
+          "delta": 0.036673818904091604,
+          "relative_delta_percent": 8.338314536784576e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.15303841698914766,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0503698656,
+          "delta": 0.06517258402891457,
+          "relative_delta_percent": 1.0456188363835039e-05
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5453730242,
+          "delta": 0.1668084340635687,
+          "relative_delta_percent": 4.7407833442553065e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 6.115424935104904e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 512,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 1.1218422090169042,
+      "metrics": {
+        "area": {
+          "before": 4986335.889951706,
+          "after": 4986336.303753116,
+          "delta": 0.4138014102354646,
+          "relative_delta_percent": 8.298707094107781e-06
+        },
+        "volume": {
+          "before": 2814867.0360590303,
+          "after": 2814868.362870565,
+          "delta": 1.3268115348182619,
+          "relative_delta_percent": 4.7135851101367526e-05
+        },
+        "nseg": {
+          "before": 40960,
+          "after": 40960,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 24576,
+          "after": 24576,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[158].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00025732191945340845,
+      "max_blender_transform_error_um": 0.00025732191945340845,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 512,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 128,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.36251341697061434,
+      "metrics": {
+        "area": {
+          "before": 1246583.8582253398,
+          "after": 1246584.029812315,
+          "delta": 0.17158697522245347,
+          "relative_delta_percent": 1.3764575410652911e-05
+        },
+        "volume": {
+          "before": 703716.7010445684,
+          "after": 703717.0769762925,
+          "delta": 0.37593172409106046,
+          "relative_delta_percent": 5.342088990257624e-05
+        },
+        "nseg": {
+          "before": 10240,
+          "after": 10240,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 6144,
+          "after": 6144,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[39].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0005998756137576195,
+      "max_blender_transform_error_um": 0.0005998756137576195,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 128,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 64,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.10890837502665818,
+      "metrics": {
+        "area": {
+          "before": 623291.9851972816,
+          "after": 623292.0320872243,
+          "delta": 0.04688994272146374,
+          "relative_delta_percent": 7.522949730634246e-06
+        },
+        "volume": {
+          "before": 351858.3785645901,
+          "after": 351858.5362317035,
+          "delta": 0.15766711335163563,
+          "relative_delta_percent": 4.480982206387702e-05
+        },
+        "nseg": {
+          "before": 5120,
+          "after": 5120,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 3072,
+          "after": 3072,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[20].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00017264482235021137,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 64,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 256,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 1.173889583966229,
+      "metrics": {
+        "area": {
+          "before": 2493167.903052578,
+          "after": 2493168.1339596263,
+          "delta": 0.23090704809874296,
+          "relative_delta_percent": 9.261592362713543e-06
+        },
+        "volume": {
+          "before": 1407433.4877201824,
+          "after": 1407434.1673923482,
+          "delta": 0.679672165773809,
+          "relative_delta_percent": 4.8291601109674415e-05
+        },
+        "nseg": {
+          "before": 20480,
+          "after": 20480,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 12288,
+          "after": 12288,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.0001220703125,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[79].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0006920764513433477,
+      "max_blender_transform_error_um": 0.0006920764513433477,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 256,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 16,
+      "sections": 16,
+      "interaction": "Section",
+      "seconds": 0.030553625023458153,
+      "metrics": {
+        "area": {
+          "before": 155822.9786780324,
+          "after": 155823.00110537556,
+          "delta": 0.022427343152230605,
+          "relative_delta_percent": 1.4392834319109551e-05
+        },
+        "volume": {
+          "before": 87964.58583050354,
+          "after": 87964.6309386755,
+          "delta": 0.045108171965694055,
+          "relative_delta_percent": 5.127992309611019e-05
+        },
+        "nseg": {
+          "before": 1280,
+          "after": 1280,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 768,
+          "after": 768,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 3.0517578125e-05,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[5].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.0004560235784389889,
+      "max_blender_transform_error_um": 0.0004560235784389889,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 16,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    },
+    {
+      "cells": 8,
+      "sections": 16,
+      "interaction": "Cell",
+      "seconds": 0.016577458009123802,
+      "metrics": {
+        "area": {
+          "before": 77911.48853898763,
+          "after": 77911.50091390715,
+          "delta": 0.012374919519061223,
+          "relative_delta_percent": 1.5883305210975014e-05
+        },
+        "volume": {
+          "before": 43982.292515237474,
+          "after": 43982.32717485374,
+          "delta": 0.034659616263525095,
+          "relative_delta_percent": 7.880356907616268e-05
+        },
+        "nseg": {
+          "before": 640,
+          "after": 640,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        },
+        "n3d": {
+          "before": 384,
+          "after": 384,
+          "delta": 0,
+          "relative_delta_percent": 0.0
+        }
+      },
+      "max_point_error_um": 0.000244140625,
+      "max_section_relative_error_percent": {
+        "area": 0.0014026364661779756,
+        "volume": 0.0014026364662177828,
+        "length": 0.0014026364662278468
+      },
+      "worst_length_section": {
+        "name": "Cell[2].soma",
+        "before_um": 10.0,
+        "after_um": 10.000140263646623
+      },
+      "max_analytic_point_error_um": 0.00017470218165382368,
+      "max_blender_transform_error_um": 0.00015192171244265688,
+      "max_diameter_error_um": 0.0,
+      "topology_unchanged": true,
+      "coordinate_validation_tolerance_um": 0.013751056699682936,
+      "layout_x_extent_um": "3150.0",
+      "section_counts_unchanged": true,
+      "transformed_root_objects": 8,
+      "rotation_axis": "Y",
+      "rotation_degrees": 45,
+      "translation_um": [
+        100,
+        0,
+        0
+      ],
+      "pivot": "Soma midpoint",
+      "blender": "4.0.2",
+      "status": "ok",
+      "repeat": 5
+    }
+  ]
+}

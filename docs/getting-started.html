@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BlenderNEURON Class Reference" href="reference.html" />
+    <link rel="next" title="Docker Tutorial" href="headless-docker.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -56,9 +56,15 @@
 <li class="toctree-l2"><a class="reference internal" href="#change-cell-colors">Change Cell Colors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#animate-cell-model-activity">Animate Cell Model Activity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-synapses-by-proximity">Create Synapses by Proximity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#confine-cells-between-layers">Confine Cells between Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#confine-cells-between-layers">Confine Cells between Layers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#remote-connections-and-mpi">Remote connections and MPI</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
@@ -160,6 +166,10 @@
 <li><p>Under ‘Cell Group Options’, select ‘Interact with Each:’ ‘Section’</p></li>
 <li><p>Import cells again</p></li>
 </ul>
+<p>Choose ‘Group’ to display all cells in a cell group as one Blender object.
+Moving or rotating that object moves the entire group together and reduces
+object overhead for large networks. ‘Cell’ creates one object per cell;
+‘Section’ creates one per section. Recording granularity remains independent.</p>
 </div></blockquote>
 <ol class="arabic simple" start="3">
 <li><p>To export changes to NEURON after editing cell morphology/position in Blender:</p></li>
@@ -169,6 +179,20 @@
 <li><p>Click ‘Update Groups with View Changes’ under ‘Import / Export’</p></li>
 <li><p>Then click ‘Export Cell Groups to NEURON’ under ‘Import / Export’</p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Morphology export updates the coordinates and radii of existing NEURON
+sections; it does not create or delete sections or reconnect cell topology.
+Child branches are matched to the previously imported morphology by their
+position in the section tree rather than rebuilt by name. Adding, deleting,
+or reordering splines or branches in Blender may therefore cause export to
+fail or update the wrong section. Reshaping or repositioning existing
+branches is supported.</p>
+<p>Export updates the physical <code class="docutils literal notranslate"><span class="pre">pt3d</span></code> morphology: coordinates, the section
+length implied by those coordinates, and diameters. Although <code class="docutils literal notranslate"><span class="pre">nseg</span></code> is
+serialized, it is not assigned back to the NEURON section, so export does
+not change NEURON’s spatial discretization.</p>
+</div>
 </div></blockquote>
 </section>
 <section id="add-cells-to-groups">
@@ -205,7 +229,7 @@
 </section>
 <section id="animate-cell-model-activity">
 <h2>Animate Cell Model Activity<a class="headerlink" href="#animate-cell-model-activity" title="Permalink to this heading"></a></h2>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>Have your model with activity loaded in NEURON</p>
 <ul class="simple">
 <li><p>To check voltage activity in the NEURON GUI, go to ‘Graph’ &gt; ‘Voltage Axis’ and ‘Tools &gt; Run Control’ and select ‘Init &amp; Run’</p></li>
@@ -222,13 +246,21 @@
 <ul class="simple">
 <li><p>Record activity by cell (at each soma), section (at the midpoint of each section), or segment (at each segment). Finer granularity has better detail but requires more time and memory.</p></li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For segment recording, BlenderNEURON assumes that section geometry remains
+fixed during each simulation run. Geometry changes made between runs are
+detected automatically. If a script changes NEURON <code class="docutils literal notranslate"><span class="pre">pt3d</span></code> geometry while
+activity is being collected, start a new simulation run before continuing
+collection so the segment recording locations are rebuilt.</p>
+</div>
 </li>
 <li><p>Choose Recording Settings</p>
 <ul class="simple">
 <li><p>Select ‘Record’ variable: NEURON section variable name to record/animate. ‘v’ by default for voltage (e.g ‘v’ of soma(0.5).v). (note: for variables other not voltage, make sure target variable exists in sections that will be recorded from)</p></li>
 <li><p>Set ‘Start Recording’ and ‘Stop Recording’ times (in ms): what time range in the NEURON simulation to record</p></li>
 <li><p>Select ‘Sampling Period’: how many milliseconds between samples collected of the recorded variable (e.g. voltage)</p></li>
-<li><p>Select ‘Frames per Milliseconds’: how many frames of animation will represent each millisecond of NEURON activity</p></li>
+<li><p>Under NEURON, below ‘Time (ms)’, set ‘Blender frames per millisecond’ (default 10). This scene-wide setting applies to every cell group and retimes existing activity animations when changed.</p></li>
 <li><p>Set colors on the color scale to correspond with low and high values</p></li>
 <li><p>Set ‘Variable Low’ and ‘High’ values: set minimum and maximum values to cover the range of the recorded variable (e.g. voltage) in your model</p></li>
 </ul>
@@ -237,7 +269,7 @@
 <li><p>Scrub the timeline on the bottom to see animation</p>
 <ul class="simple">
 <li><p>Change in voltage/recording variable value should be visible as change in color and/or brightness (to preview change in brightness without rendering image, press ‘Z’ &gt; ‘Material Preview’)</p></li>
-<li><p>Frame number = NEURON simulation time (ms) x ‘Frames per Millisecond’</p></li>
+<li><p>Frame number = NEURON simulation time (ms) x ‘Blender frames per millisecond’</p></li>
 </ul>
 </li>
 </ol>
@@ -308,6 +340,11 @@
 <li><p>Save changes in Blender by pressing ‘Update Groups with Confinement Results’</p></li>
 <li><p>Save confinement results to NEURON by pressing ‘Export Cell Groups to NEURON’ under ‘Import / Export’</p></li>
 </ol>
+<section id="remote-connections-and-mpi">
+<h3>Remote connections and MPI<a class="headerlink" href="#remote-connections-and-mpi" title="Permalink to this heading"></a></h3>
+<p>See <a class="reference internal" href="remote-connections.html"><span class="doc">Remote Connections and MPI</span></a> for Docker, SSH tunnels, and pairing.
+For script-based simulations and MPI jobs, see <a class="reference internal" href="offline-simulation.html"><span class="doc">Offline Simulation Results</span></a>.</p>
+</section>
 </section>
 </section>
 
@@ -316,13 +353,13 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="reference.html" class="btn btn-neutral float-right" title="BlenderNEURON Class Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="headless-docker.html" class="btn btn-neutral float-right" title="Docker Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

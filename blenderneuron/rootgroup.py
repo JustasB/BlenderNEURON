@@ -1,8 +1,10 @@
+from io import open
+from blenderneuron.compat import string_types
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from blenderneuron.activity import Activity
 
-class RootGroup:
+class RootGroup(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -23,6 +25,23 @@ class RootGroup:
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def from_file(file_name):
+        """Read a saved group and return its reconstructed group dictionary.
+
+        Available in both Blender and NEURON without starting a connection.
+        The result can be inspected or passed to node.update_groups([group]).
+        """
+        from blenderneuron.utils import deserialize
+
+        with open(str(file_name), 'r', encoding='utf-8') as stream:
+            group = deserialize(stream.read())
+        if (not isinstance(group, dict)
+                or not isinstance(group.get('name'), string_types)
+                or not isinstance(group.get('roots'), list)):
+            raise ValueError("Expected a saved BlenderNEURON group with name and roots")
+        return group
 
     def clear_activity(self):
         # Clear group level activity

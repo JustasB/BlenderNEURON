@@ -23,6 +23,7 @@ class VectorConfinerView(SectionObjectView):
         return self.group.ui_group.layer_confiner_settings.max_section_length
 
     def show(self):
+        self.reserve_import(split_length=self.max_section_length)
         # This will create section objects using the new split sections
         for root in self.group.roots.values():
             self.create_container_for_each_section(root)

@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, Blender, NEURON, BlenderTestCase
+from tests import test_hoc_file, BackgroundBlender as Blender, NEURON, BlenderTestCase
 
 class TestCoverage(BlenderTestCase):
     def test_blender_coverage(self):

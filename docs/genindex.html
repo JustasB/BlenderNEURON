@@ -47,6 +47,9 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="headless-docker.html">Docker Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="remote-connections.html">Remote Connections and MPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="offline-simulation.html">Offline Simulation Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">BlenderNEURON Class Reference</a></li>
 </ul>
 
@@ -87,6 +90,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -140,13 +144,6 @@
 </li>
       </ul></li>
       <li>
-    blenderneuron.neuronstart
-
-      <ul>
-        <li><a href="blenderneuron.html#module-blenderneuron.neuronstart">module</a>
-</li>
-      </ul></li>
-      <li>
     blenderneuron.nrn.neuronnode
 
       <ul>
@@ -195,13 +192,17 @@
 </li>
       <li><a href="blenderneuron.html#blenderneuron.activity.Activity.clear">clear() (blenderneuron.activity.Activity method)</a>
 </li>
-      <li><a href="blenderneuron.html#blenderneuron.rootgroup.RootGroup.clear_activity">clear_activity() (blenderneuron.rootgroup.RootGroup method)</a>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.clear_activity">clear_activity() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
 
       <ul>
+        <li><a href="blenderneuron.html#blenderneuron.rootgroup.RootGroup.clear_activity">(blenderneuron.rootgroup.RootGroup method)</a>
+</li>
         <li><a href="blenderneuron.html#blenderneuron.section.Section.clear_activity">(blenderneuron.section.Section method)</a>
 </li>
       </ul></li>
       <li><a href="blenderneuron.html#blenderneuron.section.Section.clear_segment_activity">clear_segment_activity() (blenderneuron.section.Section method)</a>
+</li>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.close">close() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
 </li>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect">collect() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
 
@@ -216,6 +217,8 @@
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode">CommNode (class in blenderneuron.commnode)</a>
 </li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.compress">compress() (blenderneuron.commnode.CommNode method)</a>
+</li>
+      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.configure_connection">configure_connection() (blenderneuron.commnode.CommNode method)</a>
 </li>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector">create_collector() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
 </li>
@@ -245,12 +248,16 @@
 </li>
       <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.find_unique_group_name">find_unique_group_name() (blenderneuron.blender.blendernode.BlenderNode method)</a>
 </li>
+      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.forget_connection">forget_connection() (blenderneuron.commnode.CommNode method)</a>
+</li>
       <li><a href="blenderneuron.html#blenderneuron.activity.Activity.from_dict">from_dict() (blenderneuron.activity.Activity method)</a>
 </li>
-      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">from_nrn_section() (blenderneuron.nrn.neuronsection.NeuronSection method)</a>
+      <li><a href="blenderneuron.html#blenderneuron.rootgroup.RootGroup.from_file">from_file() (blenderneuron.rootgroup.RootGroup static method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_nrn_section">from_nrn_section() (blenderneuron.nrn.neuronsection.NeuronSection method)</a>
+</li>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group">from_skeletal_blender_group() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
 </li>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.from_skeletal_blender_root">from_skeletal_blender_root() (blenderneuron.nrn.neuronsection.NeuronSection method)</a>
@@ -265,20 +272,22 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.gather_group_dicts">gather_group_dicts() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
+</li>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.get_coords_and_radii">get_coords_and_radii() (blenderneuron.nrn.neuronsection.NeuronSection method)</a>
 </li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.get_end_address_file">get_end_address_file() (blenderneuron.commnode.CommNode method)</a>
 </li>
       <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_group_data_from_neuron">get_group_data_from_neuron() (blenderneuron.blender.blendernode.BlenderNode method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_group_dicts">get_group_dicts() (blenderneuron.blender.blendernode.BlenderNode method)</a>
 
       <ul>
         <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_group_dicts">(blenderneuron.nrn.neuronnode.NeuronNode method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.get_roots">get_roots() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
 </li>
       <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.get_selected_groups">get_selected_groups() (blenderneuron.blender.blendernode.BlenderNode method)</a>
@@ -315,6 +324,8 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.merge_mpi_group_fragments">merge_mpi_group_fragments() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
+</li>
       <li>
     module
 
@@ -324,8 +335,6 @@
         <li><a href="blenderneuron.blender.html#module-blenderneuron.blender.blendernode">blenderneuron.blender.blendernode</a>
 </li>
         <li><a href="blenderneuron.html#module-blenderneuron.commnode">blenderneuron.commnode</a>
-</li>
-        <li><a href="blenderneuron.html#module-blenderneuron.neuronstart">blenderneuron.neuronstart</a>
 </li>
         <li><a href="blenderneuron.nrn.html#module-blenderneuron.nrn.neuronnode">blenderneuron.nrn.neuronnode</a>
 </li>
@@ -355,9 +364,23 @@
   </ul></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.offline_results">offline_results (blenderneuron.blender.blendernode.BlenderNode property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.pairing_information">pairing_information() (blenderneuron.commnode.CommNode method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity">prepare_activity() (blenderneuron.nrn.neuronrootgroup.NeuronRootGroup method)</a>
+</li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.print_safe">print_safe() (blenderneuron.commnode.CommNode method)</a>
 </li>
   </ul></td>
@@ -368,11 +391,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.rank_section_name">rank_section_name() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.read_client_address_file">read_client_address_file() (blenderneuron.commnode.CommNode method)</a>
 </li>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronsection.NeuronSection.rebuild_segment_midpoints_recursive">rebuild_segment_midpoints_recursive() (blenderneuron.nrn.neuronsection.NeuronSection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.retry_setup_client">retry_setup_client() (blenderneuron.commnode.CommNode method)</a>
+</li>
       <li><a href="blenderneuron.html#blenderneuron.rootgroup.RootGroup">RootGroup (class in blenderneuron.rootgroup)</a>
+</li>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.run_simulation">run_simulation() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -400,10 +429,10 @@
 </li>
       <li><a href="blenderneuron.html#blenderneuron.activity.Activity.simplify">simplify() (blenderneuron.activity.Activity method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.sm_end_code_coverage">sm_end_code_coverage() (blenderneuron.commnode.CommNode method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.sm_enqueue_command">sm_enqueue_command() (blenderneuron.commnode.CommNode method)</a>
 </li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.sm_get_task_error">sm_get_task_error() (blenderneuron.commnode.CommNode method)</a>
@@ -418,6 +447,10 @@
 </li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.sm_stop">sm_stop() (blenderneuron.commnode.CommNode method)</a>
 </li>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.start_mpi_coordinator">start_mpi_coordinator() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
+</li>
+      <li><a href="blenderneuron.nrn.html#blenderneuron.nrn.neuronnode.NeuronNode.stop_mpi_coordinator">stop_mpi_coordinator() (blenderneuron.nrn.neuronnode.NeuronNode method)</a>
+</li>
       <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.stop_server">stop_server() (blenderneuron.commnode.CommNode method)</a>
 </li>
       <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.synapse_sets">synapse_sets (blenderneuron.blender.blendernode.BlenderNode property)</a>
@@ -428,6 +461,8 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.test_connection">test_connection() (blenderneuron.commnode.CommNode method)</a>
+</li>
       <li><a href="blenderneuron.html#blenderneuron.activity.Activity.to_dict">to_dict() (blenderneuron.activity.Activity method)</a>
 
       <ul>
@@ -438,8 +473,12 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.try_setup_client">try_setup_client() (blenderneuron.commnode.CommNode method)</a>
+      <li><a href="blenderneuron.blender.html#blenderneuron.blender.blendernode.BlenderNode.try_setup_client">try_setup_client() (blenderneuron.blender.blendernode.BlenderNode method)</a>
+
+      <ul>
+        <li><a href="blenderneuron.html#blenderneuron.commnode.CommNode.try_setup_client">(blenderneuron.commnode.CommNode method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -478,7 +517,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025.</p>
+    <p>&#169; Copyright 2026.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

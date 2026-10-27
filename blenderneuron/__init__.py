@@ -1,3 +1,5 @@
+from blenderneuron import compat
+
 bl_info = {
     "name": "BlenderNEURON",
     "description": "A Blender GUI for NEURON simulator",
@@ -25,7 +27,9 @@ if 'COVERAGE_PROCESS_START' in os.environ:
     try:
         print('Importing COVERAGE: Inside ', "BLENDER" if inside_blender else "NEURON")
         import coverage
-        COV = coverage.process_startup()
+        COV = coverage.Coverage.current()
+        if COV is None:
+            COV = coverage.process_startup()
     except:
         print('Coverage error. Skipping coverage')
 
@@ -47,18 +51,38 @@ if inside_blender:
 
     import sys
 
+    def start_node_after_load():
+        # CLI file loading can run both startup and load handlers. Wait until
+        # Blender returns to its event loop before publishing the RPC server.
+        existing = getattr(bpy.types.Object, "BlenderNEURON_node", None)
+        if existing is not None:
+            existing.stop_server()
+        bpy.ops.blenderneuron.node_start()
+        return None
+
+    @persistent
+    def save_dataset_state(scene):
+        from blenderneuron.blender.dataset import save_offline_state
+        save_offline_state(scene)
+
+    def schedule_node_start():
+        if not bpy.app.timers.is_registered(start_node_after_load):
+            bpy.app.timers.register(start_node_after_load, first_interval=0.0)
+
     @persistent
     def auto_start(scene):
-        # Remove auto-execute command after starting
         bpy.app.handlers.depsgraph_update_post.remove(auto_start)
-
-        bpy.ops.blenderneuron.node_start()
+        schedule_node_start()
 
     @persistent
     def on_blend_load(scene):
-        bpy.ops.blenderneuron.node_start()
+        if auto_start in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.remove(auto_start)
+        schedule_node_start()
 
     def register():
+        from blenderneuron.blender import somadisplay
+        somadisplay.register()
         sys.setrecursionlimit(1500)
 
         register_module_classes(blenderneuron.blender.operators.rootgroup)
@@ -78,8 +102,15 @@ if inside_blender:
 
         # Reload the addon on file open
         bpy.app.handlers.load_post.append(on_blend_load)
+        bpy.app.handlers.save_pre.append(save_dataset_state)
 
     def unregister():
+        from blenderneuron.blender import somadisplay
+        somadisplay.unregister()
+        if save_dataset_state in bpy.app.handlers.save_pre:
+            bpy.app.handlers.save_pre.remove(save_dataset_state)
+        if bpy.app.timers.is_registered(start_node_after_load):
+            bpy.app.timers.unregister(start_node_after_load)
         bpy.ops.blenderneuron.node_stop()
 
         blenderneuron.blender.properties.connection.unregister() # already-iterative

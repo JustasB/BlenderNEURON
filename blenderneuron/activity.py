@@ -6,7 +6,7 @@ try:
 except:
     numpy_available = False
 
-class Activity:
+class Activity(object):
 
     def __init__(self):
         self.times = []

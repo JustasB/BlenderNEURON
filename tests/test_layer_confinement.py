@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from time import sleep
 from unittest import TestCase
 from blenderneuron.commnode import CommNode
-from tests import test_hoc_file, NEURON, Blender, BlenderTestCase
+from tests import test_hoc_file, NEURON, BackgroundBlender as Blender, BlenderTestCase
 from math import pi
 degs = 180/pi
 
@@ -21,6 +21,13 @@ class TestLayerConfinement(BlenderTestCase):
             # Load TestCell.hoc - create a group
             ncn.client.run_command('h.load_file("tests/TestCell.hoc");'
                                    'tc = h.TestCell();')
+
+            # Measure membrane area in NEURON before import or confinement.
+            area_command = (
+                'return_value = sum(seg.area() for sec in h.allsec() for seg in sec)'
+            )
+            initial_area = ncn.client.run_command(area_command)
+            self.assertGreater(initial_area, 0)
 
             # Load cell, add two layer planes
             bcn.client.run_command(
@@ -83,6 +90,16 @@ class TestLayerConfinement(BlenderTestCase):
             self.assertAlmostEqual(x, 55.91, 1)
             self.assertAlmostEqual(y, -91.84, 1)
             self.assertAlmostEqual(z, 10.81, 1)
+
+            # Export the split-section confinement result back into NEURON.
+            # Compare NEURON's membrane area, allowing 0.001% for floating-point
+            # coordinate rounding during Blender transforms and the round trip.
+            bcn.client.run_command('bpy.ops.blenderneuron.export_groups();')
+            confined_area = ncn.client.run_command(area_command)
+            self.assertAlmostEqual(
+                confined_area, initial_area, delta=initial_area * 1e-5,
+                msg='Confinement and export must preserve NEURON membrane area'
+            )
 
             bcn.client.end_code_coverage()
             ncn.client.end_code_coverage()
