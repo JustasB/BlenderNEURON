@@ -2,6 +2,7 @@
 import json
 import re
 from urllib.request import urlopen
+from urllib.error import URLError
 
 PYPI = 'https://pypi.org/pypi/neuron/json'
 PYTHON = 'https://raw.githubusercontent.com/docker-library/python/master/versions.json'
@@ -9,8 +10,15 @@ BLENDER = 'https://download.blender.org/release/'
 
 
 def fetch(url):
-    with urlopen(url, timeout=30) as response:
-        return response.read().decode('utf-8')
+    try:
+        with urlopen(url, timeout=30) as response:
+            return response.read().decode('utf-8')
+    except (URLError, OSError) as error:
+        if url.startswith(BLENDER):
+            mirror = url.replace(BLENDER, 'https://mirror.clarkson.edu/blender/release/', 1)
+            with urlopen(mirror, timeout=30) as response:
+                return response.read().decode('utf-8')
+        raise OSError('Release discovery failed for {}: {}'.format(url, error))
 
 
 def version(value):

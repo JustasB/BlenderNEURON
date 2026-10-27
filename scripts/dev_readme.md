@@ -83,7 +83,8 @@ Python 3 wheel minor. Latest NEURON 8/9 no longer support Python 2.
 
 The `latest` lane discovers versions on every invocation, including normal PR
 builds and monthly scheduled pipelines. It reads PyPI release files, official
-Python Docker image metadata, and Blender's official release archive. It excludes
+Python Docker image metadata, and Blender's official release archive (falling back to the Clarkson release
+mirror if the main server is unavailable). It excludes
 prereleases and yanked wheels, selects the newest stable NEURON first, then the
 newest stable Python with a matching CPython Linux AMD64 wheel and an official
 slim-bookworm image. Missing binaries or discovery errors fail the lane; it does

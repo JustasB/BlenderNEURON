@@ -166,6 +166,20 @@ class TestReleaseResolution(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.releases.resolve_neuron(data, images)
 
+    def test_blender_discovery_uses_mirror_on_server_failure(self):
+        from unittest.mock import patch, MagicMock
+        from urllib.error import HTTPError
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'archive listing'
+        with patch.object(self.releases, 'urlopen', side_effect=[
+                HTTPError(self.releases.BLENDER, 403, 'Forbidden', {}, None), response]) as request:
+            self.assertEqual(self.releases.fetch(self.releases.BLENDER), 'archive listing')
+        self.assertEqual(request.call_args[0][0], 'https://mirror.clarkson.edu/blender/release/')
+        with patch.object(self.releases, 'urlopen', side_effect=OSError('offline')) as request:
+            with self.assertRaisesRegex(OSError, 'pypi.org'):
+                self.releases.fetch(self.releases.PYPI)
+            self.assertEqual(request.call_count, 1)
+
     def test_blender_skips_prereleases_and_sorts_numerically(self):
         pages = {
             self.releases.BLENDER: '<a href="Blender5.9/">x</a><a href="Blender5.10/">x</a><a href="Blender6.0/">x</a>',
