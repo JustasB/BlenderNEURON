@@ -2,7 +2,13 @@
 set -e
 # This will .zip files with the latest version of source files (.py, .hoc, .json)
 # build pip wheels, and attempt to upload them to pypi (cancelable)
-# Requires build and twine, install them with `pip install build twine`
+# Recommended: build the BN Docker image, then run from the repository root.
+# The image includes zip, build, and twine.
+# ./scripts/build.sh
+# docker run --rm -it \
+#   -v "$PWD:/BlenderNEURON" -w /BlenderNEURON \
+#   blenderneuron:latest bash ./build.sh
+# Alternatively, run locally with zip installed and `pip install build twine`.
 
 function find_python {
     if [ -n "$PYTHON" ]; then
@@ -31,6 +37,10 @@ function require_python_module {
 
 
 function update_version_in_pyproject {
+    if ! command -v zip >/dev/null 2>&1; then
+        echo "Missing zip command. Install zip before building a release." >&2
+        return 1
+    fi
     python_bin=$(find_python)
     require_python_module "$python_bin" build
     require_python_module "$python_bin" twine
@@ -69,7 +79,7 @@ function update_version_in_pyproject {
 
     echo "Built Addon .zip file:" "$file"
 
-    echo "Getting ready to upload to PyPI. Username=`__token__` and password=`pypi-[pypi token here]`"
+    echo 'Getting ready to upload to PyPI. Username=__token__ and password=pypi-[pypi token here]'
     "$python_bin" -m twine upload dist/*
 }
 
