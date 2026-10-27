@@ -80,7 +80,9 @@
   <h1>Source code for blenderneuron.commnode</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">hmac</span>
-<span class="kn">import</span> <span class="nn">secrets</span>
+<span class="kn">from</span> <span class="nn">blenderneuron</span> <span class="kn">import</span> <span class="n">compat</span> <span class="k">as</span> <span class="n">secrets</span>
+<span class="kn">from</span> <span class="nn">blenderneuron.compat</span> <span class="kn">import</span> <span class="n">string_types</span>
+<span class="kn">import</span> <span class="nn">errno</span>
 <span class="kn">from</span> <span class="nn">blenderneuron</span> <span class="kn">import</span> <span class="n">connection</span>
 
 <span class="kn">import</span> <span class="nn">ast</span>
@@ -259,7 +261,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">send_error</span><span class="p">(</span><span class="mi">403</span><span class="p">,</span> <span class="s1">&#39;Pairing authentication failed&#39;</span><span class="p">)</span>
                     <span class="k">return</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">rfile</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">do_POST</span><span class="p">()</span>
+                <span class="n">SimpleXMLRPCRequestHandler</span><span class="o">.</span><span class="n">do_POST</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
             <span class="k">def</span> <span class="nf">_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -471,7 +473,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Pairing information must be a JSON object&quot;</span><span class="p">)</span>
             <span class="n">secret</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span> <span class="n">remembered</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">secret</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">64</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;0123456789abcdef&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">secret</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">64</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;0123456789abcdef&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">secret</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid pairing secret&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported pairing version&quot;</span><span class="p">)</span>
@@ -497,14 +499,15 @@
             <span class="n">fd</span><span class="p">,</span> <span class="n">temporary</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
             <span class="k">with</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
                 <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secret</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">temporary</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">secrets</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">temporary</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connection_settings</span><span class="p">[</span><span class="s2">&quot;secret&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secret</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">connection_settings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;peer_address&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">config_directory</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection_end</span> <span class="o">+</span> <span class="s2">&quot;-manual.json&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">error</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOENT</span><span class="p">:</span>
+                <span class="k">raise</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection_end</span> <span class="o">+</span> <span class="s2">&quot;-connection.json&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_settings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client_address</span> <span class="o">=</span> <span class="kc">None</span></div>

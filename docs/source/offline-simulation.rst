@@ -47,19 +47,7 @@ Record and Save Results
    live imports. It does not initialize or run the model. Configure it before
    ``finitialize`` and keep the export object and model cells alive throughout
    the run. Keep morphology fixed during recording. Each initialization clears
-   the previous traces and creates fresh vectors for the current granularity,
-   variable and geometry. Samples are requested at ``start + n * recording_period``;
-   a finite end time includes its endpoint when it lies on that sampling grid.
-   An end time of zero allows recording to continue without knowing the final
-   simulation time, including across multiple ``continuerun`` calls.
-
-   Displayed 3D intervals that read the same computational compartment share one
-   native trace. Recorded activity exposes live read-only sequences; use
-   ``list(...)`` for mutable copies. Exporting formats these directly without
-   duplicating every trace into Python float lists.
-   Saving does not detach the recorder, so the simulation can continue afterward.
-   Retired vectors detach at the next initialization, after NEURON clears queued
-   recording events; they are not reused for the new run.
+   the previous traces; samples are collected within the configured start/end window.
 
 4. After the simulation finishes, save the results:
 

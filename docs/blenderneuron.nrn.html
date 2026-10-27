@@ -81,6 +81,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.clear_activity"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.clear_activity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.close"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.close()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.collect()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.create_collector()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.from_skeletal_blender_group"><code class="docutils literal notranslate"><span class="pre">NeuronRootGroup.from_skeletal_blender_group()</span></code></a></li>
@@ -302,6 +304,17 @@ Call deserialize() first if application code needs to inspect its roots.</p>
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blenderneuron.nrn.neuronrootgroup.</span></span><span class="sig-name descname"><span class="pre">NeuronRootGroup</span></span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.clear_activity">
+<span class="sig-name descname"><span class="pre">clear_activity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue_cleared</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.clear_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.clear_activity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.close" title="Permalink to this definition"></a></dt>
+<dd><p>Detach owned recordings and initialization callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect">
 <span class="sig-name descname"><span class="pre">collect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.collect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.collect" title="Permalink to this definition"></a></dt>
 <dd><p>Based on the group’s color level, gathers the values of the group’s collect_variable. This method is called
@@ -316,8 +329,7 @@ at regular times during the simulation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector">
 <span class="sig-name descname"><span class="pre">create_collector</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.create_collector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.create_collector" title="Permalink to this definition"></a></dt>
-<dd><p>Greates a pair of NetStim and NetCon which trigger an event to recursively collect the activity of the group
-segments. This method does nothing if group.record_activity is False</p>
+<dd><p>Install weak initialization hooks; rebuild native vectors each run.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -332,7 +344,7 @@ segments. This method does nothing if group.record_activity is False</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity">
-<span class="sig-name descname"><span class="pre">prepare_activity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.prepare_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepare_activity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue_cleared</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blenderneuron/nrn/neuronrootgroup.html#NeuronRootGroup.prepare_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blenderneuron.nrn.neuronrootgroup.NeuronRootGroup.prepare_activity" title="Permalink to this definition"></a></dt>
 <dd><p>Clear traces and refresh geometry before the first sample of a run.</p>
 <p>Rebuilding also captures direct NEURON pt3d edits between runs. Direct
 pt3d edits during collection require an explicit cache rebuild; Blender

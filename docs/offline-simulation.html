@@ -118,6 +118,8 @@ a remote cluster. No live connection, pairing, or SSH forwarding is needed.</p>
 <li><p>Recording is enabled by default, using voltage (<code class="docutils literal notranslate"><span class="pre">v</span></code>) at cell level with a 1 ms sampling period</p></li>
 <li><p>Start and end times are in milliseconds; an end time of 0 includes samples through the end of the run</p></li>
 <li><p>For a variable other than voltage, supply <code class="docutils literal notranslate"><span class="pre">variable_units</span></code> to describe its units</p></li>
+<li><p>Variable names can be direct (<code class="docutils literal notranslate"><span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">ina</span></code>, <code class="docutils literal notranslate"><span class="pre">i_pas</span></code>) or dotted mechanism paths
+(<code class="docutils literal notranslate"><span class="pre">pas.i</span></code>, <code class="docutils literal notranslate"><span class="pre">hh.m</span></code>). Do not include <code class="docutils literal notranslate"><span class="pre">_ref_</span></code>; expressions such as <code class="docutils literal notranslate"><span class="pre">ina</span> <span class="pre">+</span> <span class="pre">ik</span></code> are not supported</p></li>
 </ul>
 </li>
 <li><p>Initialize and run your simulation using your existing code</p>
@@ -125,7 +127,7 @@ a remote cluster. No live connection, pairing, or SSH forwarding is needed.</p>
 <span class="n">h</span><span class="o">.</span><span class="n">continuerun</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">prepare()</span></code> installs the same NetStim/NetCon callback collectors used by
+<p><code class="docutils literal notranslate"><span class="pre">prepare()</span></code> installs the same native vector recorder used by
 live imports. It does not initialize or run the model. Configure it before
 <code class="docutils literal notranslate"><span class="pre">finitialize</span></code> and keep the export object and model cells alive throughout
 the run. Keep morphology fixed during recording. Each initialization clears
