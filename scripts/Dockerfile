@@ -8,7 +8,7 @@ COPY start_vnc.sh /
 
 # Install Blender dependencies
 # RUN apt-get update && apt-get install -y libglu1 libxi6 libxrender1
-RUN apt-get update && apt-get install -y curl libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0 openmpi-bin
+RUN apt-get update && apt-get install -y curl zip libglu1-mesa libxi6 libxrender1 xvfb libxkbcommon-x11-0 openmpi-bin
 # NEURON's MPI loader looks up the unversioned ``libmpi.so`` name, while the
 # runtime package supplies only the versioned OpenMPI shared object.
 RUN mpi_runtime_library=$(find /usr/lib -name 'libmpi.so.*' -print -quit) && \
