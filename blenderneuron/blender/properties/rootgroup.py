@@ -131,7 +131,7 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     max_distance: FloatProperty(
         default=5,
         min=0,
-        name="Max Proximity Distance (um)",
+        name="Max Proximity Distance (µm)",
         description="The maximum distance between segments that will be used to form synapses"
     )
 
@@ -205,8 +205,8 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     spine_neck_diameter: FloatProperty(
         default=0.2,
         min=0,
-        name="Neck Diam (um)",
-        description="Diameter of spine necks (um). Length is determined by the distance between source and "
+        name="Neck Diam (µm)",
+        description="Diameter of spine necks (µm). Length is determined by the distance between source and "
                     "destination sections. If distance between source and destination section is less than "
                     "the head diameter, the spine neck is omitted"
     )
@@ -214,8 +214,8 @@ class SynapseConnectorProperties(PropertyGroup, BlenderNodeClass):
     spine_head_diameter: FloatProperty(
         default=1,
         min=0,
-        name="Head Diam (um)",
-        description="Diameter of spine heads (um). Length is same as diameter (e.g. spherical)"
+        name="Head Diam (µm)",
+        description="Diameter of spine heads (µm). Length is same as diameter (e.g. spherical)"
     )
 
     spine_name_prefix: StringProperty(
