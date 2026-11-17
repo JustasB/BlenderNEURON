@@ -9,7 +9,6 @@ import http.client
 import time
 import subprocess
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from xmlrpc.client import ServerProxy, dumps, ProtocolError
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -118,19 +117,35 @@ class ConnectionSecurityTests(unittest.TestCase):
 
     def test_shared_proxy_overlapping_requests(self):
         with CommNode('NEURON') as node:
-            barrier = threading.Barrier(2, timeout=5)
+            entered = {value: threading.Event() for value in (11, 22)}
 
             def overlap(value):
-                barrier.wait()
+                entered[value].set()
+                if not entered[33 - value].wait(5):
+                    raise RuntimeError('Requests did not overlap')
                 return value
 
             node.server.register_function(overlap, 'overlap')
             transport = connection.AuthTransport(node.secret)
             transport.reply_timeout = 5
             client = ServerProxy(node.server_address, transport=transport, allow_none=True)
-            with ThreadPoolExecutor(max_workers=2) as workers:
-                replies = [workers.submit(client.overlap, value) for value in (11, 22)]
-                self.assertEqual([11, 22], [reply.result(timeout=10) for reply in replies])
+            replies, errors = [], []
+
+            def request(value):
+                try:
+                    replies.append(client.overlap(value))
+                except Exception as error:
+                    errors.append(error)
+
+            workers = [threading.Thread(target=request, args=(value,)) for value in (11, 22)]
+            for worker in workers:
+                worker.daemon = True
+                worker.start()
+            for worker in workers:
+                worker.join(10)
+                self.assertFalse(worker.is_alive(), 'Request did not complete')
+            self.assertEqual([], errors)
+            self.assertEqual([11, 22], sorted(replies))
             self.assertEqual(32, len(transport.epoch))
             self.assertEqual(1, client.ping())
 
