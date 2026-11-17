@@ -8,6 +8,8 @@ import tempfile
 import http.client
 import time
 import subprocess
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from xmlrpc.client import ServerProxy, dumps, ProtocolError
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -113,6 +115,32 @@ class ConnectionSecurityTests(unittest.TestCase):
                      ('a' * 64, '100', 'other', b'command'),
                      ('a' * 64, '100', 'nonce', b'stop')]:
             self.assertNotEqual(original, sign(*args))
+
+    def test_shared_proxy_overlapping_requests(self):
+        with CommNode('NEURON') as node:
+            barrier = threading.Barrier(2, timeout=5)
+
+            def overlap(value):
+                barrier.wait()
+                return value
+
+            node.server.register_function(overlap, 'overlap')
+            transport = connection.AuthTransport(node.secret)
+            transport.reply_timeout = 5
+            client = ServerProxy(node.server_address, transport=transport, allow_none=True)
+            with ThreadPoolExecutor(max_workers=2) as workers:
+                replies = [workers.submit(client.overlap, value) for value in (11, 22)]
+                self.assertEqual([11, 22], [reply.result(timeout=10) for reply in replies])
+            self.assertEqual(32, len(transport.epoch))
+            self.assertEqual(1, client.ping())
+
+    def test_shared_proxy_callback_does_not_deadlock(self):
+        with CommNode('NEURON') as node:
+            transport = connection.AuthTransport(node.secret)
+            transport.reply_timeout = 5
+            client = ServerProxy(node.server_address, transport=transport, allow_none=True)
+            node.server.register_function(lambda: client.ping(), 'callback')
+            self.assertEqual(1, client.callback())
 
     def test_authenticated_socket_and_replay(self):
         with CommNode('NEURON') as node:
