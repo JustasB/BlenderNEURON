@@ -12,7 +12,7 @@ The `./run.sh` file supports Ubuntu/Linux and macOS.
 On macOS, it opens the built-in Screen Sharing VNC client.
 On Linux, it uses `vinagre` or `vncviewer` when available.
 The Docker image selects your host architecture automatically: `linux/amd64`
-uses Blender 5.2.3 (the same archive as CircleCI), while `linux/arm64` uses
+uses Blender 5.2.3 (the same archive as the pinned NEURON lanes), while `linux/arm64` uses
 Ubuntu's native Blender package.
 Set `DOCKER_PLATFORM=linux/amd64` or `DOCKER_PLATFORM=linux/arm64` before
 `./run.sh` or `./build.sh` to select a specific image variant.
@@ -67,19 +67,34 @@ using one parameterized job and `compatibility/Dockerfile.integration`:
 
 | Lane | NEURON | NEURON Python | Blender |
 | --- | --- | --- | --- |
-| `baseline` | 8.2.7 | 3.13.17 | 5.2.3 |
+| `neuron8` | 8.2.7 | 3.13.18 | 5.2.3 |
 | `python2` | 8.0.2 | 2.7.18 | 5.2.3 |
 | `neuron7` | 7.8.2 | 3.9.25 | 5.2.3 |
-| `neuron9` | 9.0.2 | 3.14.9 | 5.2.3 |
-| `blender2` | 8.2.7 | 3.13.17 | 2.93.18 |
-| `blender4` | 8.2.7 | 3.13.17 | 4.5.15 |
+| `latest` | Latest stable | Latest stable with a matching official NEURON wheel | Latest stable |
+| `blender2` | 8.2.7 | 3.13.18 | 2.93.18 |
+| `blender4` | 8.2.7 | 3.13.18 | 4.5.15 |
 
-Pins were verified on October 26, 2026. Blender always uses its own bundled
-Python. The baseline serves both axes, avoiding a duplicate seventh run.
+The NEURON 8/Python pins were verified on October 27, 2026. Blender always uses its own bundled
+Python. The pinned neuron8 lane serves both axes, avoiding a duplicate seventh run.
 Python 2 wheels exist only in NEURON's 8.0.x series; 8.0.2 is the latest release
 with them. No published NEURON 7 release has Python 2 wheels. The Python 2 lane
 therefore assesses 8.0.2, while the NEURON 7 lane uses its newest supported
 Python 3 wheel minor. Latest NEURON 8/9 no longer support Python 2.
+
+The `latest` lane discovers versions on every invocation, including normal PR
+builds and monthly scheduled pipelines. It reads PyPI release files, official
+Python Docker image metadata, and Blender's official release archive (falling back to the Clarkson release
+mirror if the main server is unavailable). It excludes
+prereleases and yanked wheels, selects the newest stable NEURON first, then the
+newest stable Python with a matching CPython Linux AMD64 wheel and an official
+slim-bookworm image. Missing binaries or discovery errors fail the lane; it does
+not fall back to an older NEURON release or compile NEURON from source. Resolved
+versions are recorded in `result.json` and logs. `--list` also resolves latest
+and therefore needs network access. `--skip-build` still resolves latest and
+runtime version checks reject stale cached images. All other lanes stay pinned;
+`neuron8`, `blender2`, and `blender4` share the same NEURON/Python pins.
+Latest failures fail PR builds, including the unchanged 91% coverage threshold.
+The monthly schedule is configured separately in CircleCI to run the whole workflow.
 
 Every lane installs a prebuilt NEURON wheel and a checksum-verified official
 Blender archive. No Blender, Python or NEURON source compilation is required.
@@ -102,7 +117,7 @@ failures in `python2-assessment.json`. A Python 3 supervisor only supplies
 cleanup/deadlines/reporting. The current package requires Python >=3.7; the
 Python 2 lane measures the backport gap rather than claiming support. Coverage
 5.5 records Python 2 execution; Blender's bundled Python produces the combined
-reports while retaining the 91% threshold. Only the baseline uploads to Codecov;
+reports while retaining the 91% threshold. Only latest uploads to Codecov;
 all lanes publish their build/test logs, coverage XML/HTML, and result JSON as
 CircleCI artifacts, including when a lane fails.
 
@@ -117,10 +132,10 @@ have their own VMs and run concurrently.
 # Print the matrix without starting Docker:
 python3 scripts/test-compatibility.py --list
 # On a native x86-64 Docker host:
-python3 scripts/test-compatibility.py baseline
+python3 scripts/test-compatibility.py neuron8
 python3 scripts/test-compatibility.py
 # Reuse existing dependency images after changing tests or application code:
-python3 scripts/test-compatibility.py baseline --skip-build
+python3 scripts/test-compatibility.py neuron8 --skip-build
 ```
 
 The compatibility runner requires a native x86-64 Docker host. Use CI on ARM

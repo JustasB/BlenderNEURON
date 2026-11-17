@@ -85,6 +85,19 @@ class AuthTransport(Transport):
         Transport.__init__(self)
         self.secret = secret
 
+    def request(self, host, handler, request_body, verbose=False):
+        # Reconnection callbacks can use this proxy while another thread is
+        # waiting for its reply. A shared HTTPConnection is not thread-safe,
+        # and locking it would deadlock callbacks that call the waiting peer.
+        transport = AuthTransport(self.secret)
+        transport.reply_timeout = self.reply_timeout
+        try:
+            return Transport.request(transport, host, handler, request_body, verbose)
+        finally:
+            if hasattr(transport, 'epoch'):
+                self.epoch = transport.epoch
+            transport.close()
+
     def make_connection(self, host):
         connection = Transport.make_connection(self, host)
         connection.timeout = 10
