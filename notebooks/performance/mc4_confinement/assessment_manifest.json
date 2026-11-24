@@ -1,0 +1,54 @@
+{
+  "git_commit": "6f6410b23e06301a26de400d91335d6e24009ab8",
+  "production_file_sha256": {
+    "blenderneuron/blender/views/vectorconfinerview.py": "f6ab7fa37d90c6217704a844dd84b0858c78e570634b2719480e3cfedc5c9286",
+    "notebooks/performance/performance_eval.py": "195ac945b680f6760f9514978ace9016a8ffbbd5177badc8543dafdcaf3a6a89",
+    "notebooks/performance/export_roundtrip.py": "fb5e3146f419d2d30ed9aae1fa761168e3c0e113bf19130c06348a180d6f348d"
+  },
+  "trial_order_shuffle_seed": 20261121,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "angles_degrees": [
+    5,
+    10,
+    15,
+    25
+  ],
+  "maximum_section_lengths_um": [
+    200,
+    100,
+    75,
+    50,
+    25
+  ],
+  "process_policy": "Fresh Blender and NEURON process per trial; sequential trials",
+  "timing": "setup_confiner plus confine_between_layers and final view-layer update; excludes import, sphere creation, export, geometry validation, rendering, and process startup",
+  "statistic_E": "Median [5th,95th percentile] of basal pt3d points outside ideal radial shell; NumPy default linear percentile interpolation",
+  "statistic_F": "Runtime pooled across angles; boxes Q1-Q3, median line, whiskers at observed values within 5th-95th percentiles, points beyond whiskers shown; maximum absolute whole-cell NEURON area error on secondary axis",
+  "area_tolerance_percent": 0.001
+}

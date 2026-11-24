@@ -1,0 +1,6 @@
+__pycache__/
+results/raw_results.json
+results/a*_l*_s*.json
+results/a*_l*_s*.log
+figures/E_MC4_heatmap.*
+figures/F_MC4_runtime_area.*
