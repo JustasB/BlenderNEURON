@@ -48,7 +48,7 @@
   ],
   "process_policy": "Fresh Blender and NEURON process per trial; sequential trials",
   "timing": "setup_confiner plus confine_between_layers and final view-layer update; excludes import, sphere creation, export, geometry validation, rendering, and process startup",
-  "statistic_E": "Median [5th,95th percentile] of basal pt3d points outside ideal radial shell; NumPy default linear percentile interpolation",
+  "statistic_E": "Mean [5th–95th percentile] of basal pt3d points outside ideal radial shell; NumPy default linear percentile interpolation",
   "statistic_F": "Runtime pooled across angles; boxes Q1-Q3, median line, whiskers at observed values within 5th-95th percentiles, points beyond whiskers shown; maximum absolute whole-cell NEURON area error on secondary axis",
   "area_tolerance_percent": 0.001
 }
