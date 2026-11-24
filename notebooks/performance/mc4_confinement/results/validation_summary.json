@@ -1,0 +1,33 @@
+{
+  "trials": 500,
+  "area_tolerance_percent": 0.001,
+  "area_tolerance_failures": 52,
+  "max_area_error_percent": 0.0037966711637261764,
+  "max_non_target_polyline_distance_um": 1.7346243872117825e-06,
+  "setup": {
+    "cell": "MC4",
+    "transform": "TransformMC4",
+    "center_um": [
+      0,
+      0,
+      -1000
+    ],
+    "radii_um": [
+      1000,
+      1100
+    ],
+    "sphere_segments": 256,
+    "sphere_rings": 128,
+    "pattern": "*dend*",
+    "height_fractions": [
+      0,
+      1
+    ],
+    "passes": 1,
+    "geometry_only": true,
+    "source_sha256": {
+      "MC4.hoc": "f1d4373515f040cecaf3629d3d4d0c0682a2054387b3c853dad9ffd1ac042bcf",
+      "MCTransforms.py": "c2d35d21d9e0a05974ad02bef103729596a1fa86d51e6aceda69a1779c6da056"
+    }
+  }
+}

@@ -8,9 +8,26 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
+from matplotlib.transforms import ScaledTranslation
 
 HERE = Path(__file__).resolve().parent
 COLORS = {"Cell": "#0072B2", "Section": "#E69F00", "3D Segment": "#009E73"}
+
+
+def set_panel_title(ax, title, fontsize, pad):
+    """Give panel letters an independent, larger font than title text."""
+    if len(title) > 2 and title[0] in "ABCDEFGHIJ" and title[1:3] == ". ":
+        content = HPacker(children=[
+            TextArea(title[:2], textprops={"fontsize": 18, "fontweight": "bold"}),
+            TextArea(title[3:], textprops={"fontsize": fontsize}),
+        ], align="baseline", pad=0, sep=5)
+        transform = ax.transAxes + ScaledTranslation(0, pad/72, ax.figure.dpi_scale_trans)
+        ax.add_artist(AnchoredOffsetbox(loc="lower left", child=content,
+                      pad=0, borderpad=0, frameon=False,
+                      bbox_to_anchor=(0, 1), bbox_transform=transform))
+    else:
+        ax.set_title(title, loc="left", fontsize=fontsize, pad=pad)
 
 
 def summary(values):
@@ -49,14 +66,14 @@ def roundtrip_axes(fig, slot, rows):
         ax.set_xlim(0, max(counts)*1.04)
         ax.set_ylim(bottom=0)
         ax.set_xticks(counts)
-        ax.tick_params(axis="both", labelsize=7)
+        ax.tick_params(axis="both", labelsize=8.5)
         ax.tick_params(axis="x", labelbottom=i == 2, labelrotation=55)
         ax.yaxis.set_major_formatter(FuncFormatter(lambda value, pos: f"{value:.8f}".rstrip("0").rstrip(".") if value else "0"))
-        ax.set_ylabel(ylabel, fontsize=8)
-        ax.set_title(title, loc="left", fontsize=9.5 if i == 0 else 8, pad=10)
+        ax.set_ylabel(ylabel, fontsize=9.5)
+        set_panel_title(ax, title, fontsize=11.5 if i == 0 else 9.5, pad=10)
         ax.grid(axis="y", alpha=.22)
         if i == 2:
-            ax.set_xlabel("Cells (16 Sections per Cell)", fontsize=9, labelpad=8)
+            ax.set_xlabel("Cells (16 Sections per Cell)", fontsize=10.5, labelpad=8)
 
 
 def main():
@@ -101,29 +118,22 @@ def main():
                 bounds = [[s[1] for s in summaries], [s[2] for s in summaries]]
                 ax.errorbar(xs, centers, yerr=bounds, fmt="o-", ms=3, lw=1.5,
                             elinewidth=1, capsize=2, color=COLORS[level], label=level)
-            ax.set_title(title, loc="left", fontsize=9.5, pad=14)
+            set_panel_title(ax, title, fontsize=11.5, pad=14)
             ax.set_ylim(bottom=0)
             ax.grid(alpha=.22)
-            ax.tick_params(axis="both", labelsize=8)
+            ax.tick_params(axis="both", labelsize=9.5)
             ax.set_xscale("linear")
             ax.set_xticks(xs)
             ax.set_xlim(0, max(xs)*1.04)
-            if col in (0, 2):
-                ax.tick_params(axis="x", labelrotation=55)
+            ax.tick_params(axis="x", labelrotation=55)
             ax.set_ylabel("Seconds / Frame" if ri == 0 and col == 4 else
-                          "Seconds" if ri == 0 else "Additional RAM (MiB)", fontsize=9)
+                          "Seconds" if ri == 0 else "Additional RAM (MiB)", fontsize=10.5)
             if ri == 0:
                 ax.legend(title="Interaction Level" if col < 3 else "Animation Granularity",
-                          frameon=False, fontsize=8, title_fontsize=8, loc="upper left")
+                          frameon=False, fontsize=9.5, title_fontsize=9.5, loc="upper left")
             else:
-                ax.set_xlabel(xlabel, fontsize=9, labelpad=8)
-    fig.subplots_adjust(left=.045, right=.99, top=.93, bottom=.23, wspace=.36, hspace=.40)
-    fig.text(.045, .075,
-             "Dots/Bars: Medians; Error Bars: Min–Max Across Five Independent Runs per Condition. A–H: Docker / Blender 4.0.2.\n"
-             "E–F: 16 Sections/Cell; Fixed 3.15 mm Soma Layout; Rotate 45° About Soma, Then Translate +100 µm Along X; No Animation.\n"
-             "I–J: Native macOS / Metal / Blender 5.2; 12 Warmed Frames/Run; 1800 × 900; 64 EEVEE Samples; Add-on Neon Glow.\n"
-             "F: Pooled Medians and Min–Max Across 10 Runs/Cell Count (5 per Interaction Level). Memory: Additional Process RAM, Not GPU VRAM.",
-             fontsize=9, va="center", linespacing=1.5)
+                ax.set_xlabel(xlabel, fontsize=10.5, labelpad=8)
+    fig.subplots_adjust(left=.055, right=.99, top=.93, bottom=.12, wspace=.40, hspace=.40)
     output = HERE / "figures/figures_a_to_j"
     output.parent.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "svg", "pdf"):
